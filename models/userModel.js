@@ -22,7 +22,7 @@ const userSchema = mongoose.Schema(
             type: String,
             required: true
         },
-        classes: {
+        workspaces: {
             type: [ObjectId],
             default: [],
             required: true

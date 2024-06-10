@@ -2,14 +2,19 @@ import express from "express";
 import mongoose from "mongoose";
 
 import { PORT, mongoDBURL } from "./config.js";
-import { User } from "./models/userModel.js";
+
+import userRoutes from "./routes/userRoutes.js";
+import workspaceRoutes from "./routes/workspaceRoutes.js";
 
 const app = express();
 
 app.use(express.json());
 
+app.use('/users', userRoutes);
+app.use('/workspaces', workspaceRoutes);
+
 mongoose.connect(mongoDBURL)
-.then(async() => {
+.then(() => {
     app.listen(PORT, () => {
         console.log(`Listening on PORT ${PORT}`);
     });
