@@ -1,4 +1,4 @@
-import mongoose, { ObjectId } from "mongoose";
+import mongoose, { Mixed, ObjectId } from "mongoose";
 
 const userSchema = mongoose.Schema(
     {
@@ -20,6 +20,25 @@ const userSchema = mongoose.Schema(
         },
         password: {
             type: String,
+            required: true
+        },
+        groupIds: {
+            type: [ObjectId],
+            default: [],
+            required: true
+        },
+        workspaceIds: {
+            type: [{
+                workspaceId: {
+                    type: ObjectId,
+                    required: true
+                },
+                role: {
+                    type: String,
+                    required: true
+                }
+            }],
+            default: [],
             required: true
         }
     },

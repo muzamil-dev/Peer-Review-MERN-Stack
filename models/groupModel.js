@@ -10,6 +10,11 @@ const groupSchema = mongoose.Schema(
             type: ObjectId,
             required: true
         },
+        userIds: {
+            type: [ObjectId],
+            default: [],
+            required: true
+        }
     },
     {
         timestamps: true

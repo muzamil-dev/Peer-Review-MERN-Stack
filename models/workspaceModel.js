@@ -1,4 +1,4 @@
-import mongoose, { ObjectId } from "mongoose";
+import mongoose, { Mixed, ObjectId } from "mongoose";
 
 const workspaceSchema = mongoose.Schema(
     {
@@ -15,6 +15,25 @@ const workspaceSchema = mongoose.Schema(
             default: ["Instructor", "Student"],
             required: true
         },
+        userIds: {
+            type: [{
+                userId: {
+                    type: ObjectId,
+                    required: true
+                },
+                role: {
+                    type: String,
+                    required: true
+                }
+            }],
+            default: [],
+            required: true
+        },
+        groupIds: {
+            type: [ObjectId],
+            default: [],
+            required: true
+        }
     },
     {
         timestamps: true
