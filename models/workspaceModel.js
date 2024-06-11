@@ -6,7 +6,7 @@ const workspaceSchema = mongoose.Schema(
             type: String,
             required: true
         },
-        creator: {
+        creatorId: {
             type: ObjectId,
             required: true
         },
@@ -15,11 +15,6 @@ const workspaceSchema = mongoose.Schema(
             default: ["Instructor", "Student"],
             required: true
         },
-        groups: {
-            type: [ObjectId],
-            default: [],
-            required: true
-        }
     },
     {
         timestamps: true
