@@ -5,10 +5,12 @@ const commentsSchema = mongoose.Schema(
     {
         owner_id: {
             type: ObjectId,
+            ref: "User",
             required: true
         },
         target_id: {
             type: ObjectId,
+            ref: "User",
             required: true
         },
         ratings: [{

@@ -6,32 +6,44 @@ const workspaceSchema = mongoose.Schema(
             type: String,
             required: true
         },
-        creatorId: {
-            type: ObjectId,
-            required: true
-        },
         roles: {
-            type: [String],
+            type: [{
+                type: ObjectId,
+                ref: "Role",
+                required: true
+            }],
             default: ["Instructor", "Student"],
             required: true
         },
-        userIds: {
+        adminIds: {
             type: [{
-                userId: {
-                    type: ObjectId,
-                    required: true
-                },
-                role: {
-                    type: String,
-                    required: true
-                }
+                type: ObjectId,
+                ref: "User",
+                required: true
+            }],
+            default: [],
+            required: true
+        },
+        memberIds: {
+            type: [{
+                type: ObjectId,
+                ref: "User",
+                required: true
             }],
             default: [],
             required: true
         },
         groupIds: {
-            type: [ObjectId],
+            type: [{
+                type: ObjectId,
+                ref: "Group",
+                required: true
+            }],
             default: [],
+            required: true
+        },
+        inviteCode: {
+            type: String,
             required: true
         }
     },

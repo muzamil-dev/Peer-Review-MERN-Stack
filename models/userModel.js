@@ -25,16 +25,19 @@ const userSchema = mongoose.Schema(
         groupIds: {
             type: [ObjectId],
             default: [],
+            ref: "Group",
             required: true
         },
         workspaceIds: {
             type: [{
                 workspaceId: {
                     type: ObjectId,
+                    ref: "Workspace",
                     required: true
                 },
                 role: {
                     type: String,
+                    ref: "Role",
                     required: true
                 }
             }],

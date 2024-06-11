@@ -8,11 +8,13 @@ const groupSchema = mongoose.Schema(
         },
         workspaceId: {
             type: ObjectId,
-            required: true
+            required: true,
+            ref: "Workspace"
         },
         userIds: {
             type: [ObjectId],
             default: [],
+            ref: "User",
             required: true
         }
     },
