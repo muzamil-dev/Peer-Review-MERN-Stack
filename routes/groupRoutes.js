@@ -65,7 +65,7 @@ router.post("/", async(req, res) => {
 
 
 // Route to add users to a group
-router.post("/addUser", async(req, res) => {
+router.put("/addUser", async(req, res) => {
     try{
         const {userId, groupId} = req.body;
 
