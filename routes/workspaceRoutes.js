@@ -58,7 +58,7 @@ router.post("/", async(req, res) => {
         }
 
         // Create new workspace object and member object
-        const newWorkspace = { name: body.name, creatorId: creator._id };
+        const newWorkspace = { name: body.name };
         // Create and get the new workspace
         const workspace = await Workspace.create(newWorkspace);
         // Add the workspace membership for the creator

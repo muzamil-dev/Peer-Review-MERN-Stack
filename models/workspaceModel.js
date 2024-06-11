@@ -1,4 +1,4 @@
-import mongoose, { Mixed, ObjectId } from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
 const workspaceSchema = mongoose.Schema(
     {
@@ -7,28 +7,21 @@ const workspaceSchema = mongoose.Schema(
             required: true
         },
         roles: {
-            type: [{
-                type: ObjectId,
-                ref: "Role",
-                required: true
-            }],
+            type: [String],
             default: ["Instructor", "Student"],
             required: true
         },
-        adminIds: {
+        userIds: {
             type: [{
-                type: ObjectId,
-                ref: "User",
-                required: true
-            }],
-            default: [],
-            required: true
-        },
-        memberIds: {
-            type: [{
-                type: ObjectId,
-                ref: "User",
-                required: true
+                userId: {
+                    type: ObjectId,
+                    ref: "User",
+                    required: true
+                },
+                role: {
+                    type: String,
+                    required: true
+                }
             }],
             default: [],
             required: true
@@ -44,11 +37,11 @@ const workspaceSchema = mongoose.Schema(
         },
         inviteCode: {
             type: String,
-            required: true
+            required: false
         },
         inviteCodeExpiry: {
             type: Date,
-            required: true
+            required: false
         }
     },
     {
