@@ -16,7 +16,14 @@ app.use('/workspaces', workspaceRoutes);
 app.use('/groups', groupRoutes);
 
 mongoose.connect(mongoDBURL)
+
+
+
 .then(() => {
+    // Root route
+    app.get('/', (req, res) => {
+        res.send('Welcome to the Peer Review MERN Stack Application!');
+    });
     app.listen(PORT, () => {
         console.log(`Listening on PORT ${PORT}`);
     });
