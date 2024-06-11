@@ -21,11 +21,6 @@ const userSchema = mongoose.Schema(
         password: {
             type: String,
             required: true
-        },
-        groups: {
-            type: [ObjectId],
-            default: [],
-            required: true
         }
     },
     {

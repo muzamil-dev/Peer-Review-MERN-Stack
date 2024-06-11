@@ -1,5 +1,4 @@
 import mongoose, { ObjectId } from "mongoose";
-import { memberSchema } from "./memberSchema.js";
 
 const groupSchema = mongoose.Schema(
     {
@@ -7,14 +6,10 @@ const groupSchema = mongoose.Schema(
             type: String,
             required: true
         },
-        workspace: {
+        workspaceId: {
             type: ObjectId,
             required: true
         },
-        members: {
-            type: [memberSchema],
-            required: true
-        }
     },
     {
         timestamps: true
