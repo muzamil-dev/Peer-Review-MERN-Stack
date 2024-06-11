@@ -3,70 +3,10 @@ import { Group } from "../models/groupModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
+import { checkWorkspace, checkUser, checkGroup } from "../shared/checks.js";
+import { addUserToGroup, addGroupToUser } from "../shared/adders.js";
+
 const router = express.Router();
-
-// Check if the workspace exists
-async function checkWorkspace(workspaceId){
-    const workspace = await Workspace.findById(workspaceId);
-    if (!workspace){
-        return null;
-    }
-    return workspace._id;
-}
-
-// Check if the user exists
-async function checkUser(userId){
-    const user = await User.findById(userId);
-    if (!user){
-        return null;
-    }
-    return user._id;
-}
-
-// Check if the group exists
-async function checkGroup(groupId){
-    const group = await Group.findById(groupId);
-    if (!group){
-        return null;
-    }
-    return group._id;
-}
-
-// Update workspace with user
-async function addUserToWorkspace(userId, workspaceId, role){
-    const result = await Workspace.updateOne(
-        { _id: workspaceId },
-        { $push: { userIds: { userId, role } }}
-    );
-    return result;
-}
-
-// Update user with workspace
-async function addWorkspaceToUser(userId, workspaceId, role){
-    const result = await User.updateOne(
-        { _id: userId },
-        { $push: { workspaceIds: { workspaceId, role } }}
-    );
-    return result;
-}
-
-// Update group with user
-async function addUserToGroup(userId, groupId){
-    const result = await Group.updateOne(
-        { _id: groupId },
-        { $push: { userIds: userId }}
-    );
-    return result;
-}
-
-// Update user with group
-async function addGroupToUser(userId, groupId){
-    const result = await User.updateOne(
-        { _id: userId },
-        { $push: { groupIds: groupId }}
-    );
-    return result;
-}
 
 router.post("/", async(req, res) => {
     try{

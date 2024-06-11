@@ -2,43 +2,10 @@ import express from 'express';
 import { User } from '../models/userModel.js';
 import { Workspace } from '../models/workspaceModel.js';
 
+import { checkWorkspace, checkUser } from "../shared/checks.js";
+import { addUserToWorkspace, addWorkspaceToUser } from "../shared/adders.js";
+
 const router = express.Router();
-
-// Check if the workspace exists
-async function checkWorkspace(workspaceId){
-    const workspace = await Workspace.findById(workspaceId);
-    if (!workspace){
-        return null;
-    }
-    return workspace._id;
-}
-
-// Check if the user exists
-async function checkUser(userId){
-    const user = await User.findById(userId);
-    if (!user){
-        return null;
-    }
-    return user._id;
-}
-
-// Update workspace with user
-async function addUserToWorkspace(userId, workspaceId, role){
-    const result = await Workspace.updateOne(
-        { _id: workspaceId },
-        { $push: { userIds: { userId, role } }}
-    );
-    return result;
-}
-
-// Update user with workspace
-async function addWorkspaceToUser(userId, workspaceId, role){
-    const result = await User.updateOne(
-        { _id: userId },
-        { $push: { workspaceIds: { workspaceId, role } }}
-    );
-    return result;
-}
 
 // Takes in a user for now, will be modified to work with JWT
 router.post("/", async(req, res) => {
