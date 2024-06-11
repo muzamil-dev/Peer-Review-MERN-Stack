@@ -7,10 +7,13 @@ const router = express.Router();
 router.get("/:id", async(req, res) => {
     try{
         const { id } = req.params;
+        // Find user
         const userData = await User.findById(id);
+        // Could not find user
         if (!userData){
             return res.status(404).json({ message: "The requested user was not found in our database." });
         }
+        // Return data
         return res.status(200).json(userData);
     }
     catch(err){
@@ -23,10 +26,12 @@ router.get("/:id", async(req, res) => {
 router.post("/", async(req, res) => {
     try {
         const body = req.body;
+        // Check for required fields
         if (!body.firstName || !body.lastName || !body.email || !body.password){
             return res.status(400).json({ message: "One or more required fields is not present." });
         }
         else {
+            // Create the new user in db
             const newUser = {
                 firstName: body.firstName,
                 lastName: body.lastName,
@@ -36,6 +41,7 @@ router.post("/", async(req, res) => {
             if (body.middleName)
                 newUser.middleName = body.middleName;
             const userData = await User.create(newUser);
+            // Return new user's data
             return res.status(201).json(userData);
         }
     }

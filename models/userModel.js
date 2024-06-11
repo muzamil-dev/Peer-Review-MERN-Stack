@@ -22,11 +22,6 @@ const userSchema = mongoose.Schema(
             type: String,
             required: true
         },
-        workspaces: {
-            type: [ObjectId],
-            default: [],
-            required: true
-        },
         groups: {
             type: [ObjectId],
             default: [],

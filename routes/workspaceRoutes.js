@@ -1,24 +1,9 @@
 import express from 'express';
 import { User } from '../models/userModel.js';
 import { Workspace } from '../models/workspaceModel.js';
+import { WorkspaceMembership } from '../models/workspaceMembershipModel.js';
 
 const router = express.Router();
-
-// Adds the provided member object as a member of the given workspace
-async function addMemberToWorkspace(workspaceId, member){
-    return Workspace.findByIdAndUpdate(
-        workspaceId,
-        { $push: { members: member }}
-    );
-}
-
-// Adds the provided workspace to the provided user
-async function addWorkspaceToUser(userId, workspaceId){
-    return User.findByIdAndUpdate(
-        userId,
-        { $push: { workspaces: workspaceId }}
-    );
-}
 
 // Takes in a user for now, will be modified to work with JWT
 router.post("/", async(req, res) => {
@@ -39,16 +24,11 @@ router.post("/", async(req, res) => {
 
         // Create new workspace object and member object
         const newWorkspace = { name: body.name, creator: creator._id };
-        const newMember = { userId: creator._id, role: "Instructor" };
-
         // Create and get the new workspace
         const workspace = await Workspace.create(newWorkspace);
-        
-        // Run queries async
-        await Promise.all[
-            addMemberToWorkspace(workspace._id, newMember), // Add the creator as a member of the workspace
-            addWorkspaceToUser(creator._id, workspace._id) // Add the workspace to the user's workspaces
-        ];
+        // Add the workspace membership for the creator
+        await WorkspaceMembership.create({ userId: creator._id, workspaceId: workspace._id, role: "Instructor" });
+
         return res.status(201).json(workspace);
     }
     catch(err){
@@ -76,13 +56,14 @@ router.put("/join/:id", async(req, res) => {
         if (!workspace){
             return res.status(404).json({ message: "The specified workspace was not found in our database" });
         }
-        // Create a member object for the new member
-        const newMember = { userId: user._id, role: "Student" };
-        // Add new member to workspace
-        await Promise.all[
-            addMemberToWorkspace(workspace._id, newMember), // Add the user as a member of the workspace
-            addWorkspaceToUser(user._id, workspace._id) // Add the workspace to the user's workspaces
-        ];
+        // Check if user is already in workspace
+        const membership = await WorkspaceMembership.find({ userId: user._id, workspaceId: workspace._id });
+        if (membership.length > 0){
+            return res.status(400).json({ message: "The given user is already in the workspace" });
+        }
+        // Add workspace membership relationship
+        await WorkspaceMembership.create({ userId: user._id, workspaceId: workspace._id, role: "Student" });
+        
         res.status(200).send({ message: `Joined ${workspace.name} successfully!`});
     }
     catch(err){

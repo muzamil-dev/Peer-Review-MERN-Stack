@@ -1,5 +1,4 @@
 import mongoose, { ObjectId } from "mongoose";
-import { memberSchema } from "./memberSchema.js";
 
 const workspaceSchema = mongoose.Schema(
     {
@@ -14,11 +13,6 @@ const workspaceSchema = mongoose.Schema(
         roles: {
             type: [String],
             default: ["Instructor", "Student"],
-            required: true
-        },
-        members: {
-            type: [memberSchema],
-            default: [],
             required: true
         },
         groups: {
