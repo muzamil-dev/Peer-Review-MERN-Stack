@@ -1,4 +1,4 @@
-import mongoose, { Mixed, ObjectId } from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
 const userSchema = mongoose.Schema(
     {

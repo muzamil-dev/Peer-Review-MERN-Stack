@@ -16,9 +16,6 @@ app.use('/workspaces', workspaceRoutes);
 app.use('/groups', groupRoutes);
 
 mongoose.connect(mongoDBURL)
-
-
-
 .then(() => {
     // Root route
     app.get('/', (req, res) => {
