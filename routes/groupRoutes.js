@@ -63,4 +63,37 @@ router.post("/", async(req, res) => {
     }
 });
 
+
+// Route to add users to a group
+router.post("/addUser", async(req, res) => {
+    try{
+        const {userId, groupId} = req.body;
+
+        if(!userId || !groupId){
+            return res.status(400).json({ message: "One or more required fields is not present" });
+        }
+
+        const group = await Group.findById(groupId);
+        if(!group){
+            return res.status(404).json({ message: "Group not found" });
+        }
+
+        const workspaceMembership = await WorkspaceMembership.findOne({userId, workspaceId: group.workspaceId});
+        if(!workspaceMembership){
+            return res.status(403).json({ message: "User not found in workspace" });
+        }
+
+        const existingMembership = await GroupMembership.findOne({userId, groupId});
+        if(existingMembership){
+            return res.status(400).json({ message: "User already in group" });
+        }
+
+        const newMembership = await GroupMembership.create({userId, groupId});
+        return res.status(201).json(newMembership);
+    }catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });
+    }
+});
+
 export default router;
