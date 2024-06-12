@@ -32,6 +32,21 @@ export async function checkGroup(req, res, next){
     next();
 }
 
+// Checks if the target user is in the workspace. Assumes existence of both is checked
+export async function checkTargetInWorkspace(req, res, next){
+    // Search for target in workspace
+    const workspaceUsers = (await Workspace.findById(
+        req.body.workspaceId
+    ).select('userIds')).userIds;
+    const found = workspaceUsers.find(
+        user => user.userId.equals(req.body.targetId)
+    );
+    if (!found){
+        return res.status(400).json({ message: "The provided user was not found in this workspace" });
+    }
+    next();
+}
+
 // Checks if the given user is an instructor
 // User/workspace should be checked before using this function
 export async function checkInstructor(req, res, next){
