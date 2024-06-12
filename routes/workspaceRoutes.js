@@ -2,7 +2,7 @@ import express from 'express';
 import { User } from '../models/userModel.js';
 import { Workspace } from '../models/workspaceModel.js';
 
-import { checkWorkspace, checkUser, checkInstructor } from "../shared/checks.js";
+import { checkWorkspace, checkUser, checkInstructor } from "../middleware/checks.js";
 import { addUserToWorkspace, addWorkspaceToUser } from "../shared/adders.js";
 import generateInviteCode from '../shared/inviteCode.js';
 
