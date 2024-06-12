@@ -82,5 +82,32 @@ router.put("/", async (req, res) => {
     }
 });
 
+// Delete a user
+router.delete("/", async (req, res) => {
+    try {
+        const { id } = req.body;
+        
+        if (!id) {
+            return res.status(400).json({ message: "User ID is required." });
+        }
+
+        //find user
+        const userData = await User.findById(id);
+        if (!userData) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        //delete user
+        await User.findByIdAndDelete(id);
+
+        //return success message
+        return res.status(200).json({ message: "User deleted successfully." });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+
 
 export default router;
