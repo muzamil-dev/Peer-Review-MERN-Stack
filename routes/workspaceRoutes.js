@@ -8,7 +8,7 @@ import generateInviteCode from '../shared/inviteCode.js';
 
 const router = express.Router();
 
-// Takes in a user for now, will be modified to work with JWT
+// Creates a new workspace
 router.post("/", async(req, res) => {
     try{
         // Check for the user id
@@ -24,9 +24,11 @@ router.post("/", async(req, res) => {
         if (!creator){
             return res.status(404).json({ message: "The specified user was not found in our database" });
         }
-
+        // Set allowed domains if provided
+        const allowedDomains = (body.allowedDomains && 
+            Array.isArray(body.allowedDomains)) ? body.allowedDomains : null;
         // Create new workspace object and member object
-        const newWorkspace = { name: body.name };
+        const newWorkspace = { name: body.name, allowedDomains };
         // Create and get the new workspace
         const workspace = await Workspace.create(newWorkspace);
         // Add the workspace membership for the creator
@@ -44,6 +46,9 @@ router.post("/", async(req, res) => {
     }
 });
 
+// Join a workspace
+// TODO: Enforce allowedDomains
+// TODO: Handle invite code expiry
 router.put("/join", async(req, res) => {
     try{
         // Check for the workspace id and user id
@@ -62,6 +67,14 @@ router.put("/join", async(req, res) => {
         }
         if (!userId){
             return res.status(400).json({ message: "The provided user was not found in our database" });
+        }
+        // Get relevant info from the workspace
+        const workspaceInfo = await Workspace.findById(workspaceId).select('inviteCode allowedDomains');
+        // Check if the correct invite code is provided
+        const correctCode = workspaceInfo.inviteCode;
+        // Return if code exists and provided code doesn't match
+        if (!correctCode || body.inviteCode !== correctCode){
+            return res.status(403).json({ message: "The given user is not authorized to join this workspace." });
         }
         // Check if user is already in workspace
         const workspaces = (await User.findById(userId)).workspaceIds;
@@ -84,6 +97,7 @@ router.put("/join", async(req, res) => {
     }
 });
 
+// Sets the active invite code
 router.put("/setInvite", async(req, res) => {
     // Check for the workspace id and user id
     try{
@@ -114,12 +128,9 @@ router.put("/setInvite", async(req, res) => {
             return res.status(403).json({ message: "The provided user is not authorized to make this request" });
         }
         // Set the invite code
-        const update = { inviteCode: generateInviteCode() };
-        // Throws error if invalid date is given, sets to null if none is provided
-        update.inviteCodeExpiry = body.inviteCodeExpiry ? new Date(body.inviteCodeExpiry) : null;
         await Workspace.updateOne(
             { _id: workspaceId },
-            update
+            { inviteCode: generateInviteCode() }
         );
         return res.json({ message: "Invite code updated successfully" });
     }
