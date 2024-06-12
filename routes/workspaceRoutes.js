@@ -11,7 +11,7 @@ const router = express.Router();
 // Creates a new workspace
 router.post("/", async(req, res) => {
     try{
-        // Check for the user id
+        // Check for the user id and workspace name
         const body = req.body;
         if (!body.userId){
             return res.status(400).json({ message: "No user id was provided" });
@@ -19,14 +19,13 @@ router.post("/", async(req, res) => {
         if (!body.name){
             return res.status(400).json({ message: "Please provide a name for your workspace" });
         }
-        // Find the given user
+
+        // Find the given user in the database
         const creator = await checkUser(body.userId);
         if (!creator){
             return res.status(404).json({ message: "The specified user was not found in our database" });
         }
-        // Set allowed domains if provided (move to its own endpoint)
-        const allowedDomains = (body.allowedDomains && 
-            Array.isArray(body.allowedDomains)) ? body.allowedDomains : null;
+
         // Create new workspace object and member object
         const newWorkspace = { name: body.name, allowedDomains };
         // Create and get the new workspace
@@ -38,6 +37,7 @@ router.post("/", async(req, res) => {
                 addWorkspaceToUser(creator._id, workspace._id, "Instructor")
             ]
         );
+        
         return res.status(201).json(workspace);
     }
     catch(err){
