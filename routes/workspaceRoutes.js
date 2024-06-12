@@ -112,27 +112,29 @@ router.use(checkInstructor);
 
 // Sets the active invite code
 router.put("/setInvite", async(req, res) => {
-    // Check for the workspace id and user id
     try{
-        // Get userId and workspaceId
-        const body = req.body;
-        const userId = body.userId;
-        const workspaceId = body.workspaceId;
-        // Check that the user is authorized to send the invite
-        const workspaceMembers = (await Workspace.findById(workspaceId)).userIds;
-        const found = workspaceMembers.find(user => user.userId.equals(userId));
-        if (!found){
-            return res.status(400).json({ message: "The provided user is not a member of this workspace" });
-        }
-        else if (found.role !== "Instructor"){
-            return res.status(403).json({ message: "The provided user is not authorized to make this request" });
-        }
         // Set the invite code
         await Workspace.updateOne(
-            { _id: workspaceId },
+            { _id: req.body.workspaceId },
             { inviteCode: generateInviteCode() }
         );
         return res.json({ message: "Invite code updated successfully" });
+    }
+    catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+// Removes the active invite code
+router.delete("/removeInvite", async(req, res) => {
+    try{
+        // Set the invite code
+        await Workspace.updateOne(
+            { _id: req.body.workspaceId },
+            { inviteCode: null }
+        );
+        return res.json({ message: "Invite code removed successfully" });
     }
     catch(err){
         console.log(err.message);
