@@ -8,33 +8,27 @@ import generateInviteCode from '../shared/inviteCode.js';
 
 const router = express.Router();
 
+// Check that the user is provided for any workspace route
+router.use(checkUser);
+
 // Creates a new workspace
 router.post("/", async(req, res) => {
     try{
         // Check for the user id and workspace name
         const body = req.body;
-        if (!body.userId){
-            return res.status(400).json({ message: "No user id was provided" });
-        }
         if (!body.name){
             return res.status(400).json({ message: "Please provide a name for your workspace" });
         }
 
-        // Find the given user in the database
-        const creator = await checkUser(body.userId);
-        if (!creator){
-            return res.status(404).json({ message: "The specified user was not found in our database" });
-        }
-
         // Create new workspace object and member object
-        const newWorkspace = { name: body.name, allowedDomains };
+        const newWorkspace = { name: body.name };
         // Create and get the new workspace
         const workspace = await Workspace.create(newWorkspace);
         // Add the workspace membership for the creator
         await Promise.all(
             [
-                addUserToWorkspace(creator._id, workspace._id, "Instructor"),
-                addWorkspaceToUser(creator._id, workspace._id, "Instructor")
+                addUserToWorkspace(body.userId, workspace._id, "Instructor"),
+                addWorkspaceToUser(body.userId, workspace._id, "Instructor")
             ]
         );
         
@@ -47,18 +41,21 @@ router.post("/", async(req, res) => {
 });
 
 // Middleware
-// Routes that require a user to change an existing workspace should go here
-router.use(checkUser);
+// Routes that require an existing workspace to be modified should go here
 router.use(checkWorkspace);
 
 // Join a workspace
 router.put("/join", async(req, res) => {
     try{
-        // Get userId and workspaceId
         const body = req.body;
+        // Get userId and workspaceId
         const userId = body.userId;
         const workspaceId = body.workspaceId;
+        const inviteCode = body.inviteCode;
 
+        if (!body.inviteCode){
+            return res.status(400).json({ message: "One or more required fields was not present"} );
+        }
         // Get relevant info from the user and workspace
         const userInfo = await User.findById(userId).select('email');
         const workspaceInfo = await Workspace.findById(workspaceId).select('inviteCode allowedDomains');
@@ -81,7 +78,7 @@ router.put("/join", async(req, res) => {
         // Check if the correct invite code is provided
         const correctCode = workspaceInfo.inviteCode;
         // Return if code exists and provided code doesn't match
-        if (!correctCode || body.inviteCode !== correctCode){
+        if (!correctCode || inviteCode !== correctCode){
             return res.status(403).json({ message: "The given user is not authorized to join this workspace." });
         }
 
