@@ -114,8 +114,7 @@ router.put("/setInvite", async(req, res) => {
             return res.status(403).json({ message: "The provided user is not authorized to make this request" });
         }
         // Set the invite code
-        const inviteCode = body.inviteCode ? body.inviteCode : generateInviteCode();
-        const update = { inviteCode };
+        const update = { inviteCode: generateInviteCode() };
         // Throws error if invalid date is given, sets to null if none is provided
         update.inviteCodeExpiry = body.inviteCodeExpiry ? new Date(body.inviteCodeExpiry) : null;
         await Workspace.updateOne(

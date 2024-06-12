@@ -35,6 +35,11 @@ const workspaceSchema = mongoose.Schema(
             default: [],
             required: true
         },
+        allowedDomains: {
+            type: [String],
+            default: null,
+            required: false
+        },
         inviteCode: {
             type: String,
             required: false
