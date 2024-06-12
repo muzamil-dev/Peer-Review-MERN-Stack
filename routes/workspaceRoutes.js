@@ -105,6 +105,8 @@ router.put("/join", async(req, res) => {
     }
 });
 
+// Checks that the user is the instructor of the given workspace
+// All routes below here are for use by workspace instructors
 router.use(checkInstructor);
 
 // Sets the active invite code
@@ -132,6 +134,30 @@ router.delete("/removeInvite", async(req, res) => {
             { inviteCode: null }
         );
         return res.json({ message: "Invite code removed successfully" });
+    }
+    catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+// Sets the allowed domains
+// Reset the domains by passing an empty array
+router.put("/setAllowedDomains", async(req, res) => {
+    try{
+        // Return if allowedDomains is not specified
+        if (!req.body.allowedDomains){
+            return res.status(400).json({ message: "One or more required fields was not present"} );
+        }
+        else if (!Array.isArray(req.body.allowedDomains)){
+            return res.status(400).json({ message: "Field allowedDomains must be an array"} );
+        }
+        // Set the invite code
+        await Workspace.updateOne(
+            { _id: req.body.workspaceId },
+            { allowedDomains: req.body.allowedDomains }
+        );
+        return res.json({ message: "Allowed Domains set successfully" });
     }
     catch(err){
         console.log(err.message);
