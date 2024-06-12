@@ -69,7 +69,7 @@ router.put("/join", async(req, res) => {
             return res.status(400).json({ message: "The provided user was not found in our database" });
         }
         // Get relevant info from the workspace
-        const workspaceInfo = await Workspace.findById(workspaceId).select('inviteCode inviteCodeExpiry allowedDomains');
+        const workspaceInfo = await Workspace.findById(workspaceId).select('inviteCode allowedDomains');
         // Check if the correct invite code is provided
         const correctCode = workspaceInfo.inviteCode;
         // Return if code exists and provided code doesn't match
@@ -128,12 +128,9 @@ router.put("/setInvite", async(req, res) => {
             return res.status(403).json({ message: "The provided user is not authorized to make this request" });
         }
         // Set the invite code
-        const update = { inviteCode: generateInviteCode() };
-        // Throws error if invalid date is given, sets to null if none is provided
-        update.inviteCodeExpiry = body.inviteCodeExpiry ? new Date(body.inviteCodeExpiry) : null;
         await Workspace.updateOne(
             { _id: workspaceId },
-            update
+            { inviteCode: generateInviteCode() }
         );
         return res.json({ message: "Invite code updated successfully" });
     }
