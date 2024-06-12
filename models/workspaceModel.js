@@ -36,8 +36,11 @@ const workspaceSchema = mongoose.Schema(
             required: true
         },
         inviteCode: {
-            type: ObjectId,
-            ref: "Invite",
+            type: String,
+            required: false
+        },
+        inviteCodeExpiry: {
+            type: Date,
             required: false
         }
     },
