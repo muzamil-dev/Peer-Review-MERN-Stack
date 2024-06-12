@@ -2,29 +2,47 @@ import { Group } from "../models/groupModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
-// Check if the workspace exists
-export async function checkWorkspace(workspaceId){
-    const workspace = await Workspace.findById(workspaceId);
-    if (!workspace){
-        return null;
-    }
-    return workspace._id;
+// Check if the workspace is in the body
+export async function checkWorkspace(req, res, next){
+    const workspace = await Workspace.findById(
+        req.body.workspaceId
+    );
+    if (!workspace)
+        return res.status(400).json({ message: "The provided workspace was not found in our database" });
+    next();
 }
 
 // Check if the user exists
-export async function checkUser(userId){
-    const user = await User.findById(userId);
-    if (!user){
-        return null;
-    }
-    return user._id;
+export async function checkUser(req, res, next){
+    const user = await User.findById(
+        req.body.userId
+    );
+    if (!user)
+        return res.status(400).json({ message: "The provided user was not found in our database" });
+    next();
 }
 
 // Check if the group exists
-export async function checkGroup(groupId){
-    const group = await Group.findById(groupId);
-    if (!group){
-        return null;
+export async function checkGroup(req, res, next){
+    const group = await Group.findById(
+        req.body.groupId
+    );
+    if (!group)
+        return res.status(400).json({ message: "The provided group was not found in our database" });
+    next();
+}
+
+// Checks if the given user is an instructor
+// User/workspace should be checked before using this function
+export async function checkInstructor(req, res, next){
+    const body = req.body;
+    const workspaceMembers = (await Workspace.findById(body.workspaceId)).userIds;
+    const found = workspaceMembers.find(user => user.userId.equals(body.userId));
+    if (!found){
+        return res.status(400).json({ message: "The provided user is not a member of this workspace" });
     }
-    return group._id;
+    else if (found.role !== "Instructor"){
+        return res.status(403).json({ message: "The provided user is not authorized to make this request" });
+    }
+    next();
 }
