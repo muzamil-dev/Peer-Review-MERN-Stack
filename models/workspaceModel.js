@@ -23,8 +23,9 @@ const workspaceSchema = mongoose.Schema(
                     required: true
                 }
             }],
+            _id: false,
             default: [],
-            required: true
+            required: true,
         },
         groupIds: {
             type: [{
@@ -42,10 +43,12 @@ const workspaceSchema = mongoose.Schema(
         },
         inviteCode: {
             type: String,
+            default: null,
             required: false
         },
         inviteCodeExpiry: {
             type: Date,
+            default: null,
             required: false
         }
     },
