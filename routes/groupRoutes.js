@@ -3,7 +3,7 @@ import { Group } from "../models/groupModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
-import { checkWorkspace, checkUser, checkGroup } from "../shared/checks.js";
+import { checkWorkspace, checkUser, checkGroup } from "../middleware/checks.js";
 import { addUserToGroup, addGroupToUser } from "../shared/adders.js";
 
 const router = express.Router();
