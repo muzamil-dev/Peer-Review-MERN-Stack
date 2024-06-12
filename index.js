@@ -17,6 +17,7 @@ app.use('/groups', groupRoutes);
 
 mongoose.connect(mongoDBURL)
 .then(() => {
+    console.log('Connected to Database!');
     // Root route
     app.get('/', (req, res) => {
         res.send('Welcome to the Peer Review MERN Stack Application!');
