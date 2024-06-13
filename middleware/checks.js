@@ -39,6 +39,35 @@ export async function checkGroup(req, res, next){
     );
     if (!group)
         return res.status(400).json({ message: "The provided group was not found in our database" });
+    // For use with other middleware
+    req.body.workspaceId = group.workspaceId;
+    next();
+}
+
+// Checks if the user is in the group
+export async function checkUserNotInGroup(req, res, next){
+    const groupUsers = (await Group.findById(req.body.groupId)).userIds;
+    const found = groupUsers.find(
+        user => user.equals(req.body.userId)
+    );
+    if (found){
+        return res.status(400).json({ message: "User is already a member of this group" });
+    }
+    next();
+}
+
+// Checks if the user is in the workspace. Assumes existence of workspace is checked
+export async function checkUserInWorkspace(req, res, next){
+    // Search for target in workspace
+    const workspaceUsers = (await Workspace.findById(
+        req.body.workspaceId
+    ).select('userIds')).userIds;
+    const found = workspaceUsers.find(
+        user => user.userId.equals(req.body.userId)
+    );
+    if (!found){
+        return res.status(400).json({ message: "The provided user was not found in this workspace" });
+    }
     next();
 }
 

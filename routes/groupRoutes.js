@@ -3,17 +3,18 @@ import { Group } from "../models/groupModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
-import { checkWorkspace, checkUser, checkGroup, checkInstructor } from "../middleware/checks.js";
+import { 
+    checkWorkspace, checkUser, checkGroup, checkInstructor, checkUserInWorkspace,
+    checkUserNotInGroup
+} from "../middleware/checks.js";
 import { addUserToGroup, addGroupToUser, addGroupToWorkspace } from "../shared/adders.js";
 
 const router = express.Router();
 
 router.use(checkUser);
-router.use(checkWorkspace);
-router.use(checkInstructor);
 
 // Create a group in a workspace
-router.post("/create", async(req, res) => {
+router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
     try{
         // Check that workspace and user were given
         const body = req.body;
@@ -40,42 +41,12 @@ router.post("/create", async(req, res) => {
 
 
 // Route to add users to a group
-router.put("/join", async(req, res) => {
+router.put("/join", checkGroup, checkUserNotInGroup, checkUserInWorkspace, async(req, res) => {
     try{
+        // Set variables
         const body = req.body;
-
-        if(!body.userId || !body.groupId){
-            return res.status(400).json({ message: "One or more required fields is not present" });
-        }
-
-        const [userId, groupId] = await Promise.all(
-            [
-                checkUser(body.userId),
-                checkGroup(body.groupId)
-            ]
-        );
-        if (!groupId){
-            return res.status(400).json({ message: "The provided group was not found in our database" });
-        }
-        if (!userId){
-            return res.status(400).json({ message: "The provided user was not found in our database" });
-        }
-        // Check if user is already in group
-        const groupUsers = (await Group.findById(groupId)).userIds;
-        const userFound = groupUsers.find(user => user.equals(userId));
-        if (userFound){
-            return res.status(400).json({ message: "User is already a member of this group" });
-        }
-        // Get the id of the group's workspace
-        const workspaceId = (await Group.findById(groupId)).workspaceId;
-        // Check that the user is in the same workspace as the group
-        const userWorkspaces = (await
-            User.findById(userId).select('workspaceIds').exec()
-        ).workspaceIds;
-        const found = userWorkspaces.find(space => space.workspaceId.equals(workspaceId));
-        if (!found){
-            return res.status(400).json({ message: "User is not in the group's workspace" });
-        }
+        const groupId = body.groupId;
+        const userId = body.userId;
         // Link the user and the group
         await Promise.all(
             [
@@ -83,7 +54,7 @@ router.put("/join", async(req, res) => {
                 addGroupToUser(userId, groupId)
             ]
         );
-        return res.status(200).json({ message: "Joined group successfully" });
+        return res.json({ message: "Joined group successfully" });
     }
     catch(err){
         console.log(err.message);
