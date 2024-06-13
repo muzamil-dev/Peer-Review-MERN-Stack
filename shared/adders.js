@@ -38,6 +38,15 @@ export async function addGroupToUser(userId, groupId){
     return result;
 }
 
+// Update workspace with group
+export async function addGroupToWorkspace(groupId, workspaceId){
+    const result = await Workspace.updateOne(
+        { _id: workspaceId },
+        { $push: { groupIds: groupId }}
+    );
+    return result;
+}
+
 // Remove user from workspace
 export async function removeUserFromWorkspace(userId, workspaceId){
     const result = await Workspace.updateOne(

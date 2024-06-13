@@ -3,42 +3,33 @@ import { Group } from "../models/groupModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
-import { checkWorkspace, checkUser, checkGroup } from "../middleware/checks.js";
-import { addUserToGroup, addGroupToUser } from "../shared/adders.js";
+import { checkWorkspace, checkUser, checkGroup, checkInstructor } from "../middleware/checks.js";
+import { addUserToGroup, addGroupToUser, addGroupToWorkspace } from "../shared/adders.js";
 
 const router = express.Router();
 
+router.use(checkUser);
+router.use(checkWorkspace);
+router.use(checkInstructor);
+
 // Create a group in a workspace
-router.post("/", async(req, res) => {
+router.post("/create", async(req, res) => {
     try{
         // Check that workspace and user were given
         const body = req.body;
-        if (!body.name || !body.workspaceId || !body.userId){
-            return res.status(400).json({ message: "One or more required fields is not present" });
-        }
-        // Check if workspaceId and userId exist
-        const [workspaceId, userId] = await Promise.all(
-            [checkWorkspace(body.workspaceId), checkUser(body.userId)]
-        );
-        if (!workspaceId){
-            return res.status(400).json({ message: "The provided workspace was not found in our database" });
-        }
-        if (!userId){
-            return res.status(400).json({ message: "The provided user was not found in our database" });
-        }
-        // Query for instructors
-        const workspaceMembers = (await Workspace.findById(workspaceId)).userIds;
-        const instructors = workspaceMembers.filter(member => member.role === "Instructor");
-
-        // Check if the user is one of the instructors
-        const found = instructors.find(elem => userId.equals(elem.userId));
-        if (!found){
-            return res.status(403).json({ 
-                message: "The provided user is not authorized to create groups in this workspace"
-            });
+        // Check that a name for the group is given
+        if (!body.name){
+            const numGroups = (await Workspace.findById(body.workspaceId)
+                            .select('groupIds').exec()).groupIds.length + 1;
+            body.name = `Group ${numGroups}`;
         }
         // Create the group
-        const group = await Group.create({ name: body.name, workspaceId });
+        const group = await Group.create({ 
+            name: body.name, 
+            workspaceId: body.workspaceId 
+        });
+        // Add the group to the workspace's list of groups
+        await addGroupToWorkspace(group._id, body.workspaceId);
         return res.status(201).json(group);
     }
     catch(err){
