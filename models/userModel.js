@@ -41,6 +41,7 @@ const userSchema = mongoose.Schema(
                     required: true
                 }
             }],
+            _id: false,
             default: [],
             required: true
         },

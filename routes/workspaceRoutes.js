@@ -9,6 +9,7 @@ import generateInviteCode from '../shared/inviteCode.js';
 const router = express.Router();
 
 // Check that the user is provided for any workspace route
+// Will be replaced when JWT is added
 router.use(checkUser);
 
 // Creates a new workspace
@@ -108,6 +109,32 @@ router.put("/join", async(req, res) => {
 // Checks that the user is the instructor of the given workspace
 // All routes below here are for use by workspace instructors
 router.use(checkInstructor);
+
+// Deletes the given workspace
+router.delete("/", async(req, res) => {
+    try{
+        // Get all workspace users
+        const workspaceUsers = (await Workspace.findById(
+            req.body.workspaceId
+        ).select('userIds')).userIds;
+        // Create an array with just user ids
+        const userIds = workspaceUsers.map(
+            user => user.userId
+        );
+        // Pull from the user's workspaceIds
+        await User.updateMany(
+            { _id: { $in: userIds }},
+            { $pull: { workspaceIds: { workspaceId: req.body.workspaceId }}}
+        );
+        // Delete the workspace itself
+        await Workspace.findByIdAndDelete(req.body.workspaceId);
+        return res.json({ message: "Workspace deleted successfully" });
+    }
+    catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
 
 // Sets the active invite code
 router.put("/setInvite", async(req, res) => {
