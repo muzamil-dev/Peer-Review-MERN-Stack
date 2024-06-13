@@ -1,5 +1,6 @@
 import express from "express";
 import { Review } from "../models/reviewsModel.js";
+import { User } from "../models/userModel.js";
 
 const router = express.Router();
 
@@ -29,19 +30,24 @@ router.post("/", async (req, res) => {
 
 
 // Get reviews for a user
-router.get("/user/:userId", async (req, res) => {
+router.post("/user/reviews", async (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+    }
 
     try {
-        const reviews = await Review.find({ userId: req.params.userId }).populate('userId workspaceId groupId');
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(400).json({ message: "User not found" });
+        }
+
+        const reviews = await Review.find({ userId });
         res.status(200).json(reviews);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: err.message });
-    }
-
-    // Check if user exists in database
-    if (!userData) {
-        return res.status(404).json({ message: "The requested user was not found in our database." });
     }
 });
 
