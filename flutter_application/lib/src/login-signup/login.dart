@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_application/components/MainAppBar.dart';
 
 /// The Widget that configures your application.
 class Login extends StatelessWidget {
@@ -13,15 +14,9 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Glue the SettingsController to the MaterialApp.
-    //
-    // The ListenableBuilder Widget listens to the SettingsController for changes.
-    // Whenever the user updates their settings, the MaterialApp is rebuilt.
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text("Login"),
-        ),
-        body: const Padding(
+    return const Scaffold(
+        appBar: MainAppBar(),
+        body: Padding(
           padding: EdgeInsets.all(15),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
