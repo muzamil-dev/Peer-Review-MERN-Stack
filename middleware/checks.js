@@ -4,6 +4,11 @@ import { Workspace } from "../models/workspaceModel.js";
 
 // Check if the workspace is in the body
 export async function checkWorkspace(req, res, next){
+    if (req.params?.workspaceId){
+        if (!req.body)
+            req.body = {};
+        req.body.workspaceId = req.params.workspaceId;
+    }
     const workspace = await Workspace.findById(
         req.body.workspaceId
     );
@@ -24,6 +29,11 @@ export async function checkUser(req, res, next){
 
 // Check if the group exists
 export async function checkGroup(req, res, next){
+    if (req.params?.groupId){
+        if (!req.body)
+            req.body = {};
+        req.body.groupId = req.params.groupId;
+    }
     const group = await Group.findById(
         req.body.groupId
     );
@@ -32,7 +42,7 @@ export async function checkGroup(req, res, next){
     next();
 }
 
-// Checks if the target user is in the workspace. Assumes existence of both is checked
+// Checks if the target user is in the workspace. Assumes existence of workspace is checked
 export async function checkTargetInWorkspace(req, res, next){
     // Search for target in workspace
     const workspaceUsers = (await Workspace.findById(
