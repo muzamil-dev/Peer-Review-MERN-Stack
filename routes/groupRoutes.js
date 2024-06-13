@@ -11,6 +11,21 @@ import { addUserToGroup, addGroupToUser, addGroupToWorkspace } from "../shared/a
 
 const router = express.Router();
 
+// Get all users in a group
+router.get("/:groupId/users", checkGroup, async (req, res) => {
+    try {
+        // const { groupId } = req.params;
+        const groupId = req.body.groupId;
+        const group = await Group.findById(groupId).select('userIds');
+        res.json(group.userIds);
+    } 
+    catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+// Check that a user is provided
 router.use(checkUser);
 
 // Create a group in a workspace
@@ -48,12 +63,10 @@ router.put("/join", checkGroup, checkUserNotInGroup, checkUserInWorkspace, async
         const groupId = body.groupId;
         const userId = body.userId;
         // Link the user and the group
-        await Promise.all(
-            [
-                addUserToGroup(userId, groupId),
-                addGroupToUser(userId, groupId)
-            ]
-        );
+        await Promise.all([
+            addUserToGroup(userId, groupId),
+            addGroupToUser(userId, groupId)
+        ]);
         return res.json({ message: "Joined group successfully" });
     }
     catch(err){
@@ -61,18 +74,6 @@ router.put("/join", checkGroup, checkUserNotInGroup, checkUserInWorkspace, async
         return res.status(500).send({ message: err.message });
     }
 });
-
-// Get users by group
-// router.get("/:groupId/users", async (req, res) => {
-//     try {
-//         const { groupId } = req.params;
-//         const group = await Group.findById(groupId).populate('userIds');
-//         res.status(200).json(group.userIds);
-//     } catch (err) {
-//         console.log(err.message);
-//         res.status(500).send({ message: err.message });
-//     }
-// });
 
 // Remove user from group
 // router.put("/:groupId/removeUser", async (req, res) => {
