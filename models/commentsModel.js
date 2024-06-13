@@ -3,12 +3,12 @@ import mongoose, { ObjectId } from "mongoose";
 
 const commentsSchema = mongoose.Schema(
     {
-        owner_id: {
+        userId: {
             type: ObjectId,
             ref: "User",
             required: true
         },
-        target_id: {
+        targetId: {
             type: ObjectId,
             ref: "User",
             required: true
@@ -18,7 +18,7 @@ const commentsSchema = mongoose.Schema(
                 type: String,
                 required: true
             },
-            ratings: {
+            rating: {
                 type: Number,
                 required: true
             }
@@ -31,10 +31,10 @@ const commentsSchema = mongoose.Schema(
             type: Date,
             default: Date.now
         },
-        workspaceId: {
+        groupId: {
             type: ObjectId,
             required: true,
-            ref: "Workspace"
+            ref: "Group"
         }
     }
 );

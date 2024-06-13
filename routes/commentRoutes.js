@@ -7,15 +7,15 @@ const router = express.Router();
 router.post("/", async (req, res) => {
     try {
         // Get the required fields from the request body
-        const { userId, workspaceId, groupId, comment } = req.body;
+        const { userId, targetId, ratings, text, groupId } = req.body;
 
         // Check that the user, workspace, and comment fields are present
-        if (!userId || !workspaceId || !comment) {
+        if (!userId || !targetId || !ratings || !text || !groupId) {
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
         // Create a new comment
-        const newComment = new Comment({ userId, workspaceId, groupId, comment });
+        const newComment = new Comment({ userId, targetId, ratings, text, groupId });
         const savedComment = await newComment.save();
 
         // Return the created comment

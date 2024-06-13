@@ -7,6 +7,7 @@ import { PORT, mongoDBURL } from "./config.js";
 import userRoutes from "./routes/userRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js";
 import groupRoutes from "./routes/groupRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/users', userRoutes);
 app.use('/workspaces', workspaceRoutes);
 app.use('/groups', groupRoutes);
+app.use('/comments', commentRoutes);
 
 mongoose.connect(mongoDBURL,{
 }).then(() => {
