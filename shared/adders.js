@@ -37,3 +37,21 @@ export async function addGroupToUser(userId, groupId){
     );
     return result;
 }
+
+// Remove user from workspace
+export async function removeUserFromWorkspace(userId, workspaceId){
+    const result = await Workspace.updateOne(
+        { _id: workspaceId },
+        { $pull: { userIds: { userId: userId }}}
+    );
+    return result;
+}
+
+// Remove workspace from user's workspace list
+export async function removeWorkspaceFromUser(userId, workspaceId){
+    const result = await User.updateOne(
+        { _id: userId },
+        { $pull: { workspaceIds: { workspaceId: workspaceId }}}
+    );
+    return result;
+}

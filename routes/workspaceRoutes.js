@@ -3,7 +3,8 @@ import { User } from '../models/userModel.js';
 import { Workspace } from '../models/workspaceModel.js';
 
 import { checkWorkspace, checkUser, checkInstructor } from "../middleware/checks.js";
-import { addUserToWorkspace, addWorkspaceToUser } from "../shared/adders.js";
+import { addUserToWorkspace, addWorkspaceToUser, removeUserFromWorkspace, 
+removeWorkspaceFromUser } from "../shared/adders.js";
 import generateInviteCode from '../shared/inviteCode.js';
 
 const router = express.Router();
@@ -55,7 +56,7 @@ router.put("/join", async(req, res) => {
         const inviteCode = body.inviteCode;
 
         if (!body.inviteCode){
-            return res.status(400).json({ message: "One or more required fields was not present"} );
+            return res.status(400).json({ message: "One or more required fields was not present" });
         }
         // Get relevant info from the user and workspace
         const userInfo = await User.findById(userId).select('email');
@@ -98,7 +99,26 @@ router.put("/join", async(req, res) => {
             ]
         );
 
-        res.status(200).send({ message: "Workspace joined successfully!"});
+        res.json({ message: "Workspace joined successfully!" });
+    }
+    catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+// Leave a workspace
+router.put("/leave", async(req, res) => {
+    try{
+        const userId = req.body.userId;
+        const workspaceId = req.body.workspaceId;
+
+        await Promise.all([
+            removeUserFromWorkspace(userId, workspaceId),
+            removeWorkspaceFromUser(userId, workspaceId)
+        ]);
+
+        res.json({ message: "Workspace left successfully" });
     }
     catch(err){
         console.log(err.message);
