@@ -1,12 +1,16 @@
-export default function generateInviteCode(){
-    const arr = []
-    for (let i = 0; i < 3; i++){
-        for (let i = 0; i < 4; i++){
-            const charCode = Math.floor(Math.random() * 26) + 'A'.charCodeAt(0);
-            const randomChar = String.fromCharCode(charCode);
-            arr.push(randomChar);
+import { Workspace } from '../models/workspaceModel.js';
+
+export default async function generateInviteCode() {
+    let unique = false;
+    let inviteCode = '';
+    
+    while (!unique) {
+        inviteCode = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
+        const existingWorkspace = await Workspace.findOne({ inviteCode });
+        if (!existingWorkspace) {
+            unique = true;
         }
-        arr.push('-');
     }
-    return arr.slice(0, -1).join('');
+    
+    return inviteCode;
 }

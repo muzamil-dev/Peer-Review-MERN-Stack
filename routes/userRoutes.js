@@ -189,6 +189,54 @@ router.post("/resetPassword", async (req, res) => {
     }
 });
 
+// Bulk user creation
+router.post("/bulk", async (req, res) => {
+    try {
+        const users = req.body;
+        if (!Array.isArray(users) || users.length === 0) {
+            return res.status(400).json({ message: "Request body must be an array of users." });
+        }
 
+        const createdUsers = [];
+        for (const user of users) {
+            const { firstName, middleName, lastName, email, password } = user;
+            if (!firstName || !lastName || !email || !password) {
+                return res.status(400).json({ message: "One or more required fields is not present." });
+            }
+
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return res.status(400).json({ message: "Invalid email address." });
+            }
+
+            // Check for existing email
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                return res.status(400).json({ message: `An account with email ${email} already exists.` });
+            }
+
+            // Hash the password
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Create the new user
+            const newUser = new User({
+                firstName,
+                middleName,
+                lastName,
+                email,
+                password: hashedPassword
+            });
+
+            const userData = await newUser.save();
+            createdUsers.push(userData);
+        }
+
+        return res.status(201).json(createdUsers);
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
 
 export default router;

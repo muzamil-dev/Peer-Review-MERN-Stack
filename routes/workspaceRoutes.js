@@ -14,29 +14,50 @@ const router = express.Router();
 router.use(checkUser);
 
 // Creates a new workspace
-router.post("/", async(req, res) => {
-    try{
-        // Check for the user id and workspace name
+// router.post("/", async(req, res) => {
+//     try{
+//         // Check for the user id and workspace name
+//         const body = req.body;
+//         if (!body.name){
+//             return res.status(400).json({ message: "Please provide a name for your workspace" });
+//         }
+
+//         // Create new workspace object and member object
+//         const newWorkspace = { name: body.name };
+//         // Create and get the new workspace
+//         const workspace = await Workspace.create(newWorkspace);
+//         // Add the workspace membership for the creator
+//         await Promise.all(
+//             [
+//                 addUserToWorkspace(body.userId, workspace._id, "Instructor"),
+//                 addWorkspaceToUser(body.userId, workspace._id, "Instructor")
+//             ]
+//         );
+        
+//         return res.status(201).json(workspace);
+//     }
+//     catch(err){
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
+router.post("/", async (req, res) => {
+    try {
         const body = req.body;
-        if (!body.name){
+        if (!body.name) {
             return res.status(400).json({ message: "Please provide a name for your workspace" });
         }
 
-        // Create new workspace object and member object
-        const newWorkspace = { name: body.name };
-        // Create and get the new workspace
+        const inviteCode = await generateInviteCode();
+        const newWorkspace = { name: body.name, inviteCode };
         const workspace = await Workspace.create(newWorkspace);
-        // Add the workspace membership for the creator
-        await Promise.all(
-            [
-                addUserToWorkspace(body.userId, workspace._id, "Instructor"),
-                addWorkspaceToUser(body.userId, workspace._id, "Instructor")
-            ]
-        );
-        
+        await Promise.all([
+            addUserToWorkspace(body.userId, workspace._id, "Instructor"),
+            addWorkspaceToUser(body.userId, workspace._id, "Instructor")
+        ]);
+
         return res.status(201).json(workspace);
-    }
-    catch(err){
+    } catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
@@ -102,6 +123,24 @@ router.put("/join", async(req, res) => {
         res.json({ message: "Workspace joined successfully!" });
     }
     catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+// Generate new invite code
+router.put("/generateInviteCode", async (req, res) => {
+    try {
+        const { workspaceId } = req.body;
+        const newInviteCode = generateInviteCode();
+
+        await Workspace.updateOne(
+            { _id: workspaceId },
+            { inviteCode: newInviteCode }
+        );
+
+        return res.status(200).json({ inviteCode: newInviteCode });
+    } catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
@@ -211,5 +250,29 @@ router.put("/setAllowedDomains", async(req, res) => {
         res.status(500).send({ message: err.message });
     }
 });
+
+// // Get users by workspace
+// router.get("/:workspaceId/users", async (req, res) => {
+//     try {
+//         const { workspaceId } = req.params;
+//         const users = await User.find({ "workspaceIds.workspaceId": workspaceId });
+//         res.status(200).json(users);
+//     } catch (err) {
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
+
+// // Get groups by workspace
+// router.get("/:workspaceId/groups", async (req, res) => {
+//     try {
+//         const { workspaceId } = req.params;
+//         const groups = await Group.find({ workspaceId });
+//         res.status(200).json(groups);
+//     } catch (err) {
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
 
 export default router;

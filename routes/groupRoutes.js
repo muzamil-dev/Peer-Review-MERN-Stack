@@ -8,6 +8,7 @@ import { addUserToGroup, addGroupToUser } from "../shared/adders.js";
 
 const router = express.Router();
 
+// Create a group in a workspace
 router.post("/", async(req, res) => {
     try{
         // Check that workspace and user were given
@@ -98,5 +99,94 @@ router.put("/join", async(req, res) => {
         return res.status(500).send({ message: err.message });
     }
 });
+
+// Get users by group
+// router.get("/:groupId/users", async (req, res) => {
+//     try {
+//         const { groupId } = req.params;
+//         const group = await Group.findById(groupId).populate('userIds');
+//         res.status(200).json(group.userIds);
+//     } catch (err) {
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
+
+// Remove user from group
+// router.put("/:groupId/removeUser", async (req, res) => {
+//     try {
+//         const { groupId } = req.params;
+//         const { userId } = req.body;
+
+//         if (!userId) {
+//             return res.status(400).json({ message: "User ID is required" });
+//         }
+
+//         const group = await Group.findById(groupId);
+//         if (!group) {
+//             return res.status(404).json({ message: "Group not found" });
+//         }
+
+//         group.userIds.pull(userId);
+//         await group.save();
+
+//         const user = await User.findById(userId);
+//         if (user) {
+//             user.groupIds.pull(groupId);
+//             await user.save();
+//         }
+
+//         res.status(200).json({ message: "User removed from group successfully" });
+//     } catch (err) {
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
+
+// Update group information
+// router.put("/:groupId", async (req, res) => {
+//     try {
+//         const { groupId } = req.params;
+//         const { name } = req.body;
+
+//         const group = await Group.findById(groupId);
+//         if (!group) {
+//             return res.status(404).json({ message: "Group not found" });
+//         }
+
+//         if (name) {
+//             group.name = name;
+//         }
+
+//         const updatedGroup = await group.save();
+//         res.status(200).json(updatedGroup);
+//     } catch (err) {
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
+
+// Delete a group
+// router.delete("/:groupId", async (req, res) => {
+//     try {
+//         const { groupId } = req.params;
+
+//         const group = await Group.findByIdAndDelete(groupId);
+//         if (!group) {
+//             return res.status(404).json({ message: "Group not found" });
+//         }
+
+//         const userIds = group.userIds;
+//         await User.updateMany(
+//             { _id: { $in: userIds } },
+//             { $pull: { groupIds: groupId } }
+//         );
+
+//         res.status(200).json({ message: "Group deleted successfully" });
+//     } catch (err) {
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
 
 export default router;
