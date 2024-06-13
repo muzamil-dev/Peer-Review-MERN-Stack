@@ -1,7 +1,6 @@
-import { text } from "express";
 import mongoose, { ObjectId } from "mongoose";
 
-const commentsSchema = mongoose.Schema(
+const reviewsSchema = mongoose.Schema(
     {
         userId: {
             type: ObjectId,
@@ -39,4 +38,4 @@ const commentsSchema = mongoose.Schema(
     }
 );
 
-export const Comment = mongoose.model("comment", commentsSchema);
+export const Review = mongoose.model("Review", reviewsSchema);
