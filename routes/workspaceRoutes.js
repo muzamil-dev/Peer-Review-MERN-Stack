@@ -9,6 +9,29 @@ import generateInviteCode from '../shared/inviteCode.js';
 
 const router = express.Router();
 
+// This is for testing and likely wont be available to users
+// Pass in an array (workspaces) with documents: { name, userId }
+// No input validation is used in this endpoint
+router.post("/createMany", async(req, res) => {
+    try{
+        const workspaces = req.body.workspaces;
+        const created = (await Workspace.insertMany(
+            workspaces
+        )).map(space => ({ 
+            name: space.name, 
+            workspaceId: space._id
+        }));
+        res.status(201).json({ 
+            message: `Workspaces created (${workspaces.length})`,
+            workspaces: created
+        });
+    }
+    catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
 // Check that the user is provided for any workspace route
 // Will be replaced when JWT is added
 router.use(checkUser);
