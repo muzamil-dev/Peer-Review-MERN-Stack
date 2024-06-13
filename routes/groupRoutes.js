@@ -11,13 +11,13 @@ import { addUserToGroup, addGroupToUser, addGroupToWorkspace } from "../shared/a
 
 const router = express.Router();
 
-// Get all users in a group
-router.get("/:groupId/users", checkGroup, async (req, res) => {
+// Get all information about a group
+router.get("/:groupId", checkGroup, async(req, res) => {
     try {
-        // const { groupId } = req.params;
+        //const { groupId } = req.params;
         const groupId = req.body.groupId;
-        const group = await Group.findById(groupId).select('userIds');
-        res.json(group.userIds);
+        const group = await Group.findById(groupId);
+        res.json(group);
     } 
     catch (err) {
         console.log(err.message);
@@ -25,7 +25,25 @@ router.get("/:groupId/users", checkGroup, async (req, res) => {
     }
 });
 
-// Check that a user is provided
+// Get all users in a group
+// Formats as an array with _id, firstName, lastName, email
+router.get("/:groupId/users", checkGroup, async (req, res) => {
+    try {
+        // const { groupId } = req.params;
+        const groupId = req.body.groupId;
+        const group = await Group.findById(groupId).select('userIds');
+        const users = await User.find(
+            { _id: { $in: group.userIds }}
+        ).select('firstName middleName lastName email');
+        res.json(users);
+    } 
+    catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+// Check that a user is provided in body
 router.use(checkUser);
 
 // Create a group in a workspace
