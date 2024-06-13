@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application/components/MainAppBar.dart';
+import 'signup.dart';
 
 /// The Widget that configures your application.
 class Login extends StatelessWidget {
@@ -14,46 +15,66 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-        appBar: MainAppBar(title: "Login"),
-        body: Padding(
-          padding: EdgeInsets.all(15),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              TextField(
-                obscureText: false,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Username',
-                ),
+    return Scaffold(
+      appBar: MainAppBar(title: "Login"),
+      body: Padding(
+        padding: EdgeInsets.all(15),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const TextField(
+              obscureText: false,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Username',
               ),
-              Padding(padding: EdgeInsets.all(5)),
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Password',
-                ),
+            ),
+            const Padding(padding: EdgeInsets.all(5)),
+            const TextField(
+              obscureText: true,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Password',
               ),
-              SizedBox(
-                height: 5,
-              ),
-              ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll<Color>(
-                    Colors.blue,
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll<Color>(
+                      Colors.blue,
+                    ),
+                  ),
+                  onPressed: null,
+                  child: Text(
+                    "Login",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                 ),
-                onPressed: null,
-                child: Text(
-                  "Login",
-                  style: TextStyle(color: Colors.white, fontSize: 20),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  style: const ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll<Color>(
+                      Colors.blue,
+                    ),
+                  ),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, Signup.routeName),
+                  child: const Text(
+                    "Signup",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ));
+              ],
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
