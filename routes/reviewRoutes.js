@@ -118,11 +118,11 @@ router.delete("/:reviewId", async (req, res) => {
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: err.message });
-    }   
+    }
 });
 
 
-// Get all reviews for a specific groupId
+// Get all reviews for a specific groupId. Looks through reviews and returns all reviews with the given groupId.
 router.get("/group/:groupId/reviews", async (req, res) => {
     const { groupId } = req.params;
 
@@ -132,14 +132,14 @@ router.get("/group/:groupId/reviews", async (req, res) => {
 
     try {
         const reviews = await Review.find({ groupId });
-        
+
         if (!reviews) {
             return res.status(404).json({ message: "No reviews found for this group" });
         }
 
         res.status(200).json(reviews);
     } catch (err) {
-        console.error("Error occurred:", err.message); // Log any error that occurs
+        console.error("Error occurred:", err.message);
         res.status(500).json({ message: err.message });
     }
 });
