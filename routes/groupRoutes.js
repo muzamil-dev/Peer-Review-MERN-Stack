@@ -8,6 +8,7 @@ import {
     checkUserNotInGroup
 } from "../middleware/checks.js";
 import { addUserToGroup, addGroupToUser, addGroupToWorkspace } from "../shared/adders.js";
+import { removeGroupFromUsers } from "../shared/removers.js";
 
 const router = express.Router();
 
@@ -49,7 +50,6 @@ router.use(checkUser);
 // Create a group in a workspace
 router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
     try{
-        // Check that workspace and user were given
         const body = req.body;
         // Check that a name for the group is given
         if (!body.name){
@@ -72,6 +72,24 @@ router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
     }
 });
 
+// Deletes a group
+router.delete("/delete", checkGroup, checkInstructor, async(req, res) => {
+    try{
+        const groupId = req.body.groupId;
+        // Get group's members
+        const groupMembers = (await Group.findById(groupId).select('userIds')).userIds;
+        // Remove group from users
+        await Promise.all([
+            removeGroupFromUsers(groupMembers, groupId),
+            Group.findByIdAndDelete(groupId)
+        ]);
+        res.json({ message: "Group deleted successfully" });
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });
+    }
+});
 
 // Route to add users to a group
 router.put("/join", checkGroup, checkUserNotInGroup, checkUserInWorkspace, async(req, res) => {
