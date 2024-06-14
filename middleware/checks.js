@@ -65,6 +65,7 @@ export async function checkAssignment(req, res, next){
 
 
 // Checks if the user is in the group
+// TODO: Change the function to check that the user is not in any group
 export async function checkUserNotInGroup(req, res, next){
     const groupUsers = (await Group.findById(req.body.groupId)).userIds;
     const found = groupUsers.find(

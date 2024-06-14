@@ -46,6 +46,7 @@ router.get("/:assignmentId/reviews/:userId", async(req, res) => {
         const reviewIds = groupReviews.map(
             review => review._id
         );
+
         // Filter out completedIds from all userIds
         const notCompletedIds = group.userIds.filter(
             id1 => !completedIds.some(id2 => id1.equals(id2))
@@ -57,7 +58,7 @@ router.get("/:assignmentId/reviews/:userId", async(req, res) => {
             User.find({ _id: { $in: notCompletedIds }}).select('firstName middleName lastName')
         ]);
 
-        // Change name of id field
+        // Change name of fields
         completeUsers = completeUsers.map(
             (user, index) => ({ targetId: user._id, reviewId: reviewIds[index], targetFirstName: user.firstName, 
             targetMiddleName: user.middleName, targetLastName: user.lastName })
