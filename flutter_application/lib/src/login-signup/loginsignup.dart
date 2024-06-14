@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/components/MainAppBar.dart';
 
 class LoginSignup extends StatefulWidget {
   const LoginSignup({super.key});
@@ -27,8 +28,8 @@ class _LoginSignupState extends State<LoginSignup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Auth Page'),
+      appBar: MainAppBar(
+        title: 'Auth Page',
       ),
       body: Column(
         children: [
