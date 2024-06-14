@@ -43,7 +43,7 @@ router.post("/", async(req, res) => {
         // Check for the user id and workspace name
         const body = req.body;
         if (!body.name){
-            return res.status(400).json({ message: "Please provide a name for your workspace" });
+            return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
         // Create new workspace object and member object
@@ -155,7 +155,6 @@ router.put("/leave", async(req, res) => {
 router.use(checkInstructor);
 
 // Deletes the given workspace
-// TODO: Fix to include deleting groups
 router.delete("/delete", async(req, res) => {
     try{
         // Get all workspace users
@@ -193,12 +192,16 @@ router.delete("/delete", async(req, res) => {
 // Sets the active invite code
 router.put("/setInvite", async(req, res) => {
     try{
+        const inviteCode = generateInviteCode();
         // Set the invite code
         await Workspace.updateOne(
             { _id: req.body.workspaceId },
-            { inviteCode: generateInviteCode() }
+            { inviteCode }
         );
-        return res.json({ message: "Invite code updated successfully" });
+        return res.json({ 
+            message: "Invite code updated successfully",
+            inviteCode
+        });
     }
     catch(err){
         console.log(err.message);

@@ -8,7 +8,7 @@ import {
     checkUserNotInGroup
 } from "../middleware/checks.js";
 import { addUserToGroup, addGroupToUser, addGroupToWorkspace } from "../shared/adders.js";
-import { removeGroupFromUsers, removeGroupFromUser, removeUserFromGroup } from "../shared/removers.js";
+import { removeGroupFromUsers, removeGroupFromUser, removeUserFromGroup, removeGroupFromWorkspace } from "../shared/removers.js";
 
 const router = express.Router();
 
@@ -98,11 +98,13 @@ router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
 router.delete("/delete", checkGroup, checkInstructor, async(req, res) => {
     try{
         const groupId = req.body.groupId;
+        const workspaceId = req.body.workspaceId;
         // Get group's members
         const groupMembers = (await Group.findById(groupId).select('userIds')).userIds;
         // Remove group from users
         await Promise.all([
             removeGroupFromUsers(groupMembers, groupId),
+            removeGroupFromWorkspace(workspaceId, groupId),
             Group.findByIdAndDelete(groupId)
         ]);
         res.json({ message: "Group deleted successfully" });
@@ -140,7 +142,7 @@ router.put("/removeUser", checkGroup, checkInstructor, async (req, res) => {
 
         // Check if the targetId was provided
         if (!targetId){
-            return res.status(400).json({ message: "One or more required fields was not provided" });
+            return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
         await Promise.all([

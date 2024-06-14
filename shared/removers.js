@@ -55,3 +55,12 @@ export async function removeGroupFromUsers(userIds, groupId){
     );
     return result;
 }
+
+// Remove group from user's group list
+export async function removeGroupFromWorkspace(workspaceId, groupId){
+    const result = Workspace.updateOne(
+        { _id: workspaceId },
+        { $pull: { groupIds: groupId }}
+    );
+    return result;
+}
