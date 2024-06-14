@@ -1,6 +1,7 @@
 import express from "express";
 import { Review } from "../models/reviewsModel.js";
 import { User } from "../models/userModel.js";
+import { Group } from "../models/groupModel.js";
 
 const router = express.Router();
 
@@ -51,6 +52,50 @@ router.post("/user/reviews", async (req, res) => {
     }
 });
 
+// Get reviews for a target user
+router.post("/target/reviews", async (req, res) => {
+    const { targetId } = req.body;
+
+    if (!targetId) {
+        return res.status(400).json({ message: "User ID is required" });
+    }
+
+    try {
+        const user = await User.findById(targetId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const reviews = await Review.find({ targetId });
+        res.status(200).json(reviews);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Get all reviews for a group
+router.get("/group/reviews", async (req, res) => {
+    const { groupId } = req.body;
+
+    if (!groupId) {
+        return res.status(400).json({ message: "Group ID is required" });
+    }
+
+    try{
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return res.status(400).json({ message: "Group not found" });
+        }
+
+        const reviews = await Review.find({ groupId });
+        res.status(200).json(reviews);
+    }catch(err){
+        console.error(err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Get reviews from a workspace
 router.get("/workspace/:workspaceId", async (req, res) => {
 
@@ -65,22 +110,6 @@ router.get("/workspace/:workspaceId", async (req, res) => {
     // Check if workspace exists
     if (!workspaceId) {
         return res.status(400).json({ message: "The provided workspace was not found in our database" });
-    }
-});
-
-// Get all reviews for a group
-router.get("/group/:groupId", async (req, res) => {
-    try {
-        const reviews = await Review.find({ groupId: req.params.groupId }).populate('userId workspaceId groupId');
-        res.status(200).json(reviews);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
-    }
-
-    // Check if group exists
-    if (!groupId) {
-        return res.status(400).json({ message: "The provided group was not found in our database" });
     }
 });
 
