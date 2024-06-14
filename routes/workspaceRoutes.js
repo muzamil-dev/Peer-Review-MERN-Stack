@@ -1,10 +1,11 @@
 import express from 'express';
 import { User } from '../models/userModel.js';
 import { Workspace } from '../models/workspaceModel.js';
+import { Group } from '../models/groupModel.js';
 
 import { checkWorkspace, checkUser, checkInstructor } from "../middleware/checks.js";
-import { addUserToWorkspace, addWorkspaceToUser, removeUserFromWorkspace, 
-removeWorkspaceFromUser } from "../shared/adders.js";
+import { addUserToWorkspace, addWorkspaceToUser } from "../shared/adders.js";
+import { removeGroupFromUser, removeGroupFromUsers, removeUserFromWorkspace, removeWorkspaceFromUser, removeWorkspaceFromUsers } from "../shared/removers.js"
 import generateInviteCode from '../shared/inviteCode.js';
 
 const router = express.Router();
@@ -154,23 +155,33 @@ router.put("/leave", async(req, res) => {
 router.use(checkInstructor);
 
 // Deletes the given workspace
-router.delete("/", async(req, res) => {
+// TODO: Fix to include deleting groups
+router.delete("/delete", async(req, res) => {
     try{
         // Get all workspace users
-        const workspaceUsers = (await Workspace.findById(
+        const workspace = await Workspace.findById(
             req.body.workspaceId
-        ).select('userIds')).userIds;
+        ).select('userIds groupIds');
+        // Get users and groups
+        const groupIds = workspace.groupIds;
         // Create an array with just user ids
-        const userIds = workspaceUsers.map(
+        const userIds = workspace.userIds.map(
             user => user.userId
         );
-        // Pull from the user's workspaceIds
-        await User.updateMany(
-            { _id: { $in: userIds }},
-            { $pull: { workspaceIds: { workspaceId: req.body.workspaceId }}}
+
+        // Remove groups in workspace from user's list of groups
+        const groups = await Group.find({ _id: { $in: groupIds }}).select('userIds');
+        await Promise.all(
+            groups.map(group => removeGroupFromUsers(group.userIds, group._id))
         );
-        // Delete the workspace itself
-        await Workspace.findByIdAndDelete(req.body.workspaceId);
+        // Pull from the user's workspaceIds
+        await removeWorkspaceFromUsers(userIds, workspace._id);
+        // Delete groups and workspace
+        await Promise.all([
+            Group.deleteMany({ _id: { $in: groupIds }}),
+            Workspace.findByIdAndDelete(req.body.workspaceId)
+        ]);
+        
         return res.json({ message: "Workspace deleted successfully" });
     }
     catch(err){
