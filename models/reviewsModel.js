@@ -2,6 +2,11 @@ import mongoose, { ObjectId } from "mongoose";
 
 const reviewsSchema = mongoose.Schema(
     {
+        assignmentId: {
+            type: ObjectId,
+            ref: "ReviewAssignment",
+            required: false // Set this to true later
+        },
         userId: {
             type: ObjectId,
             ref: "User",
@@ -11,6 +16,11 @@ const reviewsSchema = mongoose.Schema(
             type: ObjectId,
             ref: "User",
             required: true
+        },
+        groupId: {
+            type: ObjectId,
+            required: true,
+            ref: "Group"
         },
         ratings: [{
             category: {
@@ -29,11 +39,6 @@ const reviewsSchema = mongoose.Schema(
         createdAt: {
             type: Date,
             default: Date.now
-        },
-        groupId: {
-            type: ObjectId,
-            required: true,
-            ref: "Group"
         }
     }
 );
