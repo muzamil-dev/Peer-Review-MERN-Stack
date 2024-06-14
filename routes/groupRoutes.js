@@ -8,7 +8,7 @@ import {
     checkUserNotInGroup
 } from "../middleware/checks.js";
 import { addUserToGroup, addGroupToUser, addGroupToWorkspace } from "../shared/adders.js";
-import { removeGroupFromUsers } from "../shared/removers.js";
+import { removeGroupFromUsers, removeGroupFromUser, removeUserFromGroup } from "../shared/removers.js";
 
 const router = express.Router();
 
@@ -143,18 +143,10 @@ router.put("/removeUser", checkGroup, checkInstructor, async (req, res) => {
             return res.status(400).json({ message: "One or more required fields was not provided" });
         }
 
-        // Pull the user from the group
-        const group = await Group.findById(groupId);
-        group.userIds.pull(targetId);
-        await group.save();
-
-        // Pull the group from the user's groups
-        const target = await User.findById(targetId);
-        if (target) {
-            target.groupIds.pull(groupId);
-            await target.save();
-        }
-
+        await Promise.all([
+            removeGroupFromUser(targetId, groupId),
+            removeUserFromGroup(targetId, groupId)
+        ]);
         res.json({ message: "User removed from group successfully" });
     } 
     catch (err) {

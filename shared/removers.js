@@ -10,3 +10,21 @@ export async function removeGroupFromUsers(userIds, groupId){
     );
     return result;
 }
+
+// Remove user from group
+export async function removeUserFromGroup(userId, groupId){
+    const result = await Group.updateOne(
+        { _id: groupId },
+        { $pull: { userIds: userId }}
+    );
+    return result;
+}
+
+// Remove group from user's group list
+export async function removeGroupFromUser(userId, groupId){
+    const result = await User.updateOne(
+        { _id: userId },
+        { $pull: { groupIds: groupId }}
+    );
+    return result;
+}
