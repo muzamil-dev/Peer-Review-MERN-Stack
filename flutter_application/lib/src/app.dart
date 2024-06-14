@@ -51,6 +51,12 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("USER DASHBOARD PAGE"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/loginsignup");
+                },
+                child: const Text("Login siignup PAGE"),
+              ),
             ],
           ),
         ));
