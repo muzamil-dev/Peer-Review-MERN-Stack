@@ -124,21 +124,41 @@ router.get("/group/reviews", async (req, res) => {
     }
 });
 
-// Get reviews from a workspace
-router.get("/workspace/:workspaceId", async (req, res) => {
-
+//Delete a review
+router.delete("/:reviewId", async (req, res) => {
     try {
-        const reviews = await Review.find({ workspaceId: req.params.workspaceId }).populate('userId workspaceId groupId');
-        res.status(200).json(reviews);
+        const { reviewId } = req.params;
+
+        const review = await Review.findById(reviewId);
+        if (!review) {
+            return res.status(404).json({ message: "Review not found" });
+        }
+
+        await review.deleteOne({ __id: reviewId });
+        res.status(200).json({ message: "Review deleted successfully" });
+
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: err.message });
-    }
-
-    // Check if workspace exists
-    if (!workspaceId) {
-        return res.status(400).json({ message: "The provided workspace was not found in our database" });
-    }
+    }   
 });
+
+
+// Get reviews from a workspace
+// router.get("/workspace/:workspaceId", async (req, res) => {
+
+//     try {
+//         const reviews = await Review.find({ workspaceId: req.params.workspaceId }).populate('userId workspaceId groupId');
+//         res.status(200).json(reviews);
+//     } catch (err) {
+//         console.error(err.message);
+//         res.status(500).json({ message: err.message });
+//     }
+
+//     // Check if workspace exists
+//     if (!workspaceId) {
+//         return res.status(400).json({ message: "The provided workspace was not found in our database" });
+//     }
+// });
 
 export default router;
