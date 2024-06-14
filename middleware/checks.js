@@ -1,4 +1,5 @@
 import { Group } from "../models/groupModel.js";
+import { ReviewAssignment } from "../models/reviewAssignmentModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
@@ -43,6 +44,25 @@ export async function checkGroup(req, res, next){
     req.body.workspaceId = group.workspaceId;
     next();
 }
+
+// Check that the assignmentId is provided (for creating a review)
+export async function checkAssignment(req, res, next){
+    if (req.params?.assignmentId){
+        if (!req.body)
+            req.body = {};
+        req.body.assignmentId = req.params.assignmentId;
+    }
+    const assignment = await ReviewAssignment.findById(
+        req.body.assignmentId
+    );
+    if (!assignment){
+        return res.status(400).json({
+            message: "The provided assignment was not found in our database" 
+        });
+    }
+    next();
+} 
+
 
 // Checks if the user is in the group
 export async function checkUserNotInGroup(req, res, next){
