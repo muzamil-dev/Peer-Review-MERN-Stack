@@ -12,6 +12,28 @@ import { removeGroupFromUsers } from "../shared/removers.js";
 
 const router = express.Router();
 
+// Join several users in a group (for testing)
+router.put("/bulkjoin", checkGroup, async(req, res) => {
+    try {
+        const groupId = req.body.groupId;
+        const userIds = req.body.userIds;
+
+        const group = await Group.findById(groupId);
+        group.userIds.push(...userIds);
+        await group.save();
+
+        await User.updateMany(
+            { _id: { $in: userIds }},
+            { $push: { groupIds: groupId }}
+        );
+        res.send("Users added");
+    } 
+    catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
 // Get all information about a group
 router.get("/:groupId", checkGroup, async(req, res) => {
     try {
@@ -112,35 +134,34 @@ router.put("/join", checkGroup, checkUserNotInGroup, checkUserInWorkspace, async
 });
 
 // Remove user from group
-// router.put("/:groupId/removeUser", async (req, res) => {
-//     try {
-//         const { groupId } = req.params;
-//         const { userId } = req.body;
+router.put("/removeUser", checkGroup, checkInstructor, async (req, res) => {
+    try {
+        const { groupId, targetId } = req.body;
 
-//         if (!userId) {
-//             return res.status(400).json({ message: "User ID is required" });
-//         }
+        // Check if the targetId was provided
+        if (!targetId){
+            return res.status(400).json({ message: "One or more required fields was not provided" });
+        }
 
-//         const group = await Group.findById(groupId);
-//         if (!group) {
-//             return res.status(404).json({ message: "Group not found" });
-//         }
+        // Pull the user from the group
+        const group = await Group.findById(groupId);
+        group.userIds.pull(targetId);
+        await group.save();
 
-//         group.userIds.pull(userId);
-//         await group.save();
+        // Pull the group from the user's groups
+        const target = await User.findById(targetId);
+        if (target) {
+            target.groupIds.pull(groupId);
+            await target.save();
+        }
 
-//         const user = await User.findById(userId);
-//         if (user) {
-//             user.groupIds.pull(groupId);
-//             await user.save();
-//         }
-
-//         res.status(200).json({ message: "User removed from group successfully" });
-//     } catch (err) {
-//         console.log(err.message);
-//         res.status(500).send({ message: err.message });
-//     }
-// });
+        res.json({ message: "User removed from group successfully" });
+    } 
+    catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
 
 // Update group information
 // router.put("/:groupId", async (req, res) => {
@@ -159,29 +180,6 @@ router.put("/join", checkGroup, checkUserNotInGroup, checkUserInWorkspace, async
 
 //         const updatedGroup = await group.save();
 //         res.status(200).json(updatedGroup);
-//     } catch (err) {
-//         console.log(err.message);
-//         res.status(500).send({ message: err.message });
-//     }
-// });
-
-// Delete a group
-// router.delete("/:groupId", async (req, res) => {
-//     try {
-//         const { groupId } = req.params;
-
-//         const group = await Group.findByIdAndDelete(groupId);
-//         if (!group) {
-//             return res.status(404).json({ message: "Group not found" });
-//         }
-
-//         const userIds = group.userIds;
-//         await User.updateMany(
-//             { _id: { $in: userIds } },
-//             { $pull: { groupIds: groupId } }
-//         );
-
-//         res.status(200).json({ message: "Group deleted successfully" });
 //     } catch (err) {
 //         console.log(err.message);
 //         res.status(500).send({ message: err.message });
