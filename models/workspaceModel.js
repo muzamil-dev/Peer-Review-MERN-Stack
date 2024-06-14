@@ -18,13 +18,6 @@ const workspaceSchema = mongoose.Schema(
                     ref: "User",
                     required: true
                 },
-                // will test this, may be removed later
-                groupId: {
-                    type: String,
-                    ref: "Group",
-                    required: false,
-                    default: null
-                },
                 role: {
                     type: String,
                     required: true
