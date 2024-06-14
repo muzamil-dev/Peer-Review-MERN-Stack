@@ -3,6 +3,7 @@ import 'package:flutter_application/src/app.dart';
 import 'package:flutter_application/src/dashboard/AdminDashboard.dart';
 import 'package:flutter_application/src/dashboard/UserDashboard.dart';
 
+import 'src/login-signup/loginsignup.dart';
 import 'src/login-signup/signup.dart';
 import 'src/login-signup/login.dart';
 
@@ -15,6 +16,7 @@ void main() async {
       MyApp.routeName: (context) => const MyApp(),
       AdminDashboard.routeName: (context) => const AdminDashboard(),
       UserDashboard.routeName: (context) => const UserDashboard(),
+      LoginSignup.routeName: (context) => const LoginSignup(),
     },
   ));
 }
