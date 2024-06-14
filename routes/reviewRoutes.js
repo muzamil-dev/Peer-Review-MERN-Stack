@@ -102,28 +102,6 @@ router.put("/:reviewId", async (req, res) => {
 });
 
 
-// Get all reviews for a group
-router.get("/group/reviews", async (req, res) => {
-    const { groupId } = req.body;
-
-    if (!groupId) {
-        return res.status(400).json({ message: "Group ID is required" });
-    }
-
-    try{
-        const group = await Group.findById(groupId);
-        if (!group) {
-            return res.status(400).json({ message: "Group not found" });
-        }
-
-        const reviews = await Review.find({ groupId });
-        res.status(200).json(reviews);
-    }catch(err){
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
-    }
-});
-
 //Delete a review
 router.delete("/:reviewId", async (req, res) => {
     try {
@@ -141,6 +119,29 @@ router.delete("/:reviewId", async (req, res) => {
         console.error(err.message);
         res.status(500).json({ message: err.message });
     }   
+});
+
+
+// Get all reviews for a specific groupId
+router.get("/group/:groupId/reviews", async (req, res) => {
+    const { groupId } = req.params;
+
+    if (!groupId) {
+        return res.status(400).json({ message: "Group ID is required" });
+    }
+
+    try {
+        const reviews = await Review.find({ groupId });
+        
+        if (!reviews) {
+            return res.status(404).json({ message: "No reviews found for this group" });
+        }
+
+        res.status(200).json(reviews);
+    } catch (err) {
+        console.error("Error occurred:", err.message); // Log any error that occurs
+        res.status(500).json({ message: err.message });
+    }
 });
 
 
