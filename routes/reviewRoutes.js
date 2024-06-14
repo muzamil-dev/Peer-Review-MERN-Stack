@@ -74,6 +74,34 @@ router.post("/target/reviews", async (req, res) => {
     }
 });
 
+//Edit a review.
+router.put("/:reviewId", async (req, res) => {
+    try {
+        const { reviewId } = req.params;
+        const { ratings, text } = req.body;
+
+        const review = await Review.findById(reviewId)
+        if (!review) {
+            return res.status(404).json({ message: "Review not found" });
+        }
+
+        if (ratings) {
+            review.ratings = ratings;
+        }
+
+        if (text) {
+            review.text = text;
+        }
+
+        const updatedReview = await review.save();
+        res.status(200).json(updatedReview);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
 // Get all reviews for a group
 router.get("/group/reviews", async (req, res) => {
     const { groupId } = req.body;
