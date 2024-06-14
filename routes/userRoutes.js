@@ -153,7 +153,7 @@ router.post("/requestPasswordReset", async (req, res) => {
 
         await user.save();
 
-        const resetURL = `http://localhost:5000/resetPassowrd?token=${resetToken}`;
+        const resetURL = `http://localhost:5000/resetPassword?token=${resetToken}`;
         const message = `Forgot your password? Click here to reset it: ${resetURL}`;
         await sendEmail(user.email, 'Password Reset', message);
 

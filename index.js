@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js";
 import groupRoutes from "./routes/groupRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import reviewAssignmentRoutes from "./routes/reviewAssignmentRoutes.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use('/users', userRoutes);
 app.use('/workspaces', workspaceRoutes);
 app.use('/groups', groupRoutes);
 app.use('/reviews', reviewRoutes);
+app.use('/assignments', reviewAssignmentRoutes);
 
 mongoose.connect(mongoDBURL,{
 }).then(() => {
