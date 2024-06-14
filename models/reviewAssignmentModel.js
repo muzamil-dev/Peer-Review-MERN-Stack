@@ -7,9 +7,9 @@ const reviewAssignmentSchema = mongoose.Schema(
             ref: "Workspace",
             required: true
         },
-        questions: {
-            type: [String],
-            required: true
+        description: {
+            type: String,
+            required: false
         },
         startDate: {
             type: Date,
@@ -19,6 +19,11 @@ const reviewAssignmentSchema = mongoose.Schema(
             type: Date,
             required: true
         },
+        questions: {
+            type: [String],
+            required: true
+        },
+        /*
         assignedReviews: [{
             _id: false,
             userId: {
@@ -41,6 +46,10 @@ const reviewAssignmentSchema = mongoose.Schema(
                 }
             }]
         }]
+        */
+    },
+    {
+        timestamps: true
     }
 );
 
