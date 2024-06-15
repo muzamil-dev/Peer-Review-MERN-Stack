@@ -3,17 +3,14 @@ import { Group } from "../models/groupModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
-import { 
-    checkWorkspace, checkUser, checkGroup, checkInstructor, checkUserInWorkspace,
-    checkUserNotInGroup
-} from "../middleware/checks.js";
-import { addUserToGroup, addGroupToUser } from "../shared/adders.js";
-import { removeGroupFromUsers, removeGroupFromUser, removeUserFromGroup } from "../shared/removers.js";
+import * as Checks from "../middleware/checks.js";
+import * as Adders from "../shared/adders.js";
+import * as Removers from "../shared/removers.js";
 
 const router = express.Router();
 
 // Join several users in a group (for testing)
-router.put("/bulkjoin", checkGroup, async(req, res) => {
+router.put("/bulkjoin", Checks.checkGroup, async(req, res) => {
     try {
         const groupId = req.body.groupId;
         const userIds = req.body.userIds;
@@ -35,7 +32,7 @@ router.put("/bulkjoin", checkGroup, async(req, res) => {
 });
 
 // Get all information about a group
-router.get("/:groupId", checkGroup, async(req, res) => {
+router.get("/:groupId", Checks.checkGroup, async(req, res) => {
     try {
         //const { groupId } = req.params;
         const groupId = req.body.groupId;
@@ -50,7 +47,7 @@ router.get("/:groupId", checkGroup, async(req, res) => {
 
 // Get all users in a group
 // Formats as an array with _id, firstName, middleName, lastName, email
-router.get("/:groupId/users", checkGroup, async (req, res) => {
+router.get("/:groupId/users", Checks.checkGroup, async (req, res) => {
     try {
         // const { groupId } = req.params;
         const groupId = req.body.groupId;
@@ -67,10 +64,10 @@ router.get("/:groupId/users", checkGroup, async (req, res) => {
 });
 
 // Check that a user is provided in body
-router.use(checkUser);
+router.use(Checks.checkUser);
 
 // Create a group in a workspace
-router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
+router.post("/create", Checks.checkWorkspace, Checks.checkInstructor, async(req, res) => {
     try{
         const body = req.body;
         // Check that a name for the group is given
@@ -83,7 +80,7 @@ router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
             name: body.name, 
             workspaceId: body.workspaceId 
         });
-        // Add the group to the workspace's list of groups
+
         return res.status(201).json(group);
     }
     catch(err){
@@ -93,7 +90,7 @@ router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
 });
 
 // Creates a list of groups
-router.post("/createMany", checkWorkspace, checkInstructor, async(req, res) => {
+router.post("/createMany", Checks.checkWorkspace, Checks.checkInstructor, async(req, res) => {
     try{
         const body = req.body;
         // Check that a number of groups is passed in
@@ -119,7 +116,7 @@ router.post("/createMany", checkWorkspace, checkInstructor, async(req, res) => {
 });
 
 // Deletes a group
-router.delete("/delete", checkGroup, checkInstructor, async(req, res) => {
+router.delete("/delete", Checks.checkGroup, Checks.checkInstructor, async(req, res) => {
     try{
         const groupId = req.body.groupId;
         const workspaceId = req.body.workspaceId;
@@ -127,7 +124,7 @@ router.delete("/delete", checkGroup, checkInstructor, async(req, res) => {
         const groupMembers = (await Group.findById(groupId).select('userIds')).userIds;
         // Remove group from users
         await Promise.all([
-            removeGroupFromUsers(groupMembers, groupId),
+            Removers.removeGroupFromUsers(groupMembers, groupId),
             Group.findByIdAndDelete(groupId)
         ]);
         res.json({ message: "Group deleted successfully" });
@@ -139,7 +136,7 @@ router.delete("/delete", checkGroup, checkInstructor, async(req, res) => {
 });
 
 // Route to add users to a group
-router.put("/join", checkGroup, checkUserNotInGroup, checkUserInWorkspace, async(req, res) => {
+router.put("/join", Checks.checkGroup, Checks.checkUserNotInGroup, Checks.checkUserInWorkspace, async(req, res) => {
     try{
         // Set variables
         const body = req.body;
@@ -147,8 +144,8 @@ router.put("/join", checkGroup, checkUserNotInGroup, checkUserInWorkspace, async
         const userId = body.userId;
         // Link the user and the group
         await Promise.all([
-            addUserToGroup(userId, groupId),
-            addGroupToUser(userId, groupId)
+            Adders.addUserToGroup(userId, groupId),
+            Adders.addGroupToUser(userId, groupId)
         ]);
         return res.json({ message: "Joined group successfully" });
     }
@@ -159,7 +156,7 @@ router.put("/join", checkGroup, checkUserNotInGroup, checkUserInWorkspace, async
 });
 
 // Remove user from group
-router.put("/removeUser", checkGroup, checkInstructor, async (req, res) => {
+router.put("/removeUser", Checks.checkGroup, Checks.checkInstructor, async (req, res) => {
     try {
         const { groupId, targetId } = req.body;
 
@@ -169,8 +166,8 @@ router.put("/removeUser", checkGroup, checkInstructor, async (req, res) => {
         }
 
         await Promise.all([
-            removeGroupFromUser(targetId, groupId),
-            removeUserFromGroup(targetId, groupId)
+            Removers.removeGroupFromUser(targetId, groupId),
+            Removers.removeUserFromGroup(targetId, groupId)
         ]);
         res.json({ message: "User removed from group successfully" });
     } 
