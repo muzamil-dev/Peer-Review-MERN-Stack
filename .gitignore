@@ -1,2 +1,4 @@
-web_application/node_modules/**
-.env
+node_modules
+.gitignore
+config.js
+mail.env

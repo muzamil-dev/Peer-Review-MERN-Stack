@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/MainAppBar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'login-signup/loginsignup.dart';
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'sample_feature/sample_item_details_view.dart';
-import 'sample_feature/sample_item_list_view.dart';
-import 'settings/settings_controller.dart';
-import 'settings/settings_view.dart';
+// import 'sample_feature/sample_item_details_view.dart';
+// import 'sample_feature/sample_item_list_view.dart';
+// import 'settings/settings_controller.dart';
+// import 'settings/settings_view.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatelessWidget {
@@ -18,11 +19,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Glue the SettingsController to the MaterialApp.
-    //
-    // The ListenableBuilder Widget listens to the SettingsController for changes.
-    // Whenever the user updates their settings, the MaterialApp is rebuilt.
-    return Scaffold(
+    return MaterialApp(
+      title: 'PEER APP',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Scaffold(
         appBar: const MainAppBar(title: "DEBUG PAGE VIEWER"),
         body: Center(
           child: Column(
@@ -59,6 +61,19 @@ class MyApp extends StatelessWidget {
               ),
             ],
           ),
-        ));
+        ),
+      ),
+      routes: {
+        //'/login': (context) => LoginScreen(), // Add the LoginScreen route
+        //'/signup': (context) => SignUpScreen(), // Add the SignUpScreen route
+        //'/userDashboard': (context) => UserDashboardScreen(), // Add the UserDashboardScreen route
+        // '/adminDashboard': (context) => AdminDashboardScreen(), // Uncomment and add AdminDashboardScreen route if necessary
+        '/loginsignup': (context) => LoginSignup(), // Add the LoginSignupScreen route
+      },
+    );
+    // Glue the SettingsController to the MaterialApp.
+    //
+    // The ListenableBuilder Widget listens to the SettingsController for changes.
+    // Whenever the user updates their settings, the MaterialApp is rebuilt.
   }
 }
