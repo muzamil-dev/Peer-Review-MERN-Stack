@@ -13,7 +13,8 @@ const reviewAssignmentSchema = mongoose.Schema(
         },
         startDate: {
             type: Date,
-            required: true
+            required: true,
+            default: Date.now()
         },
         dueDate: {
             type: Date,

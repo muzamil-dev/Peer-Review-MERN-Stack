@@ -23,23 +23,16 @@ const reviewsSchema = mongoose.Schema(
             ref: "Group"
         },
         ratings: [{
-            category: {
-                type: String,
-                required: true
-            },
-            rating: {
-                type: Number,
-                required: true
-            }
+            type: Number,
+            required: true
         }],
         text: {
             type: String,
-            required: true
+            required: false
         },
-        createdAt: {
-            type: Date,
-            default: Date.now
-        }
+    },
+    {
+        timestamps: true
     }
 );
 

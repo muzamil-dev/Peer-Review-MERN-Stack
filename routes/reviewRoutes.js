@@ -2,33 +2,55 @@ import express from "express";
 import { Review } from "../models/reviewsModel.js";
 import { User } from "../models/userModel.js";
 import { Group } from "../models/groupModel.js";
+import { ReviewAssignment } from "../models/reviewAssignmentModel.js";
+
+import * as Checks from "../middleware/checks.js";
+import * as Getters from "../shared/getters.js";
 
 const router = express.Router();
 
 // Create a new review
-router.post("/", async (req, res) => {
+router.post("/submit", Checks.checkAssignment, Checks.checkReviewNotCreated, async (req, res) => {
     try {
         // Get the required fields from the request body
-        const { userId, targetId, ratings, text, groupId } = req.body;
+        const { assignmentId, userId, targetId, ratings, text } = req.body;
 
         // Check that the user, workspace, and review fields are present
-        if (!userId || !targetId || !ratings || !text || !groupId) {
+        if (!userId || !targetId || !ratings) {
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
+        // Get the assignment being referred to
+        const assignment = await ReviewAssignment.findById(
+            assignmentId
+        );
+        
+        // Check that there is a rating for every question
+        if (assignment.questions.length !== ratings.length){
+            return res.status(400).json({ message: "There must be one rating for each question" });
+        }
+
+        // Get the group id of the reviewer/target
+        const groupId = (await Getters.getGroupInWorkspace(
+            targetId, assignment.workspaceId
+        ))._id;
+
         // Create a new review
-        const newReview = new Review({ userId, targetId, ratings, text, groupId });
+        const newReview = new Review({ assignmentId, userId, targetId, ratings, text, groupId });
         const savedReview = await newReview.save();
 
         // Return the created review
-        res.status(201).json(savedReview);
-
+        res.status(201).json({
+            message: "Review submitted successfully",
+            reviewId: savedReview._id
+        });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: err.message });
     }
 });
 
+// FIX ROUTES BELOW
 
 // Get reviews for a user
 router.post("/user/reviews", async (req, res) => {

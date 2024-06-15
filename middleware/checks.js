@@ -1,5 +1,6 @@
 import { Group } from "../models/groupModel.js";
 import { ReviewAssignment } from "../models/reviewAssignmentModel.js";
+import { Review } from "../models/reviewsModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
@@ -130,6 +131,20 @@ export async function checkInstructor(req, res, next){
     }
     else if (found.role !== "Instructor"){
         return res.status(403).json({ message: "The provided user is not authorized to make this request" });
+    }
+    next();
+}
+
+// Check that a review doesn't already exist for a specified
+// assignment/user/target
+export async function checkReviewNotCreated(req, res, next){
+    const review = await Review.findOne({
+        assignmentId: req.body.assignmentId,
+        userId: req.body.userId,
+        targetId: req.body.targetId
+    });
+    if (review){
+        return res.status(400).json({ message: "A review has already been submitted for this person" });
     }
     next();
 }

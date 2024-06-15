@@ -81,13 +81,13 @@ router.get("/:assignmentId/reviews/:userId", async(req, res) => {
     }
 });
 
-// Excluding assignedReviews for now, will likely be unnecessary
+// Create a new review assignment
 router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
     try{
         const body = req.body;
         const workspaceId = body.workspaceId
         // Check for required fields
-        if (!body.startDate || !body.dueDate || !body.questions || body.questions.length < 1){
+        if (!body.dueDate || !body.questions || body.questions.length < 1){
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
         // Create assigned reviews array (to populate)
@@ -97,39 +97,20 @@ router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
             { workspaceId }
         ).select('userIds');
 
-        /*
-        // Populate assignedReviews
-        for (let group of groups){
-            const userIds = group.userIds;
-            const groupId = group._id;
-            for (let j = 0; j < userIds.length; j++){
-                const userReviews = { userId: userIds[j], reviews: [] };
-                for (let k = 0; k < userIds.length; k++){
-                    if (j !== k){
-                        userReviews.reviews.push({
-                            targetId: userIds[k],
-                            reviewId: null
-                        });
-                    }
-                }
-                assignedReviews.push(userReviews);
-            }
-        }
-        */
-
-        // Get other fields
-        const startDate = new Date(body.startDate);
+        // Add required fields to object
         const dueDate = new Date(body.dueDate);
         const questions = body.questions;
-        const description = body.description;
+
+        const assignmentObj = { workspaceId, dueDate, questions};
+
+        // Look for optional fields
+        if (body.startDate) assignmentObj.startDate = new Date(body.startDate);
+        if (body.description) assignmentObj.description = body.description;
 
         // Get the returned object
         const assignment = (await ReviewAssignment.create(
-            { workspaceId, description, startDate, dueDate, questions} //, assignedReviews }
+            assignmentObj
         )).toObject();
-
-        // assignedReviews takes up a lot of space, so its not included
-        // delete assignment.assignedReviews;
 
         return res.json(assignment);
     }
