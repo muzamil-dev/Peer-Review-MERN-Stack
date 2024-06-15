@@ -5,15 +5,17 @@ import { Group } from "../models/groupModel.js";
 import { Workspace } from "../models/workspaceModel.js"
 import { ReviewAssignment } from "../models/reviewAssignmentModel.js";
 
-import { checkWorkspace, checkInstructor } from "../middleware/checks.js";
+import * as Checkers from "../shared/checkers.js";
 
 const router = express.Router();
 
 // Get the reviews that a user has done on a specific assignment
 // TODO: Modify to use either a targetId (instructor checks user's review) or no id (user checks their own reviews)
-router.get("/:assignmentId/reviews/:userId", async(req, res) => {
+router.get(["/:assignmentId/reviews", "/:assignmentId/reviews/:userId"], async(req, res) => {
     try{
-        const { assignmentId, userId } = req.params;
+        const { assignmentId } = req.params;
+        const userId = req.params.userId || req.body.userId
+
         // Get info about assignment
         const assignment = await ReviewAssignment.findById(
             assignmentId
@@ -82,22 +84,29 @@ router.get("/:assignmentId/reviews/:userId", async(req, res) => {
 });
 
 // Create a new review assignment
-router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
+// Required: workspaceId, dueDate, questions
+// Optional: startDate, description
+router.post("/create", async(req, res) => {
     try{
         const body = req.body;
+        const userId = body.userId
         const workspaceId = body.workspaceId
         // Check for required fields
         if (!body.dueDate || !body.questions || body.questions.length < 1){
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
-        // Create assigned reviews array (to populate)
-        const assignedReviews = [];
-        // Get all groups in the workspace
-        const groups = await Group.find(
-            { workspaceId }
-        ).select('userIds');
 
-        // Add required fields to object
+        // Check that the workspace exists
+        const workspaceExists = Checkers.checkWorkspaceExists(workspaceId);
+        if (!workspaceExists)
+            return res.status(400).json({ message: "The provided workspace was not found in our database" });
+
+        // Check that the user requesting is an instructor in the workspace
+        const verifyInstructor = Checkers.checkInstructor(userId, workspaceId);
+        if (!verifyInstructor)
+            return res.status(403).json({ message: "The provided user is not authorized to make this request" });
+
+        // Add required fields to a new object
         const dueDate = new Date(body.dueDate);
         const questions = body.questions;
 
@@ -107,12 +116,38 @@ router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
         if (body.startDate) assignmentObj.startDate = new Date(body.startDate);
         if (body.description) assignmentObj.description = body.description;
 
-        // Get the returned object
-        const assignment = (await ReviewAssignment.create(
+        // Create the assignment
+        const assignment = await ReviewAssignment.create(
             assignmentObj
-        )).toObject();
+        );
+        // Return a success response
+        return res.status(201).json({
+            message: "Assignment created successfully",
+            assignmentId: assignment._id
+        });
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });
+    }
+});
 
-        return res.json(assignment);
+// Delete an assignment
+router.delete("/delete/:assignmentId", async(req, res) => {
+    try{
+        // Get assignmentId
+        const { assignmentId } = req.params;
+        // Check that the user making the request is an instructor
+        const assignment = await ReviewAssignment.findById(assignmentId).select('workspaceId');
+        const verifyInstructor = await Checkers.checkInstructor(req.body.userId, assignment.workspaceId);
+        if (!verifyInstructor)
+            return res.status(403).json({ message: "The provided user is not authorized to make this request" });
+        // Delete the assignment
+        await Promise.all([
+            ReviewAssignment.findByIdAndDelete(assignmentId), // Delete the assignment itself
+            Review.deleteMany({ assignmentId }) // Delete all reviews associated with the assignment
+        ]);
+        return res.json({ message: "Assignment deleted successfully" });
     }
     catch(err){
         console.log(err.message);

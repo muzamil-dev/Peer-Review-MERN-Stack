@@ -3,7 +3,7 @@ import { User } from '../models/userModel.js';
 import { Workspace } from '../models/workspaceModel.js';
 import { Group } from '../models/groupModel.js';
 
-import { checkWorkspace, checkUser, checkInstructor } from "../middleware/checks.js";
+import * as Checks from "../middleware/checks.js";
 import { addUserToWorkspace, addWorkspaceToUser } from "../shared/adders.js";
 import { removeGroupFromUsers, removeUserFromWorkspace, removeWorkspaceFromUser, removeWorkspaceFromUsers } from "../shared/removers.js"
 import generateInviteCode from '../shared/inviteCode.js';
@@ -35,7 +35,7 @@ router.post("/createMany", async(req, res) => {
 
 // Check that the user is provided for any workspace route
 // Will be replaced when JWT is added
-router.use(checkUser);
+router.use(Checks.checkUser);
 
 // Creates a new workspace
 router.post("/", async(req, res) => {
@@ -68,9 +68,10 @@ router.post("/", async(req, res) => {
 
 // Middleware
 // Routes that require an existing workspace to be modified should go here
-router.use(checkWorkspace);
+router.use(Checks.checkWorkspace);
 
 // Join a workspace
+// Required: workspaceId, inviteCode
 router.put("/join", async(req, res) => {
     try{
         const body = req.body;
@@ -78,18 +79,17 @@ router.put("/join", async(req, res) => {
         const userId = body.userId;
         const workspaceId = body.workspaceId;
         const inviteCode = body.inviteCode;
-
-        if (!body.inviteCode){
+        // Check that the invite code was given
+        if (!body.workspaceId || !body.inviteCode){
             return res.status(400).json({ message: "One or more required fields was not present" });
         }
         // Get relevant info from the user and workspace
         const userInfo = await User.findById(userId).select('email');
         const workspaceInfo = await Workspace.findById(workspaceId).select('inviteCode allowedDomains');
-
         // Check if user's email contains an allowed domain
         if (workspaceInfo.allowedDomains !== null 
             && workspaceInfo.allowedDomains.length > 0){
-            // Check the list of domains if an allowedDomains list is provided
+            // Check the list of domains if an allowedDomains list exists
             const userDomain = userInfo.email.split('@')[1];
             const domainCheck = (domain, userDomain) => {
                 const domainPattern = new RegExp(domain);
@@ -116,13 +116,11 @@ router.put("/join", async(req, res) => {
         }
 
         // Add workspace membership relationship
-        await Promise.all(
-            [
+        await Promise.all([
                 addUserToWorkspace(userId, workspaceId, "Student"),
                 addWorkspaceToUser(userId, workspaceId, "Student")
-            ]
-        );
-
+        ]);
+        // Return success message
         res.json({ message: "Workspace joined successfully!" });
     }
     catch(err){
@@ -152,7 +150,7 @@ router.put("/leave", async(req, res) => {
 
 // Checks that the user is the instructor of the given workspace
 // All routes below here are for use by workspace instructors
-router.use(checkInstructor);
+router.use(Checks.checkInstructor);
 
 // Deletes the given workspace
 router.delete("/delete", async(req, res) => {
