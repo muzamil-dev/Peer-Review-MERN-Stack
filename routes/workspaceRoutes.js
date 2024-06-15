@@ -160,9 +160,7 @@ router.delete("/delete", async(req, res) => {
         // Get all workspace users
         const workspace = await Workspace.findById(
             req.body.workspaceId
-        ).select('userIds groupIds');
-        // Get users and groups
-        const groupIds = workspace.groupIds;
+        ).select('userIds');
         // Create an array with just user ids
         const userIds = workspace.userIds.map(
             user => user.userId

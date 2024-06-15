@@ -7,8 +7,8 @@ import {
     checkWorkspace, checkUser, checkGroup, checkInstructor, checkUserInWorkspace,
     checkUserNotInGroup
 } from "../middleware/checks.js";
-import { addUserToGroup, addGroupToUser, addGroupToWorkspace, addGroupsToWorkspace } from "../shared/adders.js";
-import { removeGroupFromUsers, removeGroupFromUser, removeUserFromGroup, removeGroupFromWorkspace } from "../shared/removers.js";
+import { addUserToGroup, addGroupToUser } from "../shared/adders.js";
+import { removeGroupFromUsers, removeGroupFromUser, removeUserFromGroup } from "../shared/removers.js";
 
 const router = express.Router();
 
@@ -75,9 +75,8 @@ router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
         const body = req.body;
         // Check that a name for the group is given
         if (!body.name){
-            const numGroups = (await Workspace.findById(body.workspaceId)
-                            .select('groupIds').exec()).groupIds.length + 1;
-            body.name = `Group ${numGroups}`;
+            const numGroups = await Group.countDocuments({ workspaceId: body.workspaceId });
+            body.name = `Group ${numGroups + 1}`;
         }
         // Create the group
         const group = await Group.create({ 
