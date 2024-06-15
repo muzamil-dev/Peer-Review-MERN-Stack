@@ -85,6 +85,14 @@ class _LoginSignupState extends State<LoginSignup> {
               ),
             ],
           ),
+          SizedBox(height: 20),  // Add space between tabs and title
+        Text(
+          _selectedPage == 0 ? 'Welcome Back!' : 'Welcome!',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
           Expanded(
             child: PageView(
               controller: _pageController,
