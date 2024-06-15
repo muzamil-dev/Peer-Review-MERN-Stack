@@ -9,6 +9,7 @@ import 'src/login-signup/login.dart';
 
 void main() async {
   runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
     initialRoute: MyApp.routeName,
     routes: {
       Login.routeName: (context) => const Login(),

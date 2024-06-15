@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushNamed(context, "/loginsignup");
                 },
-                child: const Text("Login siignup PAGE"),
+                child: const Text("Login Signup PAGE"),
               ),
             ],
           ),
