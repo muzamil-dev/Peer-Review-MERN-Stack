@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/MainAppBar.dart';
+import 'dart:ui'; // for BackdropFilter
 
 class LoginSignup extends StatefulWidget {
   const LoginSignup({super.key});
@@ -139,6 +140,80 @@ class LoginScreen extends StatelessWidget {
             },
             child: Text('Login'),
           ),
+          SizedBox(height: 10),
+          TextButton(
+  onPressed: () {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+          child: Stack(
+            children: [
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    //color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(20),
+                margin: EdgeInsets.symmetric(horizontal: 40, vertical: 180),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Reset Password',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Enter your email',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                        fillColor: Colors.grey[200],
+                        filled: true,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle password reset logic
+                      },
+                      child: Text('Submit'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          ),
+        );
+      },
+    );
+  },
+  child: Text(
+    'Forgot Password?',
+    style: TextStyle(color: Colors.purple),
+  ),
+),
         ],
       ),
     );
