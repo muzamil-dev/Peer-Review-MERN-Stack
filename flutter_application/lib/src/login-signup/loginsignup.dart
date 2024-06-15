@@ -112,13 +112,26 @@ class LoginScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextField(
-            decoration: InputDecoration(labelText: 'Email'),
+          Container(margin: const EdgeInsets.only(bottom: 10.0), child: TextField(
+            decoration: InputDecoration(labelText: 'Email',
+            border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none),
+                fillColor: Colors.purple.withOpacity(0.1),
+                filled: true,
+                prefixIcon: const Icon(Icons.email),),
+            ),
           ),
-          TextField(
-            decoration: InputDecoration(labelText: 'Password'),
+          Container(margin: const EdgeInsets.only(bottom: 10.0), child: TextField(
+            decoration: InputDecoration(labelText: 'Password',
+            border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none),
+                fillColor: Colors.purple.withOpacity(0.1),
+                filled: true,
+                prefixIcon: const Icon(Icons.password),),
             obscureText: true,
-          ),
+          ),),
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
@@ -140,16 +153,89 @@ class SignUpScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextField(
-            decoration: InputDecoration(labelText: 'Email'),
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              decoration: InputDecoration(
+                labelText: 'First Name',
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none),
+                fillColor: Colors.purple.withOpacity(0.1),
+                filled: true,
+              ),
+            ),
           ),
-          TextField(
-            decoration: InputDecoration(labelText: 'Password'),
-            obscureText: true,
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              decoration: InputDecoration(
+                labelText: 'Middle Name',
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none),
+                fillColor: Colors.purple.withOpacity(0.1),
+                filled: true,
+              ),
+            ),
           ),
-          TextField(
-            decoration: InputDecoration(labelText: 'Confirm Password'),
-            obscureText: true,
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              decoration: InputDecoration(
+                labelText: 'Last Name',
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none),
+                fillColor: Colors.purple.withOpacity(0.1),
+                filled: true,
+              ),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: "Email",
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none),
+                fillColor: Colors.purple.withOpacity(0.1),
+                filled: true,
+                prefixIcon: const Icon(Icons.email),
+              ),
+              maxLines: 1,
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none),
+                fillColor: Colors.purple.withOpacity(0.1),
+                filled: true,
+                prefixIcon: const Icon(Icons.password),
+              ),
+              obscureText: true,
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              decoration: InputDecoration(
+                labelText: 'Confirm Password',
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none),
+                fillColor: Colors.purple.withOpacity(0.1),
+                filled: true,
+                prefixIcon: const Icon(Icons.password),
+              ),
+              obscureText: true,
+            ),
           ),
           SizedBox(height: 20),
           ElevatedButton(
