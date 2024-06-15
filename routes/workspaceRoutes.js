@@ -169,7 +169,7 @@ router.delete("/delete", async(req, res) => {
         );
 
         // Remove groups in workspace from user's list of groups
-        const groups = await Group.find({ _id: { $in: groupIds }}).select('userIds');
+        const groups = await Group.find({ workspaceId: req.body.workspaceId }).select('userIds');
         await Promise.all(
             groups.map(group => removeGroupFromUsers(group.userIds, group._id))
         );
@@ -177,7 +177,7 @@ router.delete("/delete", async(req, res) => {
         await removeWorkspaceFromUsers(userIds, workspace._id);
         // Delete groups and workspace
         await Promise.all([
-            Group.deleteMany({ _id: { $in: groupIds }}),
+            Group.deleteMany({ workspaceId: req.body.workspaceId }),
             Workspace.findByIdAndDelete(req.body.workspaceId)
         ]);
         

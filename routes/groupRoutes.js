@@ -85,7 +85,6 @@ router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
             workspaceId: body.workspaceId 
         });
         // Add the group to the workspace's list of groups
-        await addGroupToWorkspace(group._id, body.workspaceId);
         return res.status(201).json(group);
     }
     catch(err){
@@ -130,7 +129,6 @@ router.delete("/delete", checkGroup, checkInstructor, async(req, res) => {
         // Remove group from users
         await Promise.all([
             removeGroupFromUsers(groupMembers, groupId),
-            removeGroupFromWorkspace(workspaceId, groupId),
             Group.findByIdAndDelete(groupId)
         ]);
         res.json({ message: "Group deleted successfully" });

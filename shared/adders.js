@@ -38,20 +38,22 @@ export async function addGroupToUser(userId, groupId){
     return result;
 }
 
-// Update workspace with group
-export async function addGroupToWorkspace(groupId, workspaceId){
-    const result = await Workspace.updateOne(
-        { _id: workspaceId },
-        { $push: { groupIds: groupId }}
-    );
-    return result;
-}
+// These functions aren't useful and will likely be removed
 
-// Update workspace with groups
-export async function addGroupsToWorkspace(groupIds, workspaceId){
-    const result = await Workspace.updateOne(
-        { _id: workspaceId },
-        { $push: { groupIds: { $each: groupIds }}}
-    );
-    return result;
-}
+// // Update workspace with group
+// export async function addGroupToWorkspace(groupId, workspaceId){
+//     const result = await Workspace.updateOne(
+//         { _id: workspaceId },
+//         { $push: { groupIds: groupId }}
+//     );
+//     return result;
+// }
+
+// // Update workspace with groups
+// export async function addGroupsToWorkspace(groupIds, workspaceId){
+//     const result = await Workspace.updateOne(
+//         { _id: workspaceId },
+//         { $push: { groupIds: { $each: groupIds }}}
+//     );
+//     return result;
+// }

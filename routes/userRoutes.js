@@ -26,6 +26,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create a new user
+// Password hashing turned off for now
 router.post("/", async (req, res) => {
     try {
         const { firstName, middleName, lastName, email, password } = req.body;
@@ -47,14 +48,15 @@ router.post("/", async (req, res) => {
         }
 
         //Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // const hashedPassword = await bcrypt.hash(password, 10);
 
         //create the new user
         const newUser = new User({
             firstName,
             lastName,
             email,
-            password: hashedPassword
+            password
+            // password: hashedPassword
         });
 
         if (middleName) newUser.middleName = middleName;

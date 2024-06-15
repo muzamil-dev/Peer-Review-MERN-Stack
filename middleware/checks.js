@@ -102,6 +102,7 @@ export async function checkUserInWorkspace(req, res, next){
 }
 
 // Checks if the target user is in the workspace. Assumes existence of workspace is checked
+// Same as checkUserInWorkspace, but uses a targetId instead of a userId
 export async function checkTargetInWorkspace(req, res, next){
     // Search for target in workspace
     const workspaceUsers = (await Workspace.findById(

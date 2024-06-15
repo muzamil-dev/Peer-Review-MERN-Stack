@@ -27,16 +27,6 @@ const workspaceSchema = mongoose.Schema(
             default: [],
             required: true,
         },
-        // groupIds will potentially be removed
-        groupIds: {
-            type: [{
-                type: ObjectId,
-                ref: "Group",
-                required: true
-            }],
-            default: [],
-            required: true
-        },
         allowedDomains: {
             type: [String],
             default: null,
