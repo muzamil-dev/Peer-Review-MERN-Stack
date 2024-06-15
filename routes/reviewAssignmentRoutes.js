@@ -10,6 +10,7 @@ import { checkWorkspace, checkInstructor } from "../middleware/checks.js";
 const router = express.Router();
 
 // Get the reviews that a user has done on a specific assignment
+// TODO: Modify to use either a targetId (instructor checks user's review) or no id (user checks their own reviews)
 router.get("/:assignmentId/reviews/:userId", async(req, res) => {
     try{
         const { assignmentId, userId } = req.params;

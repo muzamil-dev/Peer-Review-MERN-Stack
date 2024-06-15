@@ -65,20 +65,22 @@ export async function checkAssignment(req, res, next){
 
 
 // Checks if the user is in the group (assumes workspace is provided)
-// TODO: Change the function to check that the user is not in any group
 export async function checkUserNotInGroup(req, res, next){
-    // Get all groups from workspace
-    const allGroups = await Group.find(
-        { workspaceId: req.body.workspaceId }
-    ).select('userIds');
-    // Get all users into one array
-    const allUsers = [];
-    for (let group of allGroups){
-        allUsers.push(...group.userIds);
-    }
+    // Get all groupIds that user is in
+    const userGroups = await User.findById(
+        req.body.userId
+    ).select('groupIds');
+    // Get all groups
+    const groups = await Group.find(
+        { _id: { $in: userGroups.groupIds }}
+    ).select('workspaceId');
+    // Move workspaceIds to an array
+    const workspaceIds = groups.map(
+        group => group.workspaceId
+    );
     // Find the user in all of the users in groups
-    const found = allUsers.find(
-        user => user.equals(req.body.userId)
+    const found = workspaceIds.find(
+        id => id.equals(req.body.workspaceId)
     );
     if (found){
         return res.status(400).json({ message: "User is already a member of a group in this workspace" });

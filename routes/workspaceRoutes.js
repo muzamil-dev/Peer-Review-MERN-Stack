@@ -5,7 +5,7 @@ import { Group } from '../models/groupModel.js';
 
 import { checkWorkspace, checkUser, checkInstructor } from "../middleware/checks.js";
 import { addUserToWorkspace, addWorkspaceToUser } from "../shared/adders.js";
-import { removeGroupFromUser, removeGroupFromUsers, removeUserFromWorkspace, removeWorkspaceFromUser, removeWorkspaceFromUsers } from "../shared/removers.js"
+import { removeGroupFromUsers, removeUserFromWorkspace, removeWorkspaceFromUser, removeWorkspaceFromUsers } from "../shared/removers.js"
 import generateInviteCode from '../shared/inviteCode.js';
 
 const router = express.Router();
