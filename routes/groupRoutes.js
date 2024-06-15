@@ -7,7 +7,7 @@ import {
     checkWorkspace, checkUser, checkGroup, checkInstructor, checkUserInWorkspace,
     checkUserNotInGroup
 } from "../middleware/checks.js";
-import { addUserToGroup, addGroupToUser, addGroupToWorkspace } from "../shared/adders.js";
+import { addUserToGroup, addGroupToUser, addGroupToWorkspace, addGroupsToWorkspace } from "../shared/adders.js";
 import { removeGroupFromUsers, removeGroupFromUser, removeUserFromGroup, removeGroupFromWorkspace } from "../shared/removers.js";
 
 const router = express.Router();
@@ -49,7 +49,7 @@ router.get("/:groupId", checkGroup, async(req, res) => {
 });
 
 // Get all users in a group
-// Formats as an array with _id, firstName, lastName, email
+// Formats as an array with _id, firstName, middleName, lastName, email
 router.get("/:groupId/users", checkGroup, async (req, res) => {
     try {
         // const { groupId } = req.params;
@@ -87,6 +87,32 @@ router.post("/create", checkWorkspace, checkInstructor, async(req, res) => {
         // Add the group to the workspace's list of groups
         await addGroupToWorkspace(group._id, body.workspaceId);
         return res.status(201).json(group);
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });
+    }
+});
+
+// Creates a list of groups
+router.post("/createMany", checkWorkspace, checkInstructor, async(req, res) => {
+    try{
+        const body = req.body;
+        // Check that a number of groups is passed in
+        if (!body.numGroups || body.numGroups < 1){
+            return res.status(400).json({ message: "One or more required fields is not present" });
+        }
+        // Create the group objects
+        const groupObjs = [];
+        for (let i = 0; i < body.numGroups; i++){
+            groupObjs.push({
+                name: `Group ${i+1}`,
+                workspaceId: body.workspaceId
+            });
+        }
+        // Create groups and return
+        const groups = await Group.create(groupObjs);
+        return res.status(201).json(groups);
     }
     catch(err){
         console.log(err.message);

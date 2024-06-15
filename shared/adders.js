@@ -46,3 +46,12 @@ export async function addGroupToWorkspace(groupId, workspaceId){
     );
     return result;
 }
+
+// Update workspace with groups
+export async function addGroupsToWorkspace(groupIds, workspaceId){
+    const result = await Workspace.updateOne(
+        { _id: workspaceId },
+        { $push: { groupIds: { $each: groupIds }}}
+    );
+    return result;
+}
