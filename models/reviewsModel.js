@@ -5,7 +5,7 @@ const reviewsSchema = mongoose.Schema(
         assignmentId: {
             type: ObjectId,
             ref: "ReviewAssignment",
-            required: false // Set this to true later
+            required: true
         },
         userId: {
             type: ObjectId,

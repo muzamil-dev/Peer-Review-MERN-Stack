@@ -135,16 +135,30 @@ export async function checkInstructor(req, res, next){
     next();
 }
 
-// Check that a review doesn't already exist for a specified
-// assignment/user/target
-export async function checkReviewNotCreated(req, res, next){
-    const review = await Review.findOne({
-        assignmentId: req.body.assignmentId,
-        userId: req.body.userId,
-        targetId: req.body.targetId
-    });
-    if (review){
-        return res.status(400).json({ message: "A review has already been submitted for this person" });
+// Checks if a review exists or not for a specified assignment/user/target
+// If exists is true, it will require that the review exists
+// If exists is false, it will require that the review does not exist
+export function checkReview(exists){
+    return async(req, res, next) => {
+        let review;
+        // Find the review by id if review is required to exist
+        if (exists){
+            review = await Review.findById(req.body.reviewId)
+        }
+        // Find by assignment, user, and target to see if a review was already made
+        else{
+            review = await Review.findOne({
+                assignmentId: req.body.assignmentId,
+                userId: req.body.userId,
+                targetId: req.body.targetId
+            });
+        }
+        if (review && !exists){
+            return res.status(400).json({ message: "A review has already been submitted for this person" });
+        }
+        else if (!review && exists){
+            return res.status(404).json({ message: "No review was found that matched these query results" });
+        }
+        next();
     }
-    next();
 }

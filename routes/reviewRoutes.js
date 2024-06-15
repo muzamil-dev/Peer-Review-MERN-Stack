@@ -9,42 +9,74 @@ import * as Getters from "../shared/getters.js";
 
 const router = express.Router();
 
-// Create a new review
-router.post("/submit", Checks.checkAssignment, Checks.checkReviewNotCreated, async (req, res) => {
+// Submit a review
+// Required: assignmentId, targetId, ratings
+// Optional: text
+router.post("/submit", Checks.checkReview(false), async(req, res) => {
     try {
         // Get the required fields from the request body
         const { assignmentId, userId, targetId, ratings, text } = req.body;
-
-        // Check that the user, workspace, and review fields are present
-        if (!userId || !targetId || !ratings) {
+        // Return if required fields are missing
+        if (!assignmentId || !userId || !targetId || !ratings) {
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
-
         // Get the assignment being referred to
         const assignment = await ReviewAssignment.findById(
             assignmentId
         );
-        
+        // Return if no assignment was found
+        if (!assignment)
+            return res.status(404).json({ message: "No assignment with the provided id exists" });
         // Check that there is a rating for every question
         if (assignment.questions.length !== ratings.length){
             return res.status(400).json({ message: "There must be one rating for each question" });
         }
-
         // Get the group id of the reviewer/target
         const groupId = (await Getters.getGroupInWorkspace(
             targetId, assignment.workspaceId
         ))._id;
-
         // Create a new review
         const newReview = new Review({ assignmentId, userId, targetId, ratings, text, groupId });
         const savedReview = await newReview.save();
-
         // Return the created review
         res.status(201).json({
             message: "Review submitted successfully",
             reviewId: savedReview._id
         });
-    } catch (err) {
+    } 
+    catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Edit a provided review
+// Required: reviewId, ratings
+// Optional: text
+router.put("/edit", Checks.checkReview(true), async(req, res) => {
+    try{
+        // Get required parameters
+        const { reviewId, ratings } = req.body;
+        // Return if required fields are missing
+        if (!reviewId || !ratings) {
+            return res.status(400).json({ message: "One or more required fields is not present" });
+        }
+        // Create review object
+        const review = { ratings };
+        // Add optional fields
+        if (req.body.text) review.text = req.body.text;
+        // Update the review in the database
+        await Review.findByIdAndUpdate(
+            reviewId,
+            review
+        );
+        // Return the edited review
+        res.status(201).json({
+            message: "Review edited successfully",
+            reviewId
+        });
+    }
+    catch (err) {
         console.error(err.message);
         res.status(500).json({ message: err.message });
     }

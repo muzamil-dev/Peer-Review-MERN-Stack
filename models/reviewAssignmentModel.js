@@ -23,31 +23,7 @@ const reviewAssignmentSchema = mongoose.Schema(
         questions: {
             type: [String],
             required: true
-        },
-        /*
-        assignedReviews: [{
-            _id: false,
-            userId: {
-                type: ObjectId,
-                required: true,
-                ref: "User"
-            },
-            reviews: [{
-                _id: false,
-                targetId: {
-                    type: ObjectId,
-                    required: true,
-                    ref: "User"
-                },
-                reviewId: {
-                    type: ObjectId,
-                    required: false,
-                    default: null,
-                    ref: "Review"
-                }
-            }]
-        }]
-        */
+        }
     },
     {
         timestamps: true
