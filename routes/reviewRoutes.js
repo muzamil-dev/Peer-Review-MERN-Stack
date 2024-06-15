@@ -4,7 +4,6 @@ import { User } from "../models/userModel.js";
 import { Group } from "../models/groupModel.js";
 import { ReviewAssignment } from "../models/reviewAssignmentModel.js";
 
-import * as Checks from "../middleware/checks.js";
 import * as Getters from "../shared/getters.js";
 
 const router = express.Router();
@@ -12,7 +11,7 @@ const router = express.Router();
 // Submit a review
 // Required: assignmentId, targetId, ratings
 // Optional: text
-router.post("/submit", Checks.checkReview(false), async(req, res) => {
+router.post("/submit", async(req, res) => {
     try {
         // Get the required fields from the request body
         const { assignmentId, userId, targetId, ratings, text } = req.body;
@@ -20,13 +19,20 @@ router.post("/submit", Checks.checkReview(false), async(req, res) => {
         if (!assignmentId || !userId || !targetId || !ratings) {
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
+
         // Get the assignment being referred to
-        const assignment = await ReviewAssignment.findById(
-            assignmentId
-        );
+        const assignment = await ReviewAssignment.findById(assignmentId);
         // Return if no assignment was found
         if (!assignment)
             return res.status(404).json({ message: "No assignment with the provided id exists" });
+
+        // Check if a review already exists between user/target
+        const review = await Review.find({
+            assignmentId, userId, targetId
+        });
+        if (!review)
+            return res.status(400).json({ message: "A review for these users already exists" });
+
         // Check that there is a rating for every question
         if (assignment.questions.length !== ratings.length){
             return res.status(400).json({ message: "There must be one rating for each question" });
@@ -35,6 +41,7 @@ router.post("/submit", Checks.checkReview(false), async(req, res) => {
         const groupId = (await Getters.getGroupInWorkspace(
             targetId, assignment.workspaceId
         ))._id;
+
         // Create a new review
         const newReview = new Review({ assignmentId, userId, targetId, ratings, text, groupId });
         const savedReview = await newReview.save();
@@ -53,23 +60,30 @@ router.post("/submit", Checks.checkReview(false), async(req, res) => {
 // Edit a provided review
 // Required: reviewId, ratings
 // Optional: text
-router.put("/edit", Checks.checkReview(true), async(req, res) => {
+router.put("/edit", async(req, res) => {
     try{
         // Get required parameters
         const { reviewId, ratings } = req.body;
         // Return if required fields are missing
-        if (!reviewId || !ratings) {
+        if (!reviewId || !ratings)
             return res.status(400).json({ message: "One or more required fields is not present" });
-        }
-        // Create review object
-        const review = { ratings };
+
+        // Check that the review exists
+        const review = await Review.findById(reviewId);
+        if (!review)
+            return res.status(404).json({ message: "The provided review was not found in our database" });
+
+        // Check that the number of ratings is correct
+        if (ratings.length !== review.ratings.length)
+            return res.status(400).json({ 
+                message: `Mismatch between number of ratings (${ratings.length}) and expected number (${review.ratings.length})`
+            });
+        // Set the new ratings
+        review.ratings = ratings;
         // Add optional fields
         if (req.body.text) review.text = req.body.text;
         // Update the review in the database
-        await Review.findByIdAndUpdate(
-            reviewId,
-            review
-        );
+        await review.save();
         // Return the edited review
         res.status(201).json({
             message: "Review edited successfully",

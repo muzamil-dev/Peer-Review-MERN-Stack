@@ -10,9 +10,9 @@ import * as Checkers from "../shared/checkers.js";
 const router = express.Router();
 
 // Get the reviews that a user has done on a specific assignment
-// TODO: Modify to use either a targetId (instructor checks user's review) or no id (user checks their own reviews)
 router.get(["/:assignmentId/reviews", "/:assignmentId/reviews/:userId"], async(req, res) => {
     try{
+        // Get assignmentId and userId from params
         const { assignmentId } = req.params;
         const userId = req.params.userId || req.body.userId
 
@@ -20,6 +20,13 @@ router.get(["/:assignmentId/reviews", "/:assignmentId/reviews/:userId"], async(r
         const assignment = await ReviewAssignment.findById(
             assignmentId
         ).select('workspaceId questions');
+
+        // If a userId param is passed, check that an instructor is making the request
+        if (req.params.userId && 
+            !await Checkers.checkInstructor(req.body.userId, assignment.workspaceId)){
+            return res.status(403).json({ message: "User is not authorized to make this request" });
+        }
+
         // Get groups from workspace that contain userId
         const group = await Group.findOne({
             workspaceId: assignment.workspaceId,
@@ -97,8 +104,8 @@ router.post("/create", async(req, res) => {
         }
 
         // Check that the workspace exists
-        const workspaceExists = Checkers.checkWorkspaceExists(workspaceId);
-        if (!workspaceExists)
+        const workspace = Workspace.findById(workspaceId);
+        if (!workspace)
             return res.status(400).json({ message: "The provided workspace was not found in our database" });
 
         // Check that the user requesting is an instructor in the workspace
