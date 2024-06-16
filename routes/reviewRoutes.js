@@ -51,29 +51,32 @@ router.post("/submit", async(req, res) => {
         if (!assignment)
             return res.status(404).json({ message: "No assignment with the provided id exists" });
 
-        // Check if a review already exists between user/target
-        const review = await Review.find({
+        // Check that the current date is within the due date
+        if (assignment.dueDate < Date.now())
+            return res.status(403).json({ message: "The assignment is locked because the due date has passed" });
+
+        // Check for a review between user/target
+        const review = await Review.findOne({
             assignmentId, userId, targetId
         });
         if (!review)
-            return res.status(400).json({ message: "A review for these users already exists" });
+            return res.status(400).json({ message: "You were not assigned to review this person" });
 
         // Check that there is a rating for every question
         if (assignment.questions.length !== ratings.length){
             return res.status(400).json({ message: "There must be one rating for each question" });
         }
-        // Get the group id of the reviewer/target
-        const groupId = (await Getters.getGroupInWorkspace(
-            targetId, assignment.workspaceId
-        ))._id;
 
-        // Create a new review
-        const newReview = new Review({ assignmentId, userId, targetId, ratings, text, groupId });
-        const savedReview = await newReview.save();
-        // Return the created review
+        // Add attributes to review
+        const saved = await Review.findByIdAndUpdate(
+            review._id,
+            { ratings, text, completed: true }
+        );
+
+        // Return success response
         res.status(201).json({
             message: "Review submitted successfully",
-            reviewId: savedReview._id
+            reviewId: saved._id
         });
     } 
     catch (err) {
@@ -82,6 +85,7 @@ router.post("/submit", async(req, res) => {
     }
 });
 
+// TODO: fix edits (make it like submit, but taking in a reviewId)
 // Edit a provided review
 // Required: reviewId, ratings
 // Optional: text
