@@ -24,12 +24,17 @@ const reviewsSchema = mongoose.Schema(
         },
         ratings: [{
             type: Number,
-            required: true
+            required: false
         }],
         text: {
             type: String,
             required: false
         },
+        completed: {
+            type: Boolean,
+            required: true,
+            default: false
+        }
     },
     {
         timestamps: true

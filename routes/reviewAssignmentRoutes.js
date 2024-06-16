@@ -10,6 +10,7 @@ import * as Checkers from "../shared/checkers.js";
 const router = express.Router();
 
 // Get the reviews that a user has done on a specific assignment
+// TODO: Change to view existing reviews (complete/incomplete)
 router.get(["/:assignmentId/reviews", "/:assignmentId/reviews/:userId"], async(req, res) => {
     try{
         // Get assignmentId and userId from params
@@ -127,6 +128,29 @@ router.post("/create", async(req, res) => {
         const assignment = await ReviewAssignment.create(
             assignmentObj
         );
+
+        // Reviews to create
+        const reviews = [];
+        // Get all groups
+        const groups = await Group.find({ workspaceId });
+        // Create the reviews array
+        for (let group of groups){
+            for (let j = 0; j < group.userIds.length; j++){
+                for (let k = 0; k < group.userIds.length; k++){
+                    if (j !== k){
+                        reviews.push({
+                            assignmentId: assignment._id,
+                            userId: group.userIds[j],
+                            targetId: group.userIds[k],
+                            groupId: group._id
+                        });
+                    }
+                }
+            }
+        }
+        // Add the reviews array to mongo
+        await Review.create(reviews);
+
         // Return a success response
         return res.status(201).json({
             message: "Assignment created successfully",

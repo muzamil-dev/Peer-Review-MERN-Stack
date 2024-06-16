@@ -8,6 +8,31 @@ import * as Getters from "../shared/getters.js";
 
 const router = express.Router();
 
+// View a review
+router.get("/view/:reviewId", async(req, res) => {
+    try{
+        // Get the review
+        const { reviewId } = req.params;
+        const review = await Review.findById(reviewId);
+        // Check if the review exists
+        if (!review)
+            return res.status(404).json({ message: "No review with the provided id exists" });
+        // Get the assignment that the review is from
+        const assignment = await ReviewAssignment.findById(review.assignmentId);   
+        const reviewArray = review.ratings.map((rating, index) => ({
+            question: assignment.questions[index], rating
+        }));
+        // Return the array
+        res.json(reviewArray);
+    }
+    catch(err){
+        console.error(err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// TODO: Merge submit/edit into one since reviews are created beforehand
+
 // Submit a review
 // Required: assignmentId, targetId, ratings
 // Optional: text
@@ -96,7 +121,7 @@ router.put("/edit", async(req, res) => {
     }
 });
 
-// FIX ROUTES BELOW
+// FIX ROUTES BELOW (or remove them)
 
 // Get reviews for a user
 router.post("/user/reviews", async (req, res) => {
