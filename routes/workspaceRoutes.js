@@ -8,7 +8,7 @@ import * as Removers from "../shared/removers.js"
 import * as Checkers from '../shared/checkers.js';
 import * as Getters from "../shared/getters.js";
 
-import generateInviteCode from '../shared/inviteCode.js';
+import generateCode from '../shared/generateCode.js';
 
 const router = express.Router();
 
@@ -195,12 +195,10 @@ router.delete("/delete/:workspaceId", async(req, res) => {
     }
 });
 
-// Modify to check that the user is the instructor/no middleware
-
 // Sets the active invite code
 router.put("/setInvite", async(req, res) => {
     try{
-        const inviteCode = generateInviteCode();
+        const inviteCode = generateCode();
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
             return res.status(403).json({ 

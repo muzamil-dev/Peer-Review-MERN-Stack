@@ -1,4 +1,4 @@
-export default function generateInviteCode(){
+export default function generateCode(){
     const arr = []
     for (let i = 0; i < 3; i++){
         for (let i = 0; i < 4; i++){
