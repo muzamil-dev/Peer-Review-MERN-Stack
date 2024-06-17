@@ -110,7 +110,7 @@ router.post("/create", async(req, res) => {
             return res.status(400).json({ message: "The provided workspace was not found in our database" });
 
         // Check that the user requesting is an instructor in the workspace
-        const verifyInstructor = Checkers.checkInstructor(userId, workspaceId);
+        const verifyInstructor = await Checkers.checkInstructor(userId, workspaceId);
         if (!verifyInstructor)
             return res.status(403).json({ message: "The provided user is not authorized to make this request" });
 

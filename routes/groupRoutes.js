@@ -6,37 +6,20 @@ import { Workspace } from "../models/workspaceModel.js";
 import * as Checks from "../middleware/checks.js";
 import * as Adders from "../shared/adders.js";
 import * as Removers from "../shared/removers.js";
+import * as Checkers from "../shared/checkers.js";
 
 const router = express.Router();
 
-// Join several users in a group (for testing)
-router.put("/bulkjoin", Checks.checkGroup, async(req, res) => {
-    try {
-        const groupId = req.body.groupId;
-        const userIds = req.body.userIds;
-
-        const group = await Group.findById(groupId);
-        group.userIds.push(...userIds);
-        await group.save();
-
-        await User.updateMany(
-            { _id: { $in: userIds }},
-            { $push: { groupIds: groupId }}
-        );
-        res.send("Users added");
-    } 
-    catch (err) {
-        console.log(err.message);
-        res.status(500).send({ message: err.message });
-    }
-});
-
 // Get all information about a group
-router.get("/:groupId", Checks.checkGroup, async(req, res) => {
+router.get("/:groupId", async(req, res) => {
     try {
-        //const { groupId } = req.params;
-        const groupId = req.body.groupId;
+        const { groupId } = req.params;
         const group = await Group.findById(groupId);
+        // Check that the group was found
+        if (!group)
+            return res.status(404).json({
+                message: "The provided group was not found in our database" 
+            });
         res.json(group);
     } 
     catch (err) {
@@ -46,16 +29,28 @@ router.get("/:groupId", Checks.checkGroup, async(req, res) => {
 });
 
 // Get all users in a group
-// Formats as an array with _id, firstName, middleName, lastName, email
-router.get("/:groupId/users", Checks.checkGroup, async (req, res) => {
+// Formats as an array with _id, firstName, middleName, lastName
+router.get("/:groupId/users", async (req, res) => {
     try {
-        // const { groupId } = req.params;
-        const groupId = req.body.groupId;
+        // Get the group
+        const { groupId } = req.params;
         const group = await Group.findById(groupId).select('userIds');
+        // Check that the group was found
+        if (!group)
+            return res.status(404).json({
+                message: "The provided group was not found in our database" 
+            });
+        // Get the group's users
         const users = await User.find(
             { _id: { $in: group.userIds }}
-        ).select('firstName middleName lastName email');
-        res.json(users);
+        ).select('firstName middleName lastName');
+        // Return formatted json
+        res.json(users.map(user => ({
+            userId: user._id,
+            firstName: user.firstName,
+            middleName: user.middleName,
+            lastName: user.lastName
+        })));
     } 
     catch (err) {
         console.log(err.message);
@@ -63,13 +58,29 @@ router.get("/:groupId/users", Checks.checkGroup, async (req, res) => {
     }
 });
 
-// Check that a user is provided in body
-router.use(Checks.checkUser);
-
 // Create a group in a workspace
-router.post("/create", Checks.checkWorkspace, Checks.checkInstructor, async(req, res) => {
+// Required: workspaceId
+// Optional: name
+router.post("/create", async(req, res) => {
     try{
         const body = req.body;
+        // Checks that a workspaceId was given
+        if (!body.workspaceId)
+            return res.status(400).json({ message: "One or more required fields is not present" });
+        
+        // Check that the workspace exists
+        const workspace = await Workspace.findById(body.workspaceId);
+        if (!workspace)
+            return res.status(404).json({ 
+                message: "The provided workspace was not found in our database" 
+            });
+        
+        // Check that the user is an instructor in the workspace
+        if (!await Checkers.checkInstructor(body.userId, workspace._id))
+            return res.status(403).json({
+                message: "The provided user is not authorized to create groups"
+            });
+
         // Check that a name for the group is given
         if (!body.name){
             const numGroups = await Group.countDocuments({ workspaceId: body.workspaceId });
@@ -90,19 +101,34 @@ router.post("/create", Checks.checkWorkspace, Checks.checkInstructor, async(req,
 });
 
 // Creates a list of groups
-router.post("/createMany", Checks.checkWorkspace, Checks.checkInstructor, async(req, res) => {
+// Required: workspaceId, numGroups (at least 1)
+router.post("/createMany", async(req, res) => {
     try{
         const body = req.body;
         // Check that a number of groups is passed in
-        if (!body.numGroups || body.numGroups < 1){
+        if (!body.workspaceId || !body.numGroups || body.numGroups < 1){
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
+
+        // Check that the workspace exists
+        const workspace = await Workspace.findById(body.workspaceId);
+        if (!workspace)
+            return res.status(404).json({ 
+                message: "The provided workspace was not found in our database" 
+            });
+
+        // Check that the user is an instructor in the workspace
+        if (!await Checkers.checkInstructor(body.userId, workspace._id))
+            return res.status(403).json({
+                message: "The provided user is not authorized to create groups"
+            });
+
         // Create the group objects
         const groupObjs = [];
         for (let i = 0; i < body.numGroups; i++){
             groupObjs.push({
                 name: `Group ${i+1}`,
-                workspaceId: body.workspaceId
+                workspaceId: workspace._id
             });
         }
         // Create groups and return
@@ -179,27 +205,28 @@ router.put("/leave", async(req, res) => {
     }
 });
 
+
 // Remove user from group
-router.put("/removeUser", Checks.checkGroup, Checks.checkInstructor, async (req, res) => {
-    try {
-        const { groupId, targetId } = req.body;
+// router.put("/removeUser", Checks.checkGroup, Checks.checkInstructor, async (req, res) => {
+//     try {
+//         const { groupId, targetId } = req.body;
 
-        // Check if the targetId was provided
-        if (!targetId){
-            return res.status(400).json({ message: "One or more required fields is not present" });
-        }
+//         // Check if the targetId was provided
+//         if (!targetId){
+//             return res.status(400).json({ message: "One or more required fields is not present" });
+//         }
 
-        await Promise.all([
-            Removers.removeGroupFromUser(targetId, groupId),
-            Removers.removeUserFromGroup(targetId, groupId)
-        ]);
-        res.json({ message: "User removed from group successfully" });
-    } 
-    catch (err) {
-        console.log(err.message);
-        res.status(500).send({ message: err.message });
-    }
-});
+//         await Promise.all([
+//             Removers.removeGroupFromUser(targetId, groupId),
+//             Removers.removeUserFromGroup(targetId, groupId)
+//         ]);
+//         res.json({ message: "User removed from group successfully" });
+//     } 
+//     catch (err) {
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
 
 // Update group information
 // router.put("/:groupId", async (req, res) => {
@@ -219,6 +246,28 @@ router.put("/removeUser", Checks.checkGroup, Checks.checkInstructor, async (req,
 //         const updatedGroup = await group.save();
 //         res.status(200).json(updatedGroup);
 //     } catch (err) {
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
+
+// Join several users in a group (for testing)
+// router.put("/bulkjoin", Checks.checkGroup, async(req, res) => {
+//     try {
+//         const groupId = req.body.groupId;
+//         const userIds = req.body.userIds;
+
+//         const group = await Group.findById(groupId);
+//         group.userIds.push(...userIds);
+//         await group.save();
+
+//         await User.updateMany(
+//             { _id: { $in: userIds }},
+//             { $push: { groupIds: groupId }}
+//         );
+//         res.send("Users added");
+//     } 
+//     catch (err) {
 //         console.log(err.message);
 //         res.status(500).send({ message: err.message });
 //     }

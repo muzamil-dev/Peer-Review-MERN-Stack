@@ -134,7 +134,7 @@ router.delete("/delete/:workspaceId", async(req, res) => {
         ).select('userIds');
 
         // Check that the user is the instructor
-        if (!Checkers.checkInstructor(req.body.userId, workspace._id))
+        if (!await Checkers.checkInstructor(req.body.userId, workspace._id))
             return res.status(403).json({ 
                 message: "The provided user is not authorized to delete this workspace" 
             });
@@ -177,7 +177,7 @@ router.put("/setInvite", async(req, res) => {
     try{
         const inviteCode = generateInviteCode();
         // Check that the user is the instructor
-        if (!Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
+        if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
             return res.status(403).json({ 
                 message: "The provided user is not authorized to delete this workspace" 
             });
@@ -207,7 +207,7 @@ router.put("/setInvite", async(req, res) => {
 router.delete("/removeInvite", async(req, res) => {
     try{
         // Check that the user is the instructor
-        if (!Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
+        if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
             return res.status(403).json({ 
                 message: "The provided user is not authorized to delete this workspace" 
             });
@@ -236,7 +236,7 @@ router.delete("/removeInvite", async(req, res) => {
 router.put("/setAllowedDomains", async(req, res) => {
     try{
         // Check that the user is the instructor
-        if (!Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
+        if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
             return res.status(403).json({ 
                 message: "The provided user is not authorized to delete this workspace" 
             });
