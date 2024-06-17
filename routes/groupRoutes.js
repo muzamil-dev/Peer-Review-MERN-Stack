@@ -135,7 +135,8 @@ router.delete("/delete", Checks.checkGroup, Checks.checkInstructor, async(req, r
     }
 });
 
-// Route to add users to a group
+// Route to join a group
+// Required: groupId
 router.put("/join", Checks.checkGroup, Checks.checkUserNotInGroup, Checks.checkUserInWorkspace, async(req, res) => {
     try{
         // Set variables
@@ -148,6 +149,29 @@ router.put("/join", Checks.checkGroup, Checks.checkUserNotInGroup, Checks.checkU
             Adders.addGroupToUser(userId, groupId)
         ]);
         return res.json({ message: "Joined group successfully" });
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });
+    }
+});
+
+// Route to leave a group
+// Required: groupId
+router.put("/leave", async(req, res) => {
+    try{
+        // Check that a group was provided
+        if (!req.body.groupId)
+            return res.status(400).json({ message: "One or more required fields is not present"})
+
+        // Remove the group and user from their respective arrays
+        await Promise.all([
+            Removers.removeUserFromGroup(req.body.userId, req.body.groupId),
+            Removers.removeGroupFromUser(req.body.userId, req.body.groupId)
+        ]);
+
+        // Return success response
+        return res.json({ message: "Left group successfully" });
     }
     catch(err){
         console.log(err.message);
