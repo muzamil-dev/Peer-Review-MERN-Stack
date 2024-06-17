@@ -125,7 +125,7 @@ class LoginScreen extends StatelessWidget {
   final TextEditingController resetEmailController = TextEditingController();
 
   Future<void> loginUser(BuildContext context, String email, String password) async{
-    final url = Uri.parse('http://10.0.2.2:5000/users/login');
+    final url = Uri.parse('http://10.0.2.2:3001/users/login');
 
     try{
       final response = await http.post(
@@ -157,7 +157,7 @@ class LoginScreen extends StatelessWidget {
   }
 
   Future<void> requestPasswordReset(BuildContext context, String email) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/requestPasswordReset');
+    final url = Uri.parse('http://10.0.2.2:3001/users/requestPasswordReset');
 
     try{
       final response = await http.post(
@@ -324,7 +324,7 @@ class SignUpScreen extends StatelessWidget {
   final TextEditingController confirmPasswordController = TextEditingController();
 
   Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/login');
+    final url = Uri.parse('http://10.0.2.2:3001/users');
 
     try {
       final response = await http.post(
@@ -340,13 +340,13 @@ class SignUpScreen extends StatelessWidget {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         final responseData = json.decode(response.body);
         print("Sign Up Successfull: $responseData");
         Navigator.pushNamed(context, '/adminDashboard');
       } else {
         final errorData = json.decode(response.body);
-        print("Login Failed: ${response.statusCode}, ${errorData['message']}");
+        print("SignUp Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('SignUp Failed: ${errorData['message']}')),
         );
