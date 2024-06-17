@@ -5,10 +5,35 @@ import { Group } from '../models/groupModel.js';
 
 import * as Adders from "../shared/adders.js";
 import * as Removers from "../shared/removers.js"
-import generateInviteCode from '../shared/inviteCode.js';
 import * as Checkers from '../shared/checkers.js';
+import * as Getters from "../shared/getters.js";
+
+import generateInviteCode from '../shared/inviteCode.js';
 
 const router = express.Router();
+
+// Gets a list of groups from the workspace
+router.get("/:workspaceId/groups", async(req, res) => {
+    try{
+        // Get the workspace
+        const { workspaceId } = req.params;
+        const workspace = Workspace.findById(workspaceId);
+        // Check that the workspace exists
+        if (!workspace)
+            return res.status(400).json({ 
+                message: "The provided workspace was not found in our database" 
+            });
+
+        // Get all groups from workspace
+        const groups = await Group.find({ workspaceId }).select('_id');
+        const groupDataArray = await Promise.all(groups.map(group => Getters.getGroupData(group._id)));
+        return res.json(groupDataArray);
+    }
+    catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
 
 // Creates a new workspace
 // Required: name
@@ -272,24 +297,24 @@ router.put("/setAllowedDomains", async(req, res) => {
 // This is for testing and likely wont be available to users
 // Pass in an array (workspaces) with documents: { name, userId }
 // No input validation is used in this endpoint
-router.post("/createMany", async(req, res) => {
-    try{
-        const workspaces = req.body.workspaces;
-        const created = (await Workspace.insertMany(
-            workspaces
-        )).map(space => ({ 
-            name: space.name, 
-            workspaceId: space._id
-        }));
-        res.status(201).json({ 
-            message: `Workspaces created (${workspaces.length})`,
-            workspaces: created
-        });
-    }
-    catch(err){
-        console.log(err.message);
-        res.status(500).send({ message: err.message });
-    }
-});
+// router.post("/createMany", async(req, res) => {
+//     try{
+//         const workspaces = req.body.workspaces;
+//         const created = (await Workspace.insertMany(
+//             workspaces
+//         )).map(space => ({ 
+//             name: space.name, 
+//             workspaceId: space._id
+//         }));
+//         res.status(201).json({ 
+//             message: `Workspaces created (${workspaces.length})`,
+//             workspaces: created
+//         });
+//     }
+//     catch(err){
+//         console.log(err.message);
+//         res.status(500).send({ message: err.message });
+//     }
+// });
 
 export default router;

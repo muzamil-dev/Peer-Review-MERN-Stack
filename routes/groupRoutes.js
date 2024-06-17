@@ -6,10 +6,11 @@ import { Workspace } from "../models/workspaceModel.js";
 import * as Adders from "../shared/adders.js";
 import * as Removers from "../shared/removers.js";
 import * as Checkers from "../shared/checkers.js";
+import * as Getters from "../shared/getters.js";
 
 const router = express.Router();
 
-// Get basic information about a group
+// Get information about a group
 router.get("/:groupId", async(req, res) => {
     try {
         const { groupId } = req.params;
@@ -19,42 +20,10 @@ router.get("/:groupId", async(req, res) => {
             return res.status(404).json({
                 message: "The provided group was not found in our database" 
             });
+        // Get formatted data
+        const groupData = await Getters.getGroupData(groupId);
         // Return formatted json
-        res.json({
-            name: group.name,
-            workspaceId: group.workspaceId,
-            groupId: group._id
-        });
-    } 
-    catch (err) {
-        console.log(err.message);
-        res.status(500).send({ message: err.message });
-    }
-});
-
-// Get all users in a group
-// Formats as an array with _id, firstName, middleName, lastName
-router.get("/:groupId/users", async (req, res) => {
-    try {
-        // Get the group
-        const { groupId } = req.params;
-        const group = await Group.findById(groupId).select('userIds');
-        // Check that the group was found
-        if (!group)
-            return res.status(404).json({
-                message: "The provided group was not found in our database" 
-            });
-        // Get the group's users
-        const users = await User.find(
-            { _id: { $in: group.userIds }}
-        ).select('firstName middleName lastName');
-        // Return formatted json
-        res.json(users.map(user => ({
-            userId: user._id,
-            firstName: user.firstName,
-            middleName: user.middleName,
-            lastName: user.lastName
-        })));
+        res.json(groupData);
     } 
     catch (err) {
         console.log(err.message);
