@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/components/MainAppBar.dart';
+import 'package:flutter_application/components/main_app_bar.dart';
 import 'dart:ui'; // for BackdropFilter
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -14,7 +14,7 @@ class LoginSignup extends StatefulWidget {
 }
 
 class _LoginSignupState extends State<LoginSignup> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   int _selectedPage = 0;
 
   void _togglePage(int page) {
@@ -23,7 +23,7 @@ class _LoginSignupState extends State<LoginSignup> {
     });
     _pageController.animateToPage(
       page,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }
@@ -31,7 +31,7 @@ class _LoginSignupState extends State<LoginSignup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MainAppBar(
+      appBar: const MainAppBar(
         title: 'Auth Page',
       ),
       body: Column(
@@ -42,7 +42,8 @@ class _LoginSignupState extends State<LoginSignup> {
               GestureDetector(
                 onTap: () => _togglePage(0),
                 child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
@@ -65,7 +66,8 @@ class _LoginSignupState extends State<LoginSignup> {
               GestureDetector(
                 onTap: () => _togglePage(1),
                 child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
@@ -119,6 +121,7 @@ class LoginScreen extends StatelessWidget {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController resetEmailController = TextEditingController();
 
   Future<void> loginUser(BuildContext context, String email, String password) async{
     final url = Uri.parse('http://10.0.2.2:5000/users/login');
@@ -152,6 +155,38 @@ class LoginScreen extends StatelessWidget {
     }
   }
 
+  Future<void> requestPasswordReset(BuildContext context, String email) async {
+    final url = Uri.parse('http://10.0.2.2:5000/users/requestPasswordReset');
+
+    try{
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+        }),
+      );
+
+      if(response.statusCode == 200){
+        print('Password reset email sent');
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Password reset email sent')),
+        );
+      }else{
+        final errorData = json.decode(response.body);
+        print('Request failed: ${response.statusCode}, ${errorData['message']}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Request failed: ${errorData['message']}')),
+        );
+      }
+    }catch(err){
+      print('Error: $err');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -167,7 +202,8 @@ class LoginScreen extends StatelessWidget {
                     borderSide: BorderSide.none),
                 fillColor: Colors.purple.withOpacity(0.1),
                 filled: true,
-                prefixIcon: const Icon(Icons.email),),
+                prefixIcon: const Icon(Icons.email),
+              ),
             ),
           ),
           Container(margin: const EdgeInsets.only(bottom: 10.0), child: TextField(
@@ -178,10 +214,12 @@ class LoginScreen extends StatelessWidget {
                     borderSide: BorderSide.none),
                 fillColor: Colors.purple.withOpacity(0.1),
                 filled: true,
-                prefixIcon: const Icon(Icons.password),),
-            obscureText: true,
-          ),),
-          SizedBox(height: 20),
+                prefixIcon: const Icon(Icons.password),
+              ),
+              obscureText: true,
+            ),
+          ),
+          const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
               // Handle login logic
@@ -189,9 +227,9 @@ class LoginScreen extends StatelessWidget {
               final password = passwordController.text;
               loginUser(context, email, password);
             },
-            child: Text('Login'),
+            child: const Text('Login'),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           TextButton(
   onPressed: () {
     showDialog(
@@ -216,7 +254,7 @@ class LoginScreen extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.all(20),
-                margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 180),
+                margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 160),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -233,6 +271,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     TextField(
+                      controller : resetEmailController,
                       decoration: InputDecoration(
                         labelText: 'Enter your email',
                         border: OutlineInputBorder(
@@ -247,6 +286,9 @@ class LoginScreen extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         // Handle password reset logic
+                        // Send password reset email
+                        final email = resetEmailController.text;
+                        requestPasswordReset(context, email);
                       },
                       child: Text('Submit'),
                     ),
@@ -363,12 +405,12 @@ class SignUpScreen extends StatelessWidget {
               obscureText: true,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
               // Handle signup logic
             },
-            child: Text('Sign Up'),
+            child: const Text('Sign Up'),
           ),
         ],
       ),

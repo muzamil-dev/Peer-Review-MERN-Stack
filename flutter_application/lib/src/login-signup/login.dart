@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_application/components/MainAppBar.dart';
+import 'package:flutter_application/components/main_app_bar.dart';
 import 'signup.dart';
 
 /// The Widget that configures your application.
@@ -16,9 +15,9 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MainAppBar(title: "Login"),
+      appBar: const MainAppBar(title: "Login"),
       body: Padding(
-        padding: EdgeInsets.all(15),
+        padding: const EdgeInsets.all(15),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
