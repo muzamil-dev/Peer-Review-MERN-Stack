@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application/components/main_app_bar.dart';
 import 'dart:ui'; // for BackdropFilter
 import 'package:http/http.dart' as http;
@@ -313,7 +314,48 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
+// Sign Up Page Design and Functionality
 class SignUpScreen extends StatelessWidget {
+  
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password) async {
+    final url = Uri.parse('http://10.0.2.2:5000/users');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'firstName': firstName,
+          'lastName': lastName,
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+        print("Sign Up Successfull: $responseData");
+        Navigator.pushNamed(context, '/adminDashboard');
+      } else {
+        final errorData = json.decode(response.body);
+        print("SignUp Failed: ${response.statusCode}, ${errorData['message']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('SignUp Failed: ${errorData['message']}')),
+        );
+      }
+    } catch(err) {
+      print("Error: $err");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -324,6 +366,7 @@ class SignUpScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(bottom: 10.0),
             child: TextField(
+              controller: firstNameController,
               decoration: InputDecoration(
                 labelText: 'First Name',
                 border: OutlineInputBorder(
@@ -350,6 +393,7 @@ class SignUpScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(bottom: 10.0),
             child: TextField(
+              controller: lastNameController,
               decoration: InputDecoration(
                 labelText: 'Last Name',
                 border: OutlineInputBorder(
@@ -363,6 +407,7 @@ class SignUpScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(bottom: 10.0),
             child: TextField(
+              controller: emailController,
               decoration: InputDecoration(
                 hintText: "Email",
                 border: OutlineInputBorder(
@@ -378,6 +423,7 @@ class SignUpScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(bottom: 10.0),
             child: TextField(
+              controller: passwordController,
               decoration: InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(
@@ -393,6 +439,7 @@ class SignUpScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(bottom: 10.0),
             child: TextField(
+              controller: confirmPasswordController,
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
                 border: OutlineInputBorder(
@@ -409,6 +456,12 @@ class SignUpScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               // Handle signup logic
+              final firstName = firstNameController.text;
+              final lastName = lastNameController.text;
+              final email = emailController.text;
+              final password = passwordController.text;
+              final confirmPassword = confirmPasswordController.text;
+              userSignUp(context, firstName, lastName, email, password);
             },
             child: const Text('Sign Up'),
           ),
