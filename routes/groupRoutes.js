@@ -3,14 +3,13 @@ import { Group } from "../models/groupModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
-import * as Checks from "../middleware/checks.js";
 import * as Adders from "../shared/adders.js";
 import * as Removers from "../shared/removers.js";
 import * as Checkers from "../shared/checkers.js";
 
 const router = express.Router();
 
-// Get all information about a group
+// Get basic information about a group
 router.get("/:groupId", async(req, res) => {
     try {
         const { groupId } = req.params;
@@ -20,7 +19,12 @@ router.get("/:groupId", async(req, res) => {
             return res.status(404).json({
                 message: "The provided group was not found in our database" 
             });
-        res.json(group);
+        // Return formatted json
+        res.json({
+            name: group.name,
+            workspaceId: group.workspaceId,
+            groupId: group._id
+        });
     } 
     catch (err) {
         console.log(err.message);
@@ -101,12 +105,13 @@ router.post("/create", async(req, res) => {
 });
 
 // Creates a list of groups
-// Required: workspaceId, numGroups (at least 1)
-router.post("/createMany", async(req, res) => {
+// Required: workspaceId
+router.post("/create/:num", async(req, res) => {
     try{
         const body = req.body;
+        const { num } = req.params;
         // Check that a number of groups is passed in
-        if (!body.workspaceId || !body.numGroups || body.numGroups < 1){
+        if (!body.workspaceId || num < 1){
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
@@ -123,37 +128,23 @@ router.post("/createMany", async(req, res) => {
                 message: "The provided user is not authorized to create groups"
             });
 
-        // Create the group objects
-        const groupObjs = [];
-        for (let i = 0; i < body.numGroups; i++){
-            groupObjs.push({
+        // Create the groups objects
+        const promises = new Array(num);
+        for (let i = 0; i < num; i++){
+            promises[i] = Group.create({
                 name: `Group ${i+1}`,
                 workspaceId: workspace._id
             });
         }
-        // Create groups and return
-        const groups = await Group.create(groupObjs);
-        return res.status(201).json(groups);
-    }
-    catch(err){
-        console.log(err.message);
-        return res.status(500).send({ message: err.message });
-    }
-});
-
-// Deletes a group
-router.delete("/delete", Checks.checkGroup, Checks.checkInstructor, async(req, res) => {
-    try{
-        const groupId = req.body.groupId;
-        const workspaceId = req.body.workspaceId;
-        // Get group's members
-        const groupMembers = (await Group.findById(groupId).select('userIds')).userIds;
-        // Remove group from users
-        await Promise.all([
-            Removers.removeGroupFromUsers(groupMembers, groupId),
-            Group.findByIdAndDelete(groupId)
-        ]);
-        res.json({ message: "Group deleted successfully" });
+        // Wait for promises to resolve, format the return json
+        const groups = (await Promise.all(promises)).map(group => ({
+            name: group.name,
+            groupId: group._id
+        }));
+        // Return formatted json
+        return res.status(201).json({
+            message: "Groups created successfully", groups
+        });
     }
     catch(err){
         console.log(err.message);
@@ -163,12 +154,26 @@ router.delete("/delete", Checks.checkGroup, Checks.checkInstructor, async(req, r
 
 // Route to join a group
 // Required: groupId
-router.put("/join", Checks.checkGroup, Checks.checkUserNotInGroup, Checks.checkUserInWorkspace, async(req, res) => {
+router.put("/join", async(req, res) => {
     try{
         // Set variables
-        const body = req.body;
-        const groupId = body.groupId;
-        const userId = body.userId;
+        const groupId = req.body.groupId;
+        const userId = req.body.userId;
+        // Get group and check that it exists
+        const group = await Group.findById(groupId).select('workspaceId');
+        if (!group)
+            return res.status(404).json({ 
+                message: "The provided group was not found in our database" 
+            });
+        // Check that the user is in the same workspace as the group
+        if (!await Checkers.checkUserInWorkspace(userId, group.workspaceId))
+            return res.status(400).json({ message: "The provided user was not found in this workspace" });
+
+        // Check that the user isn't already in a group within the group's workspace
+        if (await Checkers.checkUserInWorkspaceGroup(userId, group.workspaceId))
+            return res.status(400).json({ 
+                message: "User is already a member of a group in this workspace" 
+            });
         // Link the user and the group
         await Promise.all([
             Adders.addUserToGroup(userId, groupId),
@@ -188,7 +193,7 @@ router.put("/leave", async(req, res) => {
     try{
         // Check that a group was provided
         if (!req.body.groupId)
-            return res.status(400).json({ message: "One or more required fields is not present"})
+            return res.status(400).json({ message: "One or more required fields is not present" });
 
         // Remove the group and user from their respective arrays
         await Promise.all([
@@ -205,6 +210,36 @@ router.put("/leave", async(req, res) => {
     }
 });
 
+// Deletes a group
+router.delete("/delete/:groupId", async(req, res) => {
+    try{
+        const { groupId } = req.params;
+        // Check that the group exists
+        const group = await Group.findById(groupId).select('workspaceId userIds');
+        if (!group)
+            return res.status(404).json({ 
+                message: "The provided group was not found in our database" 
+            });
+        // Check that the user is an instructor in the workspace
+        const workspaceId = group.workspaceId;
+        if (!await Checkers.checkInstructor(req.body.userId, workspaceId))
+            return res.status(403).json({
+                message: "The provided user is not authorized to delete this group"
+            });
+        // Get the group's members
+        const groupMembers = group.userIds;
+        // Remove group from users
+        await Promise.all([
+            Removers.removeGroupFromUsers(groupMembers, groupId),
+            Group.findByIdAndDelete(groupId)
+        ]);
+        res.json({ message: "Group deleted successfully" });
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });
+    }
+});
 
 // Remove user from group
 // router.put("/removeUser", Checks.checkGroup, Checks.checkInstructor, async (req, res) => {
