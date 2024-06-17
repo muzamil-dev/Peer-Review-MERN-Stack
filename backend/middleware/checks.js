@@ -1,5 +1,6 @@
 import { Group } from "../models/groupModel.js";
 import { ReviewAssignment } from "../models/reviewAssignmentModel.js";
+import { Review } from "../models/reviewsModel.js";
 import { User } from "../models/userModel.js";
 import { Workspace } from "../models/workspaceModel.js";
 
@@ -65,20 +66,22 @@ export async function checkAssignment(req, res, next){
 
 
 // Checks if the user is in the group (assumes workspace is provided)
-// TODO: Change the function to check that the user is not in any group
 export async function checkUserNotInGroup(req, res, next){
-    // Get all groups from workspace
-    const allGroups = await Group.find(
-        { workspaceId: req.body.workspaceId }
-    ).select('userIds');
-    // Get all users into one array
-    const allUsers = [];
-    for (let group of allGroups){
-        allUsers.push(...group.userIds);
-    }
+    // Get all groupIds that user is in
+    const userGroups = await User.findById(
+        req.body.userId
+    ).select('groupIds');
+    // Get all groups
+    const groups = await Group.find(
+        { _id: { $in: userGroups.groupIds }}
+    ).select('workspaceId');
+    // Move workspaceIds to an array
+    const workspaceIds = groups.map(
+        group => group.workspaceId
+    );
     // Find the user in all of the users in groups
-    const found = allUsers.find(
-        user => user.equals(req.body.userId)
+    const found = workspaceIds.find(
+        id => id.equals(req.body.workspaceId)
     );
     if (found){
         return res.status(400).json({ message: "User is already a member of a group in this workspace" });
@@ -102,6 +105,7 @@ export async function checkUserInWorkspace(req, res, next){
 }
 
 // Checks if the target user is in the workspace. Assumes existence of workspace is checked
+// Same as checkUserInWorkspace, but uses a targetId instead of a userId
 export async function checkTargetInWorkspace(req, res, next){
     // Search for target in workspace
     const workspaceUsers = (await Workspace.findById(
@@ -129,4 +133,32 @@ export async function checkInstructor(req, res, next){
         return res.status(403).json({ message: "The provided user is not authorized to make this request" });
     }
     next();
+}
+
+// Checks if a review exists or not for a specified assignment/user/target
+// If exists is true, it will require that the review exists
+// If exists is false, it will require that the review does not exist
+export function checkReview(exists){
+    return async(req, res, next) => {
+        let review;
+        // Find the review by id if review is required to exist
+        if (exists){
+            review = await Review.findById(req.body.reviewId)
+        }
+        // Find by assignment, user, and target to see if a review was already made
+        else{
+            review = await Review.findOne({
+                assignmentId: req.body.assignmentId,
+                userId: req.body.userId,
+                targetId: req.body.targetId
+            });
+        }
+        if (review && !exists){
+            return res.status(400).json({ message: "A review has already been submitted for this person" });
+        }
+        else if (!review && exists){
+            return res.status(404).json({ message: "No review was found that matched these query results" });
+        }
+        next();
+    }
 }

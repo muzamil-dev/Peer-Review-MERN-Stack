@@ -138,7 +138,7 @@ class LoginScreen extends StatelessWidget {
         // Navigate to dashboard
         final responseData = json.decode(response.body);
         print('Login successful: $responseData');
-        Navigator.pushNamed(context, '/userDashboard'); // Adjust the route name as needed
+        Navigator.pushNamed(context, '/adminDashboard'); // Adjust the route name as needed
       } else {
         // Login failed
         final errorData = json.decode(response.body);

@@ -13,7 +13,8 @@ const reviewAssignmentSchema = mongoose.Schema(
         },
         startDate: {
             type: Date,
-            required: true
+            required: true,
+            default: Date.now()
         },
         dueDate: {
             type: Date,
@@ -22,31 +23,7 @@ const reviewAssignmentSchema = mongoose.Schema(
         questions: {
             type: [String],
             required: true
-        },
-        /*
-        assignedReviews: [{
-            _id: false,
-            userId: {
-                type: ObjectId,
-                required: true,
-                ref: "User"
-            },
-            reviews: [{
-                _id: false,
-                targetId: {
-                    type: ObjectId,
-                    required: true,
-                    ref: "User"
-                },
-                reviewId: {
-                    type: ObjectId,
-                    required: false,
-                    default: null,
-                    ref: "Review"
-                }
-            }]
-        }]
-        */
+        }
     },
     {
         timestamps: true
