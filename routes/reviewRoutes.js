@@ -31,8 +31,6 @@ router.get("/view/:reviewId", async(req, res) => {
     }
 });
 
-// TODO: Merge submit/edit into one since reviews are created beforehand
-
 // Submit a review
 // Required: assignmentId, targetId, ratings
 // Optional: text
@@ -85,7 +83,6 @@ router.post("/submit", async(req, res) => {
     }
 });
 
-// TODO: fix edits (make it like submit, but taking in a reviewId)
 // Edit a provided review
 // Required: reviewId, ratings
 // Optional: text
@@ -234,7 +231,7 @@ router.get("/group/:groupId/reviews", async (req, res) => {
             return res.status(404).json({ message: "No reviews found for this group" });
         }
 
-        res.status(200).json(reviews);
+        res.json(reviews);
     } catch (err) {
         console.error("Error occurred:", err.message);
         res.status(500).json({ message: err.message });

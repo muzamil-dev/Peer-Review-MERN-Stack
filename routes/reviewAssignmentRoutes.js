@@ -10,12 +10,12 @@ import * as Checkers from "../shared/checkers.js";
 const router = express.Router();
 
 // Get the reviews that a user has done on a specific assignment
-// TODO: Change to view existing reviews (complete/incomplete)
-router.get(["/:assignmentId/reviews", "/:assignmentId/reviews/:userId"], async(req, res) => {
+// TODO: Simplify using the complete/imcomplete boolean
+router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, res) => {
     try{
         // Get assignmentId and userId from params
         const { assignmentId } = req.params;
-        const userId = req.params.userId || req.body.userId
+        const userId = req.params.userId || req.body.userId;
 
         // Get info about assignment
         const assignment = await ReviewAssignment.findById(
@@ -88,6 +88,30 @@ router.get(["/:assignmentId/reviews", "/:assignmentId/reviews/:userId"], async(r
     catch(err){
         console.log(err.message);
         return res.status(500).send({ message: err.message });
+    }
+});
+
+// Get all reviews on assignment for a group
+// TODO: Make getUserReviews into a function, use it here and above
+router.get("/:assignmentId/group/:groupId", async(req, res) => {
+    try{
+        const { assignmentId, groupId } = req.params;
+        // Check the group
+        const group = await Group.findById(groupId);
+        if (!group)
+            return res.status(404).json({ 
+                message: "The provided group wasn't found in our database" 
+            });
+        
+        // Check that there are reviews for the given assignment
+        const groupReviews = await Review.find({
+            assignmentId, groupId
+        });
+        res.json(groupReviews);
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });  
     }
 });
 
