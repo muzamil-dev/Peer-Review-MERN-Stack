@@ -10,6 +10,37 @@ import * as Getters from "../shared/getters.js";
 
 const router = express.Router();
 
+// Get information about an assignment
+router.get("/:assignmentId", async(req, res) => {
+    try{
+        // Get assignmentId from params
+        const { assignmentId } = req.params;
+
+        // Check that the assignment exists
+        const assignment = await ReviewAssignment.findById(assignmentId);
+        if (!assignment)
+            return res.status(404).json({ 
+                message: "The provided assignment wasn't found in our database" 
+            });
+
+        // Format the assignment information
+        const formattedAssignment = {
+            assignmentId: assignment._id,
+            workspaceId: assignment.workspaceId,
+            description: assignment.description,
+            questions: assignment.questions,
+            startDate: assignment.startDate,
+            dueDate: assignment.dueDate,
+        }
+        // Return formatted assignment
+        return res.json(formattedAssignment)
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });
+    }
+});
+
 // Get all reviews for a given assignment/user
 router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, res) => {
     try{
