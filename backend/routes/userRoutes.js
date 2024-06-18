@@ -55,6 +55,7 @@ router.post("/login", async (req, res) => {
     }
 });
 
+
 // Create a new user
 // Password hashing turned off for now
 router.post("/", async (req, res) => {
@@ -64,7 +65,7 @@ router.post("/", async (req, res) => {
         if (!firstName || !lastName || !email || !password) {
             return res.status(400).json({ message: "One or more required fields is not present." });
         }
-        
+
         //validate email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
@@ -177,7 +178,7 @@ router.post("/requestPasswordReset", async (req, res) => {
             return res.status(404).json({ message: "User not found." });
         }
 
-        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetToken = crypto.randomBytes(9).toString('hex');
         const resetTokenExpires = Date.now() + 3600000; // 1 hour from now
 
         user.resetPasswordToken = resetToken;
@@ -185,8 +186,11 @@ router.post("/requestPasswordReset", async (req, res) => {
 
         await user.save();
 
-        const resetURL = `http://localhost:5000/resetPassword?token=${resetToken}`;
-        const message = `Forgot your password? Click here to reset it: ${resetURL}`;
+        //const resetURL = `http://localhost:5000/resetPassword?token=${resetToken}`;
+        const message = `
+            <p>Your password reset token is: <strong>${resetToken}</strong></p>
+            <p>Please use this token to reset your password. The token is valid for 1 hour.</p>
+        `;
         await sendEmail(user.email, 'Password Reset', message);
 
         return res.status(200).json({ message: "Password reset email sent." });
@@ -208,7 +212,13 @@ router.post("/resetPassword", async (req, res) => {
             return res.status(400).json({ message: "Invalid or expired token." });
         }
 
-        user.password = await bcrypt.hash(newPassword, 10);
+        //user.password = await bcrypt.hash(newPassword, 10);
+        //make sure new password is different from old password
+        if (newPassword === user.password) {
+            return res.status(400).json({ message: "New password must be different from the old password." });
+        }
+
+        user.password = newPassword;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
 
