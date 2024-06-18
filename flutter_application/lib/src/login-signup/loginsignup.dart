@@ -326,16 +326,10 @@ class SignUpScreen extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
-
-  Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password) async {
+  Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password, String confirmPassword) async {
     final url = Uri.parse('http://10.0.2.2:5000/users');
 
-    
-
-    Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password, String confirmPassword) async {
-      final url = Uri.parse('http://10.0.2.2:5000/users');
-
-      try {
+    try {
       // Validation Check for Password and Confirm Password
       if (password != confirmPassword) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -343,6 +337,7 @@ class SignUpScreen extends StatelessWidget {
         );
         return;
       }
+
 
       final response = await http.post(
         url,
@@ -480,7 +475,6 @@ class SignUpScreen extends StatelessWidget {
               final email = emailController.text;
               final password = passwordController.text;
               final confirmPassword = confirmPasswordController.text;
-
               userSignUp(context, firstName, lastName, email, password, confirmPassword);
             },
             child: const Text('Sign Up'),
@@ -489,5 +483,4 @@ class SignUpScreen extends StatelessWidget {
       ),
     );
   }
-}
 }
