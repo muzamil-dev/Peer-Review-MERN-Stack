@@ -1,12 +1,18 @@
 import React from 'react';
-// keep this error ( it it aint broken dont fix it )
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LoginPage from './LoginPage';
+import DashboardPage from './DashboardPage';
 
 function App() {
     return (
-        <div className="App">
-            <LoginPage />
-        </div>
+        <Router>
+            <div className="App">
+                <Routes>
+                    <Route path="/" element={<LoginPage />} />
+                    <Route path="/DashboardPage" element={<DashboardPage />} />
+                </Routes>
+            </div>
+        </Router>
     );
 }
 
