@@ -182,7 +182,7 @@ class LoginScreen extends StatelessWidget {
         final errorData = json.decode(response.body);
         print('Request failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Request failed: ${errorData['message']}')),
+          SnackBar(content: Text('Request failed: \n${errorData['message']}')),
         );
       }
     }catch(err){
@@ -285,7 +285,7 @@ class LoginScreen extends StatelessWidget {
                         filled: true,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
                         // Handle password reset logic
@@ -293,7 +293,7 @@ class LoginScreen extends StatelessWidget {
                         final email = resetEmailController.text;
                         requestPasswordReset(context, email);
                       },
-                      child: Text('Submit'),
+                      child: const Text('Submit'),
                     ),
                   ],
                 ),
@@ -305,7 +305,7 @@ class LoginScreen extends StatelessWidget {
       },
     );
   },
-  child: Text(
+  child: const Text(
     'Forgot Password?',
     style: TextStyle(color: Colors.purple),
   ),
@@ -321,14 +321,24 @@ class SignUpScreen extends StatelessWidget {
   
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController middleNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
-  Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password) async {
+  Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password, String confirmPassword) async {
     final url = Uri.parse('http://10.0.2.2:3001/users');
 
     try {
+      // Validation Check for Password and Confirm Password
+      if (password != confirmPassword) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('SignUp Failed: \nPassword and Confirm Password Does Not Match.')),
+        );
+        return;
+      }
+
+
       final response = await http.post(
         url,
         headers: {
@@ -350,7 +360,7 @@ class SignUpScreen extends StatelessWidget {
         final errorData = json.decode(response.body);
         print("SignUp Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('SignUp Failed: ${errorData['message']}')),
+          SnackBar(content: Text('SignUp Failed: \n${errorData['message']}')),
         );
       }
     } catch(err) {
@@ -382,6 +392,7 @@ class SignUpScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(bottom: 10.0),
             child: TextField(
+              controller: middleNameController,
               decoration: InputDecoration(
                 labelText: 'Middle Name',
                 border: OutlineInputBorder(
@@ -459,11 +470,12 @@ class SignUpScreen extends StatelessWidget {
             onPressed: () {
               // Handle signup logic
               final firstName = firstNameController.text;
+              final middleName = middleNameController.text;
               final lastName = lastNameController.text;
               final email = emailController.text;
               final password = passwordController.text;
               final confirmPassword = confirmPasswordController.text;
-              userSignUp(context, firstName, lastName, email, password);
+              userSignUp(context, firstName, lastName, email, password, confirmPassword);
             },
             child: const Text('Sign Up'),
           ),
