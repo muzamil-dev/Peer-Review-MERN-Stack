@@ -1,4 +1,4 @@
-node_modules
+backend/node_modules
 .gitignore
-config.js
-mail.env
+backend/config.js
+backend/mail.env
