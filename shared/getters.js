@@ -74,3 +74,64 @@ export async function getUserReviewsByAssignment(userId, assignmentId){
         incompleteReviews
     };
 }
+
+// Takes in an assignment and groupId, gets all reviews for that group
+export async function getGroupReviewsByAssignment(groupId, assignmentId){
+    // Get reviews
+    const reviews = await Review.find(
+        { assignmentId, groupId }
+    ).select('userId targetId ratings completed')
+    .sort({ userId: 1, targetId: 1 });
+
+    // Find all users from group at the time of the assignment
+    const userIdArray = [];
+    let i = 0, curUser = reviews[0].userId;
+    userIdArray.push(curUser);
+    while (reviews[i].userId.equals(curUser)){
+        userIdArray.push(reviews[i].targetId);
+        i++;
+    }
+    // Get names of users
+    const names = await User.find(
+        { _id: { $in: userIdArray }}
+    ).select('firstName middleName lastName')
+    .sort({ _id: 1 });
+
+    const reviewArray = [];
+    // Split reviews by userId
+    let reviewIndex = 0;
+    for (i = 0; i < userIdArray.length; i++){
+        const userReviewsObj = { 
+            userId: userIdArray[i], 
+            firstName: names[i].firstName,
+            middleName: names[i].middleName,
+            lastName: names[i].lastName
+        };
+        // Get the reviews by userIdArray[i]
+        const userReviews = reviews.slice(reviewIndex, reviewIndex + userIdArray.length - 1);
+        // Filter out the current id (userIdArray[i]) from the names array
+        const otherUsers = names.filter((_, idx) => idx !== i);
+        // Format the reviews to include name
+        const formattedReviews = userReviews.map(
+            (review, index) => ({
+                targetId: review.targetId,
+                firstName: otherUsers[index].firstName,
+                middleName: otherUsers[index].middleName,
+                lastName: otherUsers[index].lastName,
+                ratings: review.ratings,
+                completed: review.completed
+            })
+        );
+        // Split between completed and incomplete
+        const completedReviews = formattedReviews.filter(r => r.completed);
+        const incompleteReviews = formattedReviews.filter(r => !r.completed);
+        // Add to the object
+        userReviewsObj.completedReviews = completedReviews;
+        userReviewsObj.incompleteReviews = incompleteReviews;
+        // Push
+        reviewIndex += (userIdArray.length - 1);
+        reviewArray.push(userReviewsObj);
+    }
+
+    return reviewArray;
+}

@@ -6,7 +6,7 @@ import { Workspace } from "../models/workspaceModel.js"
 import { ReviewAssignment } from "../models/reviewAssignmentModel.js";
 
 import * as Checkers from "../shared/checkers.js";
-import { getUserReviewsByAssignment } from "../shared/getters.js";
+import * as Getters from "../shared/getters.js";
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, re
             });
         
         // Get the reviews
-        const reviews = await getUserReviewsByAssignment(userId, assignmentId);
+        const reviews = await Getters.getUserReviewsByAssignment(userId, assignmentId);
         res.json(reviews);
     }
     catch(err){
@@ -46,10 +46,15 @@ router.get("/:assignmentId/group/:groupId", async(req, res) => {
                 message: "The provided group wasn't found in our database" 
             });
         
-        // Check that there are reviews for the given assignment
-        const groupReviews = await Review.find({
-            assignmentId, groupId
-        });
+        // Check that the assignment exists
+        const assignment = await ReviewAssignment.findById(assignmentId);
+        if (!assignment)
+            return res.status(404).json({ 
+                message: "The provided assignment wasn't found in our database" 
+            });
+
+        // Get the reviews
+        const groupReviews = await Getters.getGroupReviewsByAssignment(groupId, assignmentId);
         res.json(groupReviews);
     }
     catch(err){
