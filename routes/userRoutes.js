@@ -25,6 +25,37 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+// Login
+router.post("/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        // Check for required fields
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password are required." });
+        }
+        // Find user
+        const userData = await User
+            .findOne({ email })
+            .select("+password");
+        // Could not find user
+        if (!userData) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        // Check password
+        //const isMatch = await bcrypt.compare(password, userData.password);
+        if (password !== userData.password) {
+            return res.status(401).json({ message: "Invalid password." });
+        }
+        // Return data
+        return res.status(200).json(userData);
+    }
+    catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+
 // Create a new user
 // Password hashing turned off for now
 router.post("/", async (req, res) => {
@@ -34,7 +65,7 @@ router.post("/", async (req, res) => {
         if (!firstName || !lastName || !email || !password) {
             return res.status(400).json({ message: "One or more required fields is not present." });
         }
-        
+
         //validate email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
