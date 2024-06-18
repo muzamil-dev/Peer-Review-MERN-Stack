@@ -1,8 +1,0 @@
-#Ignore config.js
-backend/config.js
-
-#Ignore Node Modules backend
-backend/node_modules/
-
-#Ignore Node Modules
-node_modules/
