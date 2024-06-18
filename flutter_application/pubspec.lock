@@ -9,7 +9,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
-  boolean_selector:
+  boolean_selector:git 
     dependency: transitive
     description:
       name: boolean_selector
