@@ -1,4 +1,0 @@
-backend/node_modules
-.gitignore
-backend/config.js
-backend/mail.env
