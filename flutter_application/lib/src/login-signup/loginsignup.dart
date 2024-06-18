@@ -108,7 +108,9 @@ class _LoginSignupState extends State<LoginSignup> {
               },
               children: [
                 LoginScreen(),
-                SignUpScreen(),
+                SingleChildScrollView(
+                  child: SignUpScreen(),
+                ),
               ],
             ),
           ),
