@@ -127,7 +127,7 @@ class LoginScreen extends StatelessWidget {
   final TextEditingController resetEmailController = TextEditingController();
 
   Future<void> loginUser(BuildContext context, String email, String password) async{
-    final url = Uri.parse('http://10.0.2.2:3001/users/login');
+    final url = Uri.parse('http://10.0.2.2:5000/users/login');
 
     try{
       final response = await http.post(
@@ -159,7 +159,7 @@ class LoginScreen extends StatelessWidget {
   }
 
   Future<void> requestPasswordReset(BuildContext context, String email) async {
-    final url = Uri.parse('http://10.0.2.2:3001/users/requestPasswordReset');
+    final url = Uri.parse('http://10.0.2.2:5000/users/requestPasswordReset');
 
     try{
       final response = await http.post(
@@ -327,7 +327,7 @@ class SignUpScreen extends StatelessWidget {
   final TextEditingController confirmPasswordController = TextEditingController();
 
   Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password, String confirmPassword) async {
-    final url = Uri.parse('http://10.0.2.2:3001/users');
+    final url = Uri.parse('http://10.0.2.2:5000/users');
 
     try {
       // Validation Check for Password and Confirm Password
