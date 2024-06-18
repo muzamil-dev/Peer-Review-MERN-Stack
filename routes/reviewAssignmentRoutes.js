@@ -34,8 +34,30 @@ router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, re
     }
 });
 
+// Get all reviews for a given assignment/target
+router.get("/:assignmentId/target/:targetId", async(req, res) => {
+    try{
+        // Get assignmentId and userId from params
+        const { assignmentId, targetId } = req.params;
+
+        // Check that the assignment exists
+        const assignment = await ReviewAssignment.findById(assignmentId);
+        if (!assignment)
+            return res.status(404).json({ 
+                message: "The provided assignment wasn't found in our database" 
+            });
+        
+        // Get the reviews
+        const reviews = await Getters.getTargetReviewsByAssignment(targetId, assignmentId);
+        res.json(reviews);
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });
+    }
+});
+
 // Get all reviews on assignment for a group
-// TODO: Make getUserReviews into a function, use it here and above
 router.get("/:assignmentId/group/:groupId", async(req, res) => {
     try{
         const { assignmentId, groupId } = req.params;

@@ -53,6 +53,7 @@ export async function getUserReviewsByAssignment(userId, assignmentId){
     // Match the targetNames to the reviews (formatted)
     const formatted = reviews.map(
         (review, index) => ({
+            reviewId: review._id,
             targetId: review.targetId,
             firstName: targetNames[index].firstName,
             middleName: targetNames[index].middleName,
@@ -72,6 +73,38 @@ export async function getUserReviewsByAssignment(userId, assignmentId){
         lastName: user.lastName,
         completedReviews,
         incompleteReviews
+    };
+}
+
+export async function getTargetReviewsByAssignment(targetId, assignmentId){
+    // Get completed reviews
+    const reviews = await Review.find(
+        { assignmentId, targetId, completed: true }
+    ).select('userId ratings completed').sort({ userId: 1 });
+    // Get the name for the target
+    const targetName = await User.findById(targetId).select('firstName middleName lastName');
+    // Get all user ids from completed
+    const userIds = reviews.map(review => review.userId);
+    // Get names for all users
+    const names = await User.find(
+        { _id: { $in: userIds }}
+    ).select('firstName middleName lastName').sort({ _id: 1 });
+    // Return formatted json
+    return {
+        targetId,
+        firstName: targetName.firstName,
+        middleName: targetName.middleName,
+        lastName: targetName.lastName,
+        reviews: reviews.map(
+            (review, index) => ({
+                reviewId: review._id,
+                userId: review.userId,
+                firstName: names[index].firstName,
+                middleName: names[index].middleName,
+                lastName: names[index].lastName,
+                ratings: review.ratings
+            })
+        )
     };
 }
 
