@@ -146,76 +146,6 @@ router.post("/user/reviews", async (req, res) => {
     }
 });
 
-// Get reviews for a target user
-router.post("/target/reviews", async (req, res) => {
-    const { targetId } = req.body;
-
-    if (!targetId) {
-        return res.status(400).json({ message: "User ID is required" });
-    }
-
-    try {
-        const user = await User.findById(targetId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const reviews = await Review.find({ targetId });
-        res.status(200).json(reviews);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
-    }
-});
-
-//Edit a review.
-router.put("/:reviewId", async (req, res) => {
-    try {
-        const { reviewId } = req.params;
-        const { ratings, text } = req.body;
-
-        const review = await Review.findById(reviewId)
-        if (!review) {
-            return res.status(404).json({ message: "Review not found" });
-        }
-
-        if (ratings) {
-            review.ratings = ratings;
-        }
-
-        if (text) {
-            review.text = text;
-        }
-
-        const updatedReview = await review.save();
-        res.status(200).json(updatedReview);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
-    }
-});
-
-
-//Delete a review
-router.delete("/:reviewId", async (req, res) => {
-    try {
-        const { reviewId } = req.params;
-
-        const review = await Review.findById(reviewId);
-        if (!review) {
-            return res.status(404).json({ message: "Review not found" });
-        }
-
-        await review.deleteOne({ __id: reviewId });
-        res.status(200).json({ message: "Review deleted successfully" });
-
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: err.message });
-    }
-});
-
-
 // Get all reviews for a specific groupId. Looks through reviews and returns all reviews with the given groupId.
 router.get("/group/:groupId/reviews", async (req, res) => {
     const { groupId } = req.params;
@@ -237,23 +167,5 @@ router.get("/group/:groupId/reviews", async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
-
-
-// Get reviews from a workspace
-// router.get("/workspace/:workspaceId", async (req, res) => {
-
-//     try {
-//         const reviews = await Review.find({ workspaceId: req.params.workspaceId }).populate('userId workspaceId groupId');
-//         res.status(200).json(reviews);
-//     } catch (err) {
-//         console.error(err.message);
-//         res.status(500).json({ message: err.message });
-//     }
-
-//     // Check if workspace exists
-//     if (!workspaceId) {
-//         return res.status(400).json({ message: "The provided workspace was not found in our database" });
-//     }
-// });
 
 export default router;
