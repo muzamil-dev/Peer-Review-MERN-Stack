@@ -114,6 +114,7 @@ export async function getGroupReviewsByAssignment(groupId, assignmentId){
         // Format the reviews to include name
         const formattedReviews = userReviews.map(
             (review, index) => ({
+                reviewId: review._id,
                 targetId: review.targetId,
                 firstName: otherUsers[index].firstName,
                 middleName: otherUsers[index].middleName,
