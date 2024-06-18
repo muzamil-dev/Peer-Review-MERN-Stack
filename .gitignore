@@ -1,5 +1,4 @@
-#Ignore config.js
-backend/config.js
-
-backend/node_modules/
-node_modules/
+node_modules
+.gitignore
+config.js
+mail.env
