@@ -6,84 +6,27 @@ import { Workspace } from "../models/workspaceModel.js"
 import { ReviewAssignment } from "../models/reviewAssignmentModel.js";
 
 import * as Checkers from "../shared/checkers.js";
+import { getUserReviewsByAssignment } from "../shared/getters.js";
 
 const router = express.Router();
 
-// Get the reviews that a user has done on a specific assignment
-// TODO: Simplify using the complete/imcomplete boolean
+// Get all reviews for a given assignment/user
 router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, res) => {
     try{
         // Get assignmentId and userId from params
         const { assignmentId } = req.params;
         const userId = req.params.userId || req.body.userId;
 
-        // Get info about assignment
-        const assignment = await ReviewAssignment.findById(
-            assignmentId
-        ).select('workspaceId questions');
-
-        // If a userId param is passed, check that an instructor is making the request
-        if (req.params.userId && 
-            !await Checkers.checkInstructor(req.body.userId, assignment.workspaceId)){
-            return res.status(403).json({ message: "User is not authorized to make this request" });
-        }
-
-        // Get groups from workspace that contain userId
-        const group = await Group.findOne({
-            workspaceId: assignment.workspaceId,
-            userIds: userId
-        });
-
-        // Keep track of complete vs incomplete reviews
-        const completed = [];
-        const notCompleted = [];
+        // Check that the assignment exists
+        const assignment = await ReviewAssignment.findById(assignmentId);
+        if (!assignment)
+            return res.status(404).json({ 
+                message: "The provided assignment wasn't found in our database" 
+            });
         
-        // Remove the id of the user being searched
-        group.userIds = group.userIds.filter(
-            id => !id.equals(userId)
-        );
-        group.userIds = group.userIds.map(id => id.toString());
-        // Gets all reviews by user for group members
-        const groupReviews = await Review.find({
-            assignmentId,
-            userId,
-            targetId: { $in: group.userIds }
-        }).select('userId targetId');
-
-        // Get targetIds for completed reviews and incomplete reviews
-        const completedIds = groupReviews.map(
-            review => review.targetId
-        );
-        const reviewIds = groupReviews.map(
-            review => review._id
-        );
-
-        // Filter out completedIds from all userIds
-        const notCompletedIds = group.userIds.filter(
-            id1 => !completedIds.some(id2 => id1.equals(id2))
-        );
-
-        // Get names of group members
-        let [completeUsers, incompleteUsers] = await Promise.all([
-            User.find({ _id: { $in: completedIds }}).select('firstName middleName lastName'),
-            User.find({ _id: { $in: notCompletedIds }}).select('firstName middleName lastName')
-        ]);
-
-        // Change name of fields
-        completeUsers = completeUsers.map(
-            (user, index) => ({ targetId: user._id, reviewId: reviewIds[index], targetFirstName: user.firstName, 
-            targetMiddleName: user.middleName, targetLastName: user.lastName })
-        );
-        incompleteUsers = incompleteUsers.map(
-            user => ({ targetId: user._id, targetFirstName: user.firstName, 
-            targetMiddleName: user.middleName, targetLastName: user.lastName })
-        );
-
-        // Add the reviews to the arrays
-        completed.push(...completeUsers);
-        notCompleted.push(...incompleteUsers);
-        
-        res.json({ assignmentId, userId, completed, notCompleted });
+        // Get the reviews
+        const reviews = await getUserReviewsByAssignment(userId, assignmentId);
+        res.json(reviews);
     }
     catch(err){
         console.log(err.message);
