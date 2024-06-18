@@ -12,12 +12,12 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-export const sendEmail = async (to, subject, text) => {
+export const sendEmail = async (to, subject, message) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to,
         subject,
-        text
+        html: message,
     };
 
     try {

@@ -1,0 +1,1 @@
+ C:\\Users\\halkh\\Documents\\Peer-Review-MERN-Stack\\flutter_application\\.dart_tool\\flutter_build\\774d59cb00e7dbc40217cb1afb79f193\\native_assets.yaml: 
