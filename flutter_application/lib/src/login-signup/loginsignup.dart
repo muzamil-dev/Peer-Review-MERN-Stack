@@ -107,9 +107,19 @@ class _LoginSignupState extends State<LoginSignup> {
                 });
               },
               children: [
-                LoginScreen(),
                 SingleChildScrollView(
-                  child: SignUpScreen(),
+                  child: Column(
+                    children: [
+                      LoginScreen(),
+                    ],
+                  ),
+                ),
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SignUpScreen(),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -174,7 +184,7 @@ class LoginScreen extends StatelessWidget {
 
       if(response.statusCode == 200){
         print('Password reset email sent');
-        Navigator.of(context).pop();
+        Navigator.pushNamed(context, '/passwordReset'); 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Password reset email sent')),
         );
