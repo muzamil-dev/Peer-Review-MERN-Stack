@@ -9,15 +9,50 @@ import * as Checkers from '../shared/checkers.js';
 import * as Getters from "../shared/getters.js";
 
 import generateCode from '../shared/generateCode.js';
+import { ReviewAssignment } from '../models/reviewAssignmentModel.js';
 
 const router = express.Router();
+
+// Gets a list of assignments made in the workspace
+router.get("/:workspaceId/assignments", async(req, res) => {
+    try{
+        // Get the workspace
+        const { workspaceId } = req.params;
+        const workspace = await Workspace.findById(workspaceId);
+        // Check that the workspace exists
+        if (!workspace)
+            return res.status(404).json({ 
+                message: "The provided workspace was not found in our database" 
+            });
+        
+        // Get the assignments with the provided workspaceId
+        const assignments = await ReviewAssignment.find(
+            { workspaceId }
+        );
+        // Format the assignments json
+        const formatted = assignments.map(
+            asn => ({
+                assignmentId: asn._id,
+                startDate: asn.startDate,
+                dueDate: asn.dueDate,
+                description: asn.description,
+                questions: asn.questions
+            })
+        );
+        return res.json(formatted);
+    }
+    catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
 
 // Gets a list of groups from the workspace
 router.get("/:workspaceId/groups", async(req, res) => {
     try{
         // Get the workspace
         const { workspaceId } = req.params;
-        const workspace = Workspace.findById(workspaceId);
+        const workspace = await Workspace.findById(workspaceId);
         // Check that the workspace exists
         if (!workspace)
             return res.status(404).json({ 
