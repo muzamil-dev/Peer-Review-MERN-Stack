@@ -290,7 +290,7 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
     }
 });
 
-///////////////////////////////
+////////////////////////////
 
 // This is for testing and likely wont be available to users
 // Pass in an array (workspaces) with documents: { name, userId }
