@@ -33,7 +33,7 @@ router.get("/:groupId", async(req, res) => {
 
 // Create a group in a workspace
 // Required: workspaceId
-// Optional: name
+// Optional: name, memberLimit
 router.post("/create", async(req, res) => {
     try{
         const body = req.body;
@@ -60,12 +60,16 @@ router.post("/create", async(req, res) => {
             body.name = `Group ${numGroups + 1}`;
         }
         // Create the group
-        const group = await Group.create({ 
+        const groupObj = {
+            groupId: null,
             name: body.name, 
-            workspaceId: body.workspaceId 
-        });
+            workspaceId: body.workspaceId,
+            memberLimit: body.memberLimit || null
+        }
+        const group = await Group.create(groupObj);
+        groupObj.groupId = group._id;
 
-        return res.status(201).json(group);
+        return res.status(201).json(groupObj);
     }
     catch(err){
         console.log(err.message);
@@ -180,7 +184,7 @@ router.put("/leave", async(req, res) => {
 });
 
 // Deletes a group
-router.delete("/delete/:groupId", async(req, res) => {
+router.delete("/:groupId/delete", async(req, res) => {
     try{
         const { groupId } = req.params;
         // Check that the group exists
