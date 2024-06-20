@@ -1,81 +1,93 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './DashboardPage.css';
 
-const DashboardPage = () => {
-    const [workspaces, setWorkspaces] = useState([]);
-    const [showJoinForm, setShowJoinForm] = useState(false);
-    const [showCreateForm, setShowCreateForm] = useState(false);
-    const [joinCode, setJoinCode] = useState('');
-    const [newWorkspace, setNewWorkspace] = useState({ name: '', domain: '', csv: null, cloneCode: '' });
+const Dashboard = () => {
+    const [workspaces, setWorkspaces] = useState([
+        { id: 1, name: 'Workspace 1', role: 'Admin', code: 'WS1' },
+        { id: 2, name: 'Workspace 2', role: 'User', code: 'WS2' },
+        { id: 3, name: 'Workspace 3', role: 'User', code: 'WS3' },
+        { id: 4, name: 'Workspace 4', role: 'Admin', code: 'WS4' }
+    ]);
+
+    const [newWorkspaceName, setNewWorkspaceName] = useState('');
+    const [newWorkspaceDomain, setNewWorkspaceDomain] = useState('');
+    const [csvFile, setCsvFile] = useState(null);
+    const [inviteCode, setInviteCode] = useState('');
+    const navigate = useNavigate();
 
     const handleJoinWorkspace = () => {
-        // Logic to join workspace using joinCode
-        alert(`Joining workspace with code: ${joinCode}`);
+        // Logic to join workspace
+        alert('Join workspace logic here');
     };
 
-    const handleCreateWorkspace = () => {
-        // Logic to create new workspace
-        alert(`Creating workspace: ${JSON.stringify(newWorkspace)}`);
+    const handleAddWorkspace = () => {
+        // Logic to add workspace
+        const newWorkspace = {
+            id: workspaces.length + 1,
+            name: newWorkspaceName,
+            role: 'Admin',
+            code: `WS${workspaces.length + 1}`
+        };
+        setWorkspaces([...workspaces, newWorkspace]);
+        setNewWorkspaceName('');
+        setNewWorkspaceDomain('');
+        setCsvFile(null);
+        setInviteCode('');
     };
 
-    const handleCsvUpload = (e) => {
-        setNewWorkspace({ ...newWorkspace, csv: e.target.files[0] });
+    const handleCsvUpload = (event) => {
+        setCsvFile(event.target.files[0]);
+    };
+
+    const handleWorkspaceClick = (workspaceId) => {
+        navigate(`/GroupPage/${workspaceId}`);
     };
 
     return (
         <div className="dashboard">
             <h1>Dashboard</h1>
-            <div className="workspace-container">
-                {workspaces.map((workspace, index) => (
-                    <div key={index} className="workspace-card">
-                        <h3>{workspace.name}</h3>
-                        <p>{workspace.role}</p>
+            <div className="workspace-cards">
+                {workspaces.map((workspace) => (
+                    <div key={workspace.id} className="workspace-card" onClick={() => handleWorkspaceClick(workspace.id)}>
+                        <h2>{workspace.name}</h2>
+                        <p>Role: {workspace.role}</p>
+                        <p>Code: {workspace.code}</p>
                     </div>
                 ))}
             </div>
-            <div className="buttons">
-                <button onClick={() => setShowJoinForm(!showJoinForm)}>Join Workspace</button>
-                <button onClick={() => setShowCreateForm(!showCreateForm)}>Create Workspace</button>
+            <div className="workspace-actions">
+                <h2>Join Workspace</h2>
+                <input
+                    type="text"
+                    placeholder="Enter code"
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value)}
+                />
+                <button onClick={handleJoinWorkspace}>Join</button>
+
+                <h2>Add Workspace</h2>
+                <input
+                    type="text"
+                    placeholder="Workspace name"
+                    value={newWorkspaceName}
+                    onChange={(e) => setNewWorkspaceName(e.target.value)}
+                />
+                <input
+                    type="text"
+                    placeholder="Domain restrictions"
+                    value={newWorkspaceDomain}
+                    onChange={(e) => setNewWorkspaceDomain(e.target.value)}
+                />
+                <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleCsvUpload}
+                />
+                <button onClick={handleAddWorkspace}>Add</button>
             </div>
-            {showJoinForm && (
-                <div className="join-form">
-                    <h2>Join Workspace</h2>
-                    <input
-                        type="text"
-                        placeholder="Enter join code"
-                        value={joinCode}
-                        onChange={(e) => setJoinCode(e.target.value)}
-                    />
-                    <button onClick={handleJoinWorkspace}>Join</button>
-                </div>
-            )}
-            {showCreateForm && (
-                <div className="create-form">
-                    <h2>Create Workspace</h2>
-                    <input
-                        type="text"
-                        placeholder="Workspace Name"
-                        value={newWorkspace.name}
-                        onChange={(e) => setNewWorkspace({ ...newWorkspace, name: e.target.value })}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Domain Restrictions"
-                        value={newWorkspace.domain}
-                        onChange={(e) => setNewWorkspace({ ...newWorkspace, domain: e.target.value })}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Clone Code (optional)"
-                        value={newWorkspace.cloneCode}
-                        onChange={(e) => setNewWorkspace({ ...newWorkspace, cloneCode: e.target.value })}
-                    />
-                    <input type="file" onChange={handleCsvUpload} />
-                    <button onClick={handleCreateWorkspace}>Create</button>
-                </div>
-            )}
         </div>
     );
 };
 
-export default DashboardPage;
+export default Dashboard;
