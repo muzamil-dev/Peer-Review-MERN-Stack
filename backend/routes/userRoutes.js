@@ -245,18 +245,41 @@ router.get("/:userId/workspaces", async (req, res) => {
         }
 
         // Extract the workspace details from the populated data
-        const userWorkspaces = user.workspaceIds.map(workspace => {
-            return {
-                workspaceId: workspace.workspaceId._id,
-                name: workspace.workspaceId.name,
-                role: workspace.role
-            };
-        });
+        const userWorkspaces = user.workspaceIds.map(workspace => ({
+            workspaceId: workspace.workspaceId._id,
+            name: workspace.workspaceId.name,
+            role: workspace.role
+        }));
 
         return res.status(200).json(userWorkspaces);
     } catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
+    }
+});
+
+// Get all groups for a user
+router.get("/:userId/groups", async(req, res) => {
+    try{
+        const { userId } = req.params;
+        // Get the user
+        const user = await User.findById(userId).populate('groupIds', 'name');
+
+        if (!user) {
+            return res.status(404).json({
+                message: "The provided user was not found in our database"
+            });
+        }
+        // Format the groups
+        const groups = user.groupIds.map(group => ({
+            groupId: group._id,
+            name: group.name
+        }));
+
+        return res.json(groups);
+    }
+    catch(err){
+
     }
 });
 
