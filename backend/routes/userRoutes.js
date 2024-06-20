@@ -232,20 +232,22 @@ router.post("/resetPassword", async (req, res) => {
 });
 
 // Get all workspaces of a user
-router.get("/:id/workspaces", async (req, res) => {
+router.get("/:userId/workspaces", async (req, res) => {
     try {
-        const { id } = req.params;
+        const { userId } = req.params;
         // Find the user and populate the workspaceIds array
-        const user = await User.findById(id).populate('workspaceIds.workspaceId', 'name');
+        const user = await User.findById(userId).populate('workspaceIds.workspaceId', 'name');
 
         if (!user) {
-            return res.status(404).json({ message: "User not found." });
+            return res.status(404).json({
+                message: "The provided user was not found in our database"
+            });
         }
 
         // Extract the workspace details from the populated data
         const userWorkspaces = user.workspaceIds.map(workspace => {
             return {
-                id: workspace.workspaceId._id,
+                workspaceId: workspace.workspaceId._id,
                 name: workspace.workspaceId.name,
                 role: workspace.role
             };
