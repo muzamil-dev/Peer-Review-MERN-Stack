@@ -133,7 +133,7 @@ router.put("/join", async(req, res) => {
         const groupId = req.body.groupId;
         const userId = req.body.userId;
         // Get group and check that it exists
-        const group = await Group.findById(groupId).select('workspaceId');
+        const group = await Group.findById(groupId);
         if (!group)
             return res.status(404).json({ 
                 message: "The provided group was not found in our database" 
@@ -147,6 +147,12 @@ router.put("/join", async(req, res) => {
             return res.status(400).json({ 
                 message: "User is already a member of a group in this workspace" 
             });
+        // Check the group's member limit
+        if (group.memberLimit && group.userIds.length === group.memberLimit)
+            return res.status(400).json({
+                message: "Cannot join group because the member limit has been reached"
+            });
+
         // Link the user and the group
         await Promise.all([
             Adders.addUserToGroup(userId, groupId),
