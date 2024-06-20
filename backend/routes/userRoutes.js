@@ -231,17 +231,27 @@ router.post("/resetPassword", async (req, res) => {
     }
 });
 
-//get all workspaces of a user
+// Get all workspaces of a user
 router.get("/:id/workspaces", async (req, res) => {
     try {
         const { id } = req.params;
-        //find user
-        const userData = await User.findById(id);
-        if (!userData) {
+        // Find the user and populate the workspaceIds array
+        const user = await User.findById(id).populate('workspaceIds.workspaceId', 'name');
+
+        if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
-        //return user's workspaces
-        return res.status(200).json(userData.workspaceIds);
+
+        // Extract the workspace details from the populated data
+        const userWorkspaces = user.workspaceIds.map(workspace => {
+            return {
+                id: workspace.workspaceId._id,
+                name: workspace.workspaceId.name,
+                role: workspace.role
+            };
+        });
+
+        return res.status(200).json(userWorkspaces);
     } catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });

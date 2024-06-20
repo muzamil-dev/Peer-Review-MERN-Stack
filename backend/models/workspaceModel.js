@@ -15,7 +15,7 @@ const workspaceSchema = mongoose.Schema(
             type: [{
                 userId: {
                     type: ObjectId,
-                    ref: "User",
+                    ref: "user",
                     required: true
                 },
                 role: {

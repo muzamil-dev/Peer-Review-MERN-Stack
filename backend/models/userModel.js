@@ -33,7 +33,7 @@ const userSchema = mongoose.Schema(
             type: [{
                 workspaceId: {
                     type: ObjectId,
-                    ref: "Workspace",
+                    ref: "workspace",
                     required: true
                 },
                 role: {

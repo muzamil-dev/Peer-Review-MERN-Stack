@@ -1,22 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/main_app_bar.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class AdminDashboard extends StatelessWidget {
+class AdminDashboard extends StatefulWidget {
   static const routeName = "/adminDashboard";
 
-  // Example list of classes
-  final List<Class> classes = [
-    Class(name: 'POOSD', description: 'Something about OOP? I think idk'),
-    Class(
-        name: 'Senior Design',
-        description: 'Everyone else can do the work for me'),
-    Class(
-        name: 'Discrete Structures',
-        description: 'Some kind of math or something'),
-    Class(name: 'History 404', description: 'As if we would take history'),
-  ];
+  @override
+  _AdminDashboardState createState() => _AdminDashboardState();
+}
 
-  AdminDashboard({super.key});
+class _AdminDashboardState extends State<AdminDashboard> {
+  List<Workspace> workspaces = [];
+  bool isLoading = true;
+  final String userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWorkspaces();
+  }
+
+  Future<void> fetchWorkspaces() async {
+    final url = Uri.parse('http://10.0.2.2:5000/users/6671c8362ffea49f3018bf61/workspaces');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          workspaces = data.map((workspace) => Workspace.fromJson(workspace)).toList();
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load workspaces');
+      }
+    } catch (error) {
+      print('Error fetching workspaces: $error');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +48,14 @@ class AdminDashboard extends StatelessWidget {
       appBar: const MainAppBar(
         title: 'Admin Dashboard',
       ),
-      body: ListView.builder(
-        itemCount: classes.length,
-        itemBuilder: (context, index) {
-          return ClassCard(classes[index]);
-        },
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: workspaces.length,
+              itemBuilder: (context, index) {
+                return WorkspaceCard(workspaces[index]);
+              },
+            ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -37,12 +63,12 @@ class AdminDashboard extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.reorder),
               onPressed: () {},
-              tooltip: 'Reorder Classes',
+              tooltip: 'Reorder Workspaces',
             ),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {},
-              tooltip: 'Add Class',
+              tooltip: 'Add Workspace',
             ),
           ],
         ),
@@ -51,17 +77,26 @@ class AdminDashboard extends StatelessWidget {
   }
 }
 
-class Class {
+class Workspace {
+  final String workspaceId;
   final String name;
-  final String description;
+  final String role;
 
-  Class({required this.name, required this.description});
+  Workspace({required this.workspaceId, required this.name, required this.role});
+
+  factory Workspace.fromJson(Map<String, dynamic> json) {
+    return Workspace(
+      workspaceId: json['workspaceId'] ?? 'No ID',
+      name: json['name'] ?? 'No name',
+      role: json['role'] ?? 'No role',
+    );
+  }
 }
 
-class ClassCard extends StatelessWidget {
-  final Class classInfo;
+class WorkspaceCard extends StatelessWidget {
+  final Workspace workspace;
 
-  const ClassCard(this.classInfo, {super.key});
+  const WorkspaceCard(this.workspace, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -73,12 +108,12 @@ class ClassCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              classInfo.name,
+              workspace.name,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
-              classInfo.description,
+              'Role: ${workspace.role}',
               style: const TextStyle(fontSize: 16),
             ),
           ],
