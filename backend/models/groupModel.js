@@ -9,12 +9,12 @@ const groupSchema = mongoose.Schema(
         workspaceId: {
             type: ObjectId,
             required: true,
-            ref: "Workspace"
+            ref: "workspace"
         },
         userIds: {
             type: [ObjectId],
             default: [],
-            ref: "User",
+            ref: "user",
             required: true
         }
     },
