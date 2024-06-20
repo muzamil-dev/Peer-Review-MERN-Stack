@@ -4,23 +4,23 @@ const reviewsSchema = mongoose.Schema(
     {
         assignmentId: {
             type: ObjectId,
-            ref: "ReviewAssignment",
+            ref: "reviewassignment",
             required: true
         },
         userId: {
             type: ObjectId,
-            ref: "User",
+            ref: "user",
             required: true
         },
         targetId: {
             type: ObjectId,
-            ref: "User",
+            ref: "user",
             required: true
         },
         groupId: {
             type: ObjectId,
             required: true,
-            ref: "Group"
+            ref: "group"
         },
         ratings: [{
             type: Number,
@@ -41,4 +41,4 @@ const reviewsSchema = mongoose.Schema(
     }
 );
 
-export const Review = mongoose.model("Review", reviewsSchema);
+export const Review = mongoose.model("review", reviewsSchema);
