@@ -82,7 +82,7 @@ input[type="radio"]{
 #signup:checked ~ label.signup{
   color: #fff;
   cursor: default;
-  user-select: none;
+  /*user-select: none;*/
 }
 #signup:checked ~ label.login{
   color: #000;
@@ -92,7 +92,7 @@ input[type="radio"]{
 }
 #login:checked ~ label.login{
   cursor: default;
-  user-select: none;
+  /*user-select: none;*/
 }
 .wrapper .form-container{
   width: 100%;
@@ -127,12 +127,12 @@ input[type="radio"]{
 }
 .form-inner form .field{
   height: 50px;
-  width: 100%;
+  width: 100%; /**/
   margin-top: 20px;
 }
 .form-inner form .field input{
   height: 100%;
-  width: 100%;
+  width: 100%; /**/
   outline: none;
   padding-left: 15px;
   border-radius: 15px;
@@ -201,4 +201,45 @@ form .btn input[type="submit"]{
   font-size: 20px;
   font-weight: 500;
   cursor: pointer;
+}
+
+
+/**/
+.wrapper .form-inner {
+  display: flex;
+  width: 200%; /**/
+  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.wrapper .form-inner form {
+  width: 50%;
+}
+
+#signup:checked ~ .form-container .form-inner {
+  margin-left: -50%;
+}
+
+#login:checked ~ .form-container .form-inner {
+  margin-left: 0;
+}
+
+#login:checked ~ .slider-tab {
+  left: 0;
+}
+
+.field-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.field-row .field {
+  width: 48%;
+}
+
+.field-row .field:first-child {
+  margin-right: 2%;
+}
+
+.field-row .field:last-child {
+  margin-left: 2%;
 }

@@ -1,12 +1,16 @@
 // src/LoginPage.js
+import Api from "./Api.js";
 import React, { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './LoginPage.css'; // Assuming you save the CSS styles in LoginPage.css
 
 const LoginPage = () => {
     const [isLoginActive, setIsLoginActive] = useState(true);
     const [loginData, setLoginData] = useState({ email: '', password: '' });
-    const [signupData, setSignupData] = useState({ email: '', password: '', confirmPassword: '' });
+    //const [signupData, setSignupData] = useState({ email: '', password: '', confirmPassword: '' });
+    const [signupData, setSignupData] = useState({ firstName: '', middleName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+    const navigate = useNavigate();
 
     const handleLoginChange = (e) => {
         setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -19,18 +23,48 @@ const LoginPage = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/login', loginData);
-            alert('Login successful');
+            const response = await Api.Users.DoLogin(loginData.email, loginData.password);
+            if (response.status === 200) {
+                alert('Login successful');
+                navigate('/DashboardPage');
             // Redirect or perform additional actions after successful login
+            }
+            else {
+                alert('Invalid email or password');
+            }
         } catch (error) {
             console.error('Error logging in:', error);
-            alert('Invalid email or password');
+            //alert('Invalid email or password-2');
         }
     };
 
     const handleSignup = async (e) => {
         e.preventDefault();
-        // Handle signup logic
+        if (signupData.password !== signupData.confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        //console.log('Signup Data:', signupData); // Log the signup data
+
+        try {
+            const response = await Api.Users.CreateAccount(
+                signupData.firstName,
+                signupData.middleName,
+                signupData.lastName,
+                signupData.email,
+                signupData.password
+            );
+            if (response.status === 201) {
+                alert('Signup successful');
+                navigate('/DashboardPage');
+            } else {
+                alert('Signup failed');
+            }
+        } catch (error) {
+            console.error('Error signing up:', error);
+            alert('Signup failed');
+        }
     };
 
     return (
@@ -64,7 +98,7 @@ const LoginPage = () => {
                     </label>
                     <div className="slider-tab" style={{ left: isLoginActive ? '0%' : '50%' }}></div>
                 </div>
-                <div className="form-inner" style={{ marginLeft: isLoginActive ? '0%' : '-50%' }}>
+                <div className="form-inner" style={{ marginLeft: isLoginActive ? '0%' : '-100%' }}>
                     <form onSubmit={handleLogin} className="login">
                         <div className="field">
                             <input
@@ -96,6 +130,28 @@ const LoginPage = () => {
                         </div>
                     </form>
                     <form onSubmit={handleSignup} className="signup">
+                        <div className="field-row">
+                            <div className="field">
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    placeholder="First Name"
+                                    value={signupData.firstName}
+                                    onChange={handleSignupChange}
+                                    //required
+                                />
+                            </div>
+                            <div className="field">
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    placeholder="Last Name"
+                                    value={signupData.lastName}
+                                    onChange={handleSignupChange}
+                                    //required
+                                />
+                            </div>
+                        </div>
                         <div className="field">
                             <input
                                 type="text"
