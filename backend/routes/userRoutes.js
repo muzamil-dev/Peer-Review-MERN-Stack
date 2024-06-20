@@ -231,6 +231,23 @@ router.post("/resetPassword", async (req, res) => {
     }
 });
 
+//get all workspaces of a user
+router.get("/:id/workspaces", async (req, res) => {
+    try {
+        const { id } = req.params;
+        //find user
+        const userData = await User.findById(id);
+        if (!userData) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        //return user's workspaces
+        return res.status(200).json(userData.workspaceIds);
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
 // Bulk user creation
 router.post("/bulk", async (req, res) => {
     try {

@@ -84,14 +84,14 @@ router.post("/submit", async(req, res) => {
 });
 
 // Edit a provided review
-// Required: reviewId, ratings
-// Optional: text
+// Required: reviewId
+// Optional: ratings, text (fields to edit)
 router.put("/edit", async(req, res) => {
     try{
         // Get required parameters
         const { reviewId, ratings } = req.body;
         // Return if required fields are missing
-        if (!reviewId || !ratings)
+        if (!reviewId)
             return res.status(400).json({ message: "One or more required fields is not present" });
 
         // Check that the review exists
@@ -105,7 +105,14 @@ router.put("/edit", async(req, res) => {
                 message: `Mismatch between number of ratings (${ratings.length}) and expected number (${review.ratings.length})`
             });
         // Set the new ratings
-        review.ratings = ratings;
+        if (ratings){
+            if (review.ratings.length === ratings.length)
+                review.ratings = ratings;
+            else
+                return res.status(400).json({ 
+                    message: `Mismatch between provided number of ratings (${ratings.length}) and expected number (${review.ratings.length})`
+                });
+        }
         // Add optional fields
         if (req.body.text) review.text = req.body.text;
         // Update the review in the database

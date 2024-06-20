@@ -23,7 +23,7 @@ app.use('/assignments', reviewAssignmentRoutes);
 
 mongoose.connect(mongoDBURL,{
 }).then(() => {
-    console.log('Connected to Database!');
+    console.log('Connected to Database!!!!!');
     //root route
     app.get('/', (req, res) => {
         res.send('Welcome to the Peer Review MERN Stack Application!');
