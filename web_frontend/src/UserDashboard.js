@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Api from './Api';
 import { jwtDecode } from 'jwt-decode';
+import { useSnackbar } from 'notistack';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
@@ -14,6 +15,7 @@ const UserDashboard = () => {
     const [reviews, setReviews] = useState({});
     const [selectedReview, setSelectedReview] = useState({});
     const navigate = useNavigate();
+    const { enqueueSnackbar } = useSnackbar();
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
@@ -40,10 +42,12 @@ const UserDashboard = () => {
                 }
             } else {
                 setErrorMessage(`Failed to fetch workspaces: ${response.message}`);
+                enqueueSnackbar(`Failed to fetch workspaces: ${response.message}`, { variant: 'error' });
             }
         } catch (error) {
             console.error('Error fetching workspaces:', error);
             setErrorMessage(`Failed to fetch workspaces: ${error.response ? error.response.data.message : error.message}`);
+            enqueueSnackbar(`Failed to fetch workspaces: ${error.response ? error.response.data.message : error.message}`, { variant: 'error' });
         }
     };
 
@@ -63,10 +67,12 @@ const UserDashboard = () => {
                 setPastDueAssignments(pastDueAssignments);
             } else {
                 setErrorMessage(`Failed to fetch assignments: ${response.message}`);
+                enqueueSnackbar(`Failed to fetch assignments: ${response.message}`, { variant: 'error' });
             }
         } catch (error) {
             console.error('Error fetching assignments:', error);
             setErrorMessage(`Failed to fetch assignments: ${error.response ? error.response.data.message : error.message}`);
+            enqueueSnackbar(`Failed to fetch assignments: ${error.response ? error.response.data.message : error.message}`, { variant: 'error' });
         }
     };
 
@@ -86,9 +92,11 @@ const UserDashboard = () => {
                 }
             } else {
                 setErrorMessage(`Failed to fetch reviews: ${response.message}`);
+                enqueueSnackbar(`Failed to fetch reviews: ${response.message}`, { variant: 'error' });
             }
         } catch (error) {
             console.log(`No reviews found for assignment ${assignmentId}`);
+            //enqueueSnackbar(`No reviews found for assignment ${assignmentId}`, { variant: 'info' });
         }
         return null;
     };
@@ -126,16 +134,23 @@ const UserDashboard = () => {
         }));
     };
 
-    const handleReviewAction = (assignmentId, isCompleted) => {
+    const handleReviewAction = (assignmentId, dueDate) => {
+        const now = new Date();
+        if (new Date(dueDate) < now) {
+            enqueueSnackbar('This assignment is past due and cannot be edited.', { variant: 'error' });
+            return;
+        }
+
         const reviewId = selectedReview[assignmentId];
         if (reviewId) {
             navigate(`/Review/${reviewId}`);
         } else {
             console.error('No review selected');
+            enqueueSnackbar('No review selected', { variant: 'error' });
         }
     };
 
-    const renderReviewDropdown = (assignmentId) => {
+    const renderReviewDropdown = (assignmentId, dueDate) => {
         const assignmentReviews = reviews[assignmentId];
 
         if (!assignmentReviews) return null;
@@ -159,8 +174,8 @@ const UserDashboard = () => {
                     ))}
                 </select>
                 <button
-                    className='btn btn-primary'
-                    onClick={() => handleReviewAction(assignmentId, false)}
+                    className='btn btn-primary ml-2'
+                    onClick={() => handleReviewAction(assignmentId, dueDate)}
                     disabled={!selectedReview[assignmentId]}
                 >
                     {assignmentReviews.incompleteReviews.length > 0 ? 'Start' : 'Edit'}
@@ -202,7 +217,7 @@ const UserDashboard = () => {
                                 <td>{new Date(assignment.dueDate).toLocaleString()}</td>
                                 <td>{new Date(assignment.startDate).toLocaleString()}</td>
                                 <td>{(reviews[assignment.assignmentId]?.incompleteReviews.length === 0) ? 'Completed' : 'Incomplete'}</td>
-                                <td>{renderReviewDropdown(assignment.assignmentId)}</td>
+                                <td>{renderReviewDropdown(assignment.assignmentId, assignment.dueDate)}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -228,7 +243,7 @@ const UserDashboard = () => {
                                 <td>{new Date(assignment.dueDate).toLocaleString()}</td>
                                 <td>{new Date(assignment.startDate).toLocaleString()}</td>
                                 <td>{(reviews[assignment.assignmentId]?.incompleteReviews.length === 0) ? 'Completed' : 'Incomplete'}</td>
-                                <td>{renderReviewDropdown(assignment.assignmentId)}</td>
+                                <td>{renderReviewDropdown(assignment.assignmentId, assignment.dueDate)}</td>
                             </tr>
                         ))}
                     </tbody>
