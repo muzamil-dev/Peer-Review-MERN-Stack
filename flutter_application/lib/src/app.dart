@@ -52,6 +52,12 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("Login Signup PAGE"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/passwordReset");
+                },
+                child: const Text("Password Reset PAGE"),
+              ),
             ],
           ),
         ),
