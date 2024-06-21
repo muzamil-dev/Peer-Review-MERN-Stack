@@ -376,8 +376,33 @@ const GroupsPageAdmin = () => {
         navigate(`/formsAdmin/${workspaceId}`);
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        navigate('/login');
+    };
+
     return (
         <div className={styles.workspaceAdmin}>
+            
+            <nav className={styles.navbarContainer}>
+                <a className={styles.navbarBrand} href="/DashboardPage">Rate My Peer</a>
+                <button className={styles.navbarToggler} type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span className="navbar-toggler-icon"></span>
+                </button>
+                <div className={styles.navbarCollapse} id="navbarNav">
+                    <ul className="navbar-nav ml-auto">
+                        <li className="nav-item">
+                            {/* Example of a navigation link */}
+                            {/* <a className={styles.navLink} href="/DashboardPage">Workspaces</a> */}
+                        </li>
+                        <li className="nav-item">
+                            {/* Example of a logout button */}
+                            <button className={styles.logoutButton} onClick={handleLogout}>Logout</button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
             <div className={`row ${styles.headerContainer}`}>
                 <button className={`open-button ol-xl-3 col-lg-3 col-md-3 col-sm-3 btn btn-light mb-2 mb-md-0 ${styles.fixedWidthSm} ${styles.custom}`} onClick={createForm}>Create Forms</button>
                 <h1 className={`col-xl-6 col-lg-6 col-md-6 col-sm-6 ${styles.headerLarge} text-center`}>{workspaceName}</h1>

@@ -200,3 +200,56 @@ button:hover {
 .logout-button:hover {
     background-color: #ff1a1a;
 }
+
+/* Navigation Bar Styles */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* background-color: #007df9; */
+    padding: 10px 20px;
+    color: #fff;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar .navbar-brand {
+    font-size: 1.5em;
+    color: #fff;
+    text-decoration: none;
+}
+
+.navbar .navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    font-size: 1.5em;
+}
+
+.navbar .navbar-links li {
+    display: inline;
+}
+
+.navbar .navbar-links a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.navbar .navbar-links a:hover {
+    text-decoration: underline;
+}
+
+.view-forms-admin-page {
+    margin-top: 60px; /* Adjust this based on the height of your navbar */
+}
+
+.navbar navbar-expand-lg navbar-light bg-light {
+    background-color: #007df9;
+    color: tomato;
+}
+
+.navbar {
+    background-color: transparent !important;
+}
