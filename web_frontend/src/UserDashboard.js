@@ -203,7 +203,8 @@ const UserDashboard = () => {
                     onClick={() => handleReviewAction(assignmentId, dueDate)}
                     disabled={!selectedReview[assignmentId]}
                 >
-                    {assignmentReviews.incompleteReviews.length > 0 ? 'Start' : 'Edit'}
+                    Edit
+                    {/* {assignmentReviews.incompleteReviews.length > 0 ? 'Start' : 'Edit'} */}
                 </button>
             </div>
         );

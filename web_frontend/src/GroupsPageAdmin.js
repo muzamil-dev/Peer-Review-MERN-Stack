@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styles from './GroupsPageAdmin.module.css'; // Import the CSS file as a module
 import Api from './Api.js';  // Adjust the path to where your Api.js file is located
 import { jwtDecode } from 'jwt-decode';
+//snackbar
+import { enqueueSnackbar, useSnackbar } from 'notistack';
 
 const GroupsPageAdmin = () => {
     const [ungroupedMembers, setUngroupedMembers] = useState([]);
@@ -252,7 +254,40 @@ const GroupsPageAdmin = () => {
             navigate('/');
             return;
         }
-        const allowedDomainsArray = formData.allowedDomains.trim() ? formData.allowedDomains.split(',').map(domain => domain.trim()) : [];
+    
+        // Maximum workspace name length
+        const maxWorkspaceNameLength = 25; // Adjust the value as needed
+    
+        // Check if the workspace name exceeds the maximum length
+        if (formData.name.length > maxWorkspaceNameLength) {
+            //console.error(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`);
+            //snackbar alert
+            enqueueSnackbar(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`, { variant: 'error' });
+            // alert(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`);
+            return;
+        }
+    
+        // Add validation for allowed domains
+        // Numbers and special characters are not allowed
+        // Allowed domains should be separated by commas
+        // Should be a "." in each domain and characters before and after the "."
+        const allowedDomainsArray = formData.allowedDomains.trim()
+            ? formData.allowedDomains.split(',').map(domain => domain.trim())
+            : [];
+    
+        const isValidDomain = (domain) => {
+            const domainRegex = /^[a-zA-Z]+\.[a-zA-Z]+$/;
+            return domainRegex.test(domain);
+        };
+    
+        for (const domain of allowedDomainsArray) {
+            if (!isValidDomain(domain)) {
+                console.error(`Invalid domain: ${domain}`);
+                alert(`Invalid domain: ${domain}`);
+                return;
+            }
+        }
+    
         const response = await Api.Workspaces.EditWorkspace(currentUserId, workspaceId, formData.name, allowedDomainsArray, formData.groupMemberLimit, formData.groupLock, token);
         if (response.success) {
             setWorkspaceDetails({
@@ -267,6 +302,7 @@ const GroupsPageAdmin = () => {
             console.error('Failed to edit workspace:', response.message);
         }
     };
+    
 
     const handleGroupChangesSubmit = async (event) => {
         event.preventDefault();
@@ -425,7 +461,7 @@ const GroupsPageAdmin = () => {
                             <input type="text" placeholder="Enter Workspace Name" name="name" required value={formData.name} onChange={handleChange} />
 
                             <label htmlFor="allowedDomains"><b>Allowed Domains</b></label>
-                            <input type="text" placeholder="Enter Allowed Domains" name="allowedDomains" value={formData.allowedDomains} onChange={handleChange} />
+                            <input type="text" placeholder="Ex: ucf.edu, gmail.com" name="allowedDomains" value={formData.allowedDomains} onChange={handleChange} />
 
                             <label htmlFor="groupMemberLimit"><b>Maximum Group Size</b></label>
                             <input type="number" placeholder="Enter Group Member Limit" name="groupMemberLimit" required value={formData.groupMemberLimit} onChange={handleChange} />
