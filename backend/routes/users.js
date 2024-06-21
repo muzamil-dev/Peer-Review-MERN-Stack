@@ -73,6 +73,34 @@ router.post("/verifyEmail", async(req, res) => {
     return res.status(201).json(data);
 });
 
+// Request a password reset
+router.post("/requestPasswordReset", async(req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: "One or more required fields is not present" });
+    }
+    // Call the service
+    const data = await UserService.requestPasswordReset(email);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(201).json(data);
+});
+
+// Set the user's new password after requesting a reset
+router.post("/resetPassword", async(req, res) => {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+        return res.status(400).json({ message: "One or more required fields is not present" });
+    }
+    // Call the service
+    const data = await UserService.resetPassword(token, newPassword);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(201).json(data);
+});
+
 // Require JWT
 if (process.env.JWT_ENABLED === "true")
     router.use(verifyJWT);

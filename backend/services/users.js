@@ -10,12 +10,12 @@ import { sendEmail } from './emailService.js';
 dotenv.config();
 
 // Sign up for a new account
-export const signup = async(firstName, lastName, email, password) => {
-    try{
+export const signup = async (firstName, lastName, email, password) => {
+    try {
         // Check that the user provided a valid email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email))
-            return { 
+            return {
                 error: "Invalid email address",
                 status: 400
             };
@@ -23,14 +23,14 @@ export const signup = async(firstName, lastName, email, password) => {
         // Check that user doesn't already exist
         const existingUser = await getUserByEmail(email);
         if (existingUser)
-            return { 
+            return {
                 error: "An account with this email already exists",
                 status: 400
             };
-        
+
         // Insert the new temporary user
         const verificationToken = crypto.randomInt(100000, 1000000).toString();
-        const verificationTokenExpires = Date.now() + 10*60*1000; // 10 minutes
+        const verificationTokenExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
         const tempUser = await db.query(
             `INSERT INTO temp_users VALUES
             ($1, $2, $3, $4, $5, $6)
@@ -40,8 +40,8 @@ export const signup = async(firstName, lastName, email, password) => {
             password = EXCLUDED.password,
             verification_token = EXCLUDED.verification_token,
             verification_token_expiry = EXCLUDED.verification_token_expiry`,
-            [firstName, lastName, email, password, verificationToken, 
-            (new Date(verificationTokenExpires)).toISOString()]
+            [firstName, lastName, email, password, verificationToken,
+                (new Date(verificationTokenExpires)).toISOString()]
         );
 
         // Generate the email with the token and sending it
@@ -52,18 +52,18 @@ export const signup = async(firstName, lastName, email, password) => {
         await sendEmail(email, 'Email Verification', message);
         return { message: "User created. Please check your email for verification." };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Login to a user's account
-export const login = async(email, password) => {
-    try{
+export const login = async (email, password) => {
+    try {
         const res = await db.query
-        (`SELECT id AS "userId", first_name AS "firstName", last_name AS "lastName"
-        FROM users WHERE email = $1 AND password = $2`, 
-        [email, password]);
+            (`SELECT id AS "userId", first_name AS "firstName", last_name AS "lastName"
+        FROM users WHERE email = $1 AND password = $2`,
+                [email, password]);
         const data = res.rows[0];
         // Check if the combination was correct
         if (!data)
@@ -89,17 +89,17 @@ export const login = async(email, password) => {
         );
         return {
             accessToken, refreshToken,
-            refreshTokenAge: 24*60*60*1000
+            refreshTokenAge: 24 * 60 * 60 * 1000
         };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Verify the user's email on signup
-export const verifyEmail = async(token) => {
-    try{
+export const verifyEmail = async (token) => {
+    try {
         const res = await db.query(
             `SELECT * FROM temp_users
             WHERE verification_token = $1`,
@@ -119,7 +119,7 @@ export const verifyEmail = async(token) => {
                 error: "Verification token expired. Please sign up again",
                 status: 401
             };
-        
+
         // Verification successful, create the new user
         const newUser = await db.query(
             `INSERT INTO users (first_name, last_name, email, password)
@@ -128,43 +128,110 @@ export const verifyEmail = async(token) => {
         );
         return { message: "User verified successfully" }
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Function to request a password reset
-export const requestPasswordReset = async(email) => {
-    
+export const requestPasswordReset = async (email) => {
+    try {
+        // Find the user
+        const user = await getByEmail(email);
+        if (!user)
+            return {
+                error: "No user was found with this email",
+                status: 404
+            }
+        else if (user.error)
+            return user;
+
+        // Generate the password token
+        const resetToken = generateCode();
+        const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+        // Insert the token into the password reset table
+        const resetQuery = await db.query(
+            `INSERT INTO password_reset VALUES ($1, $2, $3)
+            ON CONFLICT(email) DO UPDATE SET
+            email = EXCLUDED.email,
+            reset_token = EXCLUDED.reset_token,
+            reset_token_expiry = EXCLUDED.reset_token_expiry`,
+            [email, resetToken, resetTokenExpires]
+        );
+        const message = `
+            <p>Your password reset token is: <strong>${resetToken}</strong></p>
+            <p>Please use this token to reset your password. The token is valid for 1 hour.</p>
+        `;
+        await sendEmail(user.email, 'Password Reset', message);
+        return { message: "Password reset email sent" };
+    }
+    catch (err) {
+        return { error: err.message, status: 500 };
+    }
 }
 
+// Reset the user's password based on their password reset token
+export const resetPassword = async (token, password) => {
+    try {
+        // Find the token in the password reset table
+        const res = await db.query(
+            `SELECT * FROM password_reset WHERE reset_token = $1`,
+            [token]
+        );
+        const data = res.rows[0];
+        if (!data)
+            return {
+                error: "No password reset with this token was found",
+                status: 404
+            };
+        // Check that the token hasn't expired
+        if ((new Date(data.reset_token_expiry)) < Date.now())
+            return {
+                error: "The reset token has already expired",
+                status: 400
+            };
+        // Delete the token from the password_reset table
+        db.query(`DELETE FROM password_reset WHERE reset_token = $1`, [token]);
+        // Insert the new password
+        const pwInsert = await db.query(
+            `UPDATE users SET password = $1 WHERE email = $2`,
+            [password, data.email]
+        );
+        return { message: "New password set successfully" };
+    }
+    catch (err) {
+        return { error: err.message, status: 500 };
+    }
+}
+
+
 // Get a user by their id
-export const getUserById = async(userId) => {
-    try{
+export const getUserById = async (userId) => {
+    try {
         const res = await db.query
-        (`SELECT * FROM users WHERE id = $1`, [userId]);
+            (`SELECT * FROM users WHERE id = $1`, [userId]);
         return res.rows[0];
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Get user by their email
-export const getUserByEmail = async(email) => {
-    try{
+export const getUserByEmail = async (email) => {
+    try {
         const res = await db.query
-        (`SELECT * FROM users WHERE email = $1`, [email]);
+            (`SELECT * FROM users WHERE email = $1`, [email]);
         return res.rows[0];
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Get workspaces that a user is a member of
-export const getWorkspaces = async(userId) => {
-    try{
+export const getWorkspaces = async (userId) => {
+    try {
         const res = await db.query(
             `SELECT w.id AS "workspaceId", w.name, m.role
             FROM memberships AS m
@@ -176,16 +243,16 @@ export const getWorkspaces = async(userId) => {
         );
         return res.rows;
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Create a new user
 // Returns the newly created user object
-export const createUser = async(user) => {
+export const createUser = async (user) => {
     const fields = [user.firstName, user.lastName, user.email, user.password];
-    try{
+    try {
         const res = await db.query(
             `INSERT INTO users
             (first_name, last_name, email, password)
@@ -195,14 +262,14 @@ export const createUser = async(user) => {
         );
         return res.rows[0];
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Delete user by id
-export const deleteUser = async(userId) => {
-    try{
+export const deleteUser = async (userId) => {
+    try {
         const res = await db.query(
             `delete from users
             where id = $1
@@ -211,7 +278,7 @@ export const deleteUser = async(userId) => {
         );
         return res.rows[0];
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
