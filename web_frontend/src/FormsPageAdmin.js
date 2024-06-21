@@ -40,6 +40,7 @@ const ViewFormsAdminPage = () => {
             const response = await Api.Workspaces.GetAssignments(workspaceId);
             if (response.status === 200) {
                 setForms(response.data); // Assuming response.data contains the list of assignments/forms
+                await fetchAnalyticsForAssignments(response.data);
             } else {
                 console.error('Failed to fetch forms:', response.message);
                 enqueueSnackbar(`Failed to fetch forms: ${response.message}`, { variant: 'error' });
@@ -49,6 +50,23 @@ const ViewFormsAdminPage = () => {
         fetchForms();
     }, [workspaceId]);
 
+    const fetchAnalyticsForAssignments = async (assignments) => {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+
+        const assignmentsWithRatings = await Promise.all(assignments.map(async (assignment) => {
+            const response = await Api.Analytics.GetAnalyticsForAssignment(assignment.assignmentId, userId, 1, 1);
+            if (response.status === 200 && response.data.length > 0) {
+                return { ...assignment, averageRating: response.data[0].averageRating };
+            } else {
+                console.error(`Failed to fetch analytics for assignment ${assignment.assignmentId}:`, response.message);
+                return assignment;
+            }
+        }));
+
+        setForms(assignmentsWithRatings);
+    };
+
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
@@ -56,10 +74,6 @@ const ViewFormsAdminPage = () => {
     const filteredForms = forms.filter(form =>
         form.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    const handleFormClick = (formId) => {
-        navigate(`/create/${formId}`);
-    }
 
     const handleCreateForm = () => {
         navigate(`/createForm/${workspaceId}`);
@@ -167,16 +181,21 @@ const ViewFormsAdminPage = () => {
                     className="search-input"
                 />
                 <button className="create-form-button" onClick={handleCreateForm}>
-                    + Form
+                    + Assign Form
                 </button>
             </div>
             <div className="forms-containerz">
-                <h2>Forms</h2>
+                <h2>Assignments</h2>
                 {filteredForms.length > 0 ? (
                     filteredForms.map(form => (
                         <div key={form.assignmentId} className="form-item-container">
-                            <div className="form-item" onClick={() => handleFormClick(form.assignmentId)}>
-                                {form.name}
+                            <div className="form-item">
+                                {form.name} <br />
+                                <small>Start Date: {new Date(form.startDate).toLocaleDateString()}</small><br />
+                                <small>Due Date: {new Date(form.dueDate).toLocaleDateString()}</small><br />
+                                {typeof form.averageRating === 'number' && (
+                                    <small>Average Rating: {form.averageRating.toFixed(2)}</small>
+                                )}
                             </div>
                             <button
                                 className="edit-form-button btn btn-success mt-0"

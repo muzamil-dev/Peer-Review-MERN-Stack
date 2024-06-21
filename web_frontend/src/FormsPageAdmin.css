@@ -57,10 +57,6 @@
     transition: background-color 0.3s;
 }
 
-.form-item:hover {
-    background-color: #e9ecef;
-}
-
 p {
     text-align: center;
     color: #6c757d;

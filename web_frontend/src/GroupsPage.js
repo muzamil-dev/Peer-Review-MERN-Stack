@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import styles from './GroupsPageAdmin.module.css'; // Import the CSS file as a module
-import Api from './Api.js'; 
+import './GroupsPage.css'; // Import the CSS file as a module
+import Api from './Api.js';
 import { jwtDecode } from 'jwt-decode';
 
 const GroupsPageUser = () => {
@@ -38,7 +38,7 @@ const GroupsPageUser = () => {
                 ...group,
                 members: group.members.filter(member => member && member.userId)
             })));
-            
+
             // Check if user is already in a group
             const currentUserId = getCurrentUserId();
             const userInGroup = response.data.groups.find(group => {
@@ -116,12 +116,18 @@ const GroupsPageUser = () => {
     };
 
     return (
-        <div className={styles.workspaceUser}>
-            <div className={`row ${styles.headerContainer}`}>
-                <button className="col-xl-3 col-lg-3 col-md-3 col-sm-4 btn btn-light mb-2 mb-md-0" onClick={assignmentsPage}>Assignments</button>
-                <h1 className={`col-xl-6 col-lg-6 col-md-6 col-sm-4 ${styles.headerLarge} text-center`}>{workspaceDetails.name}</h1>
-                <button className="col-xl-3 col-lg-3 col-md-3 col-sm-4 btn btn-light mb-2 mb-md-0" onClick={handleDashboard}>Dashboard</button>
-                <button className="col-xl-2 col-lg-2 col-md-3 col-sm-4 btn btn-danger mb-2 mb-md-0" onClick={() => setShowConfirmModal(true)} disabled={workspaceDetails.groupLock}>Leave Workspace</button>
+        <div className="workspaceUser">
+            <div className="row headerContainer d-flex justify-content-center align-items-center">
+                <div className="col-xl-3 col-lg-3 col-md-3 col-auto text-center">
+                    <button className="btn btn-light mb-2" onClick={assignmentsPage}>Assignments</button>
+                </div>
+                <h1 className="col-xl-6 col-lg-6 col-md-6 col-auto headerLarge text-center">{workspaceDetails.name}</h1>
+                <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-auto text-center">
+                    <button className="btn btn-light mb-2" onClick={handleDashboard}>Dashboard</button>
+                </div>
+                <div className="w-100 d-flex justify-content-center">
+                    <button className="btn btn-danger mb-2" onClick={() => setShowConfirmModal(true)} disabled={workspaceDetails.groupLock}>Leave Workspace</button>
+                </div>
             </div>
 
             {errorMessage && (
@@ -133,8 +139,8 @@ const GroupsPageUser = () => {
             <div className="container">
                 <div className="row">
                     {Array.isArray(groups) && groups.map((group) => (
-                        <div key={group.groupId} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-                            <div className={`card ${styles.groupCard}`}>
+                        <div key={group.groupId} className="col-12 col-sm-6 col-lg-4  mb-4">
+                            <div className="card groupCard">
                                 <div className="card-body d-flex flex-column">
                                     <h2 className="card-title">{group.name}</h2>
                                     <ul className="list-unstyled flex-grow-1">
