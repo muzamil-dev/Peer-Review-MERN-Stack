@@ -70,7 +70,7 @@ const GroupsPageAdmin = () => {
 
     const fetchUngroupedMembers = async () => {
         const token = localStorage.getItem('accessToken');
-        const response = await Api.Workspace.GetStudentsWithoutGroup(workspaceId, token);
+        const response = await Api.Workspaces.GetStudentsWithoutGroup(workspaceId, token);
         if (response.status === 200 && Array.isArray(response.data)) {
             setUngroupedMembers(response.data.filter(member => member && member.userId));
         } else {
