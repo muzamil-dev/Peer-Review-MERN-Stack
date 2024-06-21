@@ -51,11 +51,19 @@ select {
 }
 
 .back-button {
+    display: block;
+    justify-content: center;
+    background-color: white !important;
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin-bottom: 20px;
-    font-size: x-large !important;
+    margin-bottom: 30px !important;
+    margin-left: 5vw !important;
+    font-size: large !important;
+}
+
+.back-button:hover {
+    background-color: #d3c9c9 !important;
 }
 

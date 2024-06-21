@@ -101,6 +101,7 @@ const CreateFormPage = () => {
 
     return (
         <div className={styles.createFormPage}>
+            
             <form onSubmit={handleSubmit}>
                 <div className={styles.formGroup}>
                     <label className={styles.bold}>Assignment</label>
@@ -167,6 +168,7 @@ const CreateFormPage = () => {
                 </div>
                 <button type="submit" className="btn btn-success">Save Form</button>
             </form>
+            <button className="btn btn-light mb-3 mt-4" onClick={() => navigate(`/formsAdmin/${workspaceId}`)}>Back</button>
         </div>
     );
 };
