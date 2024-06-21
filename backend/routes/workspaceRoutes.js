@@ -72,6 +72,7 @@ router.get("/:workspaceId/groups", async(req, res) => {
 
 // Creates a new workspace
 // Required: name
+// Optional: groupMemberLimit, allowedDomains
 router.post("/create", async(req, res) => {
     try{
         // Check for the workspace name
@@ -81,7 +82,13 @@ router.post("/create", async(req, res) => {
         }
 
         // Create new workspace object and member object
-        const newWorkspace = { name: name, allowedDomains: allowedDomains || []};
+        const newWorkspace = { name: body.name };
+        // Optional fields
+        if (body.groupMemberLimit && body.groupMemberLimit >= 1)
+            newWorkspace.groupMemberLimit = body.groupMemberLimit;
+        if (body.allowedDomains && Array.isArray(body.allowedDomains))
+            newWorkspace.allowedDomains = body.allowedDomains;
+
         // Create and get the new workspace
         const workspace = await Workspace.create(newWorkspace);
         // Add the workspace membership for the creator
@@ -216,9 +223,48 @@ router.put("/setInvite", async(req, res) => {
     }
 });
 
+// Edit a workspace
+// Required: workspaceId
+// Optional: name, allowedDomains, groupMemberLimit
+router.put("/edit", async(req, res) => {
+    try{
+        const { workspaceId, name, allowedDomains, groupMemberLimit } = req.body;
+        const update = {};
+        // Check that the user is the instructor
+        if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
+            return res.status(403).json({ 
+                message: "The provided user is not authorized to edit this workspace" 
+            });
+
+        // Check that workspaceId was provided
+        if (!workspaceId)
+            return res.status(400).json({
+                message: "One or more required fields is not present"
+            });
+        // Check optional fields
+        if (name && typeof(name) === "string")
+            update.name = name;
+        if (allowedDomains && Array.isArray(allowedDomains))
+            update.allowedDomains = allowedDomains;
+        if (groupMemberLimit && groupMemberLimit >= 1)
+            update.groupMemberLimit = groupMemberLimit;
+
+        // Update the workspace
+        const updated = await Workspace.updateOne(
+            { _id: workspaceId }, update 
+        );
+        return res.json({ message: "Workspace updated successfully" });
+    }
+    catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
 // Sets the allowed domains
 // Reset the domains by passing an empty array
 // Required: workspaceId, allowedDomains (array)
+// deprecated :(
 router.put("/setAllowedDomains", async(req, res) => {
     try{
         // Check that the user is the instructor
