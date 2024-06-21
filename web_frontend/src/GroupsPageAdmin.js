@@ -296,6 +296,9 @@ const GroupsPageAdmin = () => {
                 groupLock: formData.groupLock,
                 inviteCode: workspaceDetails.inviteCode
             });
+            //snakcbar for success
+            enqueueSnackbar('Workspace details updated successfully', { variant: 'success' });
+            fetchWorkspaceDetails();
             closeForm();
         } else {
             console.error('Failed to edit workspace:', response.message);
@@ -580,7 +583,8 @@ const GroupsPageAdmin = () => {
                                             <button
                                                 className="btn btn-primary"
                                                 onClick={() => handleOpenEditForm(group.groupId, group.members)}
-                                                disabled={group.members.length === 0}
+                                                //disable the edit button if there are no members in the group
+                                                // disabled={group.members.length === 0}
                                             >
                                                 Edit
                                             </button>
