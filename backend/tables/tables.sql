@@ -76,6 +76,7 @@ CREATE TABLE ratings(
     review_id INT REFERENCES reviews (id) ON DELETE CASCADE,
     question_id INT REFERENCES questions (id) ON DELETE CASCADE,
     rating INT NOT NULL,
+    comment TEXT,
     PRIMARY KEY (review_id, question_id)
 );
 

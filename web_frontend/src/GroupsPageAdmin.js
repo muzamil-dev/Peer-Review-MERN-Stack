@@ -29,7 +29,7 @@ const GroupsPageAdmin = () => {
     const [memberToKick, setMemberToKick] = useState(null);
     const [kickFrom, setKickFrom] = useState(null);
 
-    const { workspaceId } = useParams(); 
+    const { workspaceId } = useParams();
     const navigate = useNavigate();
 
     const getCurrentUserId = () => {
@@ -87,7 +87,7 @@ const GroupsPageAdmin = () => {
             setUngroupedMembers([]);
         }
     };
-    
+
 
     useEffect(() => {
         fetchUngroupedMembers();
@@ -296,49 +296,52 @@ const GroupsPageAdmin = () => {
                 groupLock: formData.groupLock,
                 inviteCode: workspaceDetails.inviteCode
             });
-            //snakcbar for success
-            enqueueSnackbar('Workspace details updated successfully', { variant: 'success' });
-            fetchWorkspaceDetails();
             closeForm();
         } else {
             console.error('Failed to edit workspace:', response.message);
         }
     };
 
-    const handleGroupChangesSubmit = async (event) => {
-        event.preventDefault();
-        const token = localStorage.getItem('accessToken');
-        const currentUserId = getCurrentUserId();
-        if (!currentUserId) {
-            navigate('/');
-            return;
+    // Function to handle group change directly in the dropdown
+const handleGroupChange = async (memberId, newGroupId) => {
+    const token = localStorage.getItem('accessToken');
+    const currentUserId = getCurrentUserId();
+    if (!currentUserId) {
+        navigate('/');
+        return;
+    }
+
+    const oldGroupId = selectedMemberGroup[memberId];
+    if (oldGroupId === newGroupId) {
+        return; // No change needed if the new group is the same as the old group
+    }
+
+    // Update the member's group in the selectedMemberGroup state
+    setSelectedMemberGroup(prevState => ({
+        ...prevState,
+        [memberId]: newGroupId
+    }));
+
+    // Remove the user from the old group if it exists
+    if (oldGroupId) {
+        const removeResponse = await handleKickFromGroup(memberId);
+        if (!removeResponse.success) {
+            console.error(`Failed to remove user ${memberId} from group ${oldGroupId}`);
         }
+    }
 
-        const changes = Object.entries(selectedMemberGroup).map(([memberId, newGroupId]) => ({
-            memberId,
-            newGroupId
-        }));
-
-        for (const change of changes) {
-            const { memberId, newGroupId } = change;
-            const memberInCurrentGroup = selectedGroupMembers.some(member => member.userId === memberId);
-            if (editGroupId !== newGroupId) {
-                const removeResponse = await handleKickFromGroup(memberId);
-                if (!removeResponse.success) {
-                    console.error(`Failed to remove user ${memberId} from group ${editGroupId}`);
-                }
-            }
-            if (newGroupId) {
-                const addResponse = await handleAddUserToGroup(memberId, newGroupId);
-                if (!addResponse.success) {
-                    console.error(`Failed to add user ${memberId} to group ${newGroupId}`);
-                }
-            }
+    // Add the user to the new group if a new group ID is provided
+    if (newGroupId) {
+        const addResponse = await handleAddUserToGroup(memberId, newGroupId);
+        if (!addResponse.success) {
+            console.error(`Failed to add user ${memberId} to group ${newGroupId}`);
         }
+    }
 
-        setEditGroupId(null);
-        fetchGroups();
-    };
+    // Refresh group data to update the UI
+    fetchGroups();
+};
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -412,7 +415,6 @@ const GroupsPageAdmin = () => {
 
     return (
         <div className={styles.workspaceAdmin}>
-            
             <nav className={styles.navbarContainer}>
                 <a className={styles.navbarBrand} href="/DashboardPage">Rate My Peer</a>
                 <button className={styles.navbarToggler} type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -477,7 +479,6 @@ const GroupsPageAdmin = () => {
             {editGroupId && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modalContent}>
-                        <form onSubmit={handleGroupChangesSubmit}>
                             {selectedGroupMembers.map(member => (
                                 member && (
                                     <div key={member.userId} className={styles.memberEditRow}>
@@ -485,7 +486,7 @@ const GroupsPageAdmin = () => {
                                             <span className="mt-2" onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }}>{member.firstName} {member.lastName}</span>
                                             <select
                                                 value={selectedMemberGroup[member.userId]}
-                                                onChange={(e) => handleMemberGroupChange(member.userId, e.target.value)}
+                                                onChange={(e) => handleGroupChange(member.userId, e.target.value)}
                                                 className={`${styles.dropdown} form-select`}>
                                                 {groups.map(group => (
                                                     <option key={group.groupId} value={group.groupId}>
@@ -504,7 +505,6 @@ const GroupsPageAdmin = () => {
                             ))}
                             {/* <button type="submit" className="btn btn-primary mb-2">Submit Changes</button> */}
                             <button type="button" className="btn btn-danger" onClick={() => setEditGroupId(null)}>Close</button>
-                        </form>
                     </div>
                 </div>
             )}
@@ -573,8 +573,8 @@ const GroupsPageAdmin = () => {
                                         <ul className="list-unstyled flex-grow-1">
                                             {Array.isArray(group.members) && group.members.map(member => (
                                                 member && (
-                                                    <li 
-                                                    key={member.userId} onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }}className={`${styles.hoverEffect}`}> {member.firstName} {member.lastName}
+                                                    <li
+                                                        key={member.userId} onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }} className={`${styles.hoverEffect}`}> {member.firstName} {member.lastName}
                                                     </li>
                                                 )
                                             ))}
@@ -583,8 +583,7 @@ const GroupsPageAdmin = () => {
                                             <button
                                                 className="btn btn-primary"
                                                 onClick={() => handleOpenEditForm(group.groupId, group.members)}
-                                                //disable the edit button if there are no members in the group
-                                                // disabled={group.members.length === 0}
+                                            //disabled={group.members.length === 0}
                                             >
                                                 Edit
                                             </button>
