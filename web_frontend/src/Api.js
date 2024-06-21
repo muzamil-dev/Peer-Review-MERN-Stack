@@ -9,7 +9,7 @@ const getUrl = (prefix, route, postfix) => {
     }
     else
     {        
-        return 'http://localhost:5000/' + prefix + route + postfix;
+        return 'http://localhost:5000/' + prefix + route;
     }
 };
 
@@ -95,7 +95,22 @@ export default {
                 email,
                 password
             };
-            const response = await axios.post(getUrl(USERS, '', ''), payload)
+            const response = await axios.post(getUrl(USERS, 'signup'), payload)
+                .catch((err) => {
+                console.error(err);
+                return err.response || Response503;
+                });
+            return {
+            status: response.status,
+            data: response.data,
+            error: response.data.message
+            };
+        },
+        
+        /**/
+        VerifyToken: async (email, token) => {
+            const payload = { email, token };
+            const response = await axios.post(getUrl(USERS, 'verifyEmail'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -105,7 +120,9 @@ export default {
                 data: response.data,
                 error: response.data.message
             };
-        },
+        }, /**/
+
+
         /**
          * Edit the account with the corresponding id
          * @param {number} id 
@@ -158,22 +175,37 @@ export default {
          * @param {string} email 
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
-        RequestPasswordReset: async (id, email) => {
-            const payload = {
-                id,
-                email
-            };
-            const response = await axios.post(getUrl(USERS, 'requestPasswordReset', ''), payload)
+
+        RequestPasswordReset: async (email) => {
+            const payload = { email };
+            const response = await axios.post(getUrl(USERS, 'requestPasswordReset'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
                 });
             return {
                 status: response.status,
-                success: response.status === 200,
-                message: response.data.message
+                data: response.data,
+                error: response.message
             };
         },
+
+        /**/
+        ResetPassword: async (email, token, newPassword) => {
+            const payload = { email, token, newPassword };
+            const response = await axios.post(getUrl(USERS, 'resetPassword'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                error: response.message
+            };
+        },
+        /**/
+
         /**
          * Create bulk users
          * @param {{

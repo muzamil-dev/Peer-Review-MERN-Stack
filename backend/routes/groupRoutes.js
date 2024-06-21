@@ -129,23 +129,33 @@ router.put("/join", async(req, res) => {
         const groupId = req.body.groupId;
         const userId = req.body.userId;
         // Get group and check that it exists
-        const group = await Group.findById(groupId);
+        const group = await Group.findById(groupId).populate('workspaceId', 'groupLock');
         if (!group)
             return res.status(404).json({ 
                 message: "The provided group was not found in our database" 
             });
+        
+        // Set variables from populate
+        const workspaceId = group.workspaceId._id;
+        const groupLock = group.workspaceId.groupLock;
+        
+        // Check if the groups are locked
+        if (groupLock){
+            return res.status(400).json({ message: "This group is locked and cannot be joined" });
+        }
+
         // Check that the user is in the same workspace as the group
-        if (!await Checkers.checkUserInWorkspace(userId, group.workspaceId))
+        if (!await Checkers.checkUserInWorkspace(userId, workspaceId))
             return res.status(400).json({ message: "The provided user was not found in this workspace" });
 
         // Check that the user isn't already in a group within the group's workspace
-        if (await Checkers.checkUserInWorkspaceGroup(userId, group.workspaceId))
+        if (await Checkers.checkUserInWorkspaceGroup(userId, workspaceId))
             return res.status(400).json({ 
                 message: "User is already a member of a group in this workspace" 
             });
 
         // Get group member limit
-        const memberLimit = (await Workspace.findById(group.workspaceId)
+        const memberLimit = (await Workspace.findById(workspaceId)
                             .select('groupMemberLimit')).groupMemberLimit;
         // Check the group's member limit
         if (memberLimit && group.userIds.length >= memberLimit)
@@ -171,8 +181,24 @@ router.put("/join", async(req, res) => {
 router.put("/leave", async(req, res) => {
     try{
         // Check that a group was provided
-        if (!req.body.groupId)
+        const { groupId } = req.body;
+        if (!groupId)
             return res.status(400).json({ message: "One or more required fields is not present" });
+
+        // Get group and check that it exists
+        const group = await Group.findById(groupId).populate('workspaceId', 'groupLock');
+        if (!group)
+            return res.status(404).json({ 
+                message: "The provided group was not found in our database" 
+            });
+        
+        // Set variables from populate
+        const groupLock = group.workspaceId.groupLock;
+        
+        // Check if the groups are locked
+        if (groupLock){
+            return res.status(400).json({ message: "This group is locked and cannot be left" });
+        }
 
         // Remove the group and user from their respective arrays
         await Promise.all([
@@ -189,7 +215,7 @@ router.put("/leave", async(req, res) => {
     }
 });
 
-// Route for admin to add user to a group, overrides member limit
+// Route for admin to add user to a group, overrides member limit and locks
 // Required: targetId, groupId
 router.put("/addUser", async(req, res) => {
     try{
@@ -269,7 +295,7 @@ router.put("/removeUser", async(req, res) => {
 });
 
 // Deletes a group
-router.delete("/:groupId/delete", async(req, res) => {
+router.delete("/:groupId", async(req, res) => {
     try{
         const { groupId } = req.params;
         // Check that the group exists
@@ -298,72 +324,5 @@ router.delete("/:groupId/delete", async(req, res) => {
         return res.status(500).send({ message: err.message });
     }
 });
-
-// Remove user from group
-// router.put("/removeUser", Checks.checkGroup, Checks.checkInstructor, async (req, res) => {
-//     try {
-//         const { groupId, targetId } = req.body;
-
-//         // Check if the targetId was provided
-//         if (!targetId){
-//             return res.status(400).json({ message: "One or more required fields is not present" });
-//         }
-
-//         await Promise.all([
-//             Removers.removeGroupFromUser(targetId, groupId),
-//             Removers.removeUserFromGroup(targetId, groupId)
-//         ]);
-//         res.json({ message: "User removed from group successfully" });
-//     } 
-//     catch (err) {
-//         console.log(err.message);
-//         res.status(500).send({ message: err.message });
-//     }
-// });
-
-// Update group information
-// router.put("/:groupId", async (req, res) => {
-//     try {
-//         const { groupId } = req.params;
-//         const { name } = req.body;
-
-//         const group = await Group.findById(groupId);
-//         if (!group) {
-//             return res.status(404).json({ message: "Group not found" });
-//         }
-
-//         if (name) {
-//             group.name = name;
-//         }
-
-//         const updatedGroup = await group.save();
-//         res.status(200).json(updatedGroup);
-//     } catch (err) {
-//         console.log(err.message);
-//         res.status(500).send({ message: err.message });
-//     }
-// });
-
-// Join several users in a group (for testing)
-// router.put("/bulkjoin", Checks.checkGroup, async(req, res) => {
-//     try {
-//         const groupId = req.body.groupId;
-//         const userIds = req.body.userIds;
-
-//         const group = await Group.findById(groupId);
-//         group.userIds.push(...userIds);
-//         await group.save();
-
-//         await User.updateMany(
-//             { _id: { $in: userIds }},
-//             { $push: { groupIds: groupId }}
-//         );
-//         res.send("Users added");
-//     } 
-//     catch (err) {
-//         console.log(err.message);
-//         res.status(500).send({ message: err.message });
-//     }
-// });
 
 export default router;
