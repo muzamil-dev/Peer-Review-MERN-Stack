@@ -72,22 +72,22 @@ router.get("/:workspaceId/groups", async(req, res) => {
 
 // Creates a new workspace
 // Required: name
-// Optional: groupMemberLimit, allowedDomains
+// Optional: numGroups, groupMemberLimit, allowedDomains
 router.post("/create", async(req, res) => {
     try{
         // Check for the workspace name
-        const {name, userId, allowedDomains} = req.body;
+        const {name, userId, allowedDomains, groupMemberLimit, numGroups} = req.body;
         if (!name || !userId){
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
         // Create new workspace object and member object
-        const newWorkspace = { name: body.name };
+        const newWorkspace = { name };
         // Optional fields
-        if (body.groupMemberLimit && body.groupMemberLimit >= 1)
-            newWorkspace.groupMemberLimit = body.groupMemberLimit;
-        if (body.allowedDomains && Array.isArray(body.allowedDomains))
-            newWorkspace.allowedDomains = body.allowedDomains;
+        if (groupMemberLimit && groupMemberLimit >= 1)
+            newWorkspace.groupMemberLimit = groupMemberLimit;
+        if (allowedDomains && Array.isArray(allowedDomains))
+            newWorkspace.allowedDomains = allowedDomains;
 
         // Create and get the new workspace
         const workspace = await Workspace.create(newWorkspace);
@@ -96,6 +96,15 @@ router.post("/create", async(req, res) => {
             Adders.addUserToWorkspace(userId, workspace._id, "Instructor"),
             Adders.addWorkspaceToUser(userId, workspace._id, "Instructor")
         ]);
+
+        // Create groups if provided
+        if (numGroups && numGroups > 0){
+            const workspaceId = workspace._id;
+            const groups = Array(numGroups);
+            for (let i = 1; i <= numGroups; i++)
+                groups[i-1] = { name: `Group ${i}`, workspaceId };
+            await Group.insertMany(groups);
+        }
         
         return res.status(201).json({
             message: "Workspace created successfully",
@@ -199,7 +208,7 @@ router.put("/setInvite", async(req, res) => {
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
             return res.status(403).json({ 
-                message: "The provided user is not authorized to delete this workspace" 
+                message: "The provided user is not authorized to set invite codes" 
             });
         // Set the invite code
         const workspace = await Workspace.updateOne(
@@ -300,7 +309,7 @@ router.put("/setAllowedDomains", async(req, res) => {
 });
 
 // Deletes the given workspace
-router.delete("/delete/:workspaceId", async(req, res) => {
+router.delete("/:workspaceId/delete", async(req, res) => {
     try{
         // Get all workspace users
         const workspace = await Workspace.findById(
