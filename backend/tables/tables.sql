@@ -63,6 +63,7 @@ CREATE TABLE reviews(
     group_id INT REFERENCES groups (id) ON DELETE CASCADE,
     user_id INT REFERENCES users (id) ON DELETE CASCADE,
     target_id INT REFERENCES users (id) ON DELETE CASCADE,
+    comment TEXT,
     UNIQUE(assignment_id, user_id, target_id)
 );
 
@@ -76,7 +77,6 @@ CREATE TABLE ratings(
     review_id INT REFERENCES reviews (id) ON DELETE CASCADE,
     question_id INT REFERENCES questions (id) ON DELETE CASCADE,
     rating INT NOT NULL,
-    comment TEXT,
     PRIMARY KEY (review_id, question_id)
 );
 
