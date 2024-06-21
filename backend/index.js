@@ -49,7 +49,7 @@ const corsOptions = {
     credentials: true, // Enable cookies and other credentials
 };
 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); //comment out to test on hoppscotch
 
 // Test to ping the server
 app.get("/ping", (req, res) => {
