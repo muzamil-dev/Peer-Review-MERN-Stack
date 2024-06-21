@@ -51,11 +51,11 @@ const LoginPage = () => {
                 enqueueSnackbar('Invalid email or password', { variant: 'error' });
             }
         } catch (error) {
-            enqueueSnackbar('Error: ' + error.message, { variant: 'warning' });
+            enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
             console.error('Error logging in:', error);
         }
     };
-
+    
     const handleSignup = async (e) => {
         e.preventDefault();
         console.log('Signup button clicked'); // Add this line for debugging
@@ -69,7 +69,6 @@ const LoginPage = () => {
         try {
             const response = await Api.Users.CreateAccount(
                 signupData.firstName,
-                //signupData.middleName,
                 signupData.lastName,
                 signupData.email,
                 signupData.password
@@ -80,23 +79,21 @@ const LoginPage = () => {
                 setTempEmail(signupData.email);
                 setIsVerificationActive(true);
             } else {
-                enqueueSnackbar('Signup failed', { variant: 'error' });
+                enqueueSnackbar(`${response.message}`, { variant: 'error' });
             }
         } catch (error) {
             console.error('Error signing up:', error);
-            enqueueSnackbar('Error signing up' + error.message, { variant: 'warning' });
+            enqueueSnackbar(`Error signing up: ${error.message}`, { variant: 'error' });
         }
     };
-    /**/
+    
     const handleVerify = async (e) => {
         e.preventDefault();
-        //setIsLoading(true);
         try {
             const response = await Api.Users.VerifyEmailCode(tempEmail, verificationToken);
             console.log('Verification response:', response); // Log the response for debugging
     
             if (response.status === 201) {
-                // Successful verification
                 enqueueSnackbar('Verification successful. You can now log in.', { variant: 'success' });
                 setIsLoginActive(true);
                 setIsVerificationActive(false);
@@ -104,15 +101,13 @@ const LoginPage = () => {
                 setVerificationToken('');
                 console.log('Verification successful, switched to login form.');
             } else {
-                // Verification failed
                 enqueueSnackbar('Verification Failed', { variant: 'error' });
                 console.error('Verification failed:', response.message);
             }
         } catch (error) {
             console.error('Error verifying token:', error);
-            enqueueSnackbar('Verification failed', { variant: 'warning' });
+            enqueueSnackbar(`Verification failed: ${error.message}`, { variant: 'error' });
         }
-        //setIsLoading(false);
     };
     
     const handleResetPasswordRequest = async (e) => {
@@ -123,13 +118,15 @@ const LoginPage = () => {
                 enqueueSnackbar('Reset token sent. Please check your email', { variant: 'success' });
                 setIsRequestResetPasswordActive(false);
                 setIsResetPasswordActive(true);
+                console.log('Reset token sent:', response.message);
+                console.log('Reset password data:', resetPasswordData);
                 setResetPasswordData({ ...resetPasswordData, email: resetPasswordData.email });
             } else {
                 enqueueSnackbar(response.message, { variant: 'error' });
             }
         } catch (error) {
             console.error('Error requesting reset password:', error);
-            enqueueSnackbar('Error requesting reset password', { variant: 'warning' });
+            enqueueSnackbar(`Error requesting reset password: ${error.message}`, { variant: 'error' });
         }
     };
     
@@ -151,11 +148,9 @@ const LoginPage = () => {
             }
         } catch (error) {
             console.error('Error resetting password:', error);
-            enqueueSnackbar('Error resetting password', { variant: 'warning' });
+            enqueueSnackbar(`Error resetting password: ${error.message}`, { variant: 'error' });
         }
     };
-    
-    
     /**/
 
     return (
