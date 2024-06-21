@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import { PORT, mongoDBURL } from "./config.js";
-// hi
 
 import userRoutes from "./routes/userRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js";
