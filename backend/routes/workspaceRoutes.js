@@ -75,19 +75,19 @@ router.get("/:workspaceId/groups", async(req, res) => {
 router.post("/create", async(req, res) => {
     try{
         // Check for the workspace name
-        const body = req.body;
-        if (!body.name){
+        const {name, userId, allowedDomains} = req.body;
+        if (!name || !userId){
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
         // Create new workspace object and member object
-        const newWorkspace = { name: body.name };
+        const newWorkspace = { name: name, allowedDomains: allowedDomains || []};
         // Create and get the new workspace
         const workspace = await Workspace.create(newWorkspace);
         // Add the workspace membership for the creator
         await Promise.all([
-            Adders.addUserToWorkspace(body.userId, workspace._id, "Instructor"),
-            Adders.addWorkspaceToUser(body.userId, workspace._id, "Instructor")
+            Adders.addUserToWorkspace(userId, workspace._id, "Instructor"),
+            Adders.addWorkspaceToUser(userId, workspace._id, "Instructor")
         ]);
         
         return res.status(201).json({

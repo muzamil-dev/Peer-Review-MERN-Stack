@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/components/main_app_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'CreateWorkspace.dart';
 
 class AdminDashboard extends StatefulWidget {
   static const routeName = "/adminDashboard";
@@ -31,6 +32,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           workspaces = data.map((workspace) => Workspace.fromJson(workspace)).toList();
           isLoading = false;
         });
+        //Navigator.pushNamed(context, '/createWorkspace');
       } else {
         throw Exception('Failed to load workspaces');
       }
@@ -39,6 +41,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  void navigateToCreateWorkspacePage() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateWorkspace(userId: userId),
+      ),
+    );
+    if (result == true) {
+      fetchWorkspaces(); // Refresh workspaces after creation
     }
   }
 
@@ -67,7 +81,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
             IconButton(
               icon: const Icon(Icons.add),
-              onPressed: () {},
+              onPressed: navigateToCreateWorkspacePage,
               tooltip: 'Add Workspace',
             ),
           ],

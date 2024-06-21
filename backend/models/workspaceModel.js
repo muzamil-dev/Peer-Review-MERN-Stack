@@ -29,7 +29,7 @@ const workspaceSchema = mongoose.Schema(
         },
         allowedDomains: {
             type: [String],
-            default: null,
+            default: [],
             required: false
         },
         inviteCode: {
