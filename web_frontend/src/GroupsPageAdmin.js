@@ -377,10 +377,10 @@ const GroupsPageAdmin = () => {
     return (
         <div className={styles.workspaceAdmin}>
             <div className={`row ${styles.headerContainer}`}>
-                <button className={`open-button col-xl-3 col-lg-3 col-md-4 btn btn-light ${styles.custom}`} onClick={createForm}>Create Forms</button>
-                <h1 className={`col-xl-6 col-lg-6 col-md-4 ${styles.headerLarge}`}>{workspaceName}</h1>
-                <button className="open-button col-xl-3 col-lg-3 col-md-4 btn btn-light" onClick={openForm}>Edit Workspace</button>
-                <button className="col-xl-2 col-lg-2 col-md-3 col-sm-4 btn btn-primary mb-2 mb-md-0" onClick={handleCreateGroup}>Add Group</button>
+                <button className={`open-button ol-xl-3 col-lg-3 col-md-3 col-sm-3 btn btn-light mb-2 mb-md-0 ${styles.fixedWidthSm} ${styles.custom}`} onClick={createForm}>Create Forms</button>
+                <h1 className={`col-xl-6 col-lg-6 col-md-6 col-sm-6 ${styles.headerLarge} text-center`}>{workspaceName}</h1>
+                <button className={`open-button col-xl-3 col-lg-3 col-md-3 col-sm-3 btn btn-light mb-2 mb-md-0 ${styles.fixedWidthSm}`} onClick={openForm}>Edit Workspace</button>
+                <button className={`col-xl-2 col-lg-2 col-md-3 btn btn-success col-sm-4 mb-2 mb-md-0 ${styles.fixedWidthSm}`} onClick={handleCreateGroup}>Add Group</button>
             </div>
 
             {isFormOpen && (

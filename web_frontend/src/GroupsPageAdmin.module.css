@@ -261,3 +261,9 @@
 .custom-text-color {
     color: #123965; /* Your custom color */
 }
+
+@media (max-width: 576px) {
+    .fixedWidthSm {
+         max-width: 30% !important;
+    }
+}
