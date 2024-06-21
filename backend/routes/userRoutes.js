@@ -231,6 +231,38 @@ router.post("/resetPassword", async (req, res) => {
     }
 });
 
+// Get all workspaces of a user
+router.get("/:userId/workspaces", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        // Find the user and populate the workspaceIds array
+        const user = await User.findById(userId).populate('workspaceIds.workspaceId', 'name allowedDomains');
+
+        if (!user) {
+            return res.status(404).json({
+                message: "The provided user was not found in our database"
+            });
+        }
+
+        // Extract the workspace details from the populated data
+        const userWorkspaces = user.workspaceIds
+            .filter(workspace => workspace.workspaceId)  // Filter out null or undefined workspaces
+            .map(workspace => {
+                return {
+                    workspaceId: workspace.workspaceId._id,
+                    name: workspace.workspaceId.name,
+                    role: workspace.role,
+                    allowedDomains: workspace.workspaceId.allowedDomains
+                };
+            });
+
+        return res.status(200).json(userWorkspaces);
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
 // Bulk user creation
 router.post("/bulk", async (req, res) => {
     try {

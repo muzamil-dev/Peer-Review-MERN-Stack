@@ -33,7 +33,6 @@ router.get("/:groupId", async(req, res) => {
 
 // Create a group in a workspace
 // Required: workspaceId
-// Optional: name
 router.post("/create", async(req, res) => {
     try{
         const body = req.body;
@@ -54,18 +53,19 @@ router.post("/create", async(req, res) => {
                 message: "The provided user is not authorized to create groups"
             });
 
-        // Check that a name for the group is given
-        if (!body.name){
-            const numGroups = await Group.countDocuments({ workspaceId: body.workspaceId });
-            body.name = `Group ${numGroups + 1}`;
-        }
+        const numGroups = await Group.countDocuments({ workspaceId: body.workspaceId });
+        const name = `Group ${numGroups + 1}`;
+        
         // Create the group
-        const group = await Group.create({ 
-            name: body.name, 
-            workspaceId: body.workspaceId 
-        });
+        const groupObj = {
+            groupId: null,
+            name, 
+            workspaceId: body.workspaceId,
+        }
+        const group = await Group.create(groupObj);
+        groupObj.groupId = group._id;
 
-        return res.status(201).json(group);
+        return res.status(201).json(groupObj);
     }
     catch(err){
         console.log(err.message);
@@ -129,7 +129,7 @@ router.put("/join", async(req, res) => {
         const groupId = req.body.groupId;
         const userId = req.body.userId;
         // Get group and check that it exists
-        const group = await Group.findById(groupId).select('workspaceId');
+        const group = await Group.findById(groupId);
         if (!group)
             return res.status(404).json({ 
                 message: "The provided group was not found in our database" 
@@ -143,6 +143,16 @@ router.put("/join", async(req, res) => {
             return res.status(400).json({ 
                 message: "User is already a member of a group in this workspace" 
             });
+
+        // Get group member limit
+        const memberLimit = (await Workspace.findById(group.workspaceId)
+                            .select('groupMemberLimit')).groupMemberLimit;
+        // Check the group's member limit
+        if (memberLimit && group.userIds.length >= memberLimit)
+            return res.status(400).json({
+                message: "Cannot join group because the member limit has been reached"
+            });
+
         // Link the user and the group
         await Promise.all([
             Adders.addUserToGroup(userId, groupId),
@@ -180,7 +190,7 @@ router.put("/leave", async(req, res) => {
 });
 
 // Deletes a group
-router.delete("/delete/:groupId", async(req, res) => {
+router.delete("/:groupId/delete", async(req, res) => {
     try{
         const { groupId } = req.params;
         // Check that the group exists

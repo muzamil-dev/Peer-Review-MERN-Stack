@@ -194,6 +194,39 @@ router.post("/create", async(req, res) => {
     }
 });
 
+// Edit assignment information
+// Required: assignmentId
+// Optional: startDate, dueDate, description, questions
+router.put("/edit", async(req, res) => {
+    // Get assignmentId
+    const assignmentId = req.body.assignmentId;
+    // Check that the assignment exists
+    const assignment = await ReviewAssignment.findById(assignmentId);
+    if (!assignment)
+        return res.status(404).json({ 
+            message: "The provided assignment wasn't found in our database" 
+        });
+    // Check that the user making the request is an instructor
+    const verifyInstructor = await Checkers.checkInstructor(req.body.userId, assignment.workspaceId);
+    if (!verifyInstructor)
+        return res.status(403).json({ message: "The provided user is not authorized to make this request" });
+    // Check for edits on: startDate, dueDate, description, questions
+    const edits = {};
+    if (req.body.startDate) edits.startDate = new Date(req.body.startDate);
+    if (req.body.dueDate) edits.dueDate = new Date(req.body.dueDate);
+    if (req.body.description) edits.description = req.body.description;
+    // Modify to reset completed reviews if questions are edited
+    if (req.body.questions) edits.questions = req.body.questions;
+    // Save the edits
+    await ReviewAssignment.updateOne(
+        { _id: assignment._id }, edits
+    );
+    return res.json({ 
+        message: "Assignment edited successfully",
+        assignmentId: assignment._id
+    });
+})
+
 // Delete an assignment
 router.delete("/delete/:assignmentId", async(req, res) => {
     try{
