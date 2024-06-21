@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
 import './DashboardPage.css';
 import Api from '../Api.js';
+//import snackbar
+import { enqueueSnackbar } from 'notistack';
 
 const DashboardPage = () => {
     const [workspaces, setWorkspaces] = useState([]);
@@ -89,11 +91,41 @@ const DashboardPage = () => {
             navigate('/');
             return;
         }
-
+    
         const decodedToken = jwtDecode(token);
         const userId = decodedToken.userId;
-
+    
+        // Maximum workspace name length
+        const maxWorkspaceNameLength = 25; // Adjust the value as needed
+    
+        // Check if the workspace name exceeds the maximum length
+        if (newWorkspaceName.length > maxWorkspaceNameLength) {
+            //console.error(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`);
+            enqueueSnackbar(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`, { variant: 'error' });
+            //alert(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`);
+            return;
+        }
+    
+        // Add validation for allowed domains
+        // Numbers and special characters are not allowed
+        // Allowed domains should be separated by commas
+        // Should be a "." in each domain and characters before and after the "."
         const domainsArray = newWorkspaceDomains.split(',').map(domain => domain.trim()).filter(domain => domain);
+    
+        const isValidDomain = (domain) => {
+            const domainRegex = /^[a-zA-Z]+\.[a-zA-Z]+$/;
+            return domainRegex.test(domain);
+        };
+    
+        for (const domain of domainsArray) {
+            if (!isValidDomain(domain)) {
+                console.error(`Invalid domain: ${domain}`);
+                enqueueSnackbar(`Invalid domain: ${domain}`, { variant: 'error' });
+                //alert(`Invalid domain: ${domain}`);
+                return;
+            }
+        }
+    
         try {
             const response = await Api.Workspaces.CreateWorkspace(
                 newWorkspaceName,
@@ -102,7 +134,7 @@ const DashboardPage = () => {
                 maxGroupSize ? parseInt(maxGroupSize, 10) : undefined,
                 numGroups ? parseInt(numGroups, 10) : undefined
             );
-
+    
             if (response.status === 201 || response.status === 200) {
                 const fetchWorkspaces = async () => {
                     try {
@@ -116,7 +148,7 @@ const DashboardPage = () => {
                         console.error('Error fetching workspaces:', error);
                     }
                 };
-
+    
                 const newWorkspace = {
                     workspaceId: response.workspaceId,
                     name: newWorkspaceName,
@@ -137,6 +169,7 @@ const DashboardPage = () => {
             console.error('Error creating workspace:', error);
         }
     };
+    
 
     const handleWorkspaceClick = (workspaceId) => {
         const workspace = workspaces.find(w => w.workspaceId === workspaceId);
