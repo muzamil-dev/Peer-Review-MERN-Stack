@@ -468,7 +468,7 @@ const GroupsPageAdmin = () => {
                             <input type="text" placeholder="Ex: ucf.edu, gmail.com" name="allowedDomains" value={formData.allowedDomains} onChange={handleChange} />
 
                             <label htmlFor="groupMemberLimit"><b>Maximum Group Size</b></label>
-                            <input type="number" placeholder="Enter Group Member Limit" name="groupMemberLimit" required value={formData.groupMemberLimit} onChange={handleChange} />
+                            <input type="number" placeholder="Enter Group Member Limit" name="groupMemberLimit" value={formData.groupMemberLimit} onChange={handleChange} />
 
                             {/* Invite Code Section */}
                             <div className="mb-2 text-center">
