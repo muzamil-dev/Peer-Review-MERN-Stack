@@ -74,12 +74,16 @@ const GroupsPageAdmin = () => {
         const token = localStorage.getItem('accessToken');
         const response = await Api.Workspaces.GetStudentsWithoutGroup(workspaceId, token);
         if (response.status === 200 && Array.isArray(response.data)) {
-            setUngroupedMembers(response.data.filter(member => member && member.userId));
+            const sortedMembers = response.data
+                .filter(member => member && member.userId)
+                .sort((a, b) => a.lastName.localeCompare(b.lastName));
+            setUngroupedMembers(sortedMembers);
         } else {
             console.error('Failed to fetch ungrouped members:', response.message);
             setUngroupedMembers([]); // Ensure ungroupedMembers is an array even on error
         }
     };
+    
 
     useEffect(() => {
         fetchUngroupedMembers();
