@@ -39,9 +39,13 @@ const CreateFormPage = () => {
     };
 
     const handleRemoveField = (index) => {
-        const values = [...fields];
-        values.splice(index, 1);
-        setFields(values);
+        if (fields.length > 1) {
+            const values = [...fields];
+            values.splice(index, 1);
+            setFields(values);
+        } else {
+            enqueueSnackbar('There must be at least one question.', { variant: 'error' });
+        }
     };
 
     const handleDateChange = (e) => {
@@ -71,6 +75,11 @@ const CreateFormPage = () => {
 
         const questions = fields.map(field => field.name);
 
+        if (questions.length === 0 || questions.some(question => question.trim() === '')) {
+            enqueueSnackbar('There must be at least one question.', { variant: 'error' });
+            return;
+        }
+
         const response = await Api.Assignments.CreateAssignment(
             userId,
             workspaceId,
@@ -96,6 +105,8 @@ const CreateFormPage = () => {
                 <div className={styles.formGroup}>
                     <label className={styles.bold}>Assignment</label>
                     <input
+                        // Assignment name must be filled out
+                        required
                         type="text"
                         value={formName}
                         onChange={handleFormNameChange}
@@ -107,6 +118,7 @@ const CreateFormPage = () => {
                     {fields.map((field, index) => (
                         <div key={index} className={styles.fieldGroup}>
                             <input
+                                required
                                 type="text"
                                 placeholder={`Question ${index + 1}`}
                                 name="name"
@@ -118,6 +130,7 @@ const CreateFormPage = () => {
                                 type="button"
                                 onClick={() => handleRemoveField(index)}
                                 className={`btn btn-danger ${styles.removeButton}`}
+                                disabled={fields.length === 1}
                             >
                                 Delete
                             </button>
