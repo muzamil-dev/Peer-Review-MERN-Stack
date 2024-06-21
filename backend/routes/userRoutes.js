@@ -3,6 +3,7 @@ import { User } from '../models/userModel.js';
 import { sendEmail } from '../emailService.js';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
+import { TempUser } from '../models/tempUserModel.js';
 
 const router = express.Router();
 
@@ -102,6 +103,91 @@ router.post("/", async (req, res) => {
         res.status(500).send({ message: err.message });
     }
 });
+
+// Create a new user with email verification
+router.post("/signup", async (req, res) => {
+    try{
+        const { firstName, middleName, lastName, email, password } = req.body;
+        if (!firstName || !lastName || !email || !password) {
+            return res.status(400).json({ message: "One or more required fields is not present." });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: "Invalid email address." });
+        }
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "An account with this email already exists." });
+        }
+
+        const verificationToken = crypto.randomInt(100000, 1000000).toString();
+        const verificationTokenExpires = Date.now() + 600000; //expires in 10 minutes
+
+        const tempUser = new TempUser({
+            firstName,
+            middleName,
+            lastName,
+            email,
+            password,
+            verificationToken,
+            verificationTokenExpires
+        });
+
+        await tempUser.save();
+
+        const message = `
+            <p>Please verify your email by entering the following token:</p>
+            <p><strong>${verificationToken}</strong></p>;
+        `
+        
+        await sendEmail(email, 'Email Verification', message);
+        return res.status(201).json({ message: "User created. Please check your email for verification." });
+        
+    }catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+// Verify email
+router.post("/verifyEmail", async (req, res) => {
+    try {
+        const { token } = req.body;
+        if (!token) {
+            return res.status(400).json({ message: "Verification token is required." });
+        }
+
+        const tempUser = await TempUser.findOne({
+            verificationToken: token,
+            verificationTokenExpires: { $gt: Date.now() }
+        });
+
+        if (!tempUser) {
+            return res.status(400).json({ message: "Invalid or expired token." });
+        }
+
+        const { firstName, middleName, lastName, email, password } = tempUser;
+        const newUser = new User({
+            firstName,
+            middleName,
+            lastName,
+            email,
+            password
+        })
+
+        await newUser.save();
+        await TempUser.deleteOne({ _id: tempUser._id });
+
+        return res.status(200).json({ message: "Email verified successfully." });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+        
+
 
 // Edit a user
 router.put("/", async (req, res) => {
