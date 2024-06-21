@@ -4,7 +4,7 @@ const reviewAssignmentSchema = mongoose.Schema(
     {
         workspaceId: {
             type: ObjectId,
-            ref: "Workspace",
+            ref: "workspace",
             required: true
         },
         description: {
@@ -30,4 +30,4 @@ const reviewAssignmentSchema = mongoose.Schema(
     }
 );
 
-export const ReviewAssignment = mongoose.model("ReviewAssignment", reviewAssignmentSchema);
+export const ReviewAssignment = mongoose.model("reviewassignment", reviewAssignmentSchema);

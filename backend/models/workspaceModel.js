@@ -15,7 +15,7 @@ const workspaceSchema = mongoose.Schema(
             type: [{
                 userId: {
                     type: ObjectId,
-                    ref: "User",
+                    ref: "user",
                     required: true
                 },
                 role: {
@@ -27,9 +27,14 @@ const workspaceSchema = mongoose.Schema(
             default: [],
             required: true,
         },
+        groupMemberLimit: {
+            type: Number,
+            default: null,
+            required: false
+        },
         allowedDomains: {
             type: [String],
-            default: null,
+            default: [],
             required: false
         },
         inviteCode: {
