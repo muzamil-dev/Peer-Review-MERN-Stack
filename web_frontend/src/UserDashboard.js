@@ -17,6 +17,7 @@ const UserDashboard = () => {
     const [selectedReview, setSelectedReview] = useState({});
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
+    const groupId = 25; // Replace with the actual groupId you need
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
@@ -210,6 +211,7 @@ const UserDashboard = () => {
 
     return (
         <div className="dashboardz">
+            <button className="btn btn-light mt-2 back-button" onClick={() => navigate(`/groups/${groupId}`)}>Back</button>
             <h1 className="header-large">Assignments</h1>
             <div className="workspace-selector">
                 <label htmlFor="workspace">Workspace: </label>
