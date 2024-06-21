@@ -14,6 +14,7 @@ import groupRoutes from './routes/groups.js';
 import workspaceRoutes from './routes/workspaces.js';
 import assignmentRoutes from './routes/assignments.js';
 import reviewRoutes from './routes/reviews.js';
+import cors from 'cors';
 
 // Access env variables
 dotenv.config();
@@ -24,6 +25,7 @@ const PORT = process.env.PORT || 5000;
 // Initialize the app
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // Define routes
 app.use("/users", userRoutes);

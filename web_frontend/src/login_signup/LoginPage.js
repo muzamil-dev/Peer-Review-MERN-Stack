@@ -39,62 +39,54 @@ const LoginPage = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        console.log('Login button clicked'); // Debugging log
         try {
             const response = await Api.Users.DoLogin(loginData.email, loginData.password);
+            console.log('Response from API:', response); // Debugging log
             if (response.status === 200) {
                 localStorage.setItem('accessToken', response.data.accessToken); // Store JWT in local storage
                 enqueueSnackbar('Login successful', { variant: 'success' });
                 navigate('/DashboardPage');
-            // Redirect or perform additional actions after successful login
-            }
-            else {
+            } else {
                 enqueueSnackbar('Invalid email or password', { variant: 'error' });
-                // alert('Invalid email or password');
             }
         } catch (error) {
             enqueueSnackbar('Error: ' + error.message, { variant: 'warning' });
             console.error('Error logging in:', error);
-            //alert('Invalid email or password-2');
         }
     };
 
     const handleSignup = async (e) => {
         e.preventDefault();
+        console.log('Signup button clicked'); // Add this line for debugging
         if (signupData.password !== signupData.confirmPassword) {
-            // alert('Passwords do not match');
             enqueueSnackbar('Passwords do not match', { variant: 'error' });
             return;
         }
-        //setIsLoading(true);
-
-        //console.log('Signup Data:', signupData); // Log the signup data
-
+    
+        console.log('Signup Data:', signupData); // Log the signup data for debugging
+    
         try {
             const response = await Api.Users.CreateAccount(
                 signupData.firstName,
-                signupData.middleName,
+                //signupData.middleName,
                 signupData.lastName,
                 signupData.email,
                 signupData.password
             );
+            console.log('Response from API:', response); // Add this line for debugging
             if (response.status === 201) {
-                // alert('Signup successful');
                 enqueueSnackbar('Signup successful', { variant: 'success' });
-                //navigate('/DashboardPage');
                 setTempEmail(signupData.email);
                 setIsVerificationActive(true);
             } else {
                 enqueueSnackbar('Signup failed', { variant: 'error' });
-                // alert('Signup failed');
             }
         } catch (error) {
             console.error('Error signing up:', error);
             enqueueSnackbar('Error signing up' + error.message, { variant: 'warning' });
-            // alert('Signup failed');
         }
-        //setIsLoading(false);
     };
-
     /**/
     const handleVerify = async (e) => {
         e.preventDefault();
