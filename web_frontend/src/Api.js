@@ -9,6 +9,8 @@ const getUrl = (prefix, route) => {
     else {
         return 'http://localhost:5000/' + prefix + route;
     }
+
+    // return 'http://localhost:5000/' + prefix + route;
 };
 
 const getConfig = () => ({

@@ -18,6 +18,8 @@ import assignmentRoutes from './routes/assignments.js';
 import reviewRoutes from './routes/reviews.js';
 import analyticsRoutes from './routes/analytics.js';
 import jwtRoutes from './routes/jwt.js';
+import journalAssignmentsRoutes from './routes/journalAssignments.js';
+import journalSubmissionsRoutes from './routes/journalSubmissions.js';
 
 // Access env variables
 dotenv.config();
@@ -65,6 +67,8 @@ app.use("/assignments", assignmentRoutes);
 app.use("/reviews", reviewRoutes);
 app.use("/analytics", analyticsRoutes);
 app.use("/jwt", jwtRoutes);
+app.use("/journalAssignments", journalAssignmentsRoutes);
+app.use("/journalSubmissions", journalSubmissionsRoutes);
 
 // Connect to the database
 await db.connect();
@@ -72,7 +76,7 @@ await db.connect();
 
 // Hourly cron job
 // Deletes old temp users that were never verified
-cron.schedule('0 * * * *', async() => {
+cron.schedule('0 * * * *', async () => {
     const res = await db.query(
         `DELETE FROM temp_users
         WHERE verification_token_expiry < $1
@@ -85,7 +89,7 @@ cron.schedule('0 * * * *', async() => {
 
 // Once per minute cron job
 // Releases the reviews for a corresponding assignment
-cron.schedule('0 * * * * *', async() => {
+cron.schedule('0 * * * * *', async () => {
     const res = await db.query(
         `UPDATE assignments
         SET started = true
@@ -104,7 +108,7 @@ cron.schedule('0 * * * * *', async() => {
 
 // Once per minute cron job
 // Computes analytics for assignments, sets to complete
-cron.schedule('0 * * * * *', async() => {
+cron.schedule('0 * * * * *', async () => {
     const res = await db.query(
         `UPDATE assignments
         SET completed = true
