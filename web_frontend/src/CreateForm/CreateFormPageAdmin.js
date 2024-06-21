@@ -3,7 +3,7 @@ import styles from './CreateFormPage.module.css';
 import Api from '../Api.js';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from 'react-router-dom';
-
+import { useSnackbar } from 'notistack';
 
 const CreateFormPage = () => {
     const [formName, setFormName] = useState('');
@@ -12,6 +12,7 @@ const CreateFormPage = () => {
     const [availableUntil, setAvailableUntil] = useState('');
     const navigate = useNavigate();
     const { workspaceId } = useParams(); // Assuming workspaceId is passed as a URL parameter
+    const { enqueueSnackbar } = useSnackbar();
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
@@ -56,12 +57,19 @@ const CreateFormPage = () => {
         e.preventDefault();
         const userId = getCurrentUserId();
         if (!userId) {
+            enqueueSnackbar('User not authenticated', { variant: 'error' });
+            return;
+        }
+
+        const startDate = new Date(availableFrom).getTime(); // Convert to epoch time
+        const dueDate = new Date(availableUntil).getTime(); // Convert to epoch time
+
+        if (dueDate < startDate) {
+            enqueueSnackbar('Due date cannot be before the start date.', { variant: 'error' });
             return;
         }
 
         const questions = fields.map(field => field.name);
-        const startDate = new Date(availableFrom).getTime(); // Convert to epoch time
-        const dueDate = new Date(availableUntil).getTime(); // Convert to epoch time
 
         const response = await Api.Assignments.CreateAssignment(
             userId,
@@ -74,13 +82,11 @@ const CreateFormPage = () => {
         );
 
         if (response.success) {
-            // Handle success (e.g., show a success message, redirect to another page, etc.)
-            alert('Form created successfully!');
+            enqueueSnackbar('Form created successfully!', { variant: 'success' });
             navigate(`/formsAdmin/${workspaceId}`); // Adjust the redirect URL as needed
         } else {
-            // Handle error (e.g., show an error message)
             console.error('Failed to create form:', response.message);
-            alert('Failed to create form.');
+            enqueueSnackbar('Failed to create form.', { variant: 'error' });
         }
     };
 
@@ -128,7 +134,6 @@ const CreateFormPage = () => {
                 </div>
                 <div className='row'>
                     <div className={`col-6 ${styles.formGroup}`}>
-                        {/* <label>Available from</label> */}
                         <input
                             type="date"
                             name="availableFrom"
@@ -138,7 +143,6 @@ const CreateFormPage = () => {
                         />
                     </div>
                     <div className={`col-6 ${styles.formGroup}`}>
-                        {/* <label>Until</label> */}
                         <input
                             type="date"
                             name="availableUntil"

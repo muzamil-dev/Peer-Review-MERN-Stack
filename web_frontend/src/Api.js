@@ -96,8 +96,14 @@ const POST = 'post';
 const DELETE = 'delete';
 const PUT = 'put';
 
+const logout = () => {
+    localStorage.removeItem('accessToken');
+    window.location.href = '/'; // Redirect to the login page
+};
+
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
+    logout, // Export the logout function
     Groups: {
         /**
          * Gets the group info for a group specified by groupId
