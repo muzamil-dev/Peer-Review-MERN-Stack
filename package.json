@@ -11,6 +11,7 @@
   "dependencies": {
     "chart.js": "^4.4.3",
     "jwt-decode": "^4.0.0",
+    "react-bootstrap": "^2.10.4",
     "react-chartjs-2": "^5.2.0"
   }
 }
