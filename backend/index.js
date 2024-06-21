@@ -14,7 +14,7 @@ import groupRoutes from './routes/groups.js';
 import workspaceRoutes from './routes/workspaces.js';
 import assignmentRoutes from './routes/assignments.js';
 import reviewRoutes from './routes/reviews.js';
-import cors from 'cors';
+import jwtRoutes from './routes/jwt.js';
 
 // Access env variables
 dotenv.config();
@@ -25,7 +25,6 @@ const PORT = process.env.PORT || 5000;
 // Initialize the app
 const app = express();
 app.use(express.json());
-app.use(cors());
 
 // Define routes
 app.use("/users", userRoutes);
@@ -33,6 +32,7 @@ app.use("/groups", groupRoutes);
 app.use("/workspaces", workspaceRoutes);
 app.use("/assignments", assignmentRoutes);
 app.use("/reviews", reviewRoutes);
+app.use("/jwt", jwtRoutes);
 
 // Connect to the database
 await db.connect();
