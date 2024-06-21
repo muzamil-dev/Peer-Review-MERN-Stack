@@ -379,6 +379,81 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
     }
 });
 
+
+router.get("/:workspaceId/allStudents", async (req, res) => {
+    try {
+        const { workspaceId } = req.params;
+
+        // Fetch workspace and check existence
+        const workspace = await Workspace.findById(workspaceId).populate({
+            path: 'userIds.userId',
+            select: 'email firstName lastName'
+        });
+        if (!workspace) {
+            return res.status(404).json({ message: "The provided workspace was not found in our database" });
+        }
+
+        // Get all student IDs in the workspace, ensuring to handle null values
+        const allStudents = workspace.userIds
+            .filter(user => user.userId && user.role === 'Student') // Filter out null or undefined user references and non-students
+            .map(user => ({
+                userId: user.userId._id,
+                email: user.userId.email,
+                firstName: user.userId.firstName,
+                lastName: user.userId.lastName,
+                role: user.role
+            }));
+
+        return res.json(allStudents);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+
+router.get("/:workspaceId/studentsWithoutGroup", async (req, res) => {
+    try {
+        const { workspaceId } = req.params;
+
+        // Fetch workspace and check existence
+        const workspace = await Workspace.findById(workspaceId).populate({
+            path: 'userIds.userId',
+            select: 'email firstName lastName'
+        });
+        if (!workspace) {
+            return res.status(404).json({ message: "The provided workspace was not found in our database" });
+        }
+
+        // Get all student IDs in the workspace, ensuring to handle null values
+        const allStudents = workspace.userIds
+            .filter(user => user.userId && user.role === 'Student') // Filter out null or undefined user references and non-students
+            .map(user => ({
+                userId: user.userId._id,
+                email: user.userId.email,
+                firstName: user.userId.firstName,
+                lastName: user.userId.lastName,
+                role: user.role
+            }));
+
+        // Get all groups in the workspace
+        const groups = await Group.find({ workspaceId });
+        const groupUserIds = groups.reduce((acc, group) => {
+            return acc.concat(group.userIds.map(id => id.toString()));
+        }, []);
+
+        // Find students who are not in any group
+        const studentsWithoutGroup = allStudents.filter(student => !groupUserIds.includes(student.userId.toString()));
+
+        return res.json(studentsWithoutGroup);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+
+
 ////////////////////////////
 
 // This is for testing and likely wont be available to users
