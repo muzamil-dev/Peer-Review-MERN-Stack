@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import dotenv from "dotenv";
 
 // Routers
@@ -17,6 +18,23 @@ const PORT = process.env.PORT || 5000;
 // Initialize the app
 const app = express();
 app.use(express.json());
+
+// Set allowed origins
+const allowedOrigins = ['http://v2.ratemypeer.site', 'http://localhost:3000'];
+// Configure CORS options
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1)
+            callback(null, true);
+        else
+            callback(new Error(`CORS error: Disallowed origin (${origin})`));
+    },
+    credentials: true, // Enable cookies and other credentials
+};
+
+app.use(cors(corsOptions));
 
 // Use routers
 app.use("/groups", groupRoutes);

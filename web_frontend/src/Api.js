@@ -2,9 +2,25 @@ import axios from 'axios';
 import {jwtDecode} from 'jwt-decode';
 
 const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
-const getUrl = (prefix, route) => {
+// const getUrl = (prefix, route) => {
 
-    return 'http://v2.ratemypeer.site/api' + prefix + route;
+//     return 'http://localhost:5000' + prefix + route;
+// };
+
+//use this for testing local API
+// const getUrl = (prefix, route) => {
+//     const baseUrl = 'http://localhost:5000'; // Local development URL
+//     const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
+//     const formattedRoute = route.startsWith('/') ? route : `/${route}`;
+//     return `${baseUrl}/${formattedPrefix}${formattedRoute}`;
+// };
+
+
+//use this for testing deployed API
+const getUrl = (prefix, route) => {
+    const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
+    const formattedRoute = route.startsWith('/') ? route : `/${route}`;
+    return `http://v2.ratemypeer.site/api/${formattedPrefix}${formattedRoute}`;
 };
 
 const getConfig = () => ({
@@ -71,7 +87,7 @@ axios.interceptors.request.use(async config => {
 
 const apiRequest = async (method, url, data = null) => {
     try {
-        const response = await axios({ method, url, data, ...getConfig() });
+        const response = await axios({ method, url, data, ...getConfig(), withCredentials: true  });
         return response;
     } catch (error) {
         console.error('Api.js: Error Caught:', error);
@@ -442,9 +458,12 @@ export default {
         DoLogin: async (email, password) => {
             const payload = { email: email.toLowerCase(), password };
             try {
-                const response = await axios.post(getUrl(USERS, '/login'), payload, {
+                const url = getUrl(USERS, '/login');
+                console.log('Login URL:', url); // Debug log
+                console.log('Login Payload:', payload); // Debug log
+                const response = await axios.post(url, payload, {
                     withCredentials: true,
-                    headers: { 'Skip-Interceptor': 'true' } // skip the interceptor
+                    headers: { 'Skip-Interceptor': 'true' } // Skip the interceptor
                 });
                 if (response && response.status && response.status === 200) {
                     const { accessToken } = response.data;
@@ -456,10 +475,11 @@ export default {
                     message: response.data.message
                 };
             } catch (err) {
-                console.error(err);
+                console.error('Login Error:', err.response ? err.response.data : err); // Log error details
                 return err.response || Response503;
             }
         },
+        
 
         /**
      * Creates an account with the specified information.

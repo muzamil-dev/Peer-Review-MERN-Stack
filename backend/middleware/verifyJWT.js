@@ -19,7 +19,8 @@ const verifyJWT = (req, res, next) => {
                 req.body = {};
             // Set user vars
             req.body.userId = payload.userId;
-            // Go to next
+            req.userId = payload.userId;
+            // Auth successful, use the next function
             next();
         }
     );
