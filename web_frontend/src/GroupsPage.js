@@ -78,7 +78,7 @@ const GroupsPageUser = () => {
     const handleLeaveGroup = async (groupId) => {
         const currentUserId = getCurrentUserId();
         if (!currentUserId || workspaceDetails.groupLock) {
-            navigate('/login');
+            navigate('/');
             return { success: false };
         }
         const response = await Api.Groups.LeaveGroup(groupId, currentUserId);
@@ -94,7 +94,7 @@ const GroupsPageUser = () => {
     const handleLeaveWorkspace = async () => {
         const currentUserId = getCurrentUserId();
         if (!currentUserId || workspaceDetails.groupLock) {
-            navigate('/login');
+            navigate('/');
             return { success: false };
         }
         const response = await Api.Workspaces.LeaveWorkspace(currentUserId, workspaceId);

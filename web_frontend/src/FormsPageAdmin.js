@@ -24,7 +24,7 @@ const ViewFormsAdminPage = () => {
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            navigate('/login'); // Redirect to login if token is not available
+            navigate(''); // Redirect to login if token is not available
             return null;
         }
         const decodedToken = jwtDecode(token);
@@ -180,7 +180,9 @@ const ViewFormsAdminPage = () => {
     return (
         <div className="view-forms-admin-page">
             <nav className="navbar">
-                <a className="navbar-brand">Assignments Page</a>
+                {/* //link to take to dashboard page */}
+                <a className="navbar-brand" href="/DashboardPage">Rate My Peer</a>
+                {/* <a className="navbar-brand">Assignments Page</a> */}
                 <ul className="navbar-links">
                     <li><a href="/DashboardPage">Workspaces</a></li>
                     <li><button onClick={handleLogout} className="btn-danger btn">Logout</button></li>

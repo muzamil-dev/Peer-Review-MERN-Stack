@@ -17,7 +17,7 @@ const CreateFormPage = () => {
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            navigate('/login'); // Redirect to login if token is not available
+            navigate('/'); // Redirect to login if token is not available
             return null;
         }
         const decodedToken = jwtDecode(token);

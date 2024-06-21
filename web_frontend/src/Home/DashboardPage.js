@@ -28,7 +28,7 @@ const DashboardPage = () => {
 
         if (!userId) {
             console.error('User ID not found in token');
-            navigate('/login');
+            navigate('/');
             return;
         }
 
@@ -51,7 +51,7 @@ const DashboardPage = () => {
     const handleJoinWorkspace = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            navigate('/login');
+            navigate('/');
             return;
         }
 
@@ -86,7 +86,7 @@ const DashboardPage = () => {
     const handleAddWorkspace = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            navigate('/login');
+            navigate('/');
             return;
         }
 
@@ -151,7 +151,7 @@ const DashboardPage = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
-        navigate('/login');
+        navigate('/');
     };
 
     return (
