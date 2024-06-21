@@ -16,10 +16,6 @@ const groupSchema = mongoose.Schema(
             default: [],
             ref: "user",
             required: true
-        },
-        memberLimit: {
-            type: Number,
-            required: false
         }
     },
     {

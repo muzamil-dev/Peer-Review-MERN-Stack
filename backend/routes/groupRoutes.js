@@ -33,7 +33,6 @@ router.get("/:groupId", async(req, res) => {
 
 // Create a group in a workspace
 // Required: workspaceId
-// Optional: name, memberLimit
 router.post("/create", async(req, res) => {
     try{
         const body = req.body;
@@ -54,17 +53,14 @@ router.post("/create", async(req, res) => {
                 message: "The provided user is not authorized to create groups"
             });
 
-        // Check that a name for the group is given
-        if (!body.name){
-            const numGroups = await Group.countDocuments({ workspaceId: body.workspaceId });
-            body.name = `Group ${numGroups + 1}`;
-        }
+        const numGroups = await Group.countDocuments({ workspaceId: body.workspaceId });
+        const name = `Group ${numGroups + 1}`;
+        
         // Create the group
         const groupObj = {
             groupId: null,
-            name: body.name, 
+            name, 
             workspaceId: body.workspaceId,
-            memberLimit: body.memberLimit || null
         }
         const group = await Group.create(groupObj);
         groupObj.groupId = group._id;
@@ -147,8 +143,12 @@ router.put("/join", async(req, res) => {
             return res.status(400).json({ 
                 message: "User is already a member of a group in this workspace" 
             });
+
+        // Get group member limit
+        const memberLimit = (await Workspace.findById(group.workspaceId)
+                            .select('groupMemberLimit')).groupMemberLimit;
         // Check the group's member limit
-        if (group.memberLimit && group.userIds.length === group.memberLimit)
+        if (memberLimit && group.userIds.length >= memberLimit)
             return res.status(400).json({
                 message: "Cannot join group because the member limit has been reached"
             });
