@@ -471,19 +471,19 @@ const GroupsPageAdmin = () => {
                             <input type="number" placeholder="Enter Group Member Limit" name="groupMemberLimit" required value={formData.groupMemberLimit} onChange={handleChange} />
 
                             {/* Invite Code Section */}
-                            <div className="mb-3 text-center">
+                            <div className="mb-2 text-center">
                                 <label><b>Invite Code:</b></label>
                                 <p>{inviteCode ? inviteCode : "No invite code available"}</p>
                                 <div className="btn-group mb-3">
                                     <button type="button" className="btn btn-success" onClick={handleCreateInviteCode} style={{ width: '100px' }}>Create</button>
-                                    <button type="button" className="btn btn-danger" onClick={handleDeleteInviteCode} style={{ width: '100px' }}>Delete</button>
+                                    <button type="button" className="btn btn-danger mb-0" onClick={handleDeleteInviteCode} style={{ width: '100px' }}>Delete</button>
                                 </div>
                             </div>
 
                             {/*button group to lock or unlock the workspace */}
                             <div className="btn-group mb-3">
-                                <button type="button" className={`btn ${formData.groupLock ? 'btn-outline-primary' : 'btn-primary'}`} onClick={() => handleLockChange(true)}>Lock</button>
-                                <button type="button" className={`btn ${!formData.groupLock ? 'btn-outline-primary' : 'btn-primary'}`} onClick={() => handleLockChange(false)}>Unlock</button>
+                                <button type="button" className={`btn ${formData.groupLock ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => handleLockChange(true)}>Lock</button>
+                                <button type="button" className={`btn ${!formData.groupLock ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => handleLockChange(false)}>Unlock</button>
                             </div>
 
                             <button type="submit" className="btn btn-outline-success mb-3">Save</button>

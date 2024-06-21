@@ -137,6 +137,11 @@ const DashboardPage = () => {
         }
     
         try {
+            //check if name is empty
+            if (newWorkspaceName === '') {
+                enqueueSnackbar('Workspace name cannot be empty.', { variant: 'error' });
+                return;
+            }
             const response = await Api.Workspaces.CreateWorkspace(
                 newWorkspaceName,
                 userId,
@@ -282,6 +287,7 @@ const DashboardPage = () => {
                         </div>
                         <div className="modal-body">
                             <input
+                                required
                                 type="text"
                                 placeholder="Workspace Name"
                                 value={newWorkspaceName}
@@ -297,14 +303,14 @@ const DashboardPage = () => {
                             />
                             <input
                                 type="text"
-                                placeholder="Max Group Size"
+                                placeholder="Max Group Size (optional)"
                                 value={maxGroupSize}
                                 onChange={(e) => setMaxGroupSize(e.target.value)}
                                 className="form-control mb-2"
                             />
                             <input
                                 type="text"
-                                placeholder="Number of Groups"
+                                placeholder="Number of Groups (optional)"
                                 value={numGroups}
                                 onChange={(e) => setNumGroups(e.target.value)}
                                 className="form-control mb-2"
