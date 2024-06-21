@@ -243,7 +243,7 @@
 }
 
 .dropdown {
-    width: 200px;
+    width: 200px !important;
 }
 
 .temp {

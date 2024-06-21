@@ -179,9 +179,8 @@ const ViewFormsAdminPage = () => {
 
     return (
         <div className="view-forms-admin-page">
-
             <nav className="navbar">
-                <a href="/dashboard" className="navbar-brand">Forms</a>
+                <a className="navbar-brand">Assignments Page</a>
                 <ul className="navbar-links">
                     <li><a href="/DashboardPage">Workspaces</a></li>
                     <li><button onClick={handleLogout} className="btn-danger btn">Logout</button></li>

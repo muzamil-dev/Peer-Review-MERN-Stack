@@ -50,6 +50,17 @@ router.get("/:assignmentId/target/:targetId", async(req, res) => {
     return res.status(200).json(data);
 });
 
+// Get all reviews written about a user (target) for an assignment With Questions Averages
+router.get("/averages/:assignmentId/target/:targetId", async(req, res) => {
+    const { assignmentId, targetId } = req.params;
+    // Call the service
+    const data = await ReviewService.getByAssignmentAndTargetWithQAverages(targetId, assignmentId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+});
+
 // Create a new assignment
 router.post("/create", async(req, res) => {
     const { userId, workspaceId, name, startDate, dueDate, questions, description } = req.body;
