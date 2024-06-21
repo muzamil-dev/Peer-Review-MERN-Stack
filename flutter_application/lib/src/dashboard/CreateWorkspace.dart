@@ -15,6 +15,8 @@ class CreateWorkspace extends StatefulWidget {
 class _CreateWorkspaceState extends State<CreateWorkspace> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController domainController = TextEditingController();
+  final TextEditingController numGroupsController = TextEditingController();
+  final TextEditingController maxGroupSizeController = TextEditingController();
 
   Future<void> createWorkspace(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/create');
@@ -26,8 +28,11 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
         },
         body: jsonEncode({
           'name': nameController.text,
-          'allowedDomains': domainController.text.isEmpty ? [] : domainController.text.split(','),
+          'allowedDomains': domainController.text.isEmpty ? [] 
+          : domainController.text.split(',').map((domain) => domain.trim()).toList(),
           'userId': widget.userId,
+          'numGroups': numGroupsController.text.isNotEmpty ? int.parse(numGroupsController.text) : null,
+          'groupMemberLimit': maxGroupSizeController.text.isNotEmpty ? int.parse(maxGroupSizeController.text) : null,
         }),
       );
       if (response.statusCode == 201) {
@@ -55,7 +60,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
       appBar: AppBar(
         title: Text('Create Workspace'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -66,6 +71,16 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
             TextField(
               controller: domainController,
               decoration: InputDecoration(labelText: 'Allowed Domains (comma separated)'),
+            ),
+            TextField(
+              controller: numGroupsController,
+              decoration: InputDecoration(labelText: 'Number of Groups'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: maxGroupSizeController,
+              decoration: InputDecoration(labelText: 'Max Group Size'),
+              keyboardType: TextInputType.number,
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -83,6 +98,6 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
           ],
         ),
       ),
-    );
+      );
   }
 }

@@ -15,6 +15,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   List<Workspace> workspaces = [];
   bool isLoading = true;
   final String userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+  final TextEditingController inviteCodeController = TextEditingController();
 
   @override
   void initState() {
@@ -56,6 +57,69 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
+  void showJoinWorkspaceDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Join Workspace'),
+          content: TextField(
+            controller: inviteCodeController,
+            decoration: InputDecoration(labelText: 'Invite Code'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                joinWorkspace(inviteCodeController.text);
+                Navigator.pop(context);
+              },
+              child: Text('Join'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> joinWorkspace(String inviteCode) async {
+    final url = Uri.parse('http://10.0.2.2:5000/workspaces/join');
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'userId': userId,
+          'workspaceId': 'workspaceIdFromInput', // You need to get this from user input or logic
+          'inviteCode': inviteCode,
+        }),
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Workspace joined successfully')),
+        );
+        fetchWorkspaces(); // Refresh workspaces after joining
+      } else {
+        final errorData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${errorData['message']}')),
+        );
+      }
+    } catch (err) {
+      print('Error joining workspace: $err');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error joining workspace')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,6 +147,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
               icon: const Icon(Icons.add),
               onPressed: navigateToCreateWorkspacePage,
               tooltip: 'Add Workspace',
+            ),
+            IconButton(
+              icon: const Icon(Icons.input),
+              onPressed: showJoinWorkspaceDialog,
+              tooltip: 'Join Workspace',
             ),
           ],
         ),
