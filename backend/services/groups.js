@@ -1,8 +1,8 @@
 import db from "../config.js";
 
 // Get a group by id
-export const getById = async(groupId) => {
-    try{
+export const getById = async (groupId) => {
+    try {
         const res = await db.query(
             `SELECT g.*, jsonb_agg(
                 jsonb_build_object(
@@ -29,21 +29,21 @@ export const getById = async(groupId) => {
         }))[0];
         // Return
         if (!group)
-            return { 
-                error: "The requested group was not found", 
-                status: 404 
+            return {
+                error: "The requested group was not found",
+                status: 404
             };
         return group;
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Create a new group
 // Must have instructor role in workspace
-export const create = async(userId, workspaceId) => {
-    try{
+export const create = async (userId, workspaceId) => {
+    try {
         // Get the group's workspace
         const instructors = await db.query(
             `SELECT m.user_id, w.groups_created
@@ -81,15 +81,15 @@ export const create = async(userId, workspaceId) => {
         // Return the new group
         return { message: "Created group successfully", group };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Create many groups
 // Must have instructor role in workspace
-export const createMany = async(userId, workspaceId, numGroups) => {
-    try{
+export const createMany = async (userId, workspaceId, numGroups) => {
+    try {
         // Get the groups' workspace
         const instructors = await db.query(
             `SELECT m.user_id, w.groups_created
@@ -115,12 +115,12 @@ export const createMany = async(userId, workspaceId, numGroups) => {
         // Build the query
         const curGroups = found.groups_created;
         let insertQuery = `INSERT INTO groups (name, workspace_id) VALUES `;
-        for (let i = 1; i < numGroups; i++){
+        for (let i = 1; i < numGroups; i++) {
             insertQuery += `('Group ${curGroups + i}', ${workspaceId}), `;
         }
         insertQuery += `('Group ${curGroups + numGroups}', ${workspaceId})
                         RETURNING *`;
-        
+
         // Create the groups
         const [res, _] = await Promise.all([
             db.query(insertQuery),
@@ -135,14 +135,14 @@ export const createMany = async(userId, workspaceId, numGroups) => {
         // Return the new group
         return { message: "Groups created successfully", groups };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Join a group
-export const join = async(userId, groupId) => {
-    try{
+export const join = async (userId, groupId) => {
+    try {
         const check = await db.query(
             `SELECT g.id AS group_to_join, g.name AS group_name, m.group_id AS group_joined, 
             m.workspace_id, m.role, w.groups_locked AS locked, w.group_member_limit
@@ -158,26 +158,26 @@ export const join = async(userId, groupId) => {
         // Check that the group exists
         const data = check.rows[0];
         if (!data)
-            return { 
-                error: "The requested group was not found", 
-                status: 404 
+            return {
+                error: "The requested group was not found",
+                status: 404
             };
         // Check that the user is in the workspace
         if (!data.workspace_id)
             return {
-                error: "Cannot join group: User is not in the same workspace as the group", 
+                error: "Cannot join group: User is not in the same workspace as the group",
                 status: 400
             }
         // Check if the group is locked
         if (data.lock)
-            return { 
-                error: "Cannot join group: Groups are locked for this workspace", 
-                status: 400 
+            return {
+                error: "Cannot join group: Groups are locked for this workspace",
+                status: 400
             };
         // Check that the user is a student
         if (data.role !== "Student")
-            return { 
-                error: "Cannot join group: Only students can join groups", 
+            return {
+                error: "Cannot join group: Only students can join groups",
                 status: 400
             };
         // Check that the user isn't already in another group
@@ -186,7 +186,7 @@ export const join = async(userId, groupId) => {
                 error: "Cannot join group: User is already in a group in this workspace",
                 status: 400
             }
-        
+
         // Check membership limit
         const members = (await db.query(
             `SELECT count(*) FROM memberships WHERE group_id = $1`,
@@ -207,15 +207,15 @@ export const join = async(userId, groupId) => {
         );
         return { message: `Joined ${data.group_name} successfully!` };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Leave a group
 // Join memberships table to check the group theyre in
-export const leave = async(userId, groupId) => {
-    try{
+export const leave = async (userId, groupId) => {
+    try {
         const res = await db.query(
             `SELECT g.id, g.name, g.workspace_id, 
             w.groups_locked AS lock, m.group_id AS group_joined
@@ -236,8 +236,8 @@ export const leave = async(userId, groupId) => {
             };
         // Check if the group is locked
         if (data.lock)
-            return { 
-                error: "Cannot leave group: Groups are locked for this workspace", 
+            return {
+                error: "Cannot leave group: Groups are locked for this workspace",
                 status: 400
             };
         // Check that the group being left is the group they are in
@@ -255,15 +255,15 @@ export const leave = async(userId, groupId) => {
         );
         return { message: `Left ${data.name} successfully!` };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Add a user to a group
 // This overrides locks and membership limits
-export const addUser = async(userId, targetId, groupId) => {
-    try{
+export const addUser = async (userId, targetId, groupId) => {
+    try {
         const check = await db.query(
             `SELECT g.id AS new_group, g.name AS new_group_name, m1.group_id AS target_cur_group, 
             m1.workspace_id, m1.role as target_role, m2.role as user_role
@@ -279,24 +279,24 @@ export const addUser = async(userId, targetId, groupId) => {
         );
         // Check for any errors
         const data = check.rows[0];
-        
+
         // Check that the group was found
         if (!data)
-            return { 
-                error: "The requested group was not found", 
-                status: 404 
+            return {
+                error: "The requested group was not found",
+                status: 404
             };
         // Check that the user is in the workspace. This will be null if no membership was found
         // between the target and the workspace
         if (!data.workspace_id)
             return {
-                error: "Cannot join group: Target is not in the same workspace as the group", 
+                error: "Cannot join group: Target is not in the same workspace as the group",
                 status: 400
             }
         // Check that the user is a student
         if (data.target_role !== "Student")
-            return { 
-                error: "Cannot join group: Only students can join groups", 
+            return {
+                error: "Cannot join group: Only students can join groups",
                 status: 400
             };
         // Check that the user isn't already in another group
@@ -307,8 +307,8 @@ export const addUser = async(userId, targetId, groupId) => {
             }
         // Check that the user making the request is an instructor
         if (data.user_role !== "Instructor")
-            return { 
-                error: "User is not authorized to make this request", 
+            return {
+                error: "User is not authorized to make this request",
                 status: 403
             };
 
@@ -320,15 +320,15 @@ export const addUser = async(userId, targetId, groupId) => {
         );
         return { message: "Target added to group successfully" };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Removes a user from their current group
 // This overrides locks and membership limits
-export const removeUser = async(userId, targetId, groupId) => {
-    try{
+export const removeUser = async (userId, targetId, groupId) => {
+    try {
         const res = await db.query(
             `SELECT g.id AS group_to_leave, g.workspace_id, 
             m1.group_id as target_cur_group, m2.role AS user_role
@@ -343,9 +343,9 @@ export const removeUser = async(userId, targetId, groupId) => {
         const data = res.rows[0];
         // Check that the group was found
         if (!data)
-            return { 
-                error: "The requested group was not found", 
-                status: 404 
+            return {
+                error: "The requested group was not found",
+                status: 404
             };
         // Check that the group being left is the group that target is in
         if (data.group_to_leave !== data.target_cur_group)
@@ -355,8 +355,8 @@ export const removeUser = async(userId, targetId, groupId) => {
             }
         // Check that the user making the request is an instructor
         if (data.user_role !== "Instructor")
-            return { 
-                error: "User is not authorized to make this request", 
+            return {
+                error: "User is not authorized to make this request",
                 status: 403
             };
 
@@ -368,15 +368,15 @@ export const removeUser = async(userId, targetId, groupId) => {
         );
         return { message: "Target removed from group successfully" };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Delete a group
 // User must be an instructor of the workspace that contains the group
-export const deleteGroup = async(userId, groupId) => {
-    try{
+export const deleteGroup = async (userId, groupId) => {
+    try {
         // Get membership details of user userId in relation to the group's workspace
         const res = await db.query(
             `SELECT m.user_id, m.role AS user_role
@@ -389,14 +389,14 @@ export const deleteGroup = async(userId, groupId) => {
         const instructor = res.rows[0];
         // If instructor doesn't exist, the group was not found;
         if (!instructor)
-            return { 
-                error: "The requested group was not found", 
+            return {
+                error: "The requested group was not found",
                 status: 404
             };
         // Check if the user is an instructor
         if (instructor.user_role !== "Instructor")
-            return { 
-                error: "User is not authorized to make this request", 
+            return {
+                error: "User is not authorized to make this request",
                 status: 403
             };
         // Delete the group
@@ -406,7 +406,7 @@ export const deleteGroup = async(userId, groupId) => {
         );
         return { message: `Deleted group successfully` };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }

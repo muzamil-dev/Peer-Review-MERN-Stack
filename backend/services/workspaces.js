@@ -169,16 +169,11 @@ export const create = async(userId, settings) => {
             VALUES ($1, $2, $3)`,
             [userId, res.rows[0].id, "Instructor"]
         );
-        // Format the above query
-        const workspace = res.rows.map(ws => ({
-            workspaceId: ws.id,
-            name: ws.name
-        }))[0];
         // Create groups
         if (numGroups)
             await GroupService.createMany(userId, workspace.workspaceId, numGroups);
         // Return the workspace
-        return workspace;
+        return { message: "Workspace created successfully", workspaceId: res.rows[0].id };
     }
     catch(err){
         return { error: err.message, status: 500 };

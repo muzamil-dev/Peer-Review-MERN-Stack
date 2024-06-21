@@ -1,8 +1,8 @@
 import db from '../config.js';
 
 // Get a review by id
-export const getById = async(reviewId) => {
-    try{
+export const getById = async (reviewId) => {
+    try {
         const res = await db.query(
             `WITH rating_table AS
             (SELECT r.user_id, r.target_id, q.question, q.id AS question_id, ra.rating
@@ -37,11 +37,11 @@ export const getById = async(reviewId) => {
         // Check that the review exists
         const data = res.rows[0];
         if (!data)
-            return { 
-                error: "The requested review was not found", 
-                status: 404 
+            return {
+                error: "The requested review was not found",
+                status: 404
             };
-            
+
         // Format the data
         const formatted = {
             firstName: data.first_name,
@@ -52,7 +52,7 @@ export const getById = async(reviewId) => {
         }
         return formatted;
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
@@ -60,8 +60,8 @@ export const getById = async(reviewId) => {
 // Get all reviews for a given assignment/user
 // Read the blocks of sql and comments above each block to get 
 // a better understanding of the query (it is very long)
-export const getByAssignmentAndUser = async(userId, assignmentId) => {
-    try{
+export const getByAssignmentAndUser = async (userId, assignmentId) => {
+    try {
         const res = await db.query(
             `/* Get the review ids and ratings, group them together to create an array of ratings for each review */
             WITH review_table AS
@@ -125,13 +125,13 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
             incompleteReviews
         };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
-export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
-    try{
+export const getByAssignmentAndTarget = async (targetId, assignmentId) => {
+    try {
         const res = await db.query(
             `/* Get the review ids and ratings, group them together to create an array of ratings for each review */
             WITH review_table AS
@@ -192,15 +192,15 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
             reviews: data.reviews
         };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Helper function to create reviews for an assignment
 // These will made close to when an assignment opens
-export const createReviews = async(assignmentId) => {
-    try{
+export const createReviews = async (assignmentId) => {
+    try {
         // Get a list of users within each group
         const res = await db.query(
             `SELECT g.id as group_id, array_agg(m.user_id) AS group_members
@@ -219,8 +219,8 @@ export const createReviews = async(assignmentId) => {
         res.rows.forEach(row => {
             const group = row.group_id;
             const members = row.group_members;
-            for (let i = 0; i < members.length; i++){
-                for (let j = 0; j < members.length; j++){
+            for (let i = 0; i < members.length; i++) {
+                for (let j = 0; j < members.length; j++) {
                     if (i === j)
                         continue;
                     insertions.push(`(${assignmentId}, ${group}, ${members[i]}, ${members[j]})`);
@@ -231,14 +231,14 @@ export const createReviews = async(assignmentId) => {
         await db.query(query);
         return { message: "Created reviews successfully" };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }
 
 // Submit a review
-export const submit = async(userId, reviewId, ratings) => {
-    try{
+export const submit = async (userId, reviewId, ratings) => {
+    try {
         const res = await db.query(
             `SELECT r.*, a.start_date, a.due_date,
             array_agg(
@@ -257,9 +257,9 @@ export const submit = async(userId, reviewId, ratings) => {
         console.log(data);
         // Check that the referenced review exists
         if (!data)
-            return { 
-                error: "The requested review was not found", 
-                status: 404 
+            return {
+                error: "The requested review was not found",
+                status: 404
             };
         // Check that the user submitting the review is the user listed on the review
         if (userId !== data.user_id)
@@ -276,14 +276,14 @@ export const submit = async(userId, reviewId, ratings) => {
                 error: "This review is currently not active",
                 status: 400
             }
-        
+
         // Questions are sorted by id, the ratings' order is assumed to match the ordering of questions
         const questionIds = data.questionIds;
         if (questionIds.length !== ratings.length)
             return {
                 error: "Incorrect number of ratings given",
                 status: 400
-            } 
+            }
 
         // Delete old ratings
         const deleteRatings = await db.query(
@@ -294,12 +294,12 @@ export const submit = async(userId, reviewId, ratings) => {
         // Insert new ratings
         let ratingsQuery = `INSERT INTO ratings VALUES `;
         ratingsQuery += ratings.map(
-            (_, idx) => `($1, $${idx+2}, $${idx+2+ratings.length})`
+            (_, idx) => `($1, $${idx + 2}, $${idx + 2 + ratings.length})`
         ).join(', ');
         const insertRatings = await db.query(ratingsQuery, [data.id, ...questionIds, ...ratings]);
         return { message: "Review submitted successfully" };
     }
-    catch(err){
+    catch (err) {
         return { error: err.message, status: 500 };
     }
 }

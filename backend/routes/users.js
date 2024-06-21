@@ -8,14 +8,14 @@ const JWT_EXPIRATION = '1h'; // Set your desired expiration time
 
 // Create user (for testing, no error handling here)
 // Requires firstName, lastName, email, password
-router.post("/", async(req, res) => {
+router.post("/", async (req, res) => {
     const data = await UserService.createUser(req.body);
     if (data.error) return res.status(data.status).json({ message: data.error });
     return res.status(201).json(data);
 });
 
 // Sign up for an account
-router.post("/signup", async(req, res) => {
+router.post("/signup", async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
     if (!firstName || !lastName || !email || !password) {
         return res.status(400).json({ message: "One or more required fields is not present" });
@@ -35,7 +35,7 @@ router.post("/signup", async(req, res) => {
 });
 
 // Login to a user's account
-router.post("/login", async(req, res) => {
+router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ message: "One or more required fields is not present" });
@@ -55,7 +55,7 @@ router.post("/login", async(req, res) => {
 });
 
 // Verify the user's email
-router.post("/verifyEmail", async(req, res) => {
+router.post("/verifyEmail", async (req, res) => {
     const { token } = req.body;
     if (!token) {
         return res.status(400).json({ message: "One or more required fields is not present" });
@@ -66,7 +66,7 @@ router.post("/verifyEmail", async(req, res) => {
 });
 
 // Get all workspaces that a user is in
-router.get(["/:userId/workspaces", "/workspaces"], async(req, res) => {
+router.get(["/:userId/workspaces", "/workspaces"], async (req, res) => {
     const userId = req.params.userId || req.body.userId;
     const data = await UserService.getWorkspaces(userId);
     if (data.error) return res.status(data.status).json({ message: data.error });

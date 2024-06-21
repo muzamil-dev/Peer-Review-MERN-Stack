@@ -10,7 +10,7 @@ import generateCode from '../services/generateCode.js';
 const router = express.Router();
 
 // Get details about a specific workspace
-router.get("/:workspaceId", async(req, res) => {
+router.get("/:workspaceId", async (req, res) => {
     const { workspaceId } = req.params;
     // Call getById
     const data = await WorkspaceService.getById(workspaceId);
@@ -21,7 +21,7 @@ router.get("/:workspaceId", async(req, res) => {
 });
 
 // Get all assignments for a provided workspace
-router.get("/:workspaceId/assignments", async(req, res) => {
+router.get("/:workspaceId/assignments", async (req, res) => {
     const { workspaceId } = req.params;
     // Make the call to the service
     const data = await AssignmentService.getByWorkspace(workspaceId);
@@ -32,7 +32,7 @@ router.get("/:workspaceId/assignments", async(req, res) => {
 });
 
 // Gets a list of groups (with members) from the workspace
-router.get("/:workspaceId/groups", async(req, res) => {
+router.get("/:workspaceId/groups", async (req, res) => {
     const { workspaceId } = req.params;
     // Make the call to the service
     const data = await WorkspaceService.getGroups(workspaceId);
@@ -43,7 +43,7 @@ router.get("/:workspaceId/groups", async(req, res) => {
 });
 
 // Gets a list of students from the workspace
-router.get("/:workspaceId/students", async(req, res) => {
+router.get("/:workspaceId/students", async (req, res) => {
     const { workspaceId } = req.params;
     // Make the call to the service
     const data = await WorkspaceService.getStudents(workspaceId);
@@ -65,10 +65,10 @@ router.get("/:workspaceId/ungrouped", async (req, res) => {
 });
 
 // Creates a new workspace
-router.post("/create", async(req, res) => {
+router.post("/create", async (req, res) => {
     // Check for required fields
-    const {name, userId, allowedDomains, groupMemberLimit, numGroups} = req.body;
-    if (!name || !userId){
+    const { name, userId, allowedDomains, groupMemberLimit, numGroups } = req.body;
+    if (!name || !userId) {
         return res.status(400).json({ message: "One or more required fields is not present" });
     }
     // Create a settings object with all fields
@@ -84,10 +84,10 @@ router.post("/create", async(req, res) => {
 });
 
 // Edit a workspace
-router.put("/edit", async(req, res) => {
+router.put("/edit", async (req, res) => {
     // Check for required fields
-    const {userId, workspaceId, name, allowedDomains, groupMemberLimit, groupLock} = req.body;
-    if (!userId || !workspaceId){
+    const { userId, workspaceId, name, allowedDomains, groupMemberLimit, groupLock } = req.body;
+    if (!userId || !workspaceId) {
         return res.status(400).json({ message: "One or more required fields is not present" });
     }
     // Create a settings object with all fields
@@ -103,10 +103,10 @@ router.put("/edit", async(req, res) => {
 });
 
 // Join a workspace
-router.put("/join", async(req, res) => {
+router.put("/join", async (req, res) => {
     // Check for required fields
     const { userId, inviteCode } = req.body;
-    if (!userId || !inviteCode){
+    if (!userId || !inviteCode) {
         return res.status(400).json({ message: "One or more required fields is not present" });
     }
     // Call the service
@@ -118,10 +118,10 @@ router.put("/join", async(req, res) => {
 });
 
 // Leave a workspace
-router.put("/leave", async(req, res) => {
+router.put("/leave", async (req, res) => {
     // Check for required fields
     const { userId, workspaceId } = req.body;
-    if (!userId || !workspaceId){
+    if (!userId || !workspaceId) {
         return res.status(400).json({ message: "One or more required fields is not present" });
     }
     // Call the service
@@ -133,10 +133,10 @@ router.put("/leave", async(req, res) => {
 });
 
 // Sets the active invite code
-router.put("/setInvite", async(req, res) => {
+router.put("/setInvite", async (req, res) => {
     // Check for required fields
     const { userId, workspaceId } = req.body;
-    if (!userId || !workspaceId){
+    if (!userId || !workspaceId) {
         return res.status(400).json({ message: "One or more required fields is not present" });
     }
     // Call the service
@@ -148,7 +148,7 @@ router.put("/setInvite", async(req, res) => {
 });
 
 // Remove the active code, effectively locking the workspace
-router.delete("/:workspaceId/removeInvite", async(req, res) => {
+router.delete("/:workspaceId/removeInvite", async (req, res) => {
     // Get fields
     const { workspaceId } = req.params;
     const { userId } = req.body;
@@ -161,7 +161,7 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
 })
 
 // Delete a workspace entirely
-router.delete("/:workspaceId", async(req, res) => {
+router.delete("/:workspaceId", async (req, res) => {
     // Get fields
     const { workspaceId } = req.params;
     const { userId } = req.body;
