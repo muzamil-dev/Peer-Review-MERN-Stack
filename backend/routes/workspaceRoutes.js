@@ -118,25 +118,34 @@ router.post("/create", async(req, res) => {
 });
 
 // Join a workspace
-// Required: workspaceId, inviteCode
+// Required: inviteCode
 router.put("/join", async(req, res) => {
     try{
         const body = req.body;
         // Get userId and workspaceId
         const userId = body.userId;
-        const workspaceId = body.workspaceId;
         const inviteCode = body.inviteCode;
         // Check that the invite code was given
-        if (!body.workspaceId || !body.inviteCode){
+        if (!body.inviteCode){
             return res.status(400).json({ message: "One or more required fields was not present" });
         }
         // Get relevant info from the user and workspace
         const userInfo = await User.findById(userId).select('email');
-        const workspace = await Workspace.findById(workspaceId).select('inviteCode allowedDomains');
+        const workspace = await Workspace.findOne(
+            { inviteCode }
+        ).select('allowedDomains');
 
         // Check that the workspace exists
         if (!workspace)
-            return res.status(404).json({ message: "The provided workspace was not found in our database" });
+            return res.status(404).json({ message: "No workspace with this invite code was found" });
+        const workspaceId = workspace._id;
+
+        // Check if user is already in workspace
+        const workspaces = (await User.findById(userId)).workspaceIds;
+        const found = workspaces.find(space => space.workspaceId.equals(workspaceId));
+        if (found){
+            return res.status(400).json({ message: "The given user is already in the workspace" });
+        }
 
         // Check if user's email contains an allowed domain
         if (workspace.allowedDomains !== null 
@@ -153,27 +162,15 @@ router.put("/join", async(req, res) => {
             }
         }
 
-        // Check if the correct invite code is provided
-        const correctCode = workspace.inviteCode;
-        // Return if code exists and provided code doesn't match
-        if (!correctCode || inviteCode !== correctCode){
-            return res.status(403).json({ message: "The given user is not authorized to join this workspace." });
-        }
-
-        // Check if user is already in workspace
-        const workspaces = (await User.findById(userId)).workspaceIds;
-        const found = workspaces.find(space => space.workspaceId.equals(workspaceId));
-        if (found){
-            return res.status(400).json({ message: "The given user is already in the workspace" });
-        }
-
         // Add workspace membership relationship
         await Promise.all([
             Adders.addUserToWorkspace(userId, workspaceId, "Student"),
             Adders.addWorkspaceToUser(userId, workspaceId, "Student")
         ]);
         // Return success message
-        res.json({ message: "Workspace joined successfully!" });
+        res.json({ 
+            message: "Workspace joined successfully!", workspaceId 
+        });
     }
     catch(err){
         console.log(err.message);
