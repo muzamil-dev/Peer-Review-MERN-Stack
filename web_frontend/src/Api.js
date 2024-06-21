@@ -122,6 +122,23 @@ export default {
             };
         }, /**/
 
+        getUserWorkspaces: async (userId) => {
+            try {
+                const response = await axios.get(getUrl(USERS, `${userId}/workspaces`, ''));
+                return {
+                    status: response.status,
+                    data: response.data,
+                    error: null
+                };
+            } catch (err) {
+                console.error(err);
+                return {
+                    status: err.response ? err.response.status : 503,
+                    data: null,
+                    error: err.message || "Service Unavailable"
+                };
+            }
+        },
 
         /**
          * Edit the account with the corresponding id
@@ -257,16 +274,21 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], error: string }>} The list of groups
          */
         GetGroups: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/groups'))
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
-            return {
-                status: response.status,
-                data: response.data,
-                error: response.message
-            };
+            try {
+                const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/groups'));
+                return {
+                    status: response.status,
+                    data: response.data,
+                    error: null
+                };
+            } catch (err) {
+                console.error(err);
+                return {
+                    status: err.response ? err.response.status : 503,
+                    data: null,
+                    error: err.message || "Service Unavailable"
+                };
+            }
         },
         /**
          * Creates a new workspace
@@ -278,23 +300,28 @@ export default {
          * @returns {Promise<{ status: number, workspaceId: number, message: string }>} Returns ID of new workspace
          */
         CreateWorkspace: async (name, userId, allowedDomains, groupMemberLimit, numGroups) => {
-            const payload = {
-                name,
-                userId,
-                allowedDomains,
-                groupMemberLimit,
-                numGroups
-            };
-            const response = await axios.post(getUrl(WORKSPACES, 'create', ''), payload)
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
-            return {
-                status: response.status,
-                workspaceId: response.data.workspaceId,
-                message: response.data.message
-            };
+            try {
+                const payload = {
+                    name,
+                    userId,
+                    allowedDomains,
+                    groupMemberLimit,
+                    numGroups
+                };
+                const response = await axios.post(getUrl(WORKSPACES, 'create', ''), payload);
+                return {
+                    status: response.status,
+                    workspaceId: response.data.workspaceId,
+                    message: response.data.message
+                };
+            } catch (err) {
+                console.error(err);
+                return {
+                    status: err.response ? err.response.status : 503,
+                    workspaceId: null,
+                    message: err.response ? err.response.data.message : 'Service temporarily unavailable'
+                };
+            }
         },
         /**
          * Adds the user specified by userId to the workspace specified by workspaceID
@@ -303,22 +330,24 @@ export default {
          * @param {string} inviteCode 
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
-        JoinWorkspace: async (userId, workspaceId, inviteCode) => {
-            const payload = {
-                userId,
-                workspaceId,
-                inviteCode
-            };
-            const response = await axios.put(getUrl(WORKSPACES, 'join', ''), payload)
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
-            return {
-                status: response.status,
-                success: response.status === 200,
-                message: response.data.message
-            };
+        JoinWorkspace: async (userId, inviteCode) => {
+            try {
+                const payload = { userId, inviteCode };
+                const response = await axios.put(getUrl(WORKSPACES, 'join', ''), payload);
+                return {
+                    status: response.status,
+                    success: response.status === 200,
+                    message: response.data.message,
+                    workspaceId: response.data.workspaceId
+                };
+            } catch (err) {
+                console.error(err);
+                return {
+                    status: err.response ? err.response.status : 503,
+                    success: false,
+                    message: err.response ? err.response.data.message : 'Service temporarily unavailable'
+                };
+            }
         },
         /**
          * Removes the user specified by userId from the workspace specified by workspaceId

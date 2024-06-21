@@ -1,9 +1,13 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
 import { User } from '../models/userModel.js';
 import { sendEmail } from '../emailService.js';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import { TempUser } from '../models/tempUserModel.js';
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -35,9 +39,8 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ message: "Email and password are required." });
         }
         // Find user
-        const userData = await User
-            .findOne({ email })
-            .select("+password");
+        const userData = await User.findOne({ email });
+
         // Could not find user
         if (!userData) {
             return res.status(404).json({ message: "User not found." });
@@ -47,8 +50,26 @@ router.post("/login", async (req, res) => {
         if (password !== userData.password) {
             return res.status(401).json({ message: "Invalid password." });
         }
-        // Return data
-        return res.status(200).json(userData);
+        // Include selected data
+        const user = {
+            userId: userData._id,
+            firstName: userData.firstName,
+            lastName: userData.lastName
+        };
+        // Assign JWTs (access and refresh)
+        const accessToken = jwt.sign(
+            user,
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: "1d" } // shorten this later
+        );
+        const refreshToken = jwt.sign(
+            user,
+            process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: "1d" }
+        );
+        // Return tokens
+        res.cookie("jwt", refreshToken, { httpOnly: true, maxAge: 24*60*60*1000});
+        res.json({ accessToken });
     }
     catch (err) {
         console.log(err.message);
