@@ -71,6 +71,7 @@ const GroupsPageAdmin = () => {
     const fetchUngroupedMembers = async () => {
         const token = localStorage.getItem('accessToken');
         const response = await Api.Workspaces.GetStudentsWithoutGroup(workspaceId, token);
+        console.log('Ungrouped members response:', response); // Debugging information
         if (response.status === 200 && Array.isArray(response.data)) {
             setUngroupedMembers(response.data.filter(member => member && member.userId));
         } else {
@@ -169,6 +170,8 @@ const GroupsPageAdmin = () => {
                 return group;
             }));
             // Update ungroupedMembers state
+            //i need to update the emails of the ungrouped members and that is only done with fecthhungroupedmembers
+            fetchUngroupedMembers();
             setUngroupedMembers(prevMembers => [...prevMembers, selectedGroupMembers.find(member => member.userId === targetId)]);
             // Also update selectedMemberGroup to reflect the kicked member
             setSelectedMemberGroup(prevState => {
@@ -207,6 +210,7 @@ const GroupsPageAdmin = () => {
             return;
         }
         const response = await Api.Groups.DeleteGroup(currentUserId, groupId, token);
+        fetchUngroupedMembers();
         if (response.success) {
             setGroups(groups.filter(group => group.groupId !== groupId));
         } else {

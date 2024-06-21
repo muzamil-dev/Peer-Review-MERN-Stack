@@ -111,6 +111,27 @@ h2{
         /* Add scroll to parent container */
         /*padding: 5px; NO NEED FOR THIS */ 
     }
+
+    .btn-center{
+        width: 40% !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .workspace-cards,
+    .workspace-actions {
+        width: 150%;
+        /* overflow-y: visible; */
+        /* Remove individual scroll */
+    }
+
+    .customContainer{
+        width: 100% !important;
+        padding: 0 0px 0px 0px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 }
 
 .workspace-actions h2 {

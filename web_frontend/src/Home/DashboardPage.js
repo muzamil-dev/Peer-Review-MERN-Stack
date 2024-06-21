@@ -155,7 +155,7 @@ const DashboardPage = () => {
     return (
         <div className="dashboard">
             <h1 className="header-large">Workspaces</h1>
-            <div className="container">
+            <div className="container customContainer   ">
                 <div className="row workspace-cards">
                     {workspaces.map((workspace) => (
                         <div key={workspace.workspaceId} className="col-xl-3 col-lg-4 col-md-6 col-sm-12 col-xs-12 mb-4">
@@ -169,10 +169,10 @@ const DashboardPage = () => {
                     ))}
                 </div>
                 <div className="workspace-actions text-center">
-                    <button type="button" className="btn btn-primary btn-large mb-4" data-toggle="modal" data-target="#joinWorkspaceModal">
+                    <button type="button" className="btn btn-primary btn-large mb-4 btn-center" data-toggle="modal" data-target="#joinWorkspaceModal">
                         Join
                     </button>
-                    <button type="button" className="btn btn-success btn-large mb-4" data-toggle="modal" data-target="#createWorkspaceModal">
+                    <button type="button" className="btn btn-success btn-large mb-4 btn-center" data-toggle="modal" data-target="#createWorkspaceModal">
                         Create
                     </button>
                 </div>
