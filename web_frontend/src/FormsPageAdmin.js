@@ -40,6 +40,7 @@ const ViewFormsAdminPage = () => {
             const response = await Api.Workspaces.GetAssignments(workspaceId);
             if (response.status === 200) {
                 setForms(response.data); // Assuming response.data contains the list of assignments/forms
+                await fetchAnalyticsForAssignments(response.data);
             } else {
                 console.error('Failed to fetch forms:', response.message);
                 enqueueSnackbar(`Failed to fetch forms: ${response.message}`, { variant: 'error' });
@@ -48,6 +49,23 @@ const ViewFormsAdminPage = () => {
 
         fetchForms();
     }, [workspaceId]);
+
+    const fetchAnalyticsForAssignments = async (assignments) => {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+
+        const assignmentsWithRatings = await Promise.all(assignments.map(async (assignment) => {
+            const response = await Api.Analytics.GetAnalyticsForAssignment(assignment.assignmentId, userId, 1, 1);
+            if (response.status === 200 && response.data.length > 0) {
+                return { ...assignment, averageRating: response.data[0].averageRating };
+            } else {
+                console.error(`Failed to fetch analytics for assignment ${assignment.assignmentId}:`, response.message);
+                return assignment;
+            }
+        }));
+
+        setForms(assignmentsWithRatings);
+    };
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
@@ -176,7 +194,13 @@ const ViewFormsAdminPage = () => {
                     filteredForms.map(form => (
                         <div key={form.assignmentId} className="form-item-container">
                             <div className="form-item" onClick={() => handleFormClick(form.assignmentId)}>
-                                {form.name}
+                                {form.name} <br/>
+                                <small>Start Date: {new Date(form.startDate).toLocaleDateString()}</small><br/>
+                                <small>Due Date: {new Date(form.dueDate).toLocaleDateString()}</small><br/>
+                                {form.averageRating !== undefined && (
+                                    //if averageRating is available (not an empty array), display it
+                                    <small>Average Rating: {form.averageRating}</small>
+                                )}
                             </div>
                             <button
                                 className="edit-form-button btn btn-success mt-0"
