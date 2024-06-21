@@ -158,7 +158,7 @@ const DashboardPage = () => {
             <div className="container">
                 <div className="row workspace-cards">
                     {workspaces.map((workspace) => (
-                        <div key={workspace.workspaceId} className="col-md-3 mb-4">
+                        <div key={workspace.workspaceId} className="col-xl-3 col-lg-4 col-md-6 col-sm-12 col-xs-12 mb-4">
                             <div className="workspace-card card" onClick={() => handleWorkspaceClick(workspace.workspaceId)}>
                                 <div className="card-body">
                                     <h2 className="card-title">{workspace.name}</h2>

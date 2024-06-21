@@ -3,7 +3,7 @@ import styles from './CreateFormPage.module.css';
 import Api from '../Api.js';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
+
 
 const CreateFormPage = () => {
     const [formName, setFormName] = useState('');
@@ -12,7 +12,6 @@ const CreateFormPage = () => {
     const [availableUntil, setAvailableUntil] = useState('');
     const navigate = useNavigate();
     const { workspaceId } = useParams(); // Assuming workspaceId is passed as a URL parameter
-    const { enqueueSnackbar } = useSnackbar();
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
@@ -75,11 +74,13 @@ const CreateFormPage = () => {
         );
 
         if (response.success) {
-            enqueueSnackbar('Form created successfully!', { variant: 'success' });
+            // Handle success (e.g., show a success message, redirect to another page, etc.)
+            alert('Form created successfully!');
             navigate(`/formsAdmin/${workspaceId}`); // Adjust the redirect URL as needed
         } else {
+            // Handle error (e.g., show an error message)
             console.error('Failed to create form:', response.message);
-            enqueueSnackbar(`Failed to create form: ${response.message}`, { variant: 'error' });
+            alert('Failed to create form.');
         }
     };
 
@@ -127,6 +128,7 @@ const CreateFormPage = () => {
                 </div>
                 <div className='row'>
                     <div className={`col-6 ${styles.formGroup}`}>
+                        {/* <label>Available from</label> */}
                         <input
                             type="date"
                             name="availableFrom"
@@ -136,6 +138,7 @@ const CreateFormPage = () => {
                         />
                     </div>
                     <div className={`col-6 ${styles.formGroup}`}>
+                        {/* <label>Until</label> */}
                         <input
                             type="date"
                             name="availableUntil"
