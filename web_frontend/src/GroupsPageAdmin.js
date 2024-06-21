@@ -32,7 +32,8 @@ const GroupsPageAdmin = () => {
     }
 
     const fetchWorkspaceDetails = async () => {
-        const response = await Api.Workspace.GetWorkspaceDetails(workspaceId);
+        const token = localStorage.getItem('accessToken');
+        const response = await Api.Workspace.GetWorkspaceDetails(workspaceId, token);
         if (response.status === 200) {
             const allowedDomains = response.data.allowedDomains || [];
             setWorkspaceDetails(response.data);
@@ -49,7 +50,8 @@ const GroupsPageAdmin = () => {
     };
 
     const fetchGroups = async () => {
-        const response = await Api.Workspace.GetGroups(workspaceId);
+        const token = localStorage.getItem('accessToken');
+        const response = await Api.Workspace.GetGroups(workspaceId, token);
         if (response.status === 200 && Array.isArray(response.data.groups)) {
             setGroups(response.data.groups.map(group => ({
                 ...group,
@@ -62,7 +64,8 @@ const GroupsPageAdmin = () => {
     };
 
     const fetchUngroupedMembers = async () => {
-        const response = await Api.Workspace.GetStudentsWithoutGroup(workspaceId);
+        const token = localStorage.getItem('accessToken');
+        const response = await Api.Workspace.GetStudentsWithoutGroup(workspaceId, token);
         if (response.status === 200 && Array.isArray(response.data)) {
             setUngroupedMembers(response.data.filter(member => member && member.userId));
         } else {
@@ -99,12 +102,13 @@ const GroupsPageAdmin = () => {
     };
 
     const handleAssignToGroup = async (userId, groupId) => {
+        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/login');
             return { success: false };
         }
-        const response = await Api.Groups.AddUser(currentUserId, userId, groupId);
+        const response = await Api.Groups.AddUser(currentUserId, userId, groupId, token);
         if (response.success) {
             setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== userId));
             fetchGroups(); // Refetch groups to update the UI
@@ -143,12 +147,13 @@ const GroupsPageAdmin = () => {
     };
 
     const handleKickFromGroup = async (targetId) => {
+        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/login');
             return { success: false };
         }
-        const response = await Api.Groups.RemoveUser(currentUserId, targetId, editGroupId);
+        const response = await Api.Groups.RemoveUser(currentUserId, targetId, editGroupId, token);
         if (response.success) {
             setSelectedGroupMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
             // Update the group members in the groups state
@@ -174,29 +179,29 @@ const GroupsPageAdmin = () => {
     };
 
     const handleKickFromWorkspace = async (targetId) => {
+        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/login');
             return;
         }
-        //console.log('Kicking user from workspace:', { targetId, workspaceId, currentUserId });
-        const response = await Api.Workspace.RemoveUser(currentUserId, targetId, workspaceId);
+        const response = await Api.Workspace.RemoveUser(currentUserId, targetId, workspaceId, token);
         if (response.success) {
             setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
             fetchUngroupedMembers(); 
-            //console.log('Kicked user from workspace:', targetId);
         } else {
             console.error('Failed to kick from workspace:', response.message);
         }
     };
 
     const handleDeleteGroup = async (groupId) => {
+        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/login');
             return;
         }
-        const response = await Api.Groups.DeleteGroup(currentUserId, groupId);
+        const response = await Api.Groups.DeleteGroup(currentUserId, groupId, token);
         if (response.success) {
             setGroups(groups.filter(group => group.groupId !== groupId));
         } else {
@@ -206,13 +211,14 @@ const GroupsPageAdmin = () => {
 
 
     const handleCreateGroup = async () => {
+        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/login');
             return;
         }
         try {
-            const response = await Api.Groups.CreateGroup(currentUserId, workspaceId);
+            const response = await Api.Groups.CreateGroup(currentUserId, workspaceId, token);
             if (response.status === 201) {
                 setGroups([...groups, response.data]);
                 fetchGroups(); // Refetch groups to update the UI
@@ -227,13 +233,14 @@ const GroupsPageAdmin = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/login');
             return;
         }
         const allowedDomainsArray = formData.allowedDomains.trim() ? formData.allowedDomains.split(',').map(domain => domain.trim()) : [];
-        const response = await Api.Workspace.EditWorkspace(currentUserId, workspaceId, formData.name, allowedDomainsArray, formData.groupMemberLimit, formData.groupLock);
+        const response = await Api.Workspace.EditWorkspace(currentUserId, workspaceId, formData.name, allowedDomainsArray, formData.groupMemberLimit, formData.groupLock, token);
         if (response.success) {
             setWorkspaceDetails({
                 name: formData.name,
@@ -250,6 +257,7 @@ const GroupsPageAdmin = () => {
 
     const handleGroupChangesSubmit = async (event) => {
         event.preventDefault();
+        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/login');
@@ -309,12 +317,13 @@ const GroupsPageAdmin = () => {
     };
 
     const handleCreateInviteCode = async () => {
+        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/login');
             return;
         }
-        const response = await Api.Workspace.SetInviteCode(currentUserId, workspaceId);
+        const response = await Api.Workspace.SetInviteCode(currentUserId, workspaceId, token);
         if (response.success) {
             setInviteCode(response.inviteCode); // Update inviteCode state
             setWorkspaceDetails(prevDetails => ({
@@ -328,12 +337,13 @@ const GroupsPageAdmin = () => {
 
 
     const handleDeleteInviteCode = async () => {
+        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/login');
             return;
         }
-        const response = await Api.Workspace.RemoveActiveInvite(currentUserId, workspaceId);
+        const response = await Api.Workspace.RemoveActiveInvite(currentUserId, workspaceId, token);
         if (response.success) {
             setInviteCode(null); // Update inviteCode state
             setWorkspaceDetails(prevDetails => ({
