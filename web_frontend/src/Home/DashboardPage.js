@@ -75,13 +75,15 @@ const DashboardPage = () => {
                         console.error('Error fetching workspaces:', error);
                     }
                 };
-
+                enqueueSnackbar('Successfully joined workspace.', { variant: 'success' });
                 fetchWorkspaces();
             } else {
-                console.error('Failed to join workspace:', response.message);
+                enqueueSnackbar('Failed to join workspace.', { variant: 'error' });
+                //console.error('Failed to join workspace:', response.message);
             }
         } catch (error) {
-            console.error('Error joining workspace:', error);
+            enqueueSnackbar('Error joining workspace.', { variant: 'error' });
+            //console.error('Error joining workspace:', error);
         }
     };
 
@@ -100,9 +102,7 @@ const DashboardPage = () => {
     
         // Check if the workspace name exceeds the maximum length
         if (newWorkspaceName.length > maxWorkspaceNameLength) {
-            //console.error(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`);
             enqueueSnackbar(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`, { variant: 'error' });
-            //alert(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`);
             return;
         }
     
@@ -119,11 +119,21 @@ const DashboardPage = () => {
     
         for (const domain of domainsArray) {
             if (!isValidDomain(domain)) {
-                console.error(`Invalid domain: ${domain}`);
+                //console.error(`Invalid domain: ${domain}`);
                 enqueueSnackbar(`Invalid domain: ${domain}`, { variant: 'error' });
-                //alert(`Invalid domain: ${domain}`);
                 return;
             }
+        }
+    
+        // Validate that numGroups and maxGroupSize are numbers
+        if (numGroups && isNaN(parseInt(numGroups, 10))) {
+            enqueueSnackbar('Number of groups must be a valid number.', { variant: 'error' });
+            return;
+        }
+    
+        if (maxGroupSize && isNaN(parseInt(maxGroupSize, 10))) {
+            enqueueSnackbar('Max group size must be a valid number.', { variant: 'error' });
+            return;
         }
     
         try {
@@ -162,13 +172,17 @@ const DashboardPage = () => {
                 setInviteCode('');
                 setMaxGroupSize('');
                 setNumGroups('');
+                enqueueSnackbar('Workspace created successfully.', { variant: 'success' });
             } else {
-                console.error('Failed to create workspace:', response.message);
+                //console.error('Failed to create workspace:', response.message);
+                enqueueSnackbar('Failed to create workspace.', { variant: 'error' });
             }
         } catch (error) {
-            console.error('Error creating workspace:', error);
+            enqueueSnackbar('Error creating workspace.', { variant: 'error' });
+            // console.error('Error creating workspace:', error);
         }
     };
+    
     
 
     const handleWorkspaceClick = (workspaceId) => {
