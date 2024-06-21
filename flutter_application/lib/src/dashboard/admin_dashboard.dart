@@ -139,13 +139,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MainAppBar(
-        title: 'Admin Dashboard', backgroundColor: Color(0xFF9bc4bc),
+      appBar: AppBar(
+        title: const Text(
+          'Home',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ), // Change text color here
+        ),
+        backgroundColor: const Color(0xFF004080),
+        centerTitle: true, // Center the title
       ),
-      body: isLoading
+      body: Container(
+        color: const Color(0xFF004080), // Set background color
+        child: isLoading
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: workspaces.length,
@@ -156,7 +167,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 );
               },
             ),
-      bottomNavigationBar: BottomAppBar(
+      ),
+      bottomNavigationBar: SizedBox(
+        height: 60,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [

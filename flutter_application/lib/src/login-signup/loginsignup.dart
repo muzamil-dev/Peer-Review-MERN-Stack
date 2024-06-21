@@ -33,9 +33,17 @@ class _LoginSignupState extends State<LoginSignup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MainAppBar(
-        title: '',
+      appBar: AppBar(
+        title: const Text(
+          'Welcome!',
+          style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white, // Title color
+            ), // Change text color here
+        ),
         backgroundColor: Color(0xFF004080),
+        centerTitle: true,
       ),
       body: Container(
         color: Color(0xFF004080), // Background color
@@ -92,15 +100,7 @@ class _LoginSignupState extends State<LoginSignup> {
                 ),
               ],
             ),
-            SizedBox(height: 20),  // Add space between tabs and title
-          Text(
-            _selectedPage == 0 ? 'Welcome Back!' : 'Welcome!',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white, // Title color
-            ),
-          ),
+            SizedBox(height: 10),  // Add space between tabs and title
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -236,7 +236,7 @@ class LoginScreen extends StatelessWidget {
               obscureText: true,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
               // Handle login logic
@@ -261,7 +261,7 @@ class LoginScreen extends StatelessWidget {
           child: Stack(
             children: [
               BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
                 child: Container(
                   decoration: BoxDecoration(
                     //color: Colors.black.withOpacity(0.5),
@@ -287,7 +287,7 @@ class LoginScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       TextField(
                         controller : resetEmailController,
                         decoration: InputDecoration(
@@ -300,7 +300,7 @@ class LoginScreen extends StatelessWidget {
                           filled: true,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () {
                           // Handle password reset logic
@@ -528,7 +528,7 @@ class SignUpScreen extends StatelessWidget {
               obscureText: true,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
               // Handle signup logic
