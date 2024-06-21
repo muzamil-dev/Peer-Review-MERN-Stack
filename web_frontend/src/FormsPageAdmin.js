@@ -187,13 +187,13 @@ const ViewFormsAdminPage = () => {
                     <li><a href="/DashboardPage">Workspaces</a></li>
                     <li><button onClick={handleLogout} className="btn-danger btn">Logout</button></li>
                 </ul>
-
             </nav>
 
             <div className="header-container">
                 <button className="create-form-button" onClick={handleCreateForm}>
                     + Assign Form
                 </button>
+                <button className="btn btn-outline-primary btn-md" onClick={() => navigate(`/groups/${workspaceId}`)}>Back</button>
             </div>
             <div className="forms-containerz">
                 <h2>Assignments</h2>
