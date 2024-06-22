@@ -41,7 +41,7 @@ body {
 }
 
 .workspace-actions {
-    width: 35%;
+    width: 65%;
     max-height: 80vh;
     overflow-y: auto;
     padding: 20px;
