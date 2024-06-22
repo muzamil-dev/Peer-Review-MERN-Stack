@@ -27,7 +27,7 @@ mongoose.connect(mongoDBURL,{
     console.log('Connected to Database!!!!!');
 
     // cron job to check for expired tokens and delete them
-    cron.schedule('0 0 * * *', async () => {
+    cron.schedule('0 * * * *', async () => {
         try{
             const result = await TempUser.deleteMany({verificationTokenExpires: {$lt: Date.now()}});
             console.log(`Cleanup task ran successfully. Deleted ${result.deletedCount} expired temp users.`);
