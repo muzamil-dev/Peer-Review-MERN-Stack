@@ -2,29 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class ResetPasswordScreen extends StatefulWidget {
-  static const routeName = '/resetPassword'; // Add route name
+class PasswordResetPage extends StatelessWidget {
+  static const routeName = '/passwordReset'; // Ensure you have this route defined
 
-  final String token;
-
-  const ResetPasswordScreen({Key? key, required this.token}) : super(key: key);
-
-  @override
-  _ResetPasswordScreenState createState() => _ResetPasswordScreenState();
-}
-
-class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+  final TextEditingController tokenController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmNewPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
-  Future<void> resetPassword(String token, String newPassword) async {
+  Future<void> resetPassword(BuildContext context, String token, String newPassword) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/resetPassword');
 
-    try{
+    try {
       final response = await http.post(
         url,
-        headers: <String, String>{
-          'Content-Type': 'application/json;',
+        headers: {
+          'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'token': token,
@@ -34,24 +26,24 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
       if (response.statusCode == 200) {
         print('Password reset successful');
+        Navigator.pushNamed(context, '/loginsignup');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset successfully. Please login with your new password.')),
+          SnackBar(content: Text('Password reset successful. Please login with your new password.')),
         );
-        Navigator.pushNamed(context, '/login');
       } else {
-        final errorData = jsonDecode(response.body);
-        print('Password reset failed: ${errorData['message']}');
+        final errorData = json.decode(response.body);
+        print('Password reset failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Password reset failed: ${errorData['message']}')),
         );
       }
-    } catch (e) {
-      print(e);
+    } catch (err) {
+      print('Error: $err');
     }
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reset Password'),
@@ -62,57 +54,69 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
+              controller: tokenController,
+              decoration: InputDecoration(
+                labelText: 'Token',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: BorderSide.none,
+                ),
+                fillColor: Colors.grey[200],
+                filled: true,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
               controller: newPasswordController,
               decoration: InputDecoration(
                 labelText: 'New Password',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide(color: Colors.blue),
+                  borderSide: BorderSide.none,
                 ),
-                fillColor: Colors.purple.withOpacity(0.1),
+                fillColor: Colors.grey[200],
                 filled: true,
-                prefixIcon: const Icon(Icons.lock),
               ),
               obscureText: true,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextField(
-              controller: confirmNewPasswordController,
+              controller: confirmPasswordController,
               decoration: InputDecoration(
                 labelText: 'Confirm New Password',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide(color: Colors.blue),
+                  borderSide: BorderSide.none,
                 ),
-                fillColor: Colors.purple.withOpacity(0.1),
+                fillColor: Colors.grey[200],
                 filled: true,
-                prefixIcon: const Icon(Icons.lock),
               ),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
+                final token = tokenController.text;
                 final newPassword = newPasswordController.text;
-                final confirmNewPassword = confirmNewPasswordController.text;
+                final confirmPassword = confirmPasswordController.text;
 
-                if (newPassword.isEmpty || confirmNewPassword.isEmpty) {
+                if (newPassword.isEmpty || confirmPassword.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please fill in all fields')),
                   );
                   return;
                 }
 
-                if (newPassword == confirmNewPassword) {
-                  resetPassword(widget.token, newPassword);
-                }else{
+                if (newPassword == confirmPassword) {
+                  resetPassword(context, token, newPassword);
+                } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Passwords do not match')),
                   );
                 }
               },
               child: const Text('Reset Password'),
-            )
+            ),
           ],
         ),
       ),
