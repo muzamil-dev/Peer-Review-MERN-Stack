@@ -75,7 +75,7 @@ const DashboardPage = () => {
                         onChange={(e) => setInviteCode(e.target.value)}
                         className="form-control mb-2 transparent-input"
                     />
-                    <button onClick={handleJoinWorkspace} className="btn btn-primary mb-4">Add</button>
+                    <button onClick={handleJoinWorkspace} className="btn btn-primary mb-4">Join</button>
 
                     <h2>Create Workspace</h2>
                     <input
@@ -96,10 +96,10 @@ const DashboardPage = () => {
                                 className="form-control d-inline-block transparent-input"
                                 style={{ width: 'calc(100% - 0px)' }}
                             />
-                            <button onClick={() => handleDeleteDomain(index)} className="btn btn-danger ml-2">Delete</button>
+                            <button onClick={() => handleDeleteDomain(index)} className="btn btn-danger ml-2">🗑️</button>
                         </div>
                     ))}
-                    <button onClick={handleAddDomain} className="btn btn-secondary mb-4">Add</button>
+                    <button onClick={handleAddDomain} className="btn btn-secondary mb-4">➕</button>
 
                     <input
                         type="text"
@@ -115,7 +115,7 @@ const DashboardPage = () => {
                         onChange={(e) => setNumGroups(e.target.value)}
                         className="form-control mb-2 transparent-input"
                     />
-                    <button onClick={handleAddWorkspace} className="btn btn-success">Add</button>
+                    <button onClick={handleAddWorkspace} className="btn btn-success">Create</button>
                 </div>
             </div>
         </div>
