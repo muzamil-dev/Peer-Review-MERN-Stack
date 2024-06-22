@@ -122,7 +122,7 @@ router.post("/signup", async (req, res) => {
             return res.status(400).json({ message: "An account with this email already exists." });
         }
 
-        const verificationToken = crypto.randomBytes(20).toString('hex');
+        const verificationToken = crypto.randomBytes(10).toString('hex');
         const verificationTokenExpires = Date.now() + 3600000; // 1 hour from now
 
         const tempUser = new TempUser({

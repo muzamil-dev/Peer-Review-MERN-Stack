@@ -9,6 +9,7 @@ import workspaceRoutes from "./routes/workspaceRoutes.js";
 import groupRoutes from "./routes/groupRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import reviewAssignmentRoutes from "./routes/reviewAssignmentRoutes.js";
+import { TempUser } from "./models/tempUserModel.js";
 
 dotenv.config();
 
@@ -24,6 +25,17 @@ app.use('/assignments', reviewAssignmentRoutes);
 mongoose.connect(mongoDBURL,{
 }).then(() => {
     console.log('Connected to Database!!!!!');
+
+    // cron job to check for expired tokens and delete them
+    cron.schedule('0 0 * * *', async () => {
+        try{
+            const result = await TempUser.deleteMany({verificationTokenExpires: {$lt: Date.now()}});
+            console.log(`Cleanup task ran successfully. Deleted ${result.deletedCount} expired temp users.`);
+        }catch(err){
+            console.log('Error running cleanup task: ', err);
+        }
+    });
+    
     //root route
     app.get('/', (req, res) => {
         res.send('Welcome to the Peer Review MERN Stack Application!');
