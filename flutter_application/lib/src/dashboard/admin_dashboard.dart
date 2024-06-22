@@ -3,6 +3,8 @@ import 'package:flutter_application/components/main_app_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'CreateWorkspace.dart';
+import 'package:flutter_application/src/groups/adminGroups.dart';
+import 'package:flutter_application/src/groups/userGroups.dart';
 
 class AdminDashboard extends StatefulWidget {
   static const routeName = "/adminDashboard";
@@ -119,6 +121,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
+  void navigateToGroupPage(String workspaceId, String role) {
+    if (role == 'Instructor') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AdminGroup(workspaceId: workspaceId),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UserGroup(workspaceId: workspaceId),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,18 +150,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
           : ListView.builder(
               itemCount: workspaces.length,
               itemBuilder: (context, index) {
-                return WorkspaceCard(workspaces[index]);
+                return WorkspaceCard(
+                  workspace: workspaces[index],
+                  onTap: navigateToGroupPage,
+                );
               },
             ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            IconButton(
-              icon: const Icon(Icons.reorder),
-              onPressed: () {},
-              tooltip: 'Reorder Workspaces',
-            ),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: navigateToCreateWorkspacePage,
@@ -177,28 +195,32 @@ class Workspace {
 
 class WorkspaceCard extends StatelessWidget {
   final Workspace workspace;
+  final Function(String, String) onTap;
 
-  const WorkspaceCard(this.workspace, {super.key});
+  const WorkspaceCard({required this.workspace, required this.onTap, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(10),
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              workspace.name,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Role: ${workspace.role}',
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
+    return InkWell(
+      onTap: () => onTap(workspace.workspaceId, workspace.role),
+      child: Card(
+        margin: const EdgeInsets.all(10),
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                workspace.name,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Role: ${workspace.role}',
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
         ),
       ),
     );
