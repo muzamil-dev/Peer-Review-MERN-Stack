@@ -21,6 +21,18 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   Future<void> createWorkspace(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/create');
     try {
+
+      final allowedDomains = domainController.text.isEmpty
+        ? <String>[]
+        : domainController.text.split(',').map((domain) => domain.trim()).toList().cast<String>();
+
+      if (!validateDomains(allowedDomains)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid domain format. Only letters and periods are allowed.')),
+        );
+        return;
+      }
+
       final response = await http.post(
         url,
         headers: {
@@ -35,6 +47,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
           'groupMemberLimit': maxGroupSizeController.text.isNotEmpty ? int.parse(maxGroupSizeController.text) : null,
         }),
       );
+
       if (response.statusCode == 201) {
         Navigator.pop(context, true); // Return true to indicate success
         ScaffoldMessenger.of(context).showSnackBar(
@@ -52,6 +65,16 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
         SnackBar(content: Text('Error creating workspace')),
       );
     }
+  }
+
+  bool validateDomains(List<String> domains) {
+    final regex = RegExp(r'^[a-zA-Z.]+$');
+    for (var domain in domains) {
+      if (!regex.hasMatch(domain)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
