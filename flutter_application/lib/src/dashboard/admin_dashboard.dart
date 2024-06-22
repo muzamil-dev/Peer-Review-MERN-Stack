@@ -97,7 +97,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         },
         body: jsonEncode({
           'userId': userId,
-          'workspaceId': 'workspaceIdFromInput', // You need to get this from user input or logic
           'inviteCode': inviteCode,
         }),
       );
