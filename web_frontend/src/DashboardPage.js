@@ -11,60 +11,51 @@ const DashboardPage = () => {
     ]);
 
     const [newWorkspaceName, setNewWorkspaceName] = useState('');
-    const [newWorkspaceDomains, setNewWorkspaceDomains] = useState(['']);
-    const [newWorkspaceMaxSize, setNewWorkspaceMaxSize] = useState('');
-    const [csvFile, setCsvFile] = useState(null);
+    const [newWorkspaceDomain, setNewWorkspaceDomain] = useState(['']);
     const [inviteCode, setInviteCode] = useState('');
+    const [maxGroupSize, setMaxGroupSize] = useState('');
+    const [numGroups, setNumGroups] = useState('');
     const navigate = useNavigate();
 
     const handleJoinWorkspace = () => {
-        // Logic to join workspace
         alert('Join workspace logic here');
     };
 
     const handleAddWorkspace = () => {
-        // Logic to add workspace
         const newWorkspace = {
             id: workspaces.length + 1,
             name: newWorkspaceName,
             role: 'Admin',
-            domains: newWorkspaceDomains.filter(domain => domain.trim() !== ''),
-            maxSize: newWorkspaceMaxSize,
         };
         setWorkspaces([...workspaces, newWorkspace]);
         setNewWorkspaceName('');
-        setNewWorkspaceDomains(['']);
-        setNewWorkspaceMaxSize('');
-        setCsvFile(null);
+        setNewWorkspaceDomain(['']);
         setInviteCode('');
-    };
-
-    const handleCsvUpload = (event) => {
-        setCsvFile(event.target.files[0]);
+        setMaxGroupSize('');
+        setNumGroups('');
     };
 
     const handleWorkspaceClick = (workspaceId) => {
         navigate(`/GroupPage/${workspaceId}`);
     };
 
-    const handleDomainChange = (index, event) => {
-        const newDomains = [...newWorkspaceDomains];
-        newDomains[index] = event.target.value;
-        setNewWorkspaceDomains(newDomains);
-    };
-
     const handleAddDomain = () => {
-        setNewWorkspaceDomains([...newWorkspaceDomains, '']);
+        setNewWorkspaceDomain([...newWorkspaceDomain, '']);
     };
 
-    const handleRemoveDomain = (index) => {
-        const newDomains = newWorkspaceDomains.filter((_, i) => i !== index);
-        setNewWorkspaceDomains(newDomains);
+    const handleDomainChange = (index, value) => {
+        const updatedDomains = newWorkspaceDomain.map((domain, i) => (i === index ? value : domain));
+        setNewWorkspaceDomain(updatedDomains);
+    };
+
+    const handleDeleteDomain = (index) => {
+        const updatedDomains = newWorkspaceDomain.filter((_, i) => i !== index);
+        setNewWorkspaceDomain(updatedDomains);
     };
 
     return (
         <div className="dashboard">
-            <h1>Dashboard</h1>
+            <h1 className="text-center mb-4">Dashboard</h1>
             <div className="main-container">
                 <div className="workspace-cards">
                     {workspaces.map((workspace) => (
@@ -75,49 +66,56 @@ const DashboardPage = () => {
                     ))}
                 </div>
                 <div className="workspace-actions">
+
                     <h2>Join Workspace</h2>
                     <input
                         type="text"
                         placeholder="Enter code"
                         value={inviteCode}
                         onChange={(e) => setInviteCode(e.target.value)}
+                        className="form-control mb-2 transparent-input"
                     />
-                    <button onClick={handleJoinWorkspace}>Join</button>
+                    <button onClick={handleJoinWorkspace} className="btn btn-primary mb-4">Add</button>
 
-                    <h2>Add Workspace</h2>
+                    <h2>Create Workspace</h2>
                     <input
                         type="text"
                         placeholder="Workspace name"
                         value={newWorkspaceName}
                         onChange={(e) => setNewWorkspaceName(e.target.value)}
+                        className="form-control mb-2 transparent-input"
                     />
-                    <div className="domain-restrictions">
-                        <h3>Domain Restrictions</h3>
-                        {newWorkspaceDomains.map((domain, index) => (
-                            <div key={index} className="domain-input">
-                                <input
-                                    type="text"
-                                    placeholder="Domain restriction"
-                                    value={domain}
-                                    onChange={(e) => handleDomainChange(index, e)}
-                                />
-                                <button onClick={() => handleRemoveDomain(index)}>Delete</button>
-                            </div>
-                        ))}
-                        <button onClick={handleAddDomain}>Add Domain</button>
-                    </div>
+                    <h3>Domain Restrictions</h3>
+                    {newWorkspaceDomain.map((domain, index) => (
+                        <div key={index} className="domain-restriction mb-2">
+                            <input
+                                type="text"
+                                placeholder="Domain restriction"
+                                value={domain}
+                                onChange={(e) => handleDomainChange(index, e.target.value)}
+                                className="form-control d-inline-block transparent-input"
+                                style={{ width: 'calc(100% - 0px)' }}
+                            />
+                            <button onClick={() => handleDeleteDomain(index)} className="btn btn-danger ml-2">Delete</button>
+                        </div>
+                    ))}
+                    <button onClick={handleAddDomain} className="btn btn-secondary mb-4">Add</button>
+
                     <input
                         type="text"
                         placeholder="Max group size"
-                        value={newWorkspaceMaxSize}
-                        onChange={(e) => setNewWorkspaceMaxSize(e.target.value)}
+                        value={maxGroupSize}
+                        onChange={(e) => setMaxGroupSize(e.target.value)}
+                        className="form-control mb-2 transparent-input"
                     />
                     <input
-                        type="file"
-                        accept=".csv"
-                        onChange={handleCsvUpload}
+                        type="text"
+                        placeholder="Number of groups"
+                        value={numGroups}
+                        onChange={(e) => setNumGroups(e.target.value)}
+                        className="form-control mb-2 transparent-input"
                     />
-                    <button onClick={handleAddWorkspace}>Add</button>
+                    <button onClick={handleAddWorkspace} className="btn btn-success">Add</button>
                 </div>
             </div>
         </div>

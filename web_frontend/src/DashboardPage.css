@@ -85,7 +85,7 @@ button:hover {
 }
 
 .domain-input input {
-    flex: 1;
+    /* flex: 1; */
     margin-right: 5px;
 }
 
