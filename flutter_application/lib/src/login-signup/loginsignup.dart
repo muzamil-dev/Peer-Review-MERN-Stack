@@ -107,9 +107,19 @@ class _LoginSignupState extends State<LoginSignup> {
                 });
               },
               children: [
-                LoginScreen(),
                 SingleChildScrollView(
-                  child: SignUpScreen(),
+                  child: Column(
+                    children: [
+                      LoginScreen(),
+                    ],
+                  ),
+                ),
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SignUpScreen(),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -174,7 +184,7 @@ class LoginScreen extends StatelessWidget {
 
       if(response.statusCode == 200){
         print('Password reset email sent');
-        Navigator.of(context).pop();
+        Navigator.pushNamed(context, '/passwordReset'); 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Password reset email sent')),
         );
@@ -255,49 +265,51 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.all(20),
-                margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 160),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Reset Password',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller : resetEmailController,
-                      decoration: InputDecoration(
-                        labelText: 'Enter your email',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide.none,
+              SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 160),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Reset Password',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                        fillColor: Colors.grey[200],
-                        filled: true,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Handle password reset logic
-                        // Send password reset email
-                        final email = resetEmailController.text;
-                        requestPasswordReset(context, email);
-                      },
-                      child: const Text('Submit'),
-                    ),
-                  ],
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller : resetEmailController,
+                        decoration: InputDecoration(
+                          labelText: 'Enter your email',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide.none,
+                          ),
+                          fillColor: Colors.grey[200],
+                          filled: true,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle password reset logic
+                          // Send password reset email
+                          final email = resetEmailController.text;
+                          requestPasswordReset(context, email);
+                        },
+                        child: const Text('Submit'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              )
             ],
           ),
           ),

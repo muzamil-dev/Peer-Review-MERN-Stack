@@ -1,55 +1,102 @@
+body {
+    background-color: #003366;
+    color: #FFFFFF;
+    font-family: Arial, sans-serif;
+}
+
 .dashboard {
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    justify-content: space-between;
 }
 
 .workspace-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+    width: 60%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 20px;
 }
 
 .workspace-card {
-    background-color: #f4f4f4;
-    border: 1px solid #ddd;
+    background-color: #004080;
+    border: 1px solid #ccc;
     border-radius: 8px;
-    padding: 20px;
-    width: 200px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
+    padding: 16px;
+    cursor: pointer;
+    transition: box-shadow 0.3s;
+    margin-bottom: 10px;
+    color: #FFFFFF;
 }
 
 .workspace-card:hover {
-    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .workspace-actions {
-    margin-top: 20px;
+    width: 65%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #004080;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #FFFFFF;
 }
 
 .workspace-actions h2 {
-    margin-bottom: 10px;
+    margin-top: 0;
 }
 
-.workspace-actions input {
-    display: block;
+.workspace-actions input, .workspace-actions button {
+    width: 100%;
     margin-bottom: 10px;
     padding: 10px;
-    width: 100%;
-    max-width: 300px;
-    border: 1px solid #ddd;
     border-radius: 4px;
-}
-
-.workspace-actions button {
-    padding: 10px 20px;
     border: none;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+    box-sizing: border-box;
 }
 
-.workspace-actions button:hover {
-    background-color: #0056b3;
+button {
+    background-color: #0059b3;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0066cc;
+}
+
+.domain-restrictions {
+    margin-bottom: 10px;
+}
+
+.domain-input {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.domain-input input {
+    /* flex: 1; */
+    margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .workspace-cards, .workspace-actions {
+        width: 100%;
+        margin-top: 20px;
+    }
 }
