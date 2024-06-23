@@ -27,7 +27,11 @@ const Example = (props) => {
                         setId(response.data._id);
                     })}
             />
-            <input type='button' value='Get User By Id' onClick={() => Api.Users.GetById(id).then((response) => console.log(JSON.stringify(response, null, 4)))} />
+            <input 
+                type='button' 
+                value='Get User By Id' 
+                onClick={() => Api.Users.GetById(id)
+                    .then((response) => console.log(JSON.stringify(response, null, 4)))} />
             <input
                 type='button'
                 value='2. Login'
