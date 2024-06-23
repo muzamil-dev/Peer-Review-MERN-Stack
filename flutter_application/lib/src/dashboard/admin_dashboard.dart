@@ -143,7 +143,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const MainAppBar(
-        title: 'Admin Dashboard',
+        title: 'Admin Dashboard', backgroundColor: Color(0xFF9bc4bc),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())

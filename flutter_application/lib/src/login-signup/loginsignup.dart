@@ -5,6 +5,7 @@ import 'dart:ui'; // for BackdropFilter
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+
 class LoginSignup extends StatefulWidget {
   const LoginSignup({super.key});
 
@@ -33,98 +34,101 @@ class _LoginSignupState extends State<LoginSignup> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const MainAppBar(
-        title: 'Auth Page',
+        title: '',
+        backgroundColor: Color(0xFF004080),
       ),
-      body: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () => _togglePage(0),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: _selectedPage == 0
-                            ? Colors.blue
-                            : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                  child: Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: _selectedPage == 0 ? Colors.blue : Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => _togglePage(1),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: _selectedPage == 1
-                            ? Colors.blue
-                            : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                  child: Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: _selectedPage == 1 ? Colors.blue : Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 20),  // Add space between tabs and title
-        Text(
-          _selectedPage == 0 ? 'Welcome Back!' : 'Welcome!',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _selectedPage = index;
-                });
-              },
+      body: Container(
+        color: Color(0xFF004080), // Background color
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      LoginScreen(),
-                    ],
+                GestureDetector(
+                  onTap: () => _togglePage(0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: _selectedPage == 0
+                            ? Colors.white
+                            : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: _selectedPage == 0 ? Colors.white : Colors.grey,
+                      ),
+                    ),
                   ),
                 ),
-                SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      SignUpScreen(),
-                    ],
+                GestureDetector(
+                  onTap: () => _togglePage(1),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: _selectedPage == 1
+                              ? Colors.white
+                              : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: _selectedPage == 1 ? Colors.white : Colors.grey,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
+            SizedBox(height: 20),  // Add space between tabs and title
+          Text(
+            _selectedPage == 0 ? 'Welcome Back!' : 'Welcome!',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white, // Title color
+            ),
           ),
-        ],
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _selectedPage = index;
+                  });
+                },
+                children: [
+                  SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        LoginScreen(),
+                      ],
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        SignUpScreen(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -213,7 +217,7 @@ class LoginScreen extends StatelessWidget {
             border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
-                fillColor: Colors.purple.withOpacity(0.1),
+                fillColor: Colors.white,
                 filled: true,
                 prefixIcon: const Icon(Icons.email),
               ),
@@ -225,7 +229,7 @@ class LoginScreen extends StatelessWidget {
             border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
-                fillColor: Colors.purple.withOpacity(0.1),
+                fillColor: Colors.white,
                 filled: true,
                 prefixIcon: const Icon(Icons.password),
               ),
@@ -319,7 +323,7 @@ class LoginScreen extends StatelessWidget {
   },
   child: const Text(
     'Forgot Password?',
-    style: TextStyle(color: Colors.purple),
+    style: TextStyle(color: Colors.white),
   ),
 ),
         ],
@@ -328,28 +332,26 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-// Sign Up Page Design and Functionality
 class SignUpScreen extends StatelessWidget {
-  
   final TextEditingController firstNameController = TextEditingController();
+  //final TextEditingController middleNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController middleNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController tokenController = TextEditingController();
 
   Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password, String confirmPassword) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users');
+    final url = Uri.parse('http://10.0.2.2:5000/users/signup');
 
     try {
       // Validation Check for Password and Confirm Password
       if (password != confirmPassword) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('SignUp Failed: \nPassword and Confirm Password Does Not Match.')),
+          const SnackBar(content: Text('SignUp Failed: \nPassword and Confirm Password Do Not Match.')),
         );
         return;
       }
-
 
       final response = await http.post(
         url,
@@ -365,9 +367,8 @@ class SignUpScreen extends StatelessWidget {
       );
 
       if (response.statusCode == 201) {
-        final responseData = json.decode(response.body);
-        print("Sign Up Successfull: $responseData");
-        Navigator.pushNamed(context, '/adminDashboard');
+        print("Sign Up Successful. Please verify your email.");
+        _showVerificationDialog(context);
       } else {
         final errorData = json.decode(response.body);
         print("SignUp Failed: ${response.statusCode}, ${errorData['message']}");
@@ -375,8 +376,72 @@ class SignUpScreen extends StatelessWidget {
           SnackBar(content: Text('SignUp Failed: \n${errorData['message']}')),
         );
       }
-    } catch(err) {
+    } catch (err) {
       print("Error: $err");
+    }
+  }
+
+  void _showVerificationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Email Verification'),
+          content: TextField(
+            controller: tokenController,
+            decoration: InputDecoration(labelText: 'Enter verification token'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                verifyEmail(context, tokenController.text);
+              },
+              child: Text('Verify'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> verifyEmail(BuildContext context, String token) async {
+    final url = Uri.parse('http://10.0.2.2:5000/users/verifyEmail');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'token': token,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pop(context); // Close the dialog
+        Navigator.pushNamed(context, '/adminDashboard'); // Navigate to dashboard
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Email verified successfully.')),
+        );
+      } else {
+        final errorData = json.decode(response.body);
+        print("Verification Failed: ${response.statusCode}, ${errorData['message']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Verification Failed: \n${errorData['message']}')),
+        );
+      }
+    } catch (err) {
+      print("Error: $err");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error verifying email.')),
+      );
     }
   }
 
@@ -396,21 +461,7 @@ class SignUpScreen extends StatelessWidget {
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
-                fillColor: Colors.purple.withOpacity(0.1),
-                filled: true,
-              ),
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 10.0),
-            child: TextField(
-              controller: middleNameController,
-              decoration: InputDecoration(
-                labelText: 'Middle Name',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide.none),
-                fillColor: Colors.purple.withOpacity(0.1),
+                fillColor: Colors.white,
                 filled: true,
               ),
             ),
@@ -424,7 +475,7 @@ class SignUpScreen extends StatelessWidget {
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
-                fillColor: Colors.purple.withOpacity(0.1),
+                fillColor: Colors.white,
                 filled: true,
               ),
             ),
@@ -438,7 +489,7 @@ class SignUpScreen extends StatelessWidget {
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
-                fillColor: Colors.purple.withOpacity(0.1),
+                fillColor: Colors.white,
                 filled: true,
                 prefixIcon: const Icon(Icons.email),
               ),
@@ -454,7 +505,7 @@ class SignUpScreen extends StatelessWidget {
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
-                fillColor: Colors.purple.withOpacity(0.1),
+                fillColor: Colors.white,
                 filled: true,
                 prefixIcon: const Icon(Icons.password),
               ),
@@ -470,7 +521,7 @@ class SignUpScreen extends StatelessWidget {
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
-                fillColor: Colors.purple.withOpacity(0.1),
+                fillColor: Colors.white,
                 filled: true,
                 prefixIcon: const Icon(Icons.password),
               ),
@@ -482,7 +533,6 @@ class SignUpScreen extends StatelessWidget {
             onPressed: () {
               // Handle signup logic
               final firstName = firstNameController.text;
-              final middleName = middleNameController.text;
               final lastName = lastNameController.text;
               final email = emailController.text;
               final password = passwordController.text;

@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        appBar: const MainAppBar(title: "DEBUG PAGE VIEWER"),
+        appBar: MainAppBar(title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
         body: Center(
           child: Column(
             children: [
