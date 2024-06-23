@@ -2,15 +2,23 @@ import axios from 'axios';
 
 
 const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
-const getUrl = (prefix, route) => {
+const getUrl = (prefix, route, postfix) => {
     if (process.env.NODE_ENV === 'production') 
     {
-        return 'https://' + app_name +  '.herokuapp.com/' + prefix + route;
+        return 'https://' + app_name +  '.herokuapp.com/' + prefix + route + postfix;
     }
     else
     {        
-        return 'http://localhost:5000/' + prefix + route;
+        return 'http://localhost:5000/' + prefix + route + postfix;
     }
+};
+
+const Response503 = {
+    status: 503,
+    success: false,
+    data: {},
+    error: 'Service temporarily unavailable',
+    message: 'Service temporarily unavailable'
 };
 
 const GROUPS = 'groups/';
@@ -37,19 +45,15 @@ export default {
          * @returns {Promise<{ status: number, data: {}, error: string }>} The specified user's data
          */
         GetById: async (id) => {
-            const response = await axios.get(getUrl(USERS, id))
+            const response = await axios.get(getUrl(USERS, id, ''))
                 .catch((err) => {
                     console.error(err);
-                    return {
-                        status: err.response.status,
-                        data: err.response.data,
-                        message: err.response.data.message
-                    };
+                    return err.response || Response503;
                 });
             return {
                 status: response.status,
                 data: response.data,
-                error: response.message
+                error: response.data.message
             };
         },
         /**
@@ -63,19 +67,15 @@ export default {
                 email,
                 password
             };
-            const response = await axios.post(getUrl(USERS, 'login'), payload)
+            const response = await axios.post(getUrl(USERS, 'login', ''), payload)
                 .catch((err) => {
                     console.error(err);
-                    return {
-                        status: err.response.status,
-                        data: err.response.data,
-                        message: err.response.data.message
-                    };
+                    return err.response || Response503;
                 });
             return {
                 status: response.status,
                 data: response.data,
-                error: response.message
+                error: response.data.message
             };
         },
         /**
@@ -95,19 +95,15 @@ export default {
                 email,
                 password
             };
-            const response = await axios.post(getUrl(USERS, ''), payload)
+            const response = await axios.post(getUrl(USERS, '', ''), payload)
                 .catch((err) => {
                     console.error(err);
-                    return {
-                        status: err.response.status,
-                        data: err.response.data,
-                        message: err.response.data.message
-                    };
+                    return err.response || Response503;
                 });
             return {
                 status: response.status,
                 data: response.data,
-                error: response.message
+                error: response.data.message
             };
         },
         /**
@@ -125,19 +121,15 @@ export default {
                 lastName,
                 id
             };
-            const response = await axios.put(getUrl(USERS, ''), payload)
+            const response = await axios.put(getUrl(USERS, '', ''), payload)
                 .catch((err) => {
                     console.error(err);
-                    return {
-                        status: err.response.status,
-                        data: err.response.data,
-                        message: err.response.data.message
-                    };
+                    return err.response || Response503;
                 });
             return {
                 status: response.status,
                 data: response.data,
-                error: response.message
+                error: response.data.message
             };
         },
         /**
@@ -149,13 +141,10 @@ export default {
             const payload = {
                 id
             };
-            const response = await axios.delete(getUrl(USERS, ''), { data: payload })
+            const response = await axios.delete(getUrl(USERS, '', ''), { data: payload })
                 .catch((err) => {
                     console.error(err);
-                    return {
-                        status: err.response.status,
-                        message: err.response.data.message
-                    };
+                    return err.response || Response503;
                 });
             return {
                 status: response.status,
@@ -167,25 +156,22 @@ export default {
          * Requests a password reset for the user
          * @param {number} id 
          * @param {string} email 
-         * @returns {Promise<{ status: number, success: boolean, error: string }>}
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         RequestPasswordReset: async (id, email) => {
             const payload = {
                 id,
                 email
             };
-            const response = await axios.post(getUrl(USERS, 'requestPasswordReset'), payload)
+            const response = await axios.post(getUrl(USERS, 'requestPasswordReset', ''), payload)
                 .catch((err) => {
                     console.error(err);
-                    return {
-                        status: err.response.status,
-                        message: err.response.data.message
-                    };
+                    return err.response || Response503;
                 });
             return {
                 status: response.status,
                 success: response.status === 200,
-                error: response.data.message
+                message: response.data.message
             };
         },
         /**
@@ -203,14 +189,10 @@ export default {
             const payload = {
                 users
             };
-            const response = await axios.post(getUrl(USERS, 'requestPasswordReset'), payload)
+            const response = await axios.post(getUrl(USERS, 'requestPasswordReset', ''), payload)
                 .catch((err) => {
                     console.error(err);
-                    return {
-                        status: err.response.status,
-                        data: err.response.data,
-                        message: err.response.data.message
-                    };
+                    return err.response || Response503;
                 });
             return {
                 status: response.status,
@@ -220,6 +202,206 @@ export default {
         }
     },
     Workspace: {
+        /**
+         * Gets a list of assignments made in the specified workspace
+         * @param {string} workspaceId
+         * @returns {Promise<{ status: number, data: {}[], message: string }>} The list of assignments
+         */
+        GetAssignments: async (workspaceId) => {
+            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/assignments'))
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
+        },
+        /**
+         * Gets the list of groups in the specified workspace
+         * @param {string} workspaceId
+         * @returns {Promise<{ status: number, data: {}[], error: string }>} The list of groups
+         */
+        GetGroups: async (workspaceId) => {
+            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/groups'))
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                error: response.message
+            };
+        },
+        /**
+         * Creates a new workspace
+         * @param {string} name 
+         * @param {string} userId 
+         * @param {string[]} allowedDomains 
+         * @param {number} groupMemberLimit 
+         * @param {number} numGroups 
+         * @returns {Promise<{ status: number, workspaceId: number, message: string }>} Returns ID of new workspace
+         */
+        CreateWorkspace: async (name, userId, allowedDomains, groupMemberLimit, numGroups) => {
+            const payload = {
+                name,
+                userId,
+                allowedDomains,
+                groupMemberLimit,
+                numGroups
+            };
+            const response = await axios.post(getUrl(WORKSPACES, 'create', ''), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                workspaceId: response.data.workspaceId,
+                message: response.data.message
+            };
+        },
+        /**
+         * Adds the user specified by userId to the workspace specified by workspaceID
+         * @param {string} userId 
+         * @param {string} workspaceId 
+         * @param {string} inviteCode 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        JoinWorkspace: async (userId, workspaceId, inviteCode) => {
+            const payload = {
+                userId,
+                workspaceId,
+                inviteCode
+            };
+            const response = await axios.put(getUrl(WORKSPACES, 'join', ''), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Removes the user specified by userId from the workspace specified by workspaceId
+         * @param {string} userId 
+         * @param {string} workspaceId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        LeaveWorkspace: async (userId, workspaceId) => {
+            const payload = {
+                userId,
+                workspaceId
+            };
+            const response = await axios.put(getUrl(WORKSPACES, 'leave', ''), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Sets the active invite code
+         * @param {string} userId 
+         * @param {string} workspaceId 
+         * @returns {Promise<{ status: number, message: string, inviteCode: string }>}
+         */
+        SetInviteCode: async (userId, workspaceId) => {
+            const payload = {
+                userId,
+                workspaceId
+            };
+            const response = await axios.put(getUrl(WORKSPACES, 'setInvite', ''), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                message: response.data.message,
+                inviteCode: response.data.inviteCode
+            };
+        },
+        /**
+         * Edits the workspace specified by workspaceID
+         * @param {string} workspaceId
+         * @param {string} name
+         * @param {string[]} allowedDomains 
+         * @param {number} groupMemberLimit
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        EditWorkspace: async (userId, workspaceId, name, allowedDomains, groupMemberLimit) => {
+            const payload = {
+                userId,
+                workspaceId,
+                name,
+                allowedDomains,
+                groupMemberLimit
+            };
+            const response = await axios.put(getUrl(WORKSPACES, 'edit', ''), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Delete the workspace specified by workspaceID
+         * @param {string} userId 
+         * @param {string} workspaceId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        DeleteWorkspace: async (userId, workspaceId) => {
+            const payload = {
+                userId,
+                workspaceId
+            };
+            const response = await axios.delete(getUrl(WORKSPACES, workspaceId, '/delete'), { data: payload })
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Remove the active invite code for the workspace specified by workspaceID
+         * @param {string} userId 
+         * @param {string} workspaceId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        RemoveActiveInvite: async (userId, workspaceId) => {
+            const payload = {
+                userId
+            };
+            const response = await axios.delete(getUrl(WORKSPACES, workspaceId, '/removeInvite'), { data: payload })
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
 
     }
 };
