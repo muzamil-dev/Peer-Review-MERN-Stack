@@ -7,6 +7,8 @@ import 'package:flutter_application/src/login-signup/signup.dart';
 import 'package:flutter_application/src/login-signup/login.dart';
 import 'package:flutter_application/src/login-signup/passwordReset.dart';
 import 'package:flutter_application/src/dashboard/CreateWorkspace.dart';
+import 'package:flutter_application/src/groups/userGroups.dart';
+import 'package:flutter_application/src/groups/adminGroups.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -21,6 +23,8 @@ void main() {
       LoginSignup.routeName: (context) => const LoginSignup(),
       PasswordResetPage.routeName: (context) => PasswordResetPage(),
       CreateWorkspace.routeName: (context) => CreateWorkspace(userId: '6671c8362ffea49f3018bf61'),
+      UserGroup.routeName: (context) => const UserGroup(workspaceId: "Bob"),
+      AdminGroup.routeName: (context) => AdminGroup(workspaceId: "Bob"),
     },
   ));
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class AdminGroup extends StatelessWidget {
   final String workspaceId;
+  static const routeName = '/adminGroups';
+
 
   AdminGroup({required this.workspaceId});
 
