@@ -14,7 +14,7 @@ class UserDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      appBar: MainAppBar(title: "USER DASHBOARD"),
+      appBar: MainAppBar(title: "USER DASHBOARD", backgroundColor: Color(0xFF9bc4bc),),
       body: Padding(
         padding: EdgeInsets.all(15),
         child: Column(
