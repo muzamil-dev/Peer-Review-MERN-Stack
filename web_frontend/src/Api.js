@@ -95,7 +95,7 @@ export default {
                 email,
                 password
             };
-            const response = await axios.post(getUrl(USERS, ''), payload)
+            const response = await axios.post(getUrl(USERS, 'signup'), payload)
                 .catch((err) => {
                     console.error(err);
                     return {
@@ -110,6 +110,27 @@ export default {
                 error: response.message
             };
         },
+        
+        /**/
+        VerifyToken: async (email, token) => {
+            const payload = { email, token };
+            const response = await axios.post(getUrl(USERS, 'verifyEmail'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return {
+                        status: err.response.status,
+                        data: err.response.data,
+                        message: err.response.data.message
+                    };
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                error: response.message
+            };
+        }, /**/
+
+
         /**
          * Edit the account with the corresponding id
          * @param {number} id 
@@ -169,9 +190,8 @@ export default {
          * @param {string} email 
          * @returns {Promise<{ status: number, success: boolean, error: string }>}
          */
-        RequestPasswordReset: async (id, email) => {
+        RequestPasswordReset: async (email) => {
             const payload = {
-                id,
                 email
             };
             const response = await axios.post(getUrl(USERS, 'requestPasswordReset'), payload)
@@ -188,6 +208,27 @@ export default {
                 error: response.data.message
             };
         },
+
+        /**/
+        ResetPassword: async (email, token, newPassword) => {
+            const payload = { email, token, newPassword };
+            const response = await axios.post(getUrl(USERS, 'resetPassword'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return {
+                        status: err.response.status,
+                        data: err.response.data,
+                        message: err.response.data.message
+                    };
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                error: response.message
+            };
+        },
+        /**/
+
         /**
          * Create bulk users
          * @param {{
