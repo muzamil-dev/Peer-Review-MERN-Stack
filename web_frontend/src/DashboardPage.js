@@ -26,6 +26,8 @@ const DashboardPage = () => {
             id: workspaces.length + 1,
             name: newWorkspaceName,
             role: 'Admin',
+            maxGroupSize: maxGroupSize,
+            numGroups: numGroups
         };
         setWorkspaces([...workspaces, newWorkspace]);
         setNewWorkspaceName('');
@@ -36,7 +38,9 @@ const DashboardPage = () => {
     };
 
     const handleWorkspaceClick = (workspaceId) => {
-        navigate(`/GroupPage/${workspaceId}`);
+        const workspace = workspaces.find(w => w.id === workspaceId);
+        //navigate(`/GroupsPage/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
+        navigate(`/groups/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
     };
 
     const handleAddDomain = () => {
