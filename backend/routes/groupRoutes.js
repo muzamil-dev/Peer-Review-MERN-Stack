@@ -189,6 +189,50 @@ router.put("/leave", async(req, res) => {
     }
 });
 
+// Route for admin to add user to a group, overrides member limit
+// Required: targetId, groupId
+router.put("/addUser", async(req, res) => {
+    try{
+        const { userId, targetId, groupId } = req.body;
+        // Check for required fields
+        if (!targetId || !groupId)
+            return res.status(400).json({ message: "One or more required fields is not present" });
+
+        // Get group and check that it exists
+        const group = await Group.findById(groupId);
+        if (!group)
+            return res.status(404).json({ 
+                message: "The provided group was not found in our database" 
+            });
+
+        // Check that the user is an instructor in the workspace
+        if (!await Checkers.checkInstructor(userId, group.workspaceId))
+            return res.status(403).json({
+                message: "The provided user is not authorized to create groups"
+            });
+        // Check that the user is in the same workspace as the group
+        if (!await Checkers.checkUserInWorkspace(targetId, group.workspaceId))
+            return res.status(400).json({ message: "The provided user was not found in this workspace" });
+
+        // Check that the user isn't already in a group within the group's workspace
+        if (await Checkers.checkUserInWorkspaceGroup(targetId, group.workspaceId))
+            return res.status(400).json({ 
+                message: "User is already a member of a group in this workspace" 
+            });
+        
+        // Link the user and the group
+        await Promise.all([
+            Adders.addUserToGroup(targetId, groupId),
+            Adders.addGroupToUser(targetId, groupId)
+        ]);
+        return res.json({ message: "Added user to group successfully" });
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).send({ message: err.message });
+    }
+});
+
 // Deletes a group
 router.delete("/:groupId/delete", async(req, res) => {
     try{
