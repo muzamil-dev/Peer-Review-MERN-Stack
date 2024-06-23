@@ -81,9 +81,20 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Workspace'),
+        title: const Text(
+          'Create',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ), // Change text color here
+        ),
+        backgroundColor: const Color(0xFF004080),
+        centerTitle: true, // Center the title
       ),
-      body: SingleChildScrollView(
+      body: Container(
+        //color: Colors.white,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -92,6 +103,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
               decoration: InputDecoration(labelText: 'Workspace Name'),
             ),
             TextField(
+              //color
               controller: domainController,
               decoration: InputDecoration(labelText: 'Allowed Domains (comma separated)'),
             ),
@@ -120,7 +132,8 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
             ),
           ],
         ),
-      ),
+      ),)
+        
       );
   }
 }

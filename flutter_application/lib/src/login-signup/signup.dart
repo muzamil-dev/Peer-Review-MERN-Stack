@@ -14,7 +14,7 @@ class Signup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-        appBar: MainAppBar(title: "Signup"),
+        appBar: MainAppBar(title: "Signup", backgroundColor: Color(0xFF9bc4bc),),
         body: Padding(
           padding: EdgeInsets.all(15),
           child: Column(
