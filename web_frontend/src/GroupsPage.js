@@ -1,104 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import './GroupsPage.css';
 
 const GroupsPage = () => {
     const location = useLocation();
-    const { maxGroupSize, numGroups } = location.state || { maxGroupSize: '', numGroups: '' };
+    const { maxGroupSize, numGroups } = location.state;
 
-    const [groups, setGroups] = useState([]);
-    const [newGroupName, setNewGroupName] = useState('');
-    const [newGroupDescription, setNewGroupDescription] = useState('');
-    const [members, setMembers] = useState({}); // { groupId: number }
+    // Assuming you get the user's first and last name from a user context or prop
+    const userFirstName = 'John'; // Replace with actual user data
+    const userLastName = 'Doe'; // Replace with actual user data
+    const userFullName = `${userFirstName} ${userLastName}`;
 
-    useEffect(() => {
-        // Initialize groups based on the number of groups and max group size
-        if (numGroups) {
-            const initialGroups = Array.from({ length: numGroups }, (_, i) => ({
-                id: i + 1,
-                name: `Group ${i + 1}`,
-                description: `This is Group ${i + 1}`,
-                maxGroupSize: maxGroupSize,
-                members: []
-            }));
-            setGroups(initialGroups);
-        }
-    }, [numGroups, maxGroupSize]);
+    const [groups, setGroups] = useState(Array.from({ length: numGroups }, (_, index) => ({
+        id: index + 1,
+        members: []
+    })));
 
-    const handleAddGroup = () => {
-        if (!newGroupName || !newGroupDescription) {
-            alert("Group name and description cannot be empty");
-            return;
-        }
-
-        const newGroup = {
-            id: groups.length + 1,
-            name: newGroupName,
-            description: newGroupDescription,
-            maxGroupSize: maxGroupSize,
-            members: []
-        };
-        setGroups([...groups, newGroup]);
-        setNewGroupName('');
-        setNewGroupDescription('');
+    const handleJoinGroup = (groupId) => {
+        setGroups(groups.map(group => {
+            if (group.id === groupId && group.members.length < maxGroupSize && !group.members.includes(userFullName)) {
+                return { ...group, members: [...group.members, userFullName] };
+            }
+            return group;
+        }));
     };
 
-    const handleAddMember = (groupId) => {
-        const group = groups.find(g => g.id === groupId);
-        if (group.members.length >= group.maxGroupSize) {
-            alert(`This group has reached its maximum size of ${group.maxGroupSize} members`);
-            return;
-        }
-
-        const newMember = prompt("Enter new member's name:");
-        if (newMember) {
-            const updatedGroups = groups.map(g =>
-                g.id === groupId ? { ...g, members: [...g.members, newMember] } : g
-            );
-            setGroups(updatedGroups);
-        }
+    const handleLeaveGroup = (groupId) => {
+        setGroups(groups.map(group => {
+            if (group.id === groupId) {
+                return { ...group, members: group.members.filter(member => member !== userFullName) };
+            }
+            return group;
+        }));
     };
 
     return (
         <div className="groups-page">
-            <h1 className="text-center mb-4">Groups</h1>
+            <div className="top-right-container">
+                <button className="btn btn-primary">Dashboard</button>
+            </div>
+            <h1 className="header-large">Groups</h1>
             <div className="main-container">
-                <div className="group-cards">
-                    {groups.map((group) => (
-                        <div key={group.id} className="group-card">
-                            <h2>{group.name}</h2>
-                            <p>{group.description}</p>
-                            <p>Max Group Size: {group.maxGroupSize}</p>
-                            <p>Current Members: {group.members.length}</p>
-                            <button onClick={() => handleAddMember(group.id)} className="btn btn-primary mb-2">
-                                Add Member
-                            </button>
-                            <ul>
-                                {group.members.map((member, index) => (
-                                    <li key={index}>{member}</li>
-                                ))}
-                            </ul>
+                {groups.map(group => (
+                    <div key={group.id} className="group-card">
+                        <h2>Group {group.id}</h2>
+                        <ul>
+                            {group.members.map((member, index) => (
+                                <li key={index}>{member}</li>
+                            ))}
+                        </ul>
+                        <div className="buttons-container">
+                            {group.members.includes(userFullName) ? (
+                                <>
+                                    <button
+                                        className="btn btn-success small-btn mb-2"
+                                        disabled
+                                    >
+                                        Joined
+                                    </button>
+                                    <button
+                                        onClick={() => handleLeaveGroup(group.id)}
+                                        className="btn btn-danger small-btn mb-2"
+                                    >
+                                        Leave Group
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={() => handleJoinGroup(group.id)}
+                                    className="btn btn-success small-btn mb-2"
+                                    disabled={group.members.length >= maxGroupSize}
+                                >
+                                    {group.members.length >= maxGroupSize ? 'Group Full' : 'Join'}
+                                </button>
+                            )}
                         </div>
-                    ))}
-                </div>
-                <div className="group-actions">
-                    <h2>Create Group</h2>
-                    <input
-                        type="text"
-                        placeholder="Group name"
-                        value={newGroupName}
-                        onChange={(e) => setNewGroupName(e.target.value)}
-                        className="form-control mb-2"
-                    />
-                    <textarea
-                        placeholder="Group description"
-                        value={newGroupDescription}
-                        onChange={(e) => setNewGroupDescription(e.target.value)}
-                        className="form-control mb-2"
-                        rows="3"
-                    />
-                    <button onClick={handleAddGroup} className="btn btn-success">Create</button>
-                </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
