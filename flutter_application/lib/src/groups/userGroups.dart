@@ -22,7 +22,13 @@ class UserGroup extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Groups'),
+        backgroundColor: const Color(0xff004080),
+        title: const Text(
+          'Groups',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
       ),
       body: ListView.separated(
         itemBuilder: (context, index) {
@@ -54,7 +60,7 @@ class UserGroup extends StatelessWidget {
 Widget groupCards(BuildContext context, index) {
   return Container(
     decoration: BoxDecoration(
-      color: const Color.fromARGB(255, 37, 113, 175),
+      color: const Color(0xff004080),
       border: Border.all(
         width: 2,
         color: Colors.black,
@@ -78,14 +84,14 @@ Widget groupCards(BuildContext context, index) {
             Text(
               "Group #${index + 1}",
               style: const TextStyle(
-                fontSize: 20.0,
+                fontSize: 30.0,
                 color: Color.fromARGB(204, 255, 255, 255),
               ),
             ),
             const Text(
               "1/3",
               style: TextStyle(
-                fontSize: 15.0,
+                fontSize: 17.0,
                 color: Color.fromARGB(204, 255, 255, 255),
               ),
             ),
