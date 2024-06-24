@@ -1,5 +1,3 @@
-/* GroupsPage.css */
-
 .groups-page {
     width: 75vw;
     padding: 20px;
@@ -76,7 +74,7 @@
 }
 
 .group-card button {
-    width: 48%;
+    width: 30%; /* Reduce width of buttons */
     padding: 5px;
     border: none;
     border-radius: 4px;
@@ -85,7 +83,7 @@
 }
 
 .group-card .small-btn {
-    width: 48%;
+    width: 30%; /* Reduce width of buttons */
     padding: 5px;
 }
 
