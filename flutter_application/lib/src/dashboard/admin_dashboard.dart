@@ -126,7 +126,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   void navigateToGroupPage(String workspaceId, String role) {
     if (role == 'Instructor') {
-      Navigator.pushNamed(context, "/adminGroup");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AdminGroup(workspaceId: workspaceId),
+        ),
+      );
     } else {
       Navigator.push(
         context,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/app.dart';
 import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'package:flutter_application/src/dashboard/user_dashboard.dart';
+import 'package:flutter_application/src/groups/adminGroups.dart';
 import 'package:flutter_application/src/login-signup/loginsignup.dart';
 import 'package:flutter_application/src/login-signup/signup.dart';
 import 'package:flutter_application/src/login-signup/login.dart';
@@ -20,7 +21,11 @@ void main() {
       UserDashboard.routeName: (context) => const UserDashboard(),
       LoginSignup.routeName: (context) => const LoginSignup(),
       PasswordResetPage.routeName: (context) => PasswordResetPage(),
-      CreateWorkspace.routeName: (context) => CreateWorkspace(userId: '6671c8362ffea49f3018bf61'),
+      CreateWorkspace.routeName: (context) =>
+          CreateWorkspace(userId: '6671c8362ffea49f3018bf61'),
+      AdminGroup.routeName: (context) => AdminGroup(
+            workspaceId: 'null',
+          ),
     },
   ));
 }

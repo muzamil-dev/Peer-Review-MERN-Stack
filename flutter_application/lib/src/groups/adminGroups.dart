@@ -15,7 +15,7 @@ class _AdminGroupState extends State<AdminGroup> {
   // Example data for groups and students
   List<Map<String, dynamic>> groups = [
     {
-      'groupName': 'Group 1',
+      'groupName': "Group 1",
       'students': ['Student A', 'Student B', 'Student C'],
     },
     {
@@ -78,43 +78,54 @@ class _AdminGroupState extends State<AdminGroup> {
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: groups.length,
-          itemBuilder: (context, groupIndex) {
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      groups[groupIndex]['groupName'],
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 10),
-                    Column(
-                      children:
-                          List.generate(groups[groupIndex]['students'].length,
-                              (studentIndex) {
-                        return ListTile(
-                          title: Text(
-                              groups[groupIndex]['students'][studentIndex]),
-                          trailing: IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () {
-                              moveStudent(groupIndex, studentIndex);
-                            },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Workspace ID: ${widget.workspaceId}', // Display workspace ID here
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: groups.length,
+                itemBuilder: (context, groupIndex) {
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            groups[groupIndex]['groupName'],
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
-                        );
-                      }),
+                          SizedBox(height: 10),
+                          Column(
+                            children: List.generate(
+                                groups[groupIndex]['students'].length,
+                                (studentIndex) {
+                              return ListTile(
+                                title: Text(groups[groupIndex]['students']
+                                    [studentIndex]),
+                                trailing: IconButton(
+                                  icon: Icon(Icons.edit),
+                                  onPressed: () {
+                                    moveStudent(groupIndex, studentIndex);
+                                  },
+                                ),
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
