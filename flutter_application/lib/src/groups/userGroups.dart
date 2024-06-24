@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
-class UserGroup extends StatelessWidget {
+class UserGroup extends StatefulWidget {
   final String workspaceId;
   static const routeName = '/userGroups';
 
   const UserGroup({required this.workspaceId});
 
+  @override
+  State<UserGroup> createState() => _UserGroupState();
+}
+
+class _UserGroupState extends State<UserGroup> {
   @override
   Widget build(BuildContext context) {
     var arrNames = [
