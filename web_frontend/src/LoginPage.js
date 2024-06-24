@@ -1,6 +1,7 @@
 // src/LoginPage.js
 import Api from "./Api.js";
 import React, { useState } from 'react';
+import { useSnackbar } from 'notistack';
 import { Navigate, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './LoginPage.css'; // Assuming you save the CSS styles in LoginPage.css
@@ -18,6 +19,7 @@ const LoginPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [tempEmail, setTempEmail] = useState('');
     const navigate = useNavigate();
+    const { enqueueSnackbar } = useSnackbar();
 
     const handleLoginChange = (e) => {
         setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -40,14 +42,17 @@ const LoginPage = () => {
         try {
             const response = await Api.Users.DoLogin(loginData.email, loginData.password);
             if (response.status === 200) {
-                alert('Login successful');
+                // alert('Login successful');
+                enqueueSnackbar('Login successful', { variant: 'success' });
                 navigate('/DashboardPage');
             // Redirect or perform additional actions after successful login
             }
             else {
-                alert('Invalid email or password');
+                enqueueSnackbar('Invalid email or password', { variant: 'error' });
+                // alert('Invalid email or password');
             }
         } catch (error) {
+            enqueueSnackbar('Error: ' + error.message, { variant: 'warning' });
             console.error('Error logging in:', error);
             //alert('Invalid email or password-2');
         }
@@ -56,7 +61,8 @@ const LoginPage = () => {
     const handleSignup = async (e) => {
         e.preventDefault();
         if (signupData.password !== signupData.confirmPassword) {
-            alert('Passwords do not match');
+            // alert('Passwords do not match');
+            enqueueSnackbar('Passwords do not match', { variance: 'error' });
             return;
         }
         //setIsLoading(true);
@@ -72,16 +78,19 @@ const LoginPage = () => {
                 signupData.password
             );
             if (response.status === 201) {
-                alert('Signup successful');
+                // alert('Signup successful');
+                enqueueSnackbar('Signup successful', { variant: 'success' });
                 //navigate('/DashboardPage');
                 setTempEmail(signupData.email);
                 setIsVerificationActive(true);
             } else {
-                alert('Signup failed');
+                enqueueSnackbar('Signup failed', { variant: 'error' });
+                // alert('Signup failed');
             }
         } catch (error) {
             console.error('Error signing up:', error);
-            alert('Signup failed');
+            enqueueSnackbar('Error signing up' + error.message, { variant: 'warning' });
+            // alert('Signup failed');
         }
         //setIsLoading(false);
     };
@@ -93,17 +102,20 @@ const LoginPage = () => {
         try {
             const response = await Api.Users.VerifyToken(tempEmail, verificationToken);
             if (response.status === 200) {
-                alert('Verification successful. You can now log in.');
+                // alert('Verification successful. You can now log in.');
+                enqueueSnackbar('Verification successful. You can now log in.', { variance: 'success'});
                 setIsLoginActive(true);
                 setIsVerificationActive(false);
                 setSignupData({ firstName: '', middleName: '', lastName: '', email: '', password: '', confirmPassword: '' });
                 setVerificationToken('');
             } else {
-                alert('Verification failed');
+                enqueueSnackbar('Verification Failed', { variant: 'error' });
+                // alert('Verification failed');
             }
         } catch (error) {
             console.error('Error verifying token:', error);
-            alert('Verification failed');
+            // alert('Verification failed');
+            enqueueSnackbar('Verification failed', { variant: 'warning' });
         }
         //setIsLoading(false);
     }; 
@@ -114,16 +126,19 @@ const LoginPage = () => {
         try {
             const response = await Api.Users.RequestPasswordReset(resetPasswordData.email);
             if (response.status === 200) {
-                alert('Reset token sent. Please check your email.');
+                // alert('Reset token sent. Please check your email.');
+                enqueueSnackbar('Reset token sent. Please check your email', { variant: 'success' });
                 setIsRequestResetPasswordActive(false);
                 setIsResetPasswordActive(true);
                 setResetPasswordData({ ...resetPasswordData, email: resetPasswordData.email });
             } else {
-                alert('This email is not registered.');
+                // alert('This email is not registered.');
+                enqueueSnackbar('This email is not registered.', { variant: 'error' });
             }
         } catch (error) {
             console.error('Error requesting reset password:', error);
-            alert('Error requesting reset password');
+            // alert('Error requesting reset password');
+            enqueueSnackbar('Error requesting reset password', { variant: 'warning' });
         }
         //setIsLoading(false); // End loading
     };
@@ -131,23 +146,27 @@ const LoginPage = () => {
     const handleResetPassword = async (e) => {
         e.preventDefault();
         if (resetPasswordData.newPassword !== resetPasswordData.confirmNewPassword) {
-            alert('Passwords do not match');
+            // alert('Passwords do not match');
+            enqueueSnackbar('Passwords do not match', { variant: 'error' });
             return;
         }
         //setIsLoading(true); // Start loading
         try {
             const response = await Api.Users.ResetPassword(resetPasswordData.email, resetPasswordData.token, resetPasswordData.newPassword);
             if (response.status === 200) {
-                alert('Password reset successful. You can now log in with your new password.');
+                // alert('Password reset successful. You can now log in with your new password.');
+                enqueueSnackbar('Password reset successful. You can now log in with your new password.', { variant:'success' });
                 setIsLoginActive(true);
                 setIsResetPasswordActive(false);
                 setResetPasswordData({ email: '', token: '', newPassword: '', confirmNewPassword: '' }); // Reset resetPasswordData
             } else {
-                alert('Password reset failed. Please check the token and try again.');
+                // alert('Password reset failed. Please check the token and try again.');
+                enqueueSnackbar('Password reset failed. Please check the token and try again.', { variant: 'error' });
             }
         } catch (error) {
             console.error('Error resetting password:', error);
-            alert('Error resetting password');
+            // alert('Error resetting password');
+            enqueueSnackbar('Error resetting password', { variant: 'warning' });
         }
         //setIsLoading(false);
     };
