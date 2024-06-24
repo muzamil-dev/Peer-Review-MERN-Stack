@@ -9,7 +9,7 @@ const getUrl = (prefix, route, postfix) => {
     }
     else
     {        
-        return 'http://localhost:5000/' + prefix + route + postfix;
+        return 'http://localhost:5000/' + prefix + route;
     }
 };
 
@@ -97,13 +97,13 @@ export default {
             };
             const response = await axios.post(getUrl(USERS, 'signup'), payload)
                 .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
+                console.error(err);
+                return err.response || Response503;
                 });
             return {
-                status: response.status,
-                data: response.data,
-                error: response.data.message
+            status: response.status,
+            data: response.data,
+            error: response.data.message
             };
         },
         
@@ -175,10 +175,9 @@ export default {
          * @param {string} email 
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
+
         RequestPasswordReset: async (email) => {
-            const payload = {
-                email
-            };
+            const payload = { email };
             const response = await axios.post(getUrl(USERS, 'requestPasswordReset'), payload)
                 .catch((err) => {
                     console.error(err);
@@ -186,8 +185,8 @@ export default {
                 });
             return {
                 status: response.status,
-                success: response.status === 200,
-                message: response.data.message
+                data: response.data,
+                error: response.message
             };
         },
 
@@ -197,11 +196,7 @@ export default {
             const response = await axios.post(getUrl(USERS, 'resetPassword'), payload)
                 .catch((err) => {
                     console.error(err);
-                    return {
-                        status: err.response.status,
-                        data: err.response.data,
-                        message: err.response.data.message
-                    };
+                    return err.response || Response503;
                 });
             return {
                 status: response.status,
