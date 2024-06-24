@@ -295,7 +295,7 @@ router.put("/removeUser", async(req, res) => {
 });
 
 // Deletes a group
-router.delete("/:groupId/delete", async(req, res) => {
+router.delete("/:groupId", async(req, res) => {
     try{
         const { groupId } = req.params;
         // Check that the group exists
@@ -324,72 +324,5 @@ router.delete("/:groupId/delete", async(req, res) => {
         return res.status(500).send({ message: err.message });
     }
 });
-
-// Remove user from group
-// router.put("/removeUser", Checks.checkGroup, Checks.checkInstructor, async (req, res) => {
-//     try {
-//         const { groupId, targetId } = req.body;
-
-//         // Check if the targetId was provided
-//         if (!targetId){
-//             return res.status(400).json({ message: "One or more required fields is not present" });
-//         }
-
-//         await Promise.all([
-//             Removers.removeGroupFromUser(targetId, groupId),
-//             Removers.removeUserFromGroup(targetId, groupId)
-//         ]);
-//         res.json({ message: "User removed from group successfully" });
-//     } 
-//     catch (err) {
-//         console.log(err.message);
-//         res.status(500).send({ message: err.message });
-//     }
-// });
-
-// Update group information
-// router.put("/:groupId", async (req, res) => {
-//     try {
-//         const { groupId } = req.params;
-//         const { name } = req.body;
-
-//         const group = await Group.findById(groupId);
-//         if (!group) {
-//             return res.status(404).json({ message: "Group not found" });
-//         }
-
-//         if (name) {
-//             group.name = name;
-//         }
-
-//         const updatedGroup = await group.save();
-//         res.status(200).json(updatedGroup);
-//     } catch (err) {
-//         console.log(err.message);
-//         res.status(500).send({ message: err.message });
-//     }
-// });
-
-// Join several users in a group (for testing)
-// router.put("/bulkjoin", Checks.checkGroup, async(req, res) => {
-//     try {
-//         const groupId = req.body.groupId;
-//         const userIds = req.body.userIds;
-
-//         const group = await Group.findById(groupId);
-//         group.userIds.push(...userIds);
-//         await group.save();
-
-//         await User.updateMany(
-//             { _id: { $in: userIds }},
-//             { $push: { groupIds: groupId }}
-//         );
-//         res.send("Users added");
-//     } 
-//     catch (err) {
-//         console.log(err.message);
-//         res.status(500).send({ message: err.message });
-//     }
-// });
 
 export default router;
