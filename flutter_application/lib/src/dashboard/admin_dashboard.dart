@@ -16,7 +16,8 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   List<Workspace> workspaces = [];
   bool isLoading = true;
-  final String userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+  final String userId =
+      '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
   final TextEditingController inviteCodeController = TextEditingController();
 
   @override
@@ -26,13 +27,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Future<void> fetchWorkspaces() async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/6671c8362ffea49f3018bf61/workspaces');
+    final url = Uri.parse(
+        'http://10.0.2.2:5000/users/6671c8362ffea49f3018bf61/workspaces');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          workspaces = data.map((workspace) => Workspace.fromJson(workspace)).toList();
+          workspaces =
+              data.map((workspace) => Workspace.fromJson(workspace)).toList();
           isLoading = false;
         });
         //Navigator.pushNamed(context, '/createWorkspace');
@@ -123,12 +126,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   void navigateToGroupPage(String workspaceId, String role) {
     if (role == 'Instructor') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AdminGroup(workspaceId: workspaceId),
-        ),
-      );
+      Navigator.pushNamed(context, "/adminGroup");
     } else {
       Navigator.push(
         context,
@@ -139,7 +137,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -157,16 +155,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
       body: Container(
         color: const Color(0xFF004080), // Set background color
         child: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: workspaces.length,
-              itemBuilder: (context, index) {
-                return WorkspaceCard(
-                  workspace: workspaces[index],
-                  onTap: navigateToGroupPage,
-                );
-              },
-            ),
+            ? Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                itemCount: workspaces.length,
+                itemBuilder: (context, index) {
+                  return WorkspaceCard(
+                    workspace: workspaces[index],
+                    onTap: navigateToGroupPage,
+                  );
+                },
+              ),
       ),
       bottomNavigationBar: SizedBox(
         height: 60,
@@ -195,7 +193,8 @@ class Workspace {
   final String name;
   final String role;
 
-  Workspace({required this.workspaceId, required this.name, required this.role});
+  Workspace(
+      {required this.workspaceId, required this.name, required this.role});
 
   factory Workspace.fromJson(Map<String, dynamic> json) {
     return Workspace(
@@ -210,7 +209,8 @@ class WorkspaceCard extends StatelessWidget {
   final Workspace workspace;
   final Function(String, String) onTap;
 
-  const WorkspaceCard({required this.workspace, required this.onTap, Key? key}) : super(key: key);
+  const WorkspaceCard({required this.workspace, required this.onTap, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +225,8 @@ class WorkspaceCard extends StatelessWidget {
             children: [
               Text(
                 workspace.name,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Text(

@@ -5,7 +5,7 @@ class AdminGroup extends StatefulWidget {
 
   const AdminGroup({super.key, required this.workspaceId});
 
-  static const routeName = "/adminView";
+  static const routeName = "/adminGroup";
 
   @override
   _AdminGroupState createState() => _AdminGroupState();
@@ -119,12 +119,4 @@ class _AdminGroupState extends State<AdminGroup> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: AdminGroup(
-      workspaceId: "23e",
-    ),
-  ));
 }
