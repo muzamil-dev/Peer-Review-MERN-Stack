@@ -11,16 +11,19 @@ class UserGroup extends StatefulWidget {
 }
 
 class _UserGroupState extends State<UserGroup> {
-  List<String> names = [
-    'Raman Amin',
-    'Ramnaujan Jones',
-    'Rajesh Bob',
-    'James Johnson',
-    'John',
-    'Rahim',
-    'Ram',
-    'Chris',
-    'Matthew'
+  List<Map<String, dynamic>> groups = [
+    {
+      'groupName': "Group 1",
+      'students': ['Student A', 'Student B', 'Student C'],
+    },
+    {
+      'groupName': 'Group 2',
+      'students': ['Student D', 'Student E'],
+    },
+    {
+      'groupName': 'Group 3',
+      'students': ['Student F', 'Student G', 'Student H'],
+    },
   ];
 
   Widget groupCards(BuildContext context, index) {
@@ -66,18 +69,7 @@ class _UserGroupState extends State<UserGroup> {
           const SizedBox(
             height: 20,
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: names
-                .map((name) => Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 17.0,
-                        color: Color.fromARGB(204, 255, 255, 255),
-                      ),
-                    ))
-                .toList(),
-          ),
+          loadStudentsInGroup(context, index),
           const SizedBox(
             height: 20,
           ),
@@ -118,6 +110,24 @@ class _UserGroupState extends State<UserGroup> {
     );
   }
 
+  Widget loadStudentsInGroup(BuildContext context, index) {
+    var currentGroup = groups[index];
+    List<String> students = List<String>.from(currentGroup['students']);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: students
+          .map((student) => Text(
+                student,
+                style: const TextStyle(
+                  fontSize: 17.0,
+                  color: Color.fromARGB(204, 255, 255, 255),
+                ),
+              ))
+          .toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,7 +157,7 @@ class _UserGroupState extends State<UserGroup> {
             thickness: 0,
           );
         },
-        itemCount: 5,
+        itemCount: groups.length,
       ),
       floatingActionButton: const FloatingActionButton(
         onPressed: null,
