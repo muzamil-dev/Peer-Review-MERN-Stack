@@ -23,6 +23,9 @@ class UserGroup extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xff004080),
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
         title: const Text(
           'Groups',
           style: TextStyle(
