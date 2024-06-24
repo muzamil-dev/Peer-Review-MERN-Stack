@@ -11,21 +11,117 @@ class UserGroup extends StatefulWidget {
 }
 
 class _UserGroupState extends State<UserGroup> {
+  List<String> names = [
+    'Raman Amin',
+    'Ramnaujan Jones',
+    'Rajesh Bob',
+    'James Johnson',
+    'John',
+    'Rahim',
+    'Ram',
+    'Chris',
+    'Matthew'
+  ];
+
+  Widget groupCards(BuildContext context, index) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff004080),
+        border: Border.all(
+          width: 2,
+          color: Colors.black,
+        ),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            blurRadius: 4,
+            offset: const Offset(0, 8), // changes position of shadow
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(18.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Group #${index + 1}",
+                style: const TextStyle(
+                  fontSize: 30.0,
+                  color: Color.fromARGB(204, 255, 255, 255),
+                ),
+              ),
+              const Text(
+                "1/3",
+                style: TextStyle(
+                  fontSize: 17.0,
+                  color: Color.fromARGB(204, 255, 255, 255),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: names
+                .map((name) => Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 17.0,
+                        color: Color.fromARGB(204, 255, 255, 255),
+                      ),
+                    ))
+                .toList(),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                  onPressed: null,
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                    child: Text("Join",
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
+                  )),
+              const SizedBox(
+                width: 20,
+              ),
+              TextButton(
+                  onPressed: null,
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                    child: Text("Leave",
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
+                  )),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    var arrNames = [
-      'Raman Amin',
-      'Ramnaujan Jones',
-      'Rajesh Bob',
-      'James Johnson',
-      'John',
-      'Rahim',
-      'Ram',
-      'Chris',
-      'Matthew'
-    ];
-
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         backgroundColor: const Color(0xff004080),
         iconTheme: const IconThemeData(
@@ -51,7 +147,7 @@ class _UserGroupState extends State<UserGroup> {
             thickness: 0,
           );
         },
-        itemCount: arrNames.length,
+        itemCount: 5,
       ),
       floatingActionButton: const FloatingActionButton(
         onPressed: null,
@@ -63,112 +159,4 @@ class _UserGroupState extends State<UserGroup> {
       ),
     );
   }
-}
-
-Widget groupCards(BuildContext context, index) {
-  return Container(
-    decoration: BoxDecoration(
-      color: const Color(0xff004080),
-      border: Border.all(
-        width: 2,
-        color: Colors.black,
-      ),
-      borderRadius: BorderRadius.circular(10),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.5),
-          blurRadius: 4,
-          offset: const Offset(0, 8), // changes position of shadow
-        ),
-      ],
-    ),
-    padding: const EdgeInsets.all(18.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Group #${index + 1}",
-              style: const TextStyle(
-                fontSize: 30.0,
-                color: Color.fromARGB(204, 255, 255, 255),
-              ),
-            ),
-            const Text(
-              "1/3",
-              style: TextStyle(
-                fontSize: 17.0,
-                color: Color.fromARGB(204, 255, 255, 255),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        const Column(
-          children: [
-            Text(
-              "Kazi Amin",
-              style: TextStyle(
-                fontSize: 17.0,
-                color: Color.fromARGB(204, 255, 255, 255),
-              ),
-            ),
-            Text(
-              "Bob Jones",
-              style: TextStyle(
-                fontSize: 17.0,
-                color: Color.fromARGB(204, 255, 255, 255),
-              ),
-            ),
-            Text(
-              "Chris Paul",
-              style: TextStyle(
-                fontSize: 17.0,
-                color: Color.fromARGB(204, 255, 255, 255),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-                onPressed: null,
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.green,
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                  child: Text("Join",
-                      style: TextStyle(
-                        color: Colors.white,
-                      )),
-                )),
-            const SizedBox(
-              width: 20,
-            ),
-            TextButton(
-                onPressed: null,
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.red,
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                  child: Text("Leave",
-                      style: TextStyle(
-                        color: Colors.white,
-                      )),
-                )),
-          ],
-        ),
-      ],
-    ),
-  );
 }
