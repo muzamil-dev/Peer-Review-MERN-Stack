@@ -55,7 +55,8 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  void showMoveStudentDialog(int fromGroupIndex, int studentIndex) {
+  void showMoveStudentDialog(
+      String userId, int fromGroupIndex, int studentIndex) {
     showDialog(
       context: context,
       builder: (context) {
@@ -70,7 +71,11 @@ class _AdminGroupState extends State<AdminGroup> {
                   (entry) => ListTile(
                     title: Text(entry.value.name),
                     onTap: () {
-                      moveStudent(fromGroupIndex, studentIndex, entry.key);
+                      moveGroup(
+                        userId, // Hardcoded user ID for demonstration
+                        currentGroups[fromGroupIndex].groupId,
+                        entry.value.groupId,
+                      );
                       Navigator.of(context).pop();
                     },
                   ),
@@ -82,8 +87,53 @@ class _AdminGroupState extends State<AdminGroup> {
     );
   }
 
-  void moveStudent(int fromGroupIndex, int studentIndex, int toGroupIndex) {
-    // Implement move student functionality here
+  Future<void> moveGroup(
+      String userId, String fromGroupId, String toGroupId) async {
+    final leaveUrl = Uri.parse('http://10.0.2.2:5000/groups/leave');
+    final joinUrl = Uri.parse('http://10.0.2.2:5000/groups/join');
+
+    try {
+      // Leave the current group
+      final leaveResponse = await http.put(
+        leaveUrl,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'userId': userId,
+          'groupId': fromGroupId,
+        }),
+      );
+
+      if (leaveResponse.statusCode != 200) {
+        print(
+            'Failed to leave group $fromGroupId. Status code: ${leaveResponse.statusCode}');
+        return;
+      }
+
+      // Join the new group
+      final joinResponse = await http.put(
+        joinUrl,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'userId': userId,
+          'groupId': toGroupId,
+        }),
+      );
+
+      if (joinResponse.statusCode != 200) {
+        print(
+            'Failed to join group $toGroupId. Status code: ${joinResponse.statusCode}');
+        return;
+      }
+
+      // Refresh groups after moving
+      fetchGroups(widget.workspaceId);
+    } catch (error) {
+      print('Error moving group: $error');
+    }
   }
 
   void showAddGroupDialog() {
@@ -199,7 +249,11 @@ class _AdminGroupState extends State<AdminGroup> {
                                     icon: Icon(Icons.edit),
                                     onPressed: () {
                                       showMoveStudentDialog(
-                                          groupIndex, studentIndex);
+                                          currentGroups[groupIndex]
+                                              .members[studentIndex]
+                                              .userId,
+                                          groupIndex,
+                                          studentIndex);
                                     },
                                   ),
                                 );
