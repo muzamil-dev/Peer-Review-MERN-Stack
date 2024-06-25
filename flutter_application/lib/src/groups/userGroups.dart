@@ -18,11 +18,15 @@ class _UserGroupState extends State<UserGroup> {
     },
     {
       'groupName': 'Group 2',
-      'students': ['Student D', 'Student E'],
+      'students': ['Student D', 'Student E', 'Student Z'],
     },
     {
       'groupName': 'Group 3',
       'students': ['Student F', 'Student G', 'Student H'],
+    },
+    {
+      'groupName': 'Group 4',
+      'students': [],
     },
   ];
 
