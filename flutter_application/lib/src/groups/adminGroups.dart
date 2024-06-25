@@ -56,7 +56,7 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> deleteGroup(String groupId) async {
-    final deleteUrl = Uri.parse('http://10.0.2.2:5000/groups/$groupId/delete');
+    final deleteUrl = Uri.parse('http://10.0.2.2:5000/groups/$groupId');
 
     try {
       // Make the DELETE request
