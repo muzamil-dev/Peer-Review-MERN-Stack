@@ -6,7 +6,7 @@ import Api from './Api.js';  // Adjust the path to where your Api.js file is loc
 const DashboardPage = () => {
     const [workspaces, setWorkspaces] = useState([]);
     const [newWorkspaceName, setNewWorkspaceName] = useState('');
-    const [newWorkspaceDomain, setNewWorkspaceDomain] = useState('');
+    const [newWorkspaceDomains, setNewWorkspaceDomains] = useState('');
     const [inviteCode, setInviteCode] = useState('');
     const [maxGroupSize, setMaxGroupSize] = useState('');
     const [numGroups, setNumGroups] = useState('');
@@ -27,24 +27,55 @@ const DashboardPage = () => {
         fetchWorkspaces();
     }, []);
 
-    const handleJoinWorkspace = () => {
-        alert('Join workspace logic here');
+    const handleJoinWorkspace = async () => {
+        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+        const response = await Api.Workspace.JoinWorkspace(userId, inviteCode);
+
+        if (response.success) {
+            // Reload the workspaces after joining a new one
+            const fetchWorkspaces = async () => {
+                const response = await Api.Users.getUserWorkspaces(userId);
+                if (response.status === 200) {
+                    setWorkspaces(response.data);
+                } else {
+                    console.error('Failed to fetch workspaces:', response.error);
+                }
+            };
+
+            fetchWorkspaces();
+        } else {
+            console.error('Failed to join workspace:', response.message);
+        }
     };
 
-    const handleAddWorkspace = () => {
-        const newWorkspace = {
-            id: workspaces.length + 1,
-            name: newWorkspaceName,
-            role: 'Admin',
-            maxGroupSize: maxGroupSize,
-            numGroups: numGroups
-        };
-        setWorkspaces([...workspaces, newWorkspace]);
-        setNewWorkspaceName('');
-        setNewWorkspaceDomain('');
-        setInviteCode('');
-        setMaxGroupSize('');
-        setNumGroups('');
+    const handleAddWorkspace = async () => {
+        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+        const domainsArray = newWorkspaceDomains.split(',').map(domain => domain.trim()).filter(domain => domain);
+        const response = await Api.Workspace.CreateWorkspace(
+            newWorkspaceName,
+            userId,
+            domainsArray,
+            maxGroupSize ? parseInt(maxGroupSize, 10) : undefined,
+            numGroups ? parseInt(numGroups, 10) : undefined
+        );
+
+        if (response.status === 201) {
+            const newWorkspace = {
+                workspaceId: response.workspaceId,
+                name: newWorkspaceName,
+                role: 'Admin',
+                maxGroupSize: maxGroupSize,
+                numGroups: numGroups
+            };
+            setWorkspaces([...workspaces, newWorkspace]);
+            setNewWorkspaceName('');
+            setNewWorkspaceDomains('');
+            setInviteCode('');
+            setMaxGroupSize('');
+            setNumGroups('');
+        } else {
+            console.error('Failed to create workspace:', response.message);
+        }
     };
 
     const handleWorkspaceClick = (workspaceId) => {
@@ -125,9 +156,9 @@ const DashboardPage = () => {
                             />
                             <input
                                 type="text"
-                                placeholder="Domain Restriction"
-                                value={newWorkspaceDomain}
-                                onChange={(e) => setNewWorkspaceDomain(e.target.value)}
+                                placeholder="Domain Restrictions (comma separated)"
+                                value={newWorkspaceDomains}
+                                onChange={(e) => setNewWorkspaceDomains(e.target.value)}
                                 className="form-control mb-2"
                             />
                             <input
