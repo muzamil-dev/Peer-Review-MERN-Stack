@@ -49,6 +49,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
       );
 
       if (response.statusCode == 201) {
+        print(json.decode(response.body));
         Navigator.pop(context, true); // Return true to indicate success
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Workspace created successfully')),
