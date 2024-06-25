@@ -27,6 +27,16 @@ const workspaceSchema = mongoose.Schema(
             default: [],
             required: true,
         },
+        groupMemberLimit: {
+            type: Number,
+            default: null,
+            required: false
+        },
+        groupLock: {
+            type: Boolean,
+            default: false,
+            required: true
+        },
         allowedDomains: {
             type: [String],
             default: [],

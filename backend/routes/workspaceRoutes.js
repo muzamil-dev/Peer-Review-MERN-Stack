@@ -234,7 +234,7 @@ router.put("/setInvite", async(req, res) => {
 // Optional: name, allowedDomains, groupMemberLimit
 router.put("/edit", async(req, res) => {
     try{
-        const { workspaceId, name, allowedDomains, groupMemberLimit } = req.body;
+        const { workspaceId, name, allowedDomains, groupMemberLimit, groupLock } = req.body;
         const update = {};
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
@@ -254,6 +254,8 @@ router.put("/edit", async(req, res) => {
             update.allowedDomains = allowedDomains;
         if (groupMemberLimit && groupMemberLimit >= 1)
             update.groupMemberLimit = groupMemberLimit;
+        if (groupLock === false || groupLock === true)
+            update.groupLock = groupLock;
 
         // Update the workspace
         const updated = await Workspace.updateOne(
