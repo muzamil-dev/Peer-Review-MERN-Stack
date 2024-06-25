@@ -215,7 +215,7 @@ class WorkspaceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onTap(workspace.workspaceId, workspace.role),
+      onTap: () => onTap(workspace.workspaceId, 'Student'),
       child: Card(
         margin: const EdgeInsets.all(10),
         child: Padding(

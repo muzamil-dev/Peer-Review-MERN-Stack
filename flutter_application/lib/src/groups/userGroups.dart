@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 
 class UserGroup extends StatefulWidget {
   final String workspaceId;
@@ -11,7 +14,7 @@ class UserGroup extends StatefulWidget {
 }
 
 class _UserGroupState extends State<UserGroup> {
-  List<Map<String, dynamic>> groups = [
+  List<dynamic> groups = [
     {
       'groupName': "Group 1",
       'students': ['Student A', 'Student B', 'Student C'],
@@ -22,13 +25,55 @@ class _UserGroupState extends State<UserGroup> {
     },
     {
       'groupName': 'Group 3',
-      'students': ['Student F', 'Student G', 'Student H'],
+      'students': ['Student F', 'Student G', 'Student I'],
     },
     {
       'groupName': 'Group 4',
       'students': [],
     },
   ];
+
+  // List <dynamic> groups = [];
+
+  @override
+  void initState() {
+    super.initState();
+    retrieveGroupsData(context, '667b32c640553ebab619b4fc');
+  }
+
+  Future<void> retrieveGroupsData(BuildContext context, String workspaceId) async {
+    final url = Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> groupsData = json.decode(response.body);
+        groups = groupsData;
+        print(groups);
+      }
+    }
+    catch (error) {
+      print("Error fetching groups: $error");
+    }
+    
+  }
+
+  Widget loadStudentsInGroup(BuildContext context, index) {
+    var currentGroup = groups[index];
+    List<String> students = List<String>.from(currentGroup['students']);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: students
+          .map((student) => Text(
+                student,
+                style: const TextStyle(
+                  fontSize: 17.0,
+                  color: Color.fromARGB(204, 255, 255, 255),
+                ),
+              ))
+          .toList(),
+    );
+  }
 
   Widget groupCards(BuildContext context, index) {
     return Container(
@@ -111,24 +156,6 @@ class _UserGroupState extends State<UserGroup> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget loadStudentsInGroup(BuildContext context, index) {
-    var currentGroup = groups[index];
-    List<String> students = List<String>.from(currentGroup['students']);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: students
-          .map((student) => Text(
-                student,
-                style: const TextStyle(
-                  fontSize: 17.0,
-                  color: Color.fromARGB(204, 255, 255, 255),
-                ),
-              ))
-          .toList(),
     );
   }
 
