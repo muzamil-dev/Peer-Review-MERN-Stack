@@ -5,6 +5,9 @@
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
+.buttoon{
+  margin-top: 10px;
+}
 html,body{
   display: grid;
   height: 100%;
@@ -171,6 +174,10 @@ form .field input:focus::placeholder{
 }
 .signup-link{
   color: #004080;
+}
+
+form .btn{
+  --bs-btn-padding-x: 0. !important;
 }
 
 form .btn{
