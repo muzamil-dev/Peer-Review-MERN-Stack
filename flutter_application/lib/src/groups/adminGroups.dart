@@ -104,7 +104,7 @@ class _AdminGroupState extends State<AdminGroup> {
               onPressed: () async {
                 final groupName = groupNameController.text;
                 if (groupName.isNotEmpty) {
-                  await addGroup(groupName);
+                  await addGroup();
                   Navigator.of(context).pop();
                 }
               },
@@ -116,34 +116,37 @@ class _AdminGroupState extends State<AdminGroup> {
     );
   }
 
-  Future<void> addGroup(String groupName) async {
-    final addGroupUrl = Uri.parse('http://10.0.2.2:5000/groups/create');
+  Future<void> addGroup() async {
+    // Define the URL
+    final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
 
     try {
+      // Make the POST request
       final response = await http.post(
-        addGroupUrl,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'name': groupName,
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
           'workspaceId': widget.workspaceId,
-          'userIds': [],
+          'userId': '6671c8362ffea49f3018bf61',
         }),
       );
 
+      // Check the response status
       if (response.statusCode == 201) {
-        final newGroup = Group.fromJson(json.decode(response.body));
-        setState(() {
-          currentGroups.add(newGroup);
-        });
-        print('Group added successfully: $newGroup');
+        // Group added successfully
+        print('Group added successfully');
       } else {
+        // Error occurred
         print('Failed to add group. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        throw Exception('Failed to add group');
       }
     } catch (error) {
+      // Exception occurred
       print('Error adding group: $error');
     }
+
+    fetchGroups(widget.workspaceId);
   }
 
   @override
@@ -212,7 +215,9 @@ class _AdminGroupState extends State<AdminGroup> {
               ),
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: showAddGroupDialog,
+        onPressed: () async {
+          await addGroup();
+        },
         child: Icon(Icons.add),
         backgroundColor: const Color(0xFF004080),
       ),
