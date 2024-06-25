@@ -5,6 +5,7 @@ import LoginPage from './LoginPage';
 import DashboardPage from './DashboardPage';
 import Example from './ApiExamples';
 import GroupsPage from './GroupsPage';  // Import the GroupsPage component
+import GroupsPageAdmin from './GroupsPageAdmin';  // Import the GroupsPageAdmin component
 import ApiExamples from './ApiExamples';
 
 function App() {
@@ -16,7 +17,8 @@ function App() {
                     <Route path="/DashboardPage" element={<DashboardPage />} />
                     <Route path="/ApiExamples" element={<Example />} />
                     <Route path="/groups/:workspaceId" element={<GroupsPage />} />  // Add the route for GroupsPage
-                    <Route path="/ApiExamples" element={<ApiExamples/>} />
+                    <Route path="/groupsAdmin/:workspaceId" element={<GroupsPageAdmin />} />  // Add the route for GroupsPageAdmin
+                    <Route path="/ApiExamples" element={<ApiExamples />} />
                 </Routes>
             </div>
         </Router>
