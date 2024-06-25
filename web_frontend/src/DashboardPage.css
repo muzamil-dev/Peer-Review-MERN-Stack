@@ -7,11 +7,13 @@
 } */
 
 .header-large {
-    font-size: 75px;
-    font-weight: bold;
-    background-color: white;
-    width: 100%;
-    text-align: center;
+    font-size: 5vh !important;
+    font-weight: bold !important;
+    width: 100% !important;
+    text-align: center !important;
+    /*background color transparent*/
+    background-color: rgba(255, 255, 255, 0) !important;
+    color: white !important;
 }
 
 .dashboard {
@@ -21,25 +23,31 @@
     flex-direction: column;
     align-items: center;
     overflow-y: auto;
-    background-color: white;
     padding: 50px;
     border-radius: 20px;
 }
 
+h2{
+    font-size: 2.5vh;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
 .main-container {
-    display: flex;
-    width: 100%;
+    display: flex !important; 
+    width: 100% !important;
     /* max-width: 1200px; */
-    height: 100%;
-    justify-content: space-between;
-    background-color: white;
-    border-radius: 10px;
-    overflow-y: auto;
+    height: 100% !important;
+    justify-content: space-between !important;
+    background-color: white !important;
+    border-radius: 10px !important;
+    overflow-y: auto !important;
 }
 
 .workspace-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjust min width as needed */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    /* Adjust min width as needed */
     gap: 20px;
     width: 100%;
     height: 100%;
@@ -56,6 +64,7 @@
     transition: box-shadow 0.3s;
     margin-bottom: 10px;
     color: black;
+    height: 20vh;
 }
 
 .workspace-card:hover {
@@ -63,15 +72,20 @@
 }
 
 .workspace-actions {
-    width: 40%;
+    width: 100%;
     height: 100%;
     overflow-y: auto;
     padding: 20px;
-    background-color: white;
     /* border-radius: 8px; */
     /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
     color: black;
     border-radius: 10px;
+}
+
+@media (max-width: 1100px) {
+    .header-large {
+        font-size: 4vh !important; 
+    }
 }
 
 @media (max-width: 768px) {
@@ -80,20 +94,23 @@
         align-items: center;
     }
 
-    .workspace-cards, .workspace-actions {
+    .header-large {
+        font-size: 3.5vh !important; 
+    }
+
+    .workspace-cards,
+    .workspace-actions {
         width: 100%;
-        overflow-y: visible; /* Remove individual scroll */
+        overflow-y: visible;
+        /* Remove individual scroll */
     }
 
     .dashboard {
-        overflow-y: auto; /* Add scroll to parent container */
-        padding: 5px;
+        overflow-y: auto;
+        /* Add scroll to parent container */
+        /*padding: 5px; NO NEED FOR THIS */ 
     }
-
-    .header-large {
-        font-size: 50px;
-    }
-} 
+}
 
 .workspace-actions h2 {
     margin-top: 0;
@@ -109,14 +126,15 @@
 }
 
 .workspace-actions button {
-    width: 100%;
+    width: 20%;
     margin-bottom: 10px;
     align-items: center;
     padding: 10px;
+    margin: 5px;
     border: none;
     border-radius: 4px;
-    background-color: #007bff;
-    color: white;
+    background-color: white;
+    color: black;
     cursor: pointer;
 }
 
