@@ -9,6 +9,7 @@ import * as Checkers from '../shared/checkers.js';
 import * as Getters from "../shared/getters.js";
 
 import generateCode from '../shared/generateCode.js';
+import verifyJWT from '../middleware/verifyJWT.js';
 import { ReviewAssignment } from '../models/reviewAssignmentModel.js';
 
 const router = express.Router();
@@ -234,10 +235,10 @@ router.put("/setInvite", async(req, res) => {
 // Optional: name, allowedDomains, groupMemberLimit
 router.put("/edit", async(req, res) => {
     try{
-        const { workspaceId, name, allowedDomains, groupMemberLimit, groupLock } = req.body;
+        const { userId, workspaceId, name, allowedDomains, groupMemberLimit, groupLock } = req.body;
         const update = {};
         // Check that the user is the instructor
-        if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
+        if (!await Checkers.checkInstructor(userId, workspaceId))
             return res.status(403).json({ 
                 message: "The provided user is not authorized to edit this workspace" 
             });

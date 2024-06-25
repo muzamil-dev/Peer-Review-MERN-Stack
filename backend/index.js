@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 import { PORT, mongoDBURL } from "./config.js";
 
+import jwtRoutes from "./routes/jwtRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import workspaceRoutes from "./routes/workspaceRoutes.js";
 import groupRoutes from "./routes/groupRoutes.js";
@@ -17,6 +18,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+app.use('/jwt', jwtRoutes);
 app.use('/users', userRoutes);
 app.use('/workspaces', workspaceRoutes);
 app.use('/groups', groupRoutes);
