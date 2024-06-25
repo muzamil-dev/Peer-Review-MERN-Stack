@@ -55,6 +55,36 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
+  Future<void> deleteGroup(String groupId) async {
+    final deleteUrl = Uri.parse('http://10.0.2.2:5000/groups/$groupId/delete');
+
+    try {
+      // Make the DELETE request
+      final response = await http.delete(
+        deleteUrl,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'userId': '6671c8362ffea49f3018bf61',
+        }),
+      );
+
+      // Check the response status
+      if (response.statusCode == 200) {
+        // Group deleted successfully
+        print('Group deleted successfully');
+        fetchGroups(widget.workspaceId); // Refresh groups after deletion
+      } else {
+        // Error occurred
+        print('Failed to delete group. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Exception occurred
+      print('Error deleting group: $error');
+    }
+  }
+
   void showMoveStudentDialog(
       String userId, int fromGroupIndex, int studentIndex) {
     showDialog(
@@ -227,10 +257,21 @@ class _AdminGroupState extends State<AdminGroup> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            currentGroups[groupIndex].name,
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                          Row(
+                            children: [
+                              Text(
+                                currentGroups[groupIndex].name,
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () {
+                                  deleteGroup(
+                                      currentGroups[groupIndex].groupId);
+                                },
+                              )
+                            ],
                           ),
                           SizedBox(height: 10),
                           Column(
