@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class AdminGroup extends StatefulWidget {
   final String workspaceId;
@@ -12,23 +15,48 @@ class AdminGroup extends StatefulWidget {
 }
 
 class _AdminGroupState extends State<AdminGroup> {
-  // Example data for groups and students
-  List<Map<String, dynamic>> groups = [
-    {
-      'groupName': "Group 1",
-      'students': ['Student A', 'Student B', 'Student C'],
-    },
-    {
-      'groupName': 'Group 2',
-      'students': ['Student D', 'Student E'],
-    },
-    {
-      'groupName': 'Group 3',
-      'students': ['Student F', 'Student G', 'Student H'],
-    },
-  ];
+  late Workspace currentWorkspace;
+  List<Group> currentGroups = [];
+  bool isLoading = true;
 
-  void moveStudent(int fromGroupIndex, int studentIndex) {
+  @override
+  void initState() {
+    super.initState();
+    fetchGroups(widget.workspaceId);
+  }
+
+  Future<void> fetchGroups(String workspaceId) async {
+    final groupsUrl =
+        Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
+
+    try {
+      // Fetch groups data
+      final groupsResponse = await http.get(groupsUrl);
+      if (groupsResponse.statusCode != 200) {
+        print(
+            'Failed to load groups. Status code: ${groupsResponse.statusCode}');
+        print('Response body: ${groupsResponse.body}');
+        throw Exception('Failed to load groups');
+      }
+
+      print(groupsResponse.body);
+      final List<dynamic> groupsData = json.decode(groupsResponse.body);
+
+      final groups = groupsData.map((group) => Group.fromJson(group)).toList();
+      print("hello");
+      setState(() {
+        currentGroups = groups;
+        isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching workspace and groups: $error');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void showMoveStudentDialog(int fromGroupIndex, int studentIndex) {
     showDialog(
       context: context,
       builder: (context) {
@@ -36,20 +64,14 @@ class _AdminGroupState extends State<AdminGroup> {
           title: Text('Move Student'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: groups
+            children: currentGroups
                 .asMap()
                 .entries
                 .map(
                   (entry) => ListTile(
-                    title: Text(entry.value['groupName']),
+                    title: Text(entry.value.name),
                     onTap: () {
-                      setState(() {
-                        String student =
-                            groups[fromGroupIndex]['students'][studentIndex];
-                        groups[fromGroupIndex]['students']
-                            .removeAt(studentIndex);
-                        groups[entry.key]['students'].add(student);
-                      });
+                      moveStudent(fromGroupIndex, studentIndex, entry.key);
                       Navigator.of(context).pop();
                     },
                   ),
@@ -59,6 +81,69 @@ class _AdminGroupState extends State<AdminGroup> {
         );
       },
     );
+  }
+
+  void moveStudent(int fromGroupIndex, int studentIndex, int toGroupIndex) {
+    // Implement move student functionality here
+  }
+
+  void showAddGroupDialog() {
+    TextEditingController groupNameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add New Group'),
+          content: TextField(
+            controller: groupNameController,
+            decoration: InputDecoration(hintText: 'Group Name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                final groupName = groupNameController.text;
+                if (groupName.isNotEmpty) {
+                  await addGroup(groupName);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> addGroup(String groupName) async {
+    final addGroupUrl = Uri.parse('http://10.0.2.2:5000/groups/create');
+
+    try {
+      final response = await http.post(
+        addGroupUrl,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'name': groupName,
+          'workspaceId': widget.workspaceId,
+          'userIds': [],
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        final newGroup = Group.fromJson(json.decode(response.body));
+        setState(() {
+          currentGroups.add(newGroup);
+        });
+        print('Group added successfully: $newGroup');
+      } else {
+        print('Failed to add group. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to add group');
+      }
+    } catch (error) {
+      print('Error adding group: $error');
+    }
   }
 
   @override
@@ -76,49 +161,128 @@ class _AdminGroupState extends State<AdminGroup> {
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
       ),
-      body: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: Expanded(
-          child: ListView.builder(
-            itemCount: groups.length,
-            itemBuilder: (context, groupIndex) {
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        groups[groupIndex]['groupName'],
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 10),
-                      Column(
-                        children:
-                            List.generate(groups[groupIndex]['students'].length,
-                                (studentIndex) {
-                          return ListTile(
-                            title: Text(
-                                groups[groupIndex]['students'][studentIndex]),
-                            trailing: IconButton(
-                              icon: Icon(Icons.edit),
-                              onPressed: () {
-                                moveStudent(groupIndex, studentIndex);
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Container(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView.builder(
+                itemCount: currentGroups.length,
+                itemBuilder: (context, groupIndex) {
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            currentGroups[groupIndex].name,
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 10),
+                          Column(
+                            children: List.generate(
+                              currentGroups[groupIndex].members.length,
+                              (studentIndex) {
+                                return ListTile(
+                                  title: Text(currentGroups[groupIndex]
+                                          .members[studentIndex]
+                                          .firstName +
+                                      ' ' +
+                                      currentGroups[groupIndex]
+                                          .members[studentIndex]
+                                          .lastName),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.edit),
+                                    onPressed: () {
+                                      showMoveStudentDialog(
+                                          groupIndex, studentIndex);
+                                    },
+                                  ),
+                                );
                               },
                             ),
-                          );
-                        }),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
+                    ),
+                  );
+                },
+              ),
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: showAddGroupDialog,
+        child: Icon(Icons.add),
+        backgroundColor: const Color(0xFF004080),
       ),
+    );
+  }
+}
+
+class Workspace {
+  final String workspaceId;
+  final String name;
+  final String role;
+
+  Workspace(
+      {required this.workspaceId, required this.name, required this.role});
+
+  factory Workspace.fromJson(Map<String, dynamic> json) {
+    return Workspace(
+      workspaceId: json['workspaceId'] ?? 'No ID',
+      name: json['name'] ?? 'No name',
+      role: json['role'] ?? 'No role',
+    );
+  }
+}
+
+class Member {
+  String memberId;
+  String firstName;
+  String lastName;
+  String email;
+
+  Member({
+    required this.memberId,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+  });
+
+  factory Member.fromJson(Map<String, dynamic> json) {
+    return Member(
+      memberId: json['memberId'],
+      firstName: json['firstName'],
+      lastName: json['lastName'],
+      email: json['email'],
+    );
+  }
+}
+
+class Group {
+  String name;
+  String workspaceId;
+  String groupId;
+  List<Member> members;
+
+  Group({
+    required this.name,
+    required this.workspaceId,
+    required this.groupId,
+    required this.members,
+  });
+
+  factory Group.fromJson(Map<String, dynamic> json) {
+    List<dynamic> membersData = json['members'];
+    List<Member> members =
+        membersData.map((member) => Member.fromJson(member)).toList();
+
+    return Group(
+      name: json['name'],
+      workspaceId: json['workspaceId'],
+      groupId: json['groupId'],
+      members: members,
     );
   }
 }
