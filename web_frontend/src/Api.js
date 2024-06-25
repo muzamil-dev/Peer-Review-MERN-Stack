@@ -122,6 +122,23 @@ export default {
             };
         }, /**/
 
+        getUserWorkspaces: async (userId) => {
+            try {
+                const response = await axios.get(getUrl(USERS, `${userId}/workspaces`, ''));
+                return {
+                    status: response.status,
+                    data: response.data,
+                    error: null
+                };
+            } catch (err) {
+                console.error(err);
+                return {
+                    status: err.response ? err.response.status : 503,
+                    data: null,
+                    error: err.message || "Service Unavailable"
+                };
+            }
+        },
 
         /**
          * Edit the account with the corresponding id
@@ -257,16 +274,21 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], error: string }>} The list of groups
          */
         GetGroups: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/groups'))
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
-            return {
-                status: response.status,
-                data: response.data,
-                error: response.message
-            };
+            try {
+                const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/groups'));
+                return {
+                    status: response.status,
+                    data: response.data,
+                    error: null
+                };
+            } catch (err) {
+                console.error(err);
+                return {
+                    status: err.response ? err.response.status : 503,
+                    data: null,
+                    error: err.message || "Service Unavailable"
+                };
+            }
         },
         /**
          * Creates a new workspace

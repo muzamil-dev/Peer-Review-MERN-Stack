@@ -1,47 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './DashboardPage.css';
+import Api from './Api.js';  // Adjust the path to where your Api.js file is located
 
 const DashboardPage = () => {
-    const [workspaces, setWorkspaces] = useState([
-        { id: 1, name: 'Workspace 1', role: 'Admin' },
-        { id: 2, name: 'Workspace 2', role: 'User' },
-        { id: 3, name: 'Workspace 3', role: 'User' },
-        { id: 4, name: 'Workspace 4', role: 'User' },
-        { id: 5, name: 'Workspace 5', role: 'User' },
-        { id: 6, name: 'Workspace 6', role: 'User' },
-        // { id: 7, name: 'Workspace 7', role: 'User' },
-        // { id: 8, name: 'Workspace 8', role: 'Admin' },
-        // { id: 9, name: 'Workspace 9', role: 'User' },
-        // { id: 10, name: 'Workspace 10', role: 'User' },
-        // { id: 11, name: 'Workspace 11', role: 'User' },
-        // { id: 12, name: 'Workspace 12', role: 'User' },
-        // { id: 13, name: 'Workspace 13', role: 'User' },
-        // { id: 14, name: 'Workspace 14', role: 'Admin' },
-        // { id: 15, name: 'Workspace 15', role: 'User' },
-        // { id: 16, name: 'Workspace 16', role: 'User' },
-        // { id: 17, name: 'Workspace 17', role: 'User' },
-        // { id: 18, name: 'Workspace 18', role: 'User' },
-        // { id: 19, name: 'Workspace 19', role: 'User' },
-        // { id: 20, name: 'Workspace 20', role: 'User' },
-        // { id: 21, name: 'Workspace 21', role: 'Admin' },
-        // { id: 22, name: 'Workspace 22', role: 'User' },
-        // { id: 23, name: 'Workspace 23', role: 'User' },
-        // { id: 24, name: 'Workspace 24', role: 'User' },
-        // { id: 25, name: 'Workspace 25', role: 'User' },
-        // { id: 26, name: 'Workspace 26', role: 'User' },
-        // { id: 27, name: 'Workspace 27', role: 'User' },
-        // { id: 28, name: 'Workspace 28', role: 'Admin' },
-        // { id: 29, name: 'Workspace 29', role: 'User' },
-        // { id: 30, name: 'Workspace 30', role: 'User' }
-    ]);
-
+    const [workspaces, setWorkspaces] = useState([]);
     const [newWorkspaceName, setNewWorkspaceName] = useState('');
-    const [newWorkspaceDomain, setNewWorkspaceDomain] = useState(['']);
+    const [newWorkspaceDomain, setNewWorkspaceDomain] = useState('');
     const [inviteCode, setInviteCode] = useState('');
     const [maxGroupSize, setMaxGroupSize] = useState('');
     const [numGroups, setNumGroups] = useState('');
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Replace 'userId' with the actual user ID
+        const userId = '6671c8362ffea49f3018bf61';
+        const fetchWorkspaces = async () => {
+            const response = await Api.Users.getUserWorkspaces(userId);
+            if (response.status === 200) {
+                setWorkspaces(response.data);
+            } else {
+                console.error('Failed to fetch workspaces:', response.error);
+            }
+        };
+
+        fetchWorkspaces();
+    }, []);
 
     const handleJoinWorkspace = () => {
         alert('Join workspace logic here');
@@ -57,30 +41,15 @@ const DashboardPage = () => {
         };
         setWorkspaces([...workspaces, newWorkspace]);
         setNewWorkspaceName('');
-        setNewWorkspaceDomain(['']);
+        setNewWorkspaceDomain('');
         setInviteCode('');
         setMaxGroupSize('');
         setNumGroups('');
     };
 
     const handleWorkspaceClick = (workspaceId) => {
-        const workspace = workspaces.find(w => w.id === workspaceId);
-        //navigate(`/GroupsPage/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
+        const workspace = workspaces.find(w => w.workspaceId === workspaceId);
         navigate(`/groups/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
-    };
-
-    const handleAddDomain = () => {
-        setNewWorkspaceDomain([...newWorkspaceDomain, '']);
-    };
-
-    const handleDomainChange = (index, value) => {
-        const updatedDomains = newWorkspaceDomain.map((domain, i) => (i === index ? value : domain));
-        setNewWorkspaceDomain(updatedDomains);
-    };
-
-    const handleDeleteDomain = (index) => {
-        const updatedDomains = newWorkspaceDomain.filter((_, i) => i !== index);
-        setNewWorkspaceDomain(updatedDomains);
     };
 
     return (
@@ -89,9 +58,13 @@ const DashboardPage = () => {
             <div className="container">
                 <div className="row workspace-cards">
                     {workspaces.map((workspace) => (
-                        <div key={workspace.id} className="workspace-card" onClick={() => handleWorkspaceClick(workspace.id)}>
-                            <h2>{workspace.name}</h2>
-                            <p>Role: {workspace.role}</p>
+                        <div key={workspace.workspaceId} className="col-md-3 mb-4">
+                            <div className="workspace-card card" onClick={() => handleWorkspaceClick(workspace.workspaceId)}>
+                                <div className="card-body">
+                                    <h2 className="card-title">{workspace.name}</h2>
+                                    <p className="card-text">Role: {workspace.role}</p>
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -104,6 +77,7 @@ const DashboardPage = () => {
                     </button>
                 </div>
             </div>
+
             {/* Join Workspace Modal */}
             <div className="modal fade" id="joinWorkspaceModal" tabIndex="-1" aria-labelledby="joinWorkspaceModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
