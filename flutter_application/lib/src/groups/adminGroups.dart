@@ -43,7 +43,6 @@ class _AdminGroupState extends State<AdminGroup> {
       final List<dynamic> groupsData = json.decode(groupsResponse.body);
 
       final groups = groupsData.map((group) => Group.fromJson(group)).toList();
-      print("hello");
       setState(() {
         currentGroups = groups;
         isLoading = false;
@@ -243,24 +242,21 @@ class Workspace {
 }
 
 class Member {
-  String memberId;
+  String userId;
   String firstName;
   String lastName;
-  String email;
 
   Member({
-    required this.memberId,
+    required this.userId,
     required this.firstName,
     required this.lastName,
-    required this.email,
   });
 
   factory Member.fromJson(Map<String, dynamic> json) {
     return Member(
-      memberId: json['memberId'],
+      userId: json['userId'],
       firstName: json['firstName'],
       lastName: json['lastName'],
-      email: json['email'],
     );
   }
 }
