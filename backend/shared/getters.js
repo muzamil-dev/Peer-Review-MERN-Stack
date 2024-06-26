@@ -29,7 +29,6 @@ export async function getGroupData(groupId){
     // Return formatted json
     return({
         name: group.name,
-        workspaceId: group.workspaceId,
         groupId: group._id,
         members
     });
