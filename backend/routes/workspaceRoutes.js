@@ -52,7 +52,8 @@ router.get("/:workspaceId/groups", async(req, res) => {
     try{
         // Get the workspace
         const { workspaceId } = req.params;
-        const workspace = await Workspace.findById(workspaceId);
+        const workspace = await Workspace.findById(workspaceId)
+        .select('groupMemberLimit');
         // Check that the workspace exists
         if (!workspace)
             return res.status(404).json({ 
@@ -62,7 +63,11 @@ router.get("/:workspaceId/groups", async(req, res) => {
         // Get all groups from workspace
         const groups = await Group.find({ workspaceId }).select('_id');
         const groupDataArray = await Promise.all(groups.map(group => Getters.getGroupData(group._id)));
-        return res.json(groupDataArray);
+        const groupObj = {
+            groupMemberLimit: workspace.groupMemberLimit,
+            groups: groupDataArray
+        };
+        return res.json(groupObj);
     }
     catch(err){
         console.log(err.message);
@@ -81,7 +86,7 @@ router.get('/:workspaceId/name', async (req, res) => {
       res.json({ name: workspace.name });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: 'Server error' });
+      res.status(500).json({ message: err.message });
     }
 });
 
@@ -415,8 +420,7 @@ router.get("/:workspaceId/students", async (req, res) => {
                 userId: user.userId._id,
                 email: user.userId.email,
                 firstName: user.userId.firstName,
-                lastName: user.userId.lastName,
-                role: user.role
+                lastName: user.userId.lastName
             }));
 
         //get groups in workspace
@@ -430,7 +434,7 @@ router.get("/:workspaceId/students", async (req, res) => {
 
         // Add group information to students
         const studentsWithGroups = allStudents.map(student => {
-            const groupInfo = groupMap[student.userId.toString()] || { groupId: '', groupName: '' };
+            const groupInfo = groupMap[student.userId.toString()] || { groupId: null, groupName: null };
             return {
                 ...student,
                 groupId: groupInfo.groupId,

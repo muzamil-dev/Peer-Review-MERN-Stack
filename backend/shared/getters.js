@@ -24,7 +24,6 @@ export async function getGroupData(groupId){
     const members = users.map(user => ({
         userId: user._id,
         firstName: user.firstName,
-        middleName: user.middleName,
         lastName: user.lastName
     }));
     // Return formatted json
