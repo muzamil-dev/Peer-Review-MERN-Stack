@@ -14,7 +14,6 @@ class UserGroup extends StatefulWidget {
 
 class _UserGroupState extends State<UserGroup> {
   List<dynamic> groups = [];
-  String userFullName = "Kazi Amin";
   String userID = '667a2e4a8f5ce812352bba6f';
 
   @override
@@ -32,7 +31,6 @@ class _UserGroupState extends State<UserGroup> {
         setState(() {
           groups = json.decode(response.body);
         });
-        print(groups);
       }
     } catch (error) {
       print("Error fetching groups: $error");
@@ -54,8 +52,7 @@ class _UserGroupState extends State<UserGroup> {
       );
       if (response.statusCode == 200) {
         setState(() {
-          final responseData = json.decode(response.body);
-          print('Join Group successful: $responseData');
+          getGroupsData(context, widget.workspaceId);
         });
       } else {
         final errorData = json.decode(response.body);
@@ -91,10 +88,8 @@ class _UserGroupState extends State<UserGroup> {
         }),
       );
       if (response.statusCode == 200) {
-        setState(() {
-          final responseData = json.decode(response.body);
-          print('Leave Group successful: $responseData');
-        });
+        final responseData = json.decode(response.body);
+        print('Leave Group successful: $responseData');
       } else {
         final errorData = json.decode(response.body);
         print(
@@ -201,7 +196,7 @@ class _UserGroupState extends State<UserGroup> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextButton(
-                  onPressed: () async{
+                  onPressed: () async {
                     await leaveGroup(context);
                     await joinGroup(context, groupID);
                   },
