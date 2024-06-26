@@ -5,9 +5,35 @@ import './DashboardPage.css';
 const DashboardPage = () => {
     const [workspaces, setWorkspaces] = useState([
         { id: 1, name: 'Workspace 1', role: 'Admin' },
-        { id: 2, name: 'Workspace 2', role: 'User' },
-        { id: 3, name: 'Workspace 3', role: 'User' },
-        { id: 4, name: 'Workspace 4', role: 'Admin' }
+        // { id: 2, name: 'Workspace 2', role: 'User' },
+        // { id: 3, name: 'Workspace 3', role: 'User' },
+        // { id: 4, name: 'Workspace 4', role: 'User' },
+        // { id: 5, name: 'Workspace 5', role: 'User' },
+        // { id: 6, name: 'Workspace 6', role: 'User' },
+        // { id: 7, name: 'Workspace 7', role: 'User' },
+        // { id: 8, name: 'Workspace 8', role: 'Admin' },
+        // { id: 9, name: 'Workspace 9', role: 'User' },
+        // { id: 10, name: 'Workspace 10', role: 'User' },
+        // { id: 11, name: 'Workspace 11', role: 'User' },
+        // { id: 12, name: 'Workspace 12', role: 'User' },
+        // { id: 13, name: 'Workspace 13', role: 'User' },
+        // { id: 14, name: 'Workspace 14', role: 'Admin' },
+        // { id: 15, name: 'Workspace 15', role: 'User' },
+        // { id: 16, name: 'Workspace 16', role: 'User' },
+        // { id: 17, name: 'Workspace 17', role: 'User' },
+        // { id: 18, name: 'Workspace 18', role: 'User' },
+        // { id: 19, name: 'Workspace 19', role: 'User' },
+        // { id: 20, name: 'Workspace 20', role: 'User' },
+        // { id: 21, name: 'Workspace 21', role: 'Admin' },
+        // { id: 22, name: 'Workspace 22', role: 'User' },
+        // { id: 23, name: 'Workspace 23', role: 'User' },
+        // { id: 24, name: 'Workspace 24', role: 'User' },
+        // { id: 25, name: 'Workspace 25', role: 'User' },
+        // { id: 26, name: 'Workspace 26', role: 'User' },
+        // { id: 27, name: 'Workspace 27', role: 'User' },
+        // { id: 28, name: 'Workspace 28', role: 'Admin' },
+        // { id: 29, name: 'Workspace 29', role: 'User' },
+        // { id: 30, name: 'Workspace 30', role: 'User' }
     ]);
 
     const [newWorkspaceName, setNewWorkspaceName] = useState('');
@@ -26,6 +52,8 @@ const DashboardPage = () => {
             id: workspaces.length + 1,
             name: newWorkspaceName,
             role: 'Admin',
+            maxGroupSize: maxGroupSize,
+            numGroups: numGroups
         };
         setWorkspaces([...workspaces, newWorkspace]);
         setNewWorkspaceName('');
@@ -36,7 +64,9 @@ const DashboardPage = () => {
     };
 
     const handleWorkspaceClick = (workspaceId) => {
-        navigate(`/GroupPage/${workspaceId}`);
+        const workspace = workspaces.find(w => w.id === workspaceId);
+        //navigate(`/GroupsPage/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
+        navigate(`/groups/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
     };
 
     const handleAddDomain = () => {
@@ -55,7 +85,7 @@ const DashboardPage = () => {
 
     return (
         <div className="dashboard">
-            <h1 className="text-center mb-4">Dashboard</h1>
+            <h1 className="header-large">Workspaces</h1>
             <div className="main-container">
                 <div className="workspace-cards">
                     {workspaces.map((workspace) => (
@@ -66,7 +96,6 @@ const DashboardPage = () => {
                     ))}
                 </div>
                 <div className="workspace-actions">
-
                     <h2>Join Workspace</h2>
                     <input
                         type="text"
@@ -76,11 +105,11 @@ const DashboardPage = () => {
                         className="form-control mb-2 transparent-input"
                     />
                     <button onClick={handleJoinWorkspace} className="btn btn-primary mb-4">Join</button>
-
+                    <h1>OR</h1>
                     <h2>Create Workspace</h2>
                     <input
                         type="text"
-                        placeholder="Workspace name"
+                        placeholder="ex. COP 4331c"
                         value={newWorkspaceName}
                         onChange={(e) => setNewWorkspaceName(e.target.value)}
                         className="form-control mb-2 transparent-input"
@@ -90,7 +119,7 @@ const DashboardPage = () => {
                         <div key={index} className="domain-restriction mb-2">
                             <input
                                 type="text"
-                                placeholder="Domain restriction"
+                                placeholder="ex. ucf.edu"
                                 value={domain}
                                 onChange={(e) => handleDomainChange(index, e.target.value)}
                                 className="form-control d-inline-block transparent-input"
@@ -103,14 +132,14 @@ const DashboardPage = () => {
 
                     <input
                         type="text"
-                        placeholder="Max group size"
+                        placeholder="Max Group Size"
                         value={maxGroupSize}
                         onChange={(e) => setMaxGroupSize(e.target.value)}
                         className="form-control mb-2 transparent-input"
                     />
                     <input
                         type="text"
-                        placeholder="Number of groups"
+                        placeholder="Number of Groups"
                         value={numGroups}
                         onChange={(e) => setNumGroups(e.target.value)}
                         className="form-control mb-2 transparent-input"

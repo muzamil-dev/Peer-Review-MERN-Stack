@@ -1,0 +1,125 @@
+.groups-page {
+    width: 75vw;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    background-color: white;
+    padding: 50px;
+    border-radius: 20px;
+    position: relative;
+}
+
+.top-right-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.top-right-container .btn-primary {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.header-large {
+    font-size: 75px;
+    font-weight: bold;
+    background-color: white;
+    width: 100%;
+    text-align: center;
+}
+
+.main-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjust min width as needed */
+    gap: 20px;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+}
+
+.group-card {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 8px;
+    padding: 16px;
+    transition: box-shadow 0.3s;
+    color: black;
+}
+
+.group-card h2 {
+    margin-top: 0;
+}
+
+.group-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.group-card li {
+    margin-bottom: 5px;
+}
+
+.group-card .buttons-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.group-card button {
+    width: 30%; /* Reduce width of buttons */
+    padding: 5px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+}
+
+.group-card .small-btn {
+    width: 30%; /* Reduce width of buttons */
+    padding: 5px;
+}
+
+.group-card .btn-success {
+    background-color: #28a745;
+}
+
+.group-card .btn-success:hover {
+    background-color: #218838;
+}
+
+.group-card .btn-danger {
+    background-color: #dc3545;
+}
+
+.group-card .btn-danger:hover {
+    background-color: #c82333;
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .group-card {
+        width: 100%;
+        overflow-y: visible; /* Remove individual scroll */
+    }
+
+    .groups-page {
+        overflow-y: auto; /* Add scroll to parent container */
+        padding: 5px;
+    }
+
+    .header-large {
+        font-size: 50px;
+    }
+}

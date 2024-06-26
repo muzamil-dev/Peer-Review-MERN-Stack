@@ -190,7 +190,7 @@ router.put("/leave", async(req, res) => {
             Removers.removeWorkspaceFromUser(userId, workspaceId)
         ]);
 
-        res.json({ message: "Workspace left successfully" });
+        res.status(200).json({ message: "Workspace left successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -234,7 +234,7 @@ router.put("/setInvite", async(req, res) => {
 // Optional: name, allowedDomains, groupMemberLimit
 router.put("/edit", async(req, res) => {
     try{
-        const { workspaceId, name, allowedDomains, groupMemberLimit } = req.body;
+        const { workspaceId, name, allowedDomains, groupMemberLimit, groupLock } = req.body;
         const update = {};
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
@@ -254,12 +254,14 @@ router.put("/edit", async(req, res) => {
             update.allowedDomains = allowedDomains;
         if (groupMemberLimit && groupMemberLimit >= 1)
             update.groupMemberLimit = groupMemberLimit;
+        if (groupLock === false || groupLock === true)
+            update.groupLock = groupLock;
 
         // Update the workspace
         const updated = await Workspace.updateOne(
             { _id: workspaceId }, update 
         );
-        return res.json({ message: "Workspace updated successfully" });
+        return res.status(200).json({ message: "Workspace updated successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -297,7 +299,7 @@ router.put("/setAllowedDomains", async(req, res) => {
                 message: "The provided workspace wasn't found in our database" 
             });
 
-        return res.json({ message: "Allowed Domains set successfully" });
+        return res.status(200).json({ message: "Allowed Domains set successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -342,7 +344,7 @@ router.delete("/:workspaceId/delete", async(req, res) => {
             Workspace.findByIdAndDelete(req.body.workspaceId)
         ]);
         
-        return res.json({ message: "Workspace deleted successfully" });
+        return res.status(200).json({ message: "Workspace deleted successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -369,7 +371,7 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
                 message: "The provided workspace wasn't found in our database" 
             });
 
-        return res.json({ message: "Invite code removed successfully" });
+        return res.status(200).json({ message: "Invite code removed successfully" });
     }
     catch(err){
         console.log(err.message);

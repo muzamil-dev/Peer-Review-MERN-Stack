@@ -33,6 +33,7 @@ html,body{
   width: 50%;
   font-size: 35px;
   font-weight: 600;
+  color: #004080;
   text-align: center;
   transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
 }
@@ -168,6 +169,10 @@ form .field input:focus::placeholder{
 .form-inner form .signup-link a:hover{
   text-decoration: underline;
 }
+.signup-link{
+  color: #004080;
+}
+
 form .btn{
   height: 50px;
   width: 100%;
@@ -242,4 +247,19 @@ form .btn input[type="submit"]{
 
 .field-row .field:last-child {
   margin-left: 2%;
+}
+
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 1.5em;
+  color: #0073e6;
+  z-index: 1000;
 }
