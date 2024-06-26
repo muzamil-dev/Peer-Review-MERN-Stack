@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
 class UserGroup extends StatefulWidget {
   final String workspaceId;
   static const routeName = '/userGroups';
@@ -14,9 +13,9 @@ class UserGroup extends StatefulWidget {
 }
 
 class _UserGroupState extends State<UserGroup> {
-  
-  List<dynamic> groups= [];
+  List<dynamic> groups = [];
   String userFullName = "Kazi Amin";
+  String userID = '667a2e4a8f5ce812352bba6f';
 
   @override
   void initState() {
@@ -24,10 +23,9 @@ class _UserGroupState extends State<UserGroup> {
     getGroupsData(context, widget.workspaceId);
   }
 
-  
-
   Future<void> getGroupsData(BuildContext context, String workspaceId) async {
-    final url = Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
+    final url =
+        Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -36,39 +34,121 @@ class _UserGroupState extends State<UserGroup> {
         });
         print(groups);
       }
-    }
-    catch (error) {
+    } catch (error) {
       print("Error fetching groups: $error");
     }
+  }
+
+  Future<void> joinGroup(BuildContext context, String groupID) async {
+    final url = Uri.parse('http://10.0.2.2:5000/groups/join');
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'groupId': groupID,
+          'userId': userID,
+        }),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          final responseData = json.decode(response.body);
+          print('Join Group successful: $responseData');
+        });
+      } else {
+        final errorData = json.decode(response.body);
+        print(
+            "JoinGroup Failed: ${response.statusCode}, ${errorData['message']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Join Group Failed: \n${errorData['message']}')),
+        );
+      }
+    } catch (error) {
+      print("Error Joining groups: $error");
+    }
+  }
+
+  Future<void> leaveGroup(BuildContext context) async {
+    final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
+    String groupID = getGroupID(userID);
+
+    if (groupID == '') {
+      return;
+    }
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'groupId': groupID,
+          'userId': userID,
+        }),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          final responseData = json.decode(response.body);
+          print('Leave Group successful: $responseData');
+        });
+      } else {
+        final errorData = json.decode(response.body);
+        print(
+            "Leave Group Failed: ${response.statusCode}, ${errorData['message']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Leave Group Failed: \n${errorData['message']}')),
+        );
+      }
+    } catch (error) {
+      print("Error Joining groups: $error");
+    }
+  }
+
+  // Parses through groups list and returns the group which the user is currently in
+  // If the user is not in a group , returns ''
+  String getGroupID(String userID) {
+    for (var group in groups) {
+      var groupID = group['groupId'];
+
+      for (var member in group['members']) {
+        if (member['userId'] == userID) {
+          return groupID;
+        } else {
+          continue;
+        }
+      }
+    }
+    return '';
   }
 
   Widget loadStudentsInGroup(BuildContext context, index) {
     var currentGroup = groups[index];
     List<dynamic> members = List<dynamic>.from(currentGroup['members']);
-    print(members);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: members
-          .map((member) {
-            String fullName = member['firstName'] + ' ' + member['lastName'];
-            return Text(
-                fullName,
-                style: const TextStyle(
-                  fontSize: 17.0,
-                  color: Color.fromARGB(204, 255, 255, 255),
-                ),
-              );
-          }
-            )
-          .toList(),
+      children: members.map((member) {
+        String fullName = member['firstName'] + ' ' + member['lastName'];
+        return Text(
+          fullName,
+          style: const TextStyle(
+            fontSize: 17.0,
+            color: Color.fromARGB(204, 255, 255, 255),
+          ),
+        );
+      }).toList(),
     );
   }
 
   Widget groupCards(BuildContext context, index) {
-
     var currentGroup = groups[index];
     var numMembers = currentGroup['members'].length.toString();
+    var groupID = currentGroup['groupId'];
     var groupName = currentGroup['name'];
 
     return Container(
@@ -121,7 +201,10 @@ class _UserGroupState extends State<UserGroup> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextButton(
-                  onPressed: null,
+                  onPressed: () async{
+                    await leaveGroup(context);
+                    await joinGroup(context, groupID);
+                  },
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.green,
                   ),

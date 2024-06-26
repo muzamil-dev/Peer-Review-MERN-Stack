@@ -70,6 +70,21 @@ router.get("/:workspaceId/groups", async(req, res) => {
     }
 });
 
+//get workspace name
+router.get('/:workspaceId/name', async (req, res) => {
+    try {
+      const { workspaceId } = req.params;
+      const workspace = await Workspace.findById(workspaceId);
+      if (!workspace) {
+        return res.status(404).json({ message: 'Workspace not found' });
+      }
+      res.json({ name: workspace.name });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Creates a new workspace
 // Required: name
 // Optional: numGroups, groupMemberLimit, allowedDomains
@@ -190,7 +205,7 @@ router.put("/leave", async(req, res) => {
             Removers.removeWorkspaceFromUser(userId, workspaceId)
         ]);
 
-        res.status(200).json({ message: "Workspace left successfully" });
+        res.json({ message: "Workspace left successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -205,7 +220,7 @@ router.put("/setInvite", async(req, res) => {
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
             return res.status(403).json({ 
-                message: "The provided user is not authorized to set invite codes" 
+                message: "The provided user is not authorized to delete this workspace" 
             });
         // Set the invite code
         const workspace = await Workspace.updateOne(
@@ -272,7 +287,6 @@ router.put("/edit", async(req, res) => {
 // Sets the allowed domains
 // Reset the domains by passing an empty array
 // Required: workspaceId, allowedDomains (array)
-// deprecated :(
 router.put("/setAllowedDomains", async(req, res) => {
     try{
         // Check that the user is the instructor
@@ -299,7 +313,7 @@ router.put("/setAllowedDomains", async(req, res) => {
                 message: "The provided workspace wasn't found in our database" 
             });
 
-        return res.status(200).json({ message: "Allowed Domains set successfully" });
+        return res.json({ message: "Allowed Domains set successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -375,6 +389,128 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
     }
     catch(err){
         console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+// gets all students in a workspace
+router.get("/:workspaceId/allStudents", async (req, res) => {
+    try {
+        const { workspaceId } = req.params;
+
+        // Fetch workspace and check existence
+        const workspace = await Workspace.findById(workspaceId).populate({
+            path: 'userIds.userId',
+            select: 'email firstName lastName'
+        });
+        if (!workspace) {
+            return res.status(404).json({ message: "The provided workspace was not found in our database" });
+        }
+
+        // Get all student IDs in the workspace, ensuring to handle null values
+        const allStudents = workspace.userIds
+            .filter(user => user.userId && user.role === 'Student') // Filter out null or undefined user references and non-students
+            .map(user => ({
+                userId: user.userId._id,
+                email: user.userId.email,
+                firstName: user.userId.firstName,
+                lastName: user.userId.lastName,
+                role: user.role
+            }));
+
+        //get groups in workspace
+        const groups = await Group.find({ workspaceId });
+        const groupMap = {};
+        groups.forEach(group => {
+            group.userIds.forEach(userId => {
+                groupMap[userId.toString()] = { groupId: group._id, groupName: group.name };
+            });
+        });
+
+        // Add group information to students
+        const studentsWithGroups = allStudents.map(student => {
+            const groupInfo = groupMap[student.userId.toString()] || { groupId: '', groupName: '' };
+            return {
+                ...student,
+                groupId: groupInfo.groupId,
+                groupName: groupInfo.groupName
+            };
+        });
+
+        return res.json(studentsWithGroups);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+//gets ungrouped students in a workspace
+router.get("/:workspaceId/studentsWithoutGroup", async (req, res) => {
+    try {
+        const { workspaceId } = req.params;
+
+        // Fetch workspace and check existence
+        const workspace = await Workspace.findById(workspaceId).populate({
+            path: 'userIds.userId',
+            select: 'email firstName lastName'
+        });
+        if (!workspace) {
+            return res.status(404).json({ message: "The provided workspace was not found in our database" });
+        }
+
+        // Get all student IDs in the workspace, ensuring to handle null values
+        const allStudents = workspace.userIds
+            .filter(user => user.userId && user.role === 'Student') // Filter out null or undefined user references and non-students
+            .map(user => ({
+                userId: user.userId._id,
+                email: user.userId.email,
+                firstName: user.userId.firstName,
+                lastName: user.userId.lastName,
+                role: user.role
+            }));
+
+        // Get all groups in the workspace
+        const groups = await Group.find({ workspaceId });
+        const groupUserIds = groups.reduce((acc, group) => {
+            return acc.concat(group.userIds.map(id => id.toString()));
+        }, []);
+
+        // Find students who are not in any group
+        const studentsWithoutGroup = allStudents.filter(student => !groupUserIds.includes(student.userId.toString()));
+
+        return res.json(studentsWithoutGroup);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+router.put("/:workspaceId/moveStudentToGroup", async (req, res) => {
+    try {
+        const { workspaceId } = req.params;
+        const { studentId, groupId } = req.body;
+
+        // Fetch the group and check existence
+        const group = await Group.findById(groupId);
+        if (!group || group.workspaceId.toString() !== workspaceId) {
+            return res.status(404).json({ message: "The provided group was not found in this workspace" });
+        }
+
+        // Remove student from current group if exists
+        await Group.updateMany(
+            { workspaceId },
+            { $pull: { userIds: studentId } }
+        );
+
+        // Add student to the new group
+        if (!group.userIds.includes(studentId)) {
+            group.userIds.push(studentId);
+            await group.save();
+        }
+
+        return res.json({ message: "Student moved to the group successfully" });
+    } catch (err) {
+        console.error(err.message);
         res.status(500).send({ message: err.message });
     }
 });

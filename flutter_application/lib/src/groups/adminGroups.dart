@@ -7,10 +7,7 @@ class AdminGroup extends StatefulWidget {
   final String workspaceId;
   static const routeName = '/adminGroups';
 
-
   const AdminGroup({super.key, required this.workspaceId});
-
-  static const routeName = "/adminGroup";
 
   @override
   _AdminGroupState createState() => _AdminGroupState();

@@ -9,9 +9,18 @@ import 'package:flutter_application/src/login-signup/login.dart';
 import 'package:flutter_application/src/login-signup/passwordReset.dart';
 import 'package:flutter_application/src/dashboard/CreateWorkspace.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
-import 'package:flutter_application/src/groups/adminGroups.dart';
+import 'dart:io';
+
+class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext? context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+  }
+}
 
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     initialRoute: MyApp.routeName,
