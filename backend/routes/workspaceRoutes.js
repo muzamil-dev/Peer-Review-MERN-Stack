@@ -395,7 +395,7 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
 });
 
 // gets all students in a workspace
-router.get("/:workspaceId/allStudents", async (req, res) => {
+router.get("/:workspaceId/students", async (req, res) => {
     try {
         const { workspaceId } = req.params;
 
@@ -446,7 +446,7 @@ router.get("/:workspaceId/allStudents", async (req, res) => {
 });
 
 //gets ungrouped students in a workspace
-router.get("/:workspaceId/studentsWithoutGroup", async (req, res) => {
+router.get("/:workspaceId/ungrouped", async (req, res) => {
     try {
         const { workspaceId } = req.params;
 

@@ -228,7 +228,7 @@ router.put("/edit", async(req, res) => {
 })
 
 // Delete an assignment
-router.delete("/:assignmentId/delete", async(req, res) => {
+router.delete("/:assignmentId", async(req, res) => {
     try{
         // Get assignmentId
         const { assignmentId } = req.params;
