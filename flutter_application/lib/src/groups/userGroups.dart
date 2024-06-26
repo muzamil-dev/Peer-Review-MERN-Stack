@@ -14,40 +14,23 @@ class UserGroup extends StatefulWidget {
 }
 
 class _UserGroupState extends State<UserGroup> {
-  List<dynamic> groups = [
-    {
-      'groupName': "Group 1",
-      'students': ['Student A', 'Student B', 'Student C'],
-    },
-    {
-      'groupName': 'Group 2',
-      'students': ['Student D', 'Student E', 'Student Z'],
-    },
-    {
-      'groupName': 'Group 3',
-      'students': ['Student F', 'Student G', 'Student I'],
-    },
-    {
-      'groupName': 'Group 4',
-      'students': [],
-    },
-  ];
-
-  // List <dynamic> groups = [];
+  
+  List<dynamic> groups= [];
 
   @override
   void initState() {
     super.initState();
-    retrieveGroupsData(context, '667b32c640553ebab619b4fc');
+    getGroupsData(context, '667a22ad8f5ce812352bba01');
   }
 
-  Future<void> retrieveGroupsData(BuildContext context, String workspaceId) async {
+  Future<void> getGroupsData(BuildContext context, String workspaceId) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
-        final List<dynamic> groupsData = json.decode(response.body);
-        groups = groupsData;
+        setState(() {
+          groups = json.decode(response.body);
+        });
         print(groups);
       }
     }
@@ -59,23 +42,32 @@ class _UserGroupState extends State<UserGroup> {
 
   Widget loadStudentsInGroup(BuildContext context, index) {
     var currentGroup = groups[index];
-    List<String> students = List<String>.from(currentGroup['students']);
+    List<dynamic> members = List<dynamic>.from(currentGroup['members']);
+    print(members);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: students
-          .map((student) => Text(
-                student,
+      children: members
+          .map((member) {
+            String fullName = member['firstName'] + ' ' + member['lastName'];
+            return Text(
+                fullName,
                 style: const TextStyle(
                   fontSize: 17.0,
                   color: Color.fromARGB(204, 255, 255, 255),
                 ),
-              ))
+              );
+          }
+            )
           .toList(),
     );
   }
 
   Widget groupCards(BuildContext context, index) {
+
+    var currentGroup = groups[index];
+    var numMembers = currentGroup['members'].length.toString();
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xff004080),
@@ -106,8 +98,8 @@ class _UserGroupState extends State<UserGroup> {
                   color: Color.fromARGB(204, 255, 255, 255),
                 ),
               ),
-              const Text(
-                "1/3",
+              Text(
+                "$numMembers/3",
                 style: TextStyle(
                   fontSize: 17.0,
                   color: Color.fromARGB(204, 255, 255, 255),

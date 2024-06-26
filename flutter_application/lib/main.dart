@@ -23,7 +23,7 @@ void main() {
       LoginSignup.routeName: (context) => const LoginSignup(),
       PasswordResetPage.routeName: (context) => PasswordResetPage(),
       CreateWorkspace.routeName: (context) => CreateWorkspace(userId: '6671c8362ffea49f3018bf61'),
-      UserGroup.routeName: (context) => const UserGroup(workspaceId: '667b32c640553ebab619b4fc'),
+      UserGroup.routeName: (context) => const UserGroup(workspaceId: '667a22ad8f5ce812352bba01'),
       AdminGroup.routeName: (context) => AdminGroup(workspaceId: '667a22ad8f5ce812352bba01'),
     },
   ));
