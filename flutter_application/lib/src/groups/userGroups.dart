@@ -17,11 +17,14 @@ class _UserGroupState extends State<UserGroup> {
   
   List<dynamic> groups= [];
 
+
   @override
   void initState() {
     super.initState();
-    getGroupsData(context, '667a22ad8f5ce812352bba01');
+    getGroupsData(context, widget.workspaceId);
   }
+
+  
 
   Future<void> getGroupsData(BuildContext context, String workspaceId) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
