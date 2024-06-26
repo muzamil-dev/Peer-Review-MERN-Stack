@@ -61,11 +61,26 @@ router.get("/:workspaceId/groups", async(req, res) => {
             });
 
         // Get all groups from workspace
-        const groups = await Group.find({ workspaceId }).select('_id');
-        const groupDataArray = await Promise.all(groups.map(group => Getters.getGroupData(group._id)));
+        const groups = await Group.find({ workspaceId }).populate({
+            path: 'userIds',
+            select: 'firstName lastName'
+        });
+        // Format the groups
+        const formatted = groups.map(group => {
+            const members = group.userIds.map(ids => ({
+                userId: ids._id,
+                firstName: ids.firstName,
+                lastName: ids.lastName
+            }));
+            return {
+                groupId: group._id,
+                name: group.name,
+                members
+            };
+        });
         const groupObj = {
             groupMemberLimit: workspace.groupMemberLimit,
-            groups: groupDataArray
+            groups: formatted
         };
         return res.json(groupObj);
     }
