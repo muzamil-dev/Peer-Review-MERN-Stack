@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 
 class UserGroup extends StatefulWidget {
@@ -16,7 +16,7 @@ class UserGroup extends StatefulWidget {
 class _UserGroupState extends State<UserGroup> {
   
   List<dynamic> groups= [];
-
+  String userFullName = "Kazi Amin";
 
   @override
   void initState() {
@@ -40,7 +40,6 @@ class _UserGroupState extends State<UserGroup> {
     catch (error) {
       print("Error fetching groups: $error");
     }
-    
   }
 
   Widget loadStudentsInGroup(BuildContext context, index) {
@@ -70,6 +69,7 @@ class _UserGroupState extends State<UserGroup> {
 
     var currentGroup = groups[index];
     var numMembers = currentGroup['members'].length.toString();
+    var groupName = currentGroup['name'];
 
     return Container(
       decoration: BoxDecoration(
@@ -95,7 +95,7 @@ class _UserGroupState extends State<UserGroup> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Group #${index + 1}",
+                groupName,
                 style: const TextStyle(
                   fontSize: 30.0,
                   color: Color.fromARGB(204, 255, 255, 255),
@@ -103,7 +103,7 @@ class _UserGroupState extends State<UserGroup> {
               ),
               Text(
                 "$numMembers/3",
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 17.0,
                   color: Color.fromARGB(204, 255, 255, 255),
                 ),
