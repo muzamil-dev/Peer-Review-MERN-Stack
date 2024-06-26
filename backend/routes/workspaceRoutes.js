@@ -70,6 +70,7 @@ router.get("/:workspaceId/groups", async(req, res) => {
     }
 });
 
+//get workspace name
 router.get('/:workspaceId/name', async (req, res) => {
     try {
       const { workspaceId } = req.params;
@@ -89,13 +90,19 @@ router.get('/:workspaceId/name', async (req, res) => {
 router.post("/create", async(req, res) => {
     try{
         // Check for the workspace name
-        const {name, userId, allowedDomains} = req.body;
+        const {name, userId, allowedDomains, groupMemberLimit, numGroups} = req.body;
         if (!name || !userId){
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
         // Create new workspace object and member object
-        const newWorkspace = { name: name, allowedDomains: allowedDomains || []};
+        const newWorkspace = { name };
+        // Optional fields
+        if (groupMemberLimit && groupMemberLimit >= 1)
+            newWorkspace.groupMemberLimit = groupMemberLimit;
+        if (allowedDomains && Array.isArray(allowedDomains))
+            newWorkspace.allowedDomains = allowedDomains;
+
         // Create and get the new workspace
         const workspace = await Workspace.create(newWorkspace);
         // Add the workspace membership for the creator
@@ -103,6 +110,15 @@ router.post("/create", async(req, res) => {
             Adders.addUserToWorkspace(userId, workspace._id, "Instructor"),
             Adders.addWorkspaceToUser(userId, workspace._id, "Instructor")
         ]);
+
+        // Create groups if provided
+        if (numGroups && numGroups > 0){
+            const workspaceId = workspace._id;
+            const groups = Array(numGroups);
+            for (let i = 1; i <= numGroups; i++)
+                groups[i-1] = { name: `Group ${i}`, workspaceId };
+            await Group.insertMany(groups);
+        }
         
         return res.status(201).json({
             message: "Workspace created successfully",
