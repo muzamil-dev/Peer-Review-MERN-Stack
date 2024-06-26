@@ -83,10 +83,11 @@ router.get('/:workspaceId/name', async (req, res) => {
       console.error(err);
       res.status(500).json({ message: 'Server error' });
     }
-  });
+});
 
 // Creates a new workspace
 // Required: name
+// Optional: numGroups, groupMemberLimit, allowedDomains
 router.post("/create", async(req, res) => {
     try{
         // Check for the workspace name
@@ -132,25 +133,34 @@ router.post("/create", async(req, res) => {
 });
 
 // Join a workspace
-// Required: workspaceId, inviteCode
+// Required: inviteCode
 router.put("/join", async(req, res) => {
     try{
         const body = req.body;
         // Get userId and workspaceId
         const userId = body.userId;
-        const workspaceId = body.workspaceId;
         const inviteCode = body.inviteCode;
         // Check that the invite code was given
-        if (!body.workspaceId || !body.inviteCode){
+        if (!body.inviteCode){
             return res.status(400).json({ message: "One or more required fields was not present" });
         }
         // Get relevant info from the user and workspace
         const userInfo = await User.findById(userId).select('email');
-        const workspace = await Workspace.findById(workspaceId).select('inviteCode allowedDomains');
+        const workspace = await Workspace.findOne(
+            { inviteCode }
+        ).select('allowedDomains');
 
         // Check that the workspace exists
         if (!workspace)
-            return res.status(404).json({ message: "The provided workspace was not found in our database" });
+            return res.status(404).json({ message: "No workspace with this invite code was found" });
+        const workspaceId = workspace._id;
+
+        // Check if user is already in workspace
+        const workspaces = (await User.findById(userId)).workspaceIds;
+        const found = workspaces.find(space => space.workspaceId.equals(workspaceId));
+        if (found){
+            return res.status(400).json({ message: "The given user is already in the workspace" });
+        }
 
         // Check if user's email contains an allowed domain
         if (workspace.allowedDomains !== null 
@@ -167,27 +177,15 @@ router.put("/join", async(req, res) => {
             }
         }
 
-        // Check if the correct invite code is provided
-        const correctCode = workspace.inviteCode;
-        // Return if code exists and provided code doesn't match
-        if (!correctCode || inviteCode !== correctCode){
-            return res.status(403).json({ message: "The given user is not authorized to join this workspace." });
-        }
-
-        // Check if user is already in workspace
-        const workspaces = (await User.findById(userId)).workspaceIds;
-        const found = workspaces.find(space => space.workspaceId.equals(workspaceId));
-        if (found){
-            return res.status(400).json({ message: "The given user is already in the workspace" });
-        }
-
         // Add workspace membership relationship
         await Promise.all([
             Adders.addUserToWorkspace(userId, workspaceId, "Student"),
             Adders.addWorkspaceToUser(userId, workspaceId, "Student")
         ]);
         // Return success message
-        res.json({ message: "Workspace joined successfully!" });
+        res.json({ 
+            message: "Workspace joined successfully!", workspaceId 
+        });
     }
     catch(err){
         console.log(err.message);
@@ -246,6 +244,46 @@ router.put("/setInvite", async(req, res) => {
     }
 });
 
+// Edit a workspace
+// Required: workspaceId
+// Optional: name, allowedDomains, groupMemberLimit
+router.put("/edit", async(req, res) => {
+    try{
+        const { workspaceId, name, allowedDomains, groupMemberLimit, groupLock } = req.body;
+        const update = {};
+        // Check that the user is the instructor
+        if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
+            return res.status(403).json({ 
+                message: "The provided user is not authorized to edit this workspace" 
+            });
+
+        // Check that workspaceId was provided
+        if (!workspaceId)
+            return res.status(400).json({
+                message: "One or more required fields is not present"
+            });
+        // Check optional fields
+        if (name && typeof(name) === "string")
+            update.name = name;
+        if (allowedDomains && Array.isArray(allowedDomains))
+            update.allowedDomains = allowedDomains;
+        if (groupMemberLimit && groupMemberLimit >= 1)
+            update.groupMemberLimit = groupMemberLimit;
+        if (groupLock === false || groupLock === true)
+            update.groupLock = groupLock;
+
+        // Update the workspace
+        const updated = await Workspace.updateOne(
+            { _id: workspaceId }, update 
+        );
+        return res.status(200).json({ message: "Workspace updated successfully" });
+    }
+    catch(err){
+        console.log(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
 // Sets the allowed domains
 // Reset the domains by passing an empty array
 // Required: workspaceId, allowedDomains (array)
@@ -284,7 +322,7 @@ router.put("/setAllowedDomains", async(req, res) => {
 });
 
 // Deletes the given workspace
-router.delete("/delete/:workspaceId", async(req, res) => {
+router.delete("/:workspaceId/delete", async(req, res) => {
     try{
         // Get all workspace users
         const workspace = await Workspace.findById(
@@ -320,7 +358,7 @@ router.delete("/delete/:workspaceId", async(req, res) => {
             Workspace.findByIdAndDelete(req.body.workspaceId)
         ]);
         
-        return res.json({ message: "Workspace deleted successfully" });
+        return res.status(200).json({ message: "Workspace deleted successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -347,7 +385,7 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
                 message: "The provided workspace wasn't found in our database" 
             });
 
-        return res.json({ message: "Invite code removed successfully" });
+        return res.status(200).json({ message: "Invite code removed successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -355,7 +393,7 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
     }
 });
 
-
+// gets all students in a workspace
 router.get("/:workspaceId/allStudents", async (req, res) => {
     try {
         const { workspaceId } = req.params;
