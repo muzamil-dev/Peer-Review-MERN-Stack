@@ -9,7 +9,6 @@ import * as Checkers from '../shared/checkers.js';
 import * as Getters from "../shared/getters.js";
 
 import generateCode from '../shared/generateCode.js';
-import verifyJWT from '../middleware/verifyJWT.js';
 import { ReviewAssignment } from '../models/reviewAssignmentModel.js';
 
 const router = express.Router();
@@ -191,7 +190,7 @@ router.put("/leave", async(req, res) => {
             Removers.removeWorkspaceFromUser(userId, workspaceId)
         ]);
 
-        res.json({ message: "Workspace left successfully" });
+        res.status(200).json({ message: "Workspace left successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -235,10 +234,10 @@ router.put("/setInvite", async(req, res) => {
 // Optional: name, allowedDomains, groupMemberLimit
 router.put("/edit", async(req, res) => {
     try{
-        const { userId, workspaceId, name, allowedDomains, groupMemberLimit, groupLock } = req.body;
+        const { workspaceId, name, allowedDomains, groupMemberLimit, groupLock } = req.body;
         const update = {};
         // Check that the user is the instructor
-        if (!await Checkers.checkInstructor(userId, workspaceId))
+        if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
             return res.status(403).json({ 
                 message: "The provided user is not authorized to edit this workspace" 
             });
@@ -262,7 +261,7 @@ router.put("/edit", async(req, res) => {
         const updated = await Workspace.updateOne(
             { _id: workspaceId }, update 
         );
-        return res.json({ message: "Workspace updated successfully" });
+        return res.status(200).json({ message: "Workspace updated successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -300,7 +299,7 @@ router.put("/setAllowedDomains", async(req, res) => {
                 message: "The provided workspace wasn't found in our database" 
             });
 
-        return res.json({ message: "Allowed Domains set successfully" });
+        return res.status(200).json({ message: "Allowed Domains set successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -345,7 +344,7 @@ router.delete("/:workspaceId/delete", async(req, res) => {
             Workspace.findByIdAndDelete(req.body.workspaceId)
         ]);
         
-        return res.json({ message: "Workspace deleted successfully" });
+        return res.status(200).json({ message: "Workspace deleted successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -372,13 +371,88 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
                 message: "The provided workspace wasn't found in our database" 
             });
 
-        return res.json({ message: "Invite code removed successfully" });
+        return res.status(200).json({ message: "Invite code removed successfully" });
     }
     catch(err){
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
 });
+
+// gets all students in a workspace
+router.get("/:workspaceId/allStudents", async (req, res) => {
+    try {
+        const { workspaceId } = req.params;
+
+        // Fetch workspace and check existence
+        const workspace = await Workspace.findById(workspaceId).populate({
+            path: 'userIds.userId',
+            select: 'email firstName lastName'
+        });
+        if (!workspace) {
+            return res.status(404).json({ message: "The provided workspace was not found in our database" });
+        }
+
+        // Get all student IDs in the workspace, ensuring to handle null values
+        const allStudents = workspace.userIds
+            .filter(user => user.userId && user.role === 'Student') // Filter out null or undefined user references and non-students
+            .map(user => ({
+                userId: user.userId._id,
+                email: user.userId.email,
+                firstName: user.userId.firstName,
+                lastName: user.userId.lastName,
+                role: user.role
+            }));
+
+        return res.json(allStudents);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+//get all students in a workspace that are not in any group
+router.get("/:workspaceId/studentsWithoutGroup", async (req, res) => {
+    try {
+        const { workspaceId } = req.params;
+
+        // Fetch workspace and check existence
+        const workspace = await Workspace.findById(workspaceId).populate({
+            path: 'userIds.userId',
+            select: 'email firstName lastName'
+        });
+        if (!workspace) {
+            return res.status(404).json({ message: "The provided workspace was not found in our database" });
+        }
+
+        // Get all student IDs in the workspace, ensuring to handle null values
+        const allStudents = workspace.userIds
+            .filter(user => user.userId && user.role === 'Student') // Filter out null or undefined user references and non-students
+            .map(user => ({
+                userId: user.userId._id,
+                email: user.userId.email,
+                firstName: user.userId.firstName,
+                lastName: user.userId.lastName,
+                role: user.role
+            }));
+
+        // Get all groups in the workspace
+        const groups = await Group.find({ workspaceId });
+        const groupUserIds = groups.reduce((acc, group) => {
+            return acc.concat(group.userIds.map(id => id.toString()));
+        }, []);
+
+        // Find students who are not in any group
+        const studentsWithoutGroup = allStudents.filter(student => !groupUserIds.includes(student.userId.toString()));
+
+        return res.json(studentsWithoutGroup);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
+
+
 
 ////////////////////////////
 
