@@ -154,19 +154,16 @@ router.post("/create", async(req, res) => {
             assignmentObj
         );
 
-        // Reviews to create
-        const reviews = [];
         // Get all groups
         const groups = await Group.find({ workspaceId });
-        // Hold review promises
-        const reviewPromises = [];
+        // Holds reviews to create
+        const reviews = [];
         // Create the reviews array
         for (let group of groups){
-            const groupReviews = [];
             for (let j = 0; j < group.userIds.length; j++){
                 for (let k = 0; k < group.userIds.length; k++){
                     if (j !== k){
-                        groupReviews.push({
+                        reviews.push({
                             assignmentId: assignment._id,
                             userId: group.userIds[j],
                             targetId: group.userIds[k],
@@ -175,12 +172,8 @@ router.post("/create", async(req, res) => {
                     }
                 }
             }
-            reviewPromises.push(Review.create(groupReviews));
         }
-        // Add the reviews array to mongo
-        //await Review.create(reviews);
-        // Wait for all promises to complete
-        await Promise.all(reviewPromises);
+        await Review.insertMany(reviews);
 
         // Return a success response
         return res.status(201).json({
@@ -228,7 +221,7 @@ router.put("/edit", async(req, res) => {
 })
 
 // Delete an assignment
-router.delete("/:assignmentId/delete", async(req, res) => {
+router.delete("/:assignmentId", async(req, res) => {
     try{
         // Get assignmentId
         const { assignmentId } = req.params;
