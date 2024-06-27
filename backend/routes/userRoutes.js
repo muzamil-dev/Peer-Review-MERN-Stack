@@ -60,16 +60,21 @@ router.post("/login", async (req, res) => {
         const accessToken = jwt.sign(
             user,
             process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: "1d" } // shorten this later
+            { expiresIn: "15m" }
         );
         const refreshToken = jwt.sign(
             user,
             process.env.REFRESH_TOKEN_SECRET,
             { expiresIn: "1d" }
         );
+        // Save refresh token to database
+        await User.findByIdAndUpdate(userData._id, {refreshToken});
         // Return tokens
         res.cookie("jwt", refreshToken, { httpOnly: true, maxAge: 24*60*60*1000});
-        res.json({ accessToken });
+        res.json({ 
+            message: "Login successful",
+            accessToken 
+        });
     }
     catch (err) {
         console.log(err.message);
