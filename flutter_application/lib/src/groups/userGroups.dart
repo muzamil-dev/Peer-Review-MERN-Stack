@@ -65,6 +65,7 @@ class _UserGroupState extends State<UserGroup> {
             child: GroupCard(
               group: groups[index],
               groups: groups,
+              index: index,
             ),
           );
         },
@@ -117,7 +118,12 @@ class Groups {
 class GroupCard extends StatefulWidget {
   final Groups group;
   final List<Groups> groups;
-  const GroupCard({required this.group, required this.groups, super.key});
+  final int index;
+  const GroupCard(
+      {required this.group,
+      required this.groups,
+      required this.index,
+      super.key});
 
   @override
   State<GroupCard> createState() => _GroupCardState();
@@ -126,6 +132,7 @@ class GroupCard extends StatefulWidget {
 class _GroupCardState extends State<GroupCard> {
   late Groups group;
   late List<Groups> groups = widget.groups;
+  late int index = widget.index;
   String userID = '667a2e4a8f5ce812352bba6f';
 
   @override
@@ -133,6 +140,7 @@ class _GroupCardState extends State<GroupCard> {
     super.initState();
     group = widget.group;
     groups = widget.groups;
+    index = widget.index;
   }
 
   String getGroupID(String userID) {
@@ -188,15 +196,22 @@ class _GroupCardState extends State<GroupCard> {
 
         setState(() {
           for (var group in groups) {
+            group.groupMembers.removeWhere((member) => member['userId'] == userID);
+          }
+
+          for (var group in groups) {
             if (group.groupID == groupID) {
-              // Update the groupMembers list
-              group.groupMembers.add({
-                "userId": userID,
-                "firstName": userObject['firstName'],
-                "lastName": userObject['lastName'],
-              });
+              group.groupMembers.add(
+                {
+                  "userId" : userID,
+                  "firstName" : userObject['firstName'],
+                  "lastName" : userObject['lastName'],
+                }
+              );
+              break;
             }
           }
+          
         });
       } else {
         final errorData = json.decode(response.body);
@@ -212,57 +227,46 @@ class _GroupCardState extends State<GroupCard> {
     }
   }
 
- Future<void> leaveGroup(BuildContext context) async {
-  final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
-  String groupID = getGroupID(userID);
-  print('GroupID : $groupID');
-  if (groupID == '') {
-    return;
-  }
-
-  try {
-    final response = await http.put(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'groupId': groupID,
-        'userId': userID,
-      }),
-    );
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      print('Leave Group successful: $responseData');
-      setState(() {
-        Groups? targetGroup;
-        for (var group in groups) {
-          if (group.groupID == groupID) {
-            targetGroup = group;
-            break;
-          }
-        }
-
-        if (targetGroup != null) {
-          targetGroup.groupMembers = targetGroup.groupMembers.where((member) {
-            return member['userId'] != userID;
-          }).toList();
-        }
-      });
-    } else {
-      final errorData = json.decode(response.body);
-      print(
-          "Leave Group Failed: ${response.statusCode}, ${errorData['message']}");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Leave Group Failed: \n${errorData['message']}')),
-      );
+  Future<void> leaveGroup(BuildContext context) async {
+    final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
+    String groupID = getGroupID(userID);
+    print('GroupID : $groupID');
+    if (groupID == '') {
+      return;
     }
-  } catch (error) {
-    print("Error Leaving group: $error");
-  }
-}
 
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'groupId': groupID,
+          'userId': userID,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Leave Group successful: $responseData');
+        setState(() {
+          for (var group in groups) {
+            group.groupMembers.removeWhere((member) => member['userId'] == userID);
+          }
+        });
+      } else {
+        final errorData = json.decode(response.body);
+        print(
+            "Leave Group Failed: ${response.statusCode}, ${errorData['message']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Leave Group Failed: \n${errorData['message']}')),
+        );
+      }
+    } catch (error) {
+      print("Error Leaving group: $error");
+    }
+  }
 
   Widget loadStudentsInGroup(BuildContext context) {
     List<dynamic> members = List<dynamic>.from(widget.group.groupMembers);
