@@ -13,7 +13,7 @@ class UserGroup extends StatefulWidget {
 }
 
 class _UserGroupState extends State<UserGroup> {
-  List<dynamic> groups = [];
+  List<Groups> groups = [];
   String userID = '667a2e4a8f5ce812352bba6f';
 
   @override
@@ -28,18 +28,131 @@ class _UserGroupState extends State<UserGroup> {
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final List<dynamic> data = json.decode(response.body);
         setState(() {
-          groups = jsonResponse.toList();
+          groups = data
+              .map((group) => Groups.fromJson(group as Map<String, dynamic>))
+              .toList();
         });
+      } else {
+        throw Exception('Failed to Load Groups');
       }
     } catch (error) {
       print("Error fetching groups: $error");
     }
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[200],
+      appBar: AppBar(
+        backgroundColor: const Color(0xff004080),
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
+        title: const Text(
+          'Groups',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ),
+      body: ListView.separated(
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GroupCard(
+              group: groups[index],
+              groups: groups,
+            ),
+          );
+        },
+        separatorBuilder: (context, index) {
+          return const Divider(
+            height: 10,
+            thickness: 0,
+          );
+        },
+        itemCount: groups.length,
+      ),
+      floatingActionButton: const FloatingActionButton(
+        onPressed: null,
+        backgroundColor: Colors.green,
+        child: Icon(
+          Icons.check,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+class Groups {
+  String groupID;
+  final String groupName;
+  final List<dynamic> groupMembers;
+  final int numMembers;
+
+  Groups(
+      {required this.groupID,
+      required this.groupName,
+      required this.groupMembers,
+      required this.numMembers});
+
+  factory Groups.fromJson(Map<String, dynamic> json) {
+    return Groups(
+      groupID: json['groupId'] ?? 'No ID',
+      groupName: json['name'] ?? 'No name',
+      groupMembers: json['members'] ?? [],
+      numMembers: json['members'].length,
+    );
+  }
+
+  void updateGroupID(String newGroupID) {
+    groupID = newGroupID;
+  }
+}
+
+class GroupCard extends StatefulWidget {
+  final Groups group;
+  final List<Groups> groups;
+  const GroupCard({required this.group, required this.groups, super.key});
+
+  @override
+  State<GroupCard> createState() => _GroupCardState();
+}
+
+class _GroupCardState extends State<GroupCard> {
+  late Groups group;
+  late List<Groups> groups = widget.groups;
+  String userID = '667a2e4a8f5ce812352bba6f';
+
+  @override
+  void initState() {
+    super.initState();
+    group = widget.group;
+    groups = widget.groups;
+  }
+
+  String getGroupID(String userID) {
+    for (Groups group in groups) {
+      var groupID = group.groupID;
+
+      for (var member in group.groupMembers) {
+        if (member['userId'] == userID) {
+          return groupID;
+        } else {
+          continue;
+        }
+      }
+    }
+    return '';
+  }
+
   Future<void> joinGroup(BuildContext context, String groupID) async {
     final url = Uri.parse('http://10.0.2.2:5000/groups/join');
+    print('Join Group : $groupID');
     try {
       final response = await http.put(
         url,
@@ -52,13 +165,14 @@ class _UserGroupState extends State<UserGroup> {
         }),
       );
       if (response.statusCode == 200) {
+        print("Group Joined Succesfully!");
         setState(() {
-          getGroupsData(context, widget.workspaceId);
+          widget.group.groupID = groupID;
         });
       } else {
         final errorData = json.decode(response.body);
         print(
-            "JoinGroup Failed: ${response.statusCode}, ${errorData['message']}");
+            "Join Group Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text('Join Group Failed: \n${errorData['message']}')),
@@ -72,7 +186,7 @@ class _UserGroupState extends State<UserGroup> {
   Future<void> leaveGroup(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
     String groupID = getGroupID(userID);
-
+    print('GroupID : $groupID');
     if (groupID == '') {
       return;
     }
@@ -105,26 +219,8 @@ class _UserGroupState extends State<UserGroup> {
     }
   }
 
-  // Parses through groups list and returns the group which the user is currently in
-  // If the user is not in a group , returns ''
-  String getGroupID(String userID) {
-    for (var group in groups) {
-      var groupID = group['groupId'];
-
-      for (var member in group['members']) {
-        if (member['userId'] == userID) {
-          return groupID;
-        } else {
-          continue;
-        }
-      }
-    }
-    return '';
-  }
-
-  Widget loadStudentsInGroup(BuildContext context, index) {
-    var currentGroup = groups[index];
-    List<dynamic> members = List<dynamic>.from(currentGroup['members']);
+  Widget loadStudentsInGroup(BuildContext context) {
+    List<dynamic> members = List<dynamic>.from(widget.group.groupMembers);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,11 +237,11 @@ class _UserGroupState extends State<UserGroup> {
     );
   }
 
-  Widget groupCards(BuildContext context, index) {
-    var currentGroup = groups[index];
-    var numMembers = currentGroup['members'].length.toString();
-    var groupID = currentGroup['groupId'];
-    var groupName = currentGroup['name'];
+  @override
+  Widget build(BuildContext context) {
+    var numMembers = widget.group.numMembers;
+    var groupID = widget.group.groupID;
+    var groupName = widget.group.groupName;
 
     return Container(
       decoration: BoxDecoration(
@@ -189,7 +285,7 @@ class _UserGroupState extends State<UserGroup> {
           const SizedBox(
             height: 20,
           ),
-          loadStudentsInGroup(context, index),
+          loadStudentsInGroup(context),
           const SizedBox(
             height: 20,
           ),
@@ -232,46 +328,5 @@ class _UserGroupState extends State<UserGroup> {
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[200],
-      appBar: AppBar(
-        backgroundColor: const Color(0xff004080),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        title: const Text(
-          'Groups',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      ),
-      body: ListView.separated(
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: groupCards(context, index),
-          );
-        },
-        separatorBuilder: (context, index) {
-          return const Divider(
-            height: 10,
-            thickness: 0,
-          );
-        },
-        itemCount: groups.length,
-      ),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
-        backgroundColor: Colors.green,
-        child: Icon(
-          Icons.check,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
 }
+
