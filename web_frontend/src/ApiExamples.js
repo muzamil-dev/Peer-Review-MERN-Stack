@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Api from "./Api";
+import { jwtDecode } from 'jwt-decode';
 
 const appStyle = {
     display: "flex",
@@ -56,18 +57,13 @@ const buttonHoverStyle = {
 
 
 function ApiExamples() {
+    const [email, setEmail] = useState('N/A');
+    const [emailVerificationCode, setEmailVerificationCode] = useState('N/A');
     const [latestButton, setLatestButton] = useState('N/A');
     const [id, setId] = useState('N/A');
     const [workspaceId, setWorkspaceId] = useState('N/A');
     const [inviteCode, setInviteCode] = useState('N/A');
-    const [email, setEmail] = useState('N/A');
     const [apiResponse, setApiResponse] = useState('N/A');
-
-    const generateEmail = () => {
-        const freshEmail = Math.random() * 100000 + '@ucf.edu';
-        setEmail(freshEmail);
-        return freshEmail;
-    }
 
     const handleButtonClick = async (name, fn) => {
         console.log('Clicked ' + name);
@@ -91,20 +87,28 @@ function ApiExamples() {
     return (
         <div style={appStyle}>
             <div style={leftStyle}>
+                <h3>Manual Inputs</h3>
+                <p>Email</p>
+                <input onChange={(e) => setEmail(e.target.value)} />
+                <br/>
+                <p>Email Verification</p>
+                <input onChange={(e) => setEmailVerificationCode(e.target.value)} />
                 <h3>User Functions</h3>
                 <div style={buttonContainerStyle}>
                 {[
-                    { id: "CreateAccount", fn: () => Api.Users.CreateAccount('Brittany', 'Marie', 'Clark', generateEmail(), 'abc123')
+                    { id: "CreateAccount", fn: () => Api.Users.CreateAccount('Brittany', 'Marie', 'Clark', email, 'abc123') },
+                    { id: "VerifyEmailCode", fn: () => Api.Users.VerifyEmailCode(email, emailVerificationCode) },
+                    { id: "DoLogin", fn: () => Api.Users.DoLogin(email, 'abc123')
                         .then((response) => {
-                            setId(response.data._id);
-                            return response;
-                        }) },
-                    { id: "GetById", fn: () => Api.Users.GetById(id) },
-                    { id: "DoLogin", fn: () => Api.Users.DoLogin(email, 'abc123') },
+                            const decoded = jwtDecode(response.data.accessToken);
+                            setId(decoded.userId);
+                        })
+                     },
                     { id: "EditAccount", fn: () => Api.Users.EditAccount(id, 'Tazeka', 'Marie', 'Liranov') },
                     { id: "RequestPasswordReset", fn: () => Api.Users.RequestPasswordReset(id, email) },
                     { id: "DeleteAccount", fn: () => Api.Users.DeleteAccount(id) },
                     { id: "BulkCreateUsers", fn: () => console.error("TODO") },
+                    { id: "GetById", fn: () => Api.Users.GetById(id) },
                 ].map((endpoint, index) => (
                     <button
                         key={index}
@@ -142,6 +146,8 @@ function ApiExamples() {
                     { id: "EditWorkspace", fn: () => Api.Workspace.EditWorkspace(id, workspaceId, 'MyEditedWorkspace', ['ucf\\.edu'], 6) },
                     { id: "DeleteWorkspace", fn: () => Api.Workspace.DeleteWorkspace(id, workspaceId) },
                     { id: "RemoveActiveInvite", fn: () => Api.Workspace.RemoveActiveInvite(id, workspaceId) },
+                    { id: "GetAllStudents", fn: () => Api.Workspace.GetAllStudents(workspaceId) },
+                    { id: "GetAllStudents", fn: () => Api.Workspace.GetAllStudents(workspaceId) },
                 ].map((endpoint, index) => (
                     <button
                     key={index}

@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-
 const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
 const getUrl = (prefix, route, postfix) => {
     if (process.env.NODE_ENV === 'production') 
@@ -17,7 +16,7 @@ const Response503 = {
     status: 503,
     success: false,
     data: {},
-    error: 'Service temporarily unavailable',
+    message: 'Service temporarily unavailable',
     message: 'Service temporarily unavailable'
 };
 
@@ -42,7 +41,7 @@ export default {
         /**
          * Gets a user by their ID.
          * @param {number} id 
-         * @returns {Promise<{ status: number, data: {}, error: string }>} The specified user's data
+         * @returns {Promise<{ status: number, data: {}, message: string }>} The specified user's data
          */
         GetById: async (id) => {
             const response = await axios.get(getUrl(USERS, id, ''))
@@ -53,14 +52,15 @@ export default {
             return {
                 status: response.status,
                 data: response.data,
-                error: response.data.message
+                message: response.data.message
             };
         },
+
         /**
          * Log the specified user in.
          * @param {string} email 
          * @param {string} password 
-         * @returns {Promise<{ status: number, data: {}, error: string }>} The freshly logged in user's data
+         * @returns {Promise<{ status: number, data: { accessToken: string }, message: string }>} The freshly logged in user's data
          */
         DoLogin: async (email, password) => {
             const payload = {
@@ -75,9 +75,10 @@ export default {
             return {
                 status: response.status,
                 data: response.data,
-                error: response.data.message
+                message: response.data.message
             };
         },
+
         /**
          * Creates an account with the specified information.
          * @param {string} firstName 
@@ -85,7 +86,7 @@ export default {
          * @param {string} lastName 
          * @param {string} email 
          * @param {string} password 
-         * @returns {Promise<{ status: number, data: {}, error: string }>} The freshly created user's data
+         * @returns {Promise<{ status: number, data: {}, message: string }>} The freshly created user's data
          */
         CreateAccount: async (firstName, middleName, lastName, email, password) => {
             const payload = {
@@ -97,19 +98,24 @@ export default {
             };
             const response = await axios.post(getUrl(USERS, 'signup'), payload)
                 .catch((err) => {
-                console.error(err);
-                return err.response || Response503;
+                    console.error(err);
+                    return err.response || Response503;
                 });
             return {
-            status: response.status,
-            data: response.data,
-            error: response.data.message
+                status: response.status,
+                data: response.data,
+                message: response.data.message
             };
         },
         
-        /**/
-        VerifyToken: async (email, token) => {
-            const payload = { email, token };
+        /**
+         * Verify the token for the user
+         * @param {string} email 
+         * @param {string} code 
+         * @returns {Promise<{ status: number, data: {}, message: string }>}
+         */
+        VerifyEmailCode: async (email, code) => {
+            const payload = { email, token: code };
             const response = await axios.post(getUrl(USERS, 'verifyEmail'), payload)
                 .catch((err) => {
                     console.error(err);
@@ -118,24 +124,29 @@ export default {
             return {
                 status: response.status,
                 data: response.data,
-                error: response.data.message
+                message: response.data.message
             };
-        }, /**/
+        },
 
+        /**
+         * Gets the workspace for the user
+         * @param {string} userId 
+         * @returns {Promise<{ status: number, data: {}, message: string }>}
+         */
         getUserWorkspaces: async (userId) => {
             try {
                 const response = await axios.get(getUrl(USERS, `${userId}/workspaces`, ''));
                 return {
                     status: response.status,
                     data: response.data,
-                    error: null
+                    message: null
                 };
             } catch (err) {
                 console.error(err);
                 return {
                     status: err.response ? err.response.status : 503,
                     data: null,
-                    error: err.message || "Service Unavailable"
+                    message: err.message || "Service Unavailable"
                 };
             }
         },
@@ -146,7 +157,7 @@ export default {
          * @param {string} firstName 
          * @param {string} middleName 
          * @param {string} lastName 
-         * @returns {Promise<{ status: number, data: {}, error: string }>} The edited user's updated data
+         * @returns {Promise<{ status: number, data: {}, message: string }>} The edited user's updated data
          */
         EditAccount: async (id, firstName, middleName, lastName) => {
             const payload = {
@@ -163,13 +174,13 @@ export default {
             return {
                 status: response.status,
                 data: response.data,
-                error: response.data.message
+                message: response.data.message
             };
         },
         /**
          * Delete account specified by id
          * @param {number} id 
-         * @returns {Promise<{ status: number, success: boolean, error: string }>}
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         DeleteAccount: async (id) => {
             const payload = {
@@ -183,12 +194,11 @@ export default {
             return {
                 status: response.status,
                 success: response.status === 200,
-                error: response.data.message
+                message: response.data.message
             };
         },
         /**
          * Requests a password reset for the user
-         * @param {number} id 
          * @param {string} email 
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
@@ -203,11 +213,17 @@ export default {
             return {
                 status: response.status,
                 data: response.data,
-                error: response.message
+                message: response.message
             };
         },
 
-        /**/
+        /**
+         * Reset the user's password
+         * @param {string} email 
+         * @param {string} token 
+         * @param {string} newPassword 
+         * @returns {Promise<{ status: number, data: {}, message: string }>}
+         */
         ResetPassword: async (email, token, newPassword) => {
             const payload = { email, token, newPassword };
             const response = await axios.post(getUrl(USERS, 'resetPassword'), payload)
@@ -218,7 +234,7 @@ export default {
             return {
                 status: response.status,
                 data: response.data,
-                error: response.message
+                message: response.message
             };
         },
         /**/
@@ -232,7 +248,7 @@ export default {
          *   email: string,
          *   password: string
          * }[]} users 
-         * @returns {Promise<{ status: number, data: {}[], error: string }>} Created users' data
+         * @returns {Promise<{ status: number, data: {}[], message: string }>} Created users' data
          */
         BulkCreateUsers: async (users) => {
             const payload = {
@@ -246,7 +262,7 @@ export default {
             return {
                 status: response.status,
                 data: response.data,
-                error: response.message
+                message: response.message
             };
         }
     },
@@ -271,24 +287,19 @@ export default {
         /**
          * Gets the list of groups in the specified workspace
          * @param {string} workspaceId
-         * @returns {Promise<{ status: number, data: {}[], error: string }>} The list of groups
+         * @returns {Promise<{ status: number, data: {}[], message: string }>} The list of groups
          */
         GetGroups: async (workspaceId) => {
-            try {
-                const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/groups'));
-                return {
-                    status: response.status,
-                    data: response.data,
-                    error: null
-                };
-            } catch (err) {
-                console.error(err);
-                return {
-                    status: err.response ? err.response.status : 503,
-                    data: null,
-                    error: err.message || "Service Unavailable"
-                };
-            }
+            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/groups'))
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.message
+            };
         },
         /**
          * Creates a new workspace
@@ -300,54 +311,46 @@ export default {
          * @returns {Promise<{ status: number, workspaceId: number, message: string }>} Returns ID of new workspace
          */
         CreateWorkspace: async (name, userId, allowedDomains, groupMemberLimit, numGroups) => {
-            try {
-                const payload = {
-                    name,
-                    userId,
-                    allowedDomains,
-                    groupMemberLimit,
-                    numGroups
-                };
-                const response = await axios.post(getUrl(WORKSPACES, 'create', ''), payload);
-                return {
-                    status: response.status,
-                    workspaceId: response.data.workspaceId,
-                    message: response.data.message
-                };
-            } catch (err) {
-                console.error(err);
-                return {
-                    status: err.response ? err.response.status : 503,
-                    workspaceId: null,
-                    message: err.response ? err.response.data.message : 'Service temporarily unavailable'
-                };
-            }
+            const payload = {
+                name,
+                userId,
+                allowedDomains,
+                groupMemberLimit,
+                numGroups
+            };
+            const response = await axios.post(getUrl(WORKSPACES, 'create', ''), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                workspaceId: response.data.workspaceId,
+                message: response.data.message
+            };
         },
         /**
          * Adds the user specified by userId to the workspace specified by workspaceID
          * @param {string} userId 
-         * @param {string} workspaceId 
          * @param {string} inviteCode 
-         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         * @returns {Promise<{ status: number, success: boolean, message: string, workspaceId: string }>}
          */
         JoinWorkspace: async (userId, inviteCode) => {
-            try {
-                const payload = { userId, inviteCode };
-                const response = await axios.put(getUrl(WORKSPACES, 'join', ''), payload);
-                return {
-                    status: response.status,
-                    success: response.status === 200,
-                    message: response.data.message,
-                    workspaceId: response.data.workspaceId
-                };
-            } catch (err) {
-                console.error(err);
-                return {
-                    status: err.response ? err.response.status : 503,
-                    success: false,
-                    message: err.response ? err.response.data.message : 'Service temporarily unavailable'
-                };
-            }
+            const payload = {
+                userId,
+                inviteCode
+            };
+            const response = await axios.put(getUrl(WORKSPACES, 'join', ''), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message,
+                workspaceId: response.data.workspaceId
+            };
         },
         /**
          * Removes the user specified by userId from the workspace specified by workspaceId
@@ -399,15 +402,17 @@ export default {
          * @param {string} name
          * @param {string[]} allowedDomains 
          * @param {number} groupMemberLimit
+         * @param {boolean} groupLock
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
-        EditWorkspace: async (userId, workspaceId, name, allowedDomains, groupMemberLimit) => {
+        EditWorkspace: async (userId, workspaceId, name, allowedDomains, groupMemberLimit, groupLock) => {
             const payload = {
                 userId,
                 workspaceId,
                 name,
                 allowedDomains,
-                groupMemberLimit
+                groupMemberLimit,
+                groupLock
             };
             const response = await axios.put(getUrl(WORKSPACES, 'edit', ''), payload)
                 .catch((err) => {
@@ -460,6 +465,40 @@ export default {
             return {
                 status: response.status,
                 success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Gets a list of all students in the specified workspaceId
+         * @param {string} workspaceId 
+         * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
+         */
+        GetAllStudents: async (workspaceId) => {
+            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/allStudents'))
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
+        },
+        /**
+         * Gets a list of all students in the specified workspaceId who are not part of any group
+         * @param {string} workspaceId 
+         * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
+         */
+        GetStudentsWithoutGroup: async (workspaceId) => {
+            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/studentsWithoutGroup'))
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
                 message: response.data.message
             };
         },
