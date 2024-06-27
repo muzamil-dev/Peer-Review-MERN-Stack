@@ -220,9 +220,16 @@ router.put("/leave", async(req, res) => {
         const userId = req.body.userId;
         const workspaceId = req.body.workspaceId;
 
+        // Find user's group
+        const groupId = (await Getters.getGroupInWorkspace(userId, workspaceId))._id;
+        console.log(groupId);
+
+        // Remove from workspace and group
         await Promise.all([
             Removers.removeUserFromWorkspace(userId, workspaceId),
-            Removers.removeWorkspaceFromUser(userId, workspaceId)
+            Removers.removeWorkspaceFromUser(userId, workspaceId),
+            Removers.removeGroupFromUser(userId, groupId),
+            Removers.removeUserFromGroup(userId, groupId)
         ]);
 
         res.status(200).json({ message: "Workspace left successfully" });
