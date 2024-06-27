@@ -24,13 +24,11 @@ export async function getGroupData(groupId){
     const members = users.map(user => ({
         userId: user._id,
         firstName: user.firstName,
-        middleName: user.middleName,
         lastName: user.lastName
     }));
     // Return formatted json
     return({
         name: group.name,
-        workspaceId: group.workspaceId,
         groupId: group._id,
         members
     });
@@ -156,7 +154,7 @@ export async function getGroupReviewsByAssignment(groupId, assignmentId){
                 completed: review.completed
             })
         );
-        // Split between completed and incomplete
+        // Split between completed and incompletec
         const completedReviews = formattedReviews.filter(r => r.completed);
         const incompleteReviews = formattedReviews.filter(r => !r.completed);
         // Add to the object

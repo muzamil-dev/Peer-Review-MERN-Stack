@@ -52,7 +52,8 @@ router.get("/:workspaceId/groups", async(req, res) => {
     try{
         // Get the workspace
         const { workspaceId } = req.params;
-        const workspace = await Workspace.findById(workspaceId);
+        const workspace = await Workspace.findById(workspaceId)
+        .select('groupMemberLimit');
         // Check that the workspace exists
         if (!workspace)
             return res.status(404).json({ 
@@ -60,9 +61,28 @@ router.get("/:workspaceId/groups", async(req, res) => {
             });
 
         // Get all groups from workspace
-        const groups = await Group.find({ workspaceId }).select('_id');
-        const groupDataArray = await Promise.all(groups.map(group => Getters.getGroupData(group._id)));
-        return res.json(groupDataArray);
+        const groups = await Group.find({ workspaceId }).populate({
+            path: 'userIds',
+            select: 'firstName lastName'
+        });
+        // Format the groups
+        const formatted = groups.map(group => {
+            const members = group.userIds.map(ids => ({
+                userId: ids._id,
+                firstName: ids.firstName,
+                lastName: ids.lastName
+            }));
+            return {
+                groupId: group._id,
+                name: group.name,
+                members
+            };
+        });
+        const groupObj = {
+            groupMemberLimit: workspace.groupMemberLimit,
+            groups: formatted
+        };
+        return res.json(groupObj);
     }
     catch(err){
         console.log(err.message);
@@ -81,9 +101,29 @@ router.get('/:workspaceId/name', async (req, res) => {
       res.json({ name: workspace.name });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: 'Server error' });
+      res.status(500).json({ message: err.message });
     }
 });
+
+// Get workspace details
+router.get("/:workspaceId/details", async (req, res) => {
+    try {
+      const { workspaceId } = req.params;
+      const workspace = await Workspace.findById(workspaceId);
+      if (!workspace) {
+        return res.status(404).json({ message: 'Workspace not found' });
+      }
+      res.json({
+        name: workspace.name,
+        allowedDomains: workspace.allowedDomains,
+        groupMemberLimit: workspace.groupMemberLimit,
+        groupLock: workspace.groupLock
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ message: err.message });
+    }
+  });
 
 // Creates a new workspace
 // Required: name
@@ -200,18 +240,28 @@ router.put("/leave", async(req, res) => {
         const userId = req.body.userId;
         const workspaceId = req.body.workspaceId;
 
+        // Find user's group id
+        const group = (await Getters.getGroupInWorkspace(userId, workspaceId));
+        let groupId;
+        if (group)
+            groupId = group._id;
+
+        // Remove from workspace and group
         await Promise.all([
             Removers.removeUserFromWorkspace(userId, workspaceId),
-            Removers.removeWorkspaceFromUser(userId, workspaceId)
+            Removers.removeWorkspaceFromUser(userId, workspaceId),
+            Removers.removeGroupFromUser(userId, groupId),
+            Removers.removeUserFromGroup(userId, groupId)
         ]);
 
-        res.json({ message: "Workspace left successfully" });
+        res.status(200).json({ message: "Workspace left successfully" });
     }
     catch(err){
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
 });
+
 
 // Sets the active invite code
 router.put("/setInvite", async(req, res) => {
@@ -220,7 +270,7 @@ router.put("/setInvite", async(req, res) => {
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
             return res.status(403).json({ 
-                message: "The provided user is not authorized to delete this workspace" 
+                message: "The provided user is not authorized to set invite codes" 
             });
         // Set the invite code
         const workspace = await Workspace.updateOne(
@@ -287,6 +337,7 @@ router.put("/edit", async(req, res) => {
 // Sets the allowed domains
 // Reset the domains by passing an empty array
 // Required: workspaceId, allowedDomains (array)
+// deprecated :(
 router.put("/setAllowedDomains", async(req, res) => {
     try{
         // Check that the user is the instructor
@@ -313,7 +364,7 @@ router.put("/setAllowedDomains", async(req, res) => {
                 message: "The provided workspace wasn't found in our database" 
             });
 
-        return res.json({ message: "Allowed Domains set successfully" });
+        return res.status(200).json({ message: "Allowed Domains set successfully" });
     }
     catch(err){
         console.log(err.message);
@@ -394,7 +445,7 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
 });
 
 // gets all students in a workspace
-router.get("/:workspaceId/allStudents", async (req, res) => {
+router.get("/:workspaceId/students", async (req, res) => {
     try {
         const { workspaceId } = req.params;
 
@@ -414,8 +465,7 @@ router.get("/:workspaceId/allStudents", async (req, res) => {
                 userId: user.userId._id,
                 email: user.userId.email,
                 firstName: user.userId.firstName,
-                lastName: user.userId.lastName,
-                role: user.role
+                lastName: user.userId.lastName
             }));
 
         //get groups in workspace
@@ -429,7 +479,7 @@ router.get("/:workspaceId/allStudents", async (req, res) => {
 
         // Add group information to students
         const studentsWithGroups = allStudents.map(student => {
-            const groupInfo = groupMap[student.userId.toString()] || { groupId: '', groupName: '' };
+            const groupInfo = groupMap[student.userId.toString()] || { groupId: null, groupName: null };
             return {
                 ...student,
                 groupId: groupInfo.groupId,
@@ -445,7 +495,7 @@ router.get("/:workspaceId/allStudents", async (req, res) => {
 });
 
 //gets ungrouped students in a workspace
-router.get("/:workspaceId/studentsWithoutGroup", async (req, res) => {
+router.get("/:workspaceId/ungrouped", async (req, res) => {
     try {
         const { workspaceId } = req.params;
 
@@ -485,6 +535,7 @@ router.get("/:workspaceId/studentsWithoutGroup", async (req, res) => {
     }
 });
 
+//moves student to group
 router.put("/:workspaceId/moveStudentToGroup", async (req, res) => {
     try {
         const { workspaceId } = req.params;

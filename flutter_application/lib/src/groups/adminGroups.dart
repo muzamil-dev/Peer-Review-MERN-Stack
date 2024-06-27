@@ -18,6 +18,8 @@ class _AdminGroupState extends State<AdminGroup> {
   List<Student> ungroupedStudents = [];
   bool isLoading = true;
   String workspaceName = '';
+  bool groupLock = false;
+  final String adminUserId = '6671c8362ffea49f3018bf61'; // Replace with actual admin user ID
 
   @override
   void initState() {
@@ -34,34 +36,40 @@ class _AdminGroupState extends State<AdminGroup> {
     });
   }
 
-  Future<void> fetchWorkspaceName() async {
-    final nameUrl =
-        Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/name');
+  Future<void> fetchWorkspaceDetails() async {
+    final workspaceDetailsUrl = Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
     try {
-      final response = await http.get(nameUrl);
+      final response = await http.get(workspaceDetailsUrl);
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         setState(() {
           workspaceName = responseData['name'];
+          groupLock = responseData['groupLock'];
         });
       } else {
-        throw Exception('Failed to load workspace name');
+        throw Exception('Failed to load workspace details');
       }
     } catch (error) {
-      print('Error fetching workspace name: $error');
+      print('Error fetching workspace details: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load workspace details')),
+      );
     }
   }
 
+  Future<void> fetchWorkspaceName() async {
+    await fetchWorkspaceDetails();
+  }
+
   Future<void> fetchGroups() async {
-    final groupsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
+    final groupsUrl = Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
     try {
       final groupsResponse = await http.get(groupsUrl);
       if (groupsResponse.statusCode == 200) {
-        final List<dynamic> groupsData = json.decode(groupsResponse.body);
+        final responseData = json.decode(groupsResponse.body);
         setState(() {
-          currentGroups =
-              groupsData.map((group) => Group.fromJson(group)).toList();
+          currentGroups = (responseData['groups'] as List<dynamic>).map((group) => Group.fromJson(group)).toList();
+          groupLock = responseData['groupLock'];
         });
       } else {
         throw Exception('Failed to load groups');
@@ -72,15 +80,13 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchUngroupedStudents() async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/studentsWithoutGroup');
+    final url = Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/ungrouped');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          ungroupedStudents =
-              data.map((student) => Student.fromJson(student)).toList();
+          ungroupedStudents = data.map((student) => Student.fromJson(student)).toList();
         });
       } else {
         throw Exception('Failed to load ungrouped students');
@@ -99,7 +105,7 @@ class _AdminGroupState extends State<AdminGroup> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          'userId': '6671c8362ffea49f3018bf61',
+          'userId': adminUserId,
         }),
       );
       if (response.statusCode == 200) {
@@ -116,46 +122,23 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  void showMoveStudentDialog(Student student) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Move Student'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: currentGroups
-                .map((group) => ListTile(
-                      title: Text(group.name),
-                      onTap: () {
-                        moveGroup(student.userId, group.groupId);
-                        Navigator.of(context).pop();
-                      },
-                    ))
-                .toList(),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> moveGroup(String userId, String toGroupId) async {
-    final moveUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/moveStudentToGroup');
+  Future<void> addStudentToGroup(String userId, String groupId) async {
+    final addUserUrl = Uri.parse('http://10.0.2.2:5000/groups/addUser');
     try {
       final response = await http.put(
-        moveUrl,
+        addUserUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          'studentId': userId,
-          'groupId': toGroupId,
+          'userId': adminUserId,
+          'targetId': userId,
+          'groupId': groupId,
         }),
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Student moved to the group successfully')),
+          SnackBar(content: Text('Student added to the group successfully')),
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
@@ -165,9 +148,120 @@ class _AdminGroupState extends State<AdminGroup> {
         );
       }
     } catch (err) {
-      print('Error moving student to group: $err');
+      print('Error adding student to group: $err');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error moving student to group')),
+        SnackBar(content: Text('Error adding student to group')),
+      );
+    }
+  }
+
+  Future<void> removeStudentFromGroup(String userId, String groupId) async {
+    final removeUserUrl = Uri.parse('http://10.0.2.2:5000/groups/removeUser');
+    try {
+      final response = await http.put(
+        removeUserUrl,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'userId': adminUserId,
+          'targetId': userId,
+          'groupId': groupId,
+        }),
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Student removed from the group successfully')),
+        );
+        fetchGroupsAndStudents(); // Refresh groups and ungrouped students
+      } else {
+        final errorData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${errorData['message']}')),
+        );
+      }
+    } catch (err) {
+      print('Error removing student from group: $err');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error removing student from group')),
+      );
+    }
+  }
+
+  void showMoveStudentDialog(Student student, {String? currentGroupId}) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Edit Student'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (currentGroupId != null ) // Only show "Kick" if the student is in a group
+                ListTile(
+                  title: Text('Kick from Group', style: TextStyle(color: Colors.red)),
+                  onTap: () {
+                    removeStudentFromGroup(student.userId, currentGroupId);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ...currentGroups.map((group) => ListTile(
+                title: Text(group.name),
+                onTap: () {
+                  if (currentGroupId != null) {
+                    // Remove from current group and add to the new group
+                    removeStudentFromGroup(student.userId, currentGroupId).then((_) {
+                      addStudentToGroup(student.userId, group.groupId);
+                    });
+                  } else {
+                    // Just add to the new group
+                    addStudentToGroup(student.userId, group.groupId);
+                  }
+                  Navigator.of(context).pop();
+                },
+              )).toList(),
+              ListTile(
+                title: Text('Kick from Workspace', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  kickStudent(student.userId);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> kickStudent(String userId) async {
+    final kickUrl = Uri.parse('http://10.0.2.2:5000/workspaces/leave');
+    try {
+      final response = await http.put(
+        kickUrl,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'userId': userId,
+          'workspaceId': widget.workspaceId,
+        }),
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Student kicked from the workspace successfully')),
+        );
+        fetchGroupsAndStudents(); // Refresh groups and ungrouped students
+      } else {
+        final errorData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${errorData['message']}')),
+        );
+      }
+    } catch (err) {
+      print('Error kicking student from workspace: $err');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error kicking student from workspace')),
       );
     }
   }
@@ -177,28 +271,155 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> addGroup() async {
-    final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
+  final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
+  try {
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'workspaceId': widget.workspaceId,
+        'userId': adminUserId,
+      }),
+    );
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Group added successfully')),
+      );
+      await fetchGroupsAndStudents(); // Refresh groups and ungrouped students immediately after adding a group
+    } else {
+      print('Failed to add group. Status code: ${response.statusCode}');
+    }
+  } catch (error) {
+    print('Error adding group: $error');
+  }
+}
+
+  void showEditWorkspaceDialog() {
+    TextEditingController nameController = TextEditingController();
+    TextEditingController domainsController = TextEditingController();
+    TextEditingController limitController = TextEditingController();
+  
+    // Load the current workspace details
+    final workspaceDetailsUrl = Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+    print('Fetching workspace details from: $workspaceDetailsUrl');
+    http.get(workspaceDetailsUrl).then((response) {
+      print('Workspace details response status: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Workspace details: $responseData');
+        setState(() {
+          nameController.text = responseData['name'];
+          domainsController.text = (responseData['allowedDomains'] as List<dynamic>).join(', ');
+          limitController.text = responseData['groupMemberLimit'].toString();
+          groupLock = responseData['groupLock'];
+        });
+      } else {
+        print('Failed to load workspace details: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load workspace details')),
+        );
+      }
+    }).catchError((error) {
+      print('Error fetching workspace details: $error');
+    });
+  
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Edit Workspace'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(labelText: 'Workspace Name'),
+                    ),
+                    TextField(
+                      controller: domainsController,
+                      decoration: InputDecoration(labelText: 'Allowed Domains (comma-separated)'),
+                    ),
+                    TextField(
+                      controller: limitController,
+                      decoration: InputDecoration(labelText: 'Group Member Limit'),
+                      keyboardType: TextInputType.number,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Group Lock'),
+                        Switch(
+                          value: groupLock,
+                          onChanged: (value) {
+                            setState(() {
+                              groupLock = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await editWorkspace(
+                      nameController.text,
+                      domainsController.text.split(',').map((s) => s.trim()).toList(),
+                      int.parse(limitController.text),
+                      groupLock,
+                    );
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> editWorkspace(String name, List<String> allowedDomains, int groupMemberLimit, bool groupLock) async {
+    final editUrl = Uri.parse('http://10.0.2.2:5000/workspaces/edit');
     try {
-      final response = await http.post(
-        url,
+      final response = await http.put(
+        editUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode(<String, dynamic>{
+          'userId': '6671c8362ffea49f3018bf61',  // Replace with actual admin user ID
           'workspaceId': widget.workspaceId,
-          'userId': '6671c8362ffea49f3018bf61',
+          'name': name,
+          'allowedDomains': allowedDomains,
+          'groupMemberLimit': groupMemberLimit,
+          'groupLock': groupLock,
         }),
       );
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Group added successfully')),
+          SnackBar(content: Text('Workspace updated successfully')),
         );
-        fetchGroups(); // Refresh groups
+        fetchWorkspaceName(); // Refresh the workspace name
       } else {
-        print('Failed to add group. Status code: ${response.statusCode}');
+        final errorData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${errorData['message']}')),
+        );
       }
-    } catch (error) {
-      print('Error adding group: $error');
+    } catch (err) {
+      print('Error editing workspace: $err');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error editing workspace')),
+      );
     }
   }
 
@@ -217,6 +438,12 @@ class _AdminGroupState extends State<AdminGroup> {
         ),
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit, color: Colors.white),
+            onPressed: showEditWorkspaceDialog,
+          ),
+        ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -303,7 +530,8 @@ class _AdminGroupState extends State<AdminGroup> {
                                                 '', // Assuming email is not available in Member
                                             firstName: member.firstName,
                                             lastName: member.lastName,
-                                          ));
+                                          ),
+                                          currentGroupId: group.groupId,);
                                         },
                                       ),
                                     );
@@ -363,27 +591,21 @@ class Member {
 }
 
 class Group {
-  String name;
-  String workspaceId;
   String groupId;
+  String name;
   List<Member> members;
 
-  Group(
-      {required this.name,
-      required this.workspaceId,
-      required this.groupId,
-      required this.members});
+  Group({
+    required this.groupId,
+    required this.name,
+    required this.members,
+  });
 
   factory Group.fromJson(Map<String, dynamic> json) {
-    List<Member> members = (json['members'] as List<dynamic>)
-        .map((member) => Member.fromJson(member))
-        .toList();
-
     return Group(
-      name: json['name'],
-      workspaceId: json['workspaceId'],
       groupId: json['groupId'],
-      members: members,
+      name: json['name'],
+      members: (json['members'] as List<dynamic>).map((member) => Member.fromJson(member)).toList(),
     );
   }
 }
