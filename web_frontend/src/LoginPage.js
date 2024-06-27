@@ -100,7 +100,7 @@ const LoginPage = () => {
         e.preventDefault();
         //setIsLoading(true);
         try {
-            const response = await Api.Users.VerifyToken(tempEmail, verificationToken);
+            const response = await Api.Users.VerifyEmailCode(tempEmail, verificationToken);
             if (response.status === 200) {
                 // alert('Verification successful. You can now log in.');
                 enqueueSnackbar('Verification successful. You can now log in.', { variance: 'success'});

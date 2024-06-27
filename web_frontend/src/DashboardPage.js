@@ -20,7 +20,7 @@ const DashboardPage = () => {
             if (response.status === 200) {
                 setWorkspaces(response.data);
             } else {
-                console.error('Failed to fetch workspaces:', response.error);
+                console.error('Failed to fetch workspaces:', response.message);
             }
         };
 
@@ -38,7 +38,7 @@ const DashboardPage = () => {
                 if (response.status === 200) {
                     setWorkspaces(response.data);
                 } else {
-                    console.error('Failed to fetch workspaces:', response.error);
+                    console.error('Failed to fetch workspaces:', response.message);
                 }
             };
 
