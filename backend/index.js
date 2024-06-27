@@ -1,23 +1,15 @@
 import express from "express";
-import pg from "pg";
+import db from "./config.js";
 
 const app = express();
-
-const db = new pg.Client({
-    host: "localhost",
-    port: 5433,
-    user: "cdog",
-    password: "password",
-    database: "peer"
-});
 
 await db.connect();
 
 const res = await db.query(`
-        select *
-        from users 
-    `);
+        insert into users (first_name, last_name, email, password)
+        values ($1, $2, $3, $4)
+    `, ['Rick1', 'Leinecker', 'rick1@ucf.edu', 'password']);
 
 await db.end();
 
-console.log(res.rows);
+console.log(res);
