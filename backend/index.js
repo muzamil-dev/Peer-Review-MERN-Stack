@@ -25,7 +25,7 @@ app.use('/groups', groupRoutes);
 app.use('/reviews', reviewRoutes);
 app.use('/assignments', reviewAssignmentRoutes);
 
-mongoose.connect(mongoDBURL,{
+mongoose.connect(mongoDBURL, {
 }).then(() => {
     console.log('Connected to Database!!!!!');
 
@@ -38,8 +38,6 @@ mongoose.connect(mongoDBURL,{
             console.log('Error running cleanup task: ', err);
         }
     });
-    
-    //root route
     app.get('/', (req, res) => {
         res.send('Welcome to the Peer Review MERN Stack Application!');
     });
