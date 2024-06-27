@@ -22,6 +22,10 @@ class _UserGroupState extends State<UserGroup> {
     getGroupsData(context, widget.workspaceId);
   }
 
+  refresh() async {
+    getGroupsData(context, widget.workspaceId);
+  }
+
   Future<void> getGroupsData(BuildContext context, String workspaceId) async {
     final url =
         Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
@@ -65,6 +69,7 @@ class _UserGroupState extends State<UserGroup> {
             child: GroupCard(
               group: groups[index],
               groups: groups,
+              refreshPage: refresh,
             ),
           );
         },
@@ -91,8 +96,8 @@ class _UserGroupState extends State<UserGroup> {
 class Groups {
   String groupID;
   final String groupName;
-  final List<dynamic> groupMembers;
-  final int numMembers;
+  List<dynamic> groupMembers;
+  int numMembers;
 
   Groups(
       {required this.groupID,
@@ -117,7 +122,12 @@ class Groups {
 class GroupCard extends StatefulWidget {
   final Groups group;
   final List<Groups> groups;
-  const GroupCard({required this.group, required this.groups, super.key});
+  final Function() refreshPage;
+  const GroupCard(
+      {required this.group,
+      required this.groups,
+      required this.refreshPage,
+      super.key});
 
   @override
   State<GroupCard> createState() => _GroupCardState();
@@ -126,28 +136,67 @@ class GroupCard extends StatefulWidget {
 class _GroupCardState extends State<GroupCard> {
   late Groups group;
   late List<Groups> groups = widget.groups;
+  int originalGroupLocation = 0;
   String userID = '667a2e4a8f5ce812352bba6f';
 
   @override
   void initState() {
     super.initState();
-    group = widget.group;
-    groups = widget.groups;
+  }
+
+  Future<void> getGroupsData(BuildContext context, String workspaceId) async {
+    final url =
+        Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          groups = data
+              .map((group) => Groups.fromJson(group as Map<String, dynamic>))
+              .toList();
+        });
+      } else {
+        throw Exception('Failed to Load Groups');
+      }
+    } catch (error) {
+      print("Error fetching groups: $error");
+    }
   }
 
   String getGroupID(String userID) {
+    var counter = 0;
     for (Groups group in groups) {
       var groupID = group.groupID;
 
       for (var member in group.groupMembers) {
         if (member['userId'] == userID) {
+          originalGroupLocation = counter;
           return groupID;
         } else {
           continue;
         }
       }
+      counter += 1;
     }
     return '';
+  }
+
+  Future<dynamic> getUser(String userID) async {
+    final url = Uri.parse('http://10.0.2.2:5000/users/$userID');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        return data;
+      } else {
+        print("Error : Invalid Get User Status Code");
+      }
+    } catch (error) {
+      print("Error Getting User: $error");
+    }
+    return {};
   }
 
   Future<void> joinGroup(BuildContext context, String groupID) async {
@@ -165,10 +214,23 @@ class _GroupCardState extends State<GroupCard> {
         }),
       );
       if (response.statusCode == 200) {
-        print("Group Joined Succesfully!");
+        print("Group Joined Successfully!");
+        dynamic userObject = await getUser(userID);
+
         setState(() {
-          widget.group.groupID = groupID;
+          for (var group in groups) {
+            if (group.groupID == groupID) {
+              group.groupMembers.add({
+                "userId": userID,
+                "firstName": userObject['firstName'],
+                "lastName": userObject['lastName'],
+              });
+              break;
+            }
+          }
+          widget.group.numMembers += 1;
         });
+        widget.refreshPage();
       } else {
         final errorData = json.decode(response.body);
         print(
@@ -203,8 +265,13 @@ class _GroupCardState extends State<GroupCard> {
         }),
       );
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        print('Leave Group successful: $responseData');
+        print('Original Group Location: $originalGroupLocation');
+        setState(() {
+          groups[originalGroupLocation]
+              .groupMembers
+              .removeWhere((member) => member['userId'] == userID);
+          groups[originalGroupLocation].numMembers -= 1;
+        });
       } else {
         final errorData = json.decode(response.body);
         print(
@@ -215,7 +282,7 @@ class _GroupCardState extends State<GroupCard> {
         );
       }
     } catch (error) {
-      print("Error Joining groups: $error");
+      print("Error Leaving group: $error");
     }
   }
 
@@ -239,10 +306,6 @@ class _GroupCardState extends State<GroupCard> {
 
   @override
   Widget build(BuildContext context) {
-    var numMembers = widget.group.numMembers;
-    var groupID = widget.group.groupID;
-    var groupName = widget.group.groupName;
-
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xff004080),
@@ -267,14 +330,14 @@ class _GroupCardState extends State<GroupCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                groupName,
+                widget.group.groupName,
                 style: const TextStyle(
                   fontSize: 30.0,
                   color: Color.fromARGB(204, 255, 255, 255),
                 ),
               ),
               Text(
-                "$numMembers/3",
+                "${widget.group.numMembers}/3",
                 style: const TextStyle(
                   fontSize: 17.0,
                   color: Color.fromARGB(204, 255, 255, 255),
@@ -295,7 +358,7 @@ class _GroupCardState extends State<GroupCard> {
               TextButton(
                   onPressed: () async {
                     await leaveGroup(context);
-                    await joinGroup(context, groupID);
+                    await joinGroup(context, widget.group.groupID);
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -329,4 +392,3 @@ class _GroupCardState extends State<GroupCard> {
     );
   }
 }
-
