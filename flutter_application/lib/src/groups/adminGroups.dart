@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/groups/individualAdminGroupDisplay.dart';
 import 'package:http/http.dart' as http;
 
 class AdminGroup extends StatefulWidget {
@@ -19,7 +20,8 @@ class _AdminGroupState extends State<AdminGroup> {
   bool isLoading = true;
   String workspaceName = '';
   bool groupLock = false;
-  final String adminUserId = '6671c8362ffea49f3018bf61'; // Replace with actual admin user ID
+  final String adminUserId =
+      '6671c8362ffea49f3018bf61'; // Replace with actual admin user ID
 
   @override
   void initState() {
@@ -37,7 +39,8 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchWorkspaceDetails() async {
-    final workspaceDetailsUrl = Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+    final workspaceDetailsUrl = Uri.parse(
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
     try {
       final response = await http.get(workspaceDetailsUrl);
       if (response.statusCode == 200) {
@@ -62,13 +65,16 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchGroups() async {
-    final groupsUrl = Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
+    final groupsUrl = Uri.parse(
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
     try {
       final groupsResponse = await http.get(groupsUrl);
       if (groupsResponse.statusCode == 200) {
         final responseData = json.decode(groupsResponse.body);
         setState(() {
-          currentGroups = (responseData['groups'] as List<dynamic>).map((group) => Group.fromJson(group)).toList();
+          currentGroups = (responseData['groups'] as List<dynamic>)
+              .map((group) => Group.fromJson(group))
+              .toList();
           groupLock = responseData['groupLock'];
         });
       } else {
@@ -80,13 +86,15 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchUngroupedStudents() async {
-    final url = Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/ungrouped');
+    final url = Uri.parse(
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/ungrouped');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          ungroupedStudents = data.map((student) => Student.fromJson(student)).toList();
+          ungroupedStudents =
+              data.map((student) => Student.fromJson(student)).toList();
         });
       } else {
         throw Exception('Failed to load ungrouped students');
@@ -171,7 +179,8 @@ class _AdminGroupState extends State<AdminGroup> {
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Student removed from the group successfully')),
+          SnackBar(
+              content: Text('Student removed from the group successfully')),
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
@@ -197,31 +206,38 @@ class _AdminGroupState extends State<AdminGroup> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (currentGroupId != null ) // Only show "Kick" if the student is in a group
+              if (currentGroupId !=
+                  null) // Only show "Kick" if the student is in a group
                 ListTile(
-                  title: Text('Kick from Group', style: TextStyle(color: Colors.red)),
+                  title: Text('Kick from Group',
+                      style: TextStyle(color: Colors.red)),
                   onTap: () {
                     removeStudentFromGroup(student.userId, currentGroupId);
                     Navigator.of(context).pop();
                   },
                 ),
-              ...currentGroups.map((group) => ListTile(
-                title: Text(group.name),
-                onTap: () {
-                  if (currentGroupId != null) {
-                    // Remove from current group and add to the new group
-                    removeStudentFromGroup(student.userId, currentGroupId).then((_) {
-                      addStudentToGroup(student.userId, group.groupId);
-                    });
-                  } else {
-                    // Just add to the new group
-                    addStudentToGroup(student.userId, group.groupId);
-                  }
-                  Navigator.of(context).pop();
-                },
-              )).toList(),
+              ...currentGroups
+                  .map((group) => ListTile(
+                        title: Text(group.name),
+                        onTap: () {
+                          if (currentGroupId != null) {
+                            // Remove from current group and add to the new group
+                            removeStudentFromGroup(
+                                    student.userId, currentGroupId)
+                                .then((_) {
+                              addStudentToGroup(student.userId, group.groupId);
+                            });
+                          } else {
+                            // Just add to the new group
+                            addStudentToGroup(student.userId, group.groupId);
+                          }
+                          Navigator.of(context).pop();
+                        },
+                      ))
+                  .toList(),
               ListTile(
-                title: Text('Kick from Workspace', style: TextStyle(color: Colors.red)),
+                title: Text('Kick from Workspace',
+                    style: TextStyle(color: Colors.red)),
                 onTap: () {
                   kickStudent(student.userId);
                   Navigator.of(context).pop();
@@ -249,7 +265,8 @@ class _AdminGroupState extends State<AdminGroup> {
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Student kicked from the workspace successfully')),
+          SnackBar(
+              content: Text('Student kicked from the workspace successfully')),
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
@@ -271,38 +288,39 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> addGroup() async {
-  final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
-  try {
-    final response = await http.post(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'workspaceId': widget.workspaceId,
-        'userId': adminUserId,
-      }),
-    );
-    if (response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Group added successfully')),
+    final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
+    try {
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'workspaceId': widget.workspaceId,
+          'userId': adminUserId,
+        }),
       );
-      await fetchGroupsAndStudents(); // Refresh groups and ungrouped students immediately after adding a group
-    } else {
-      print('Failed to add group. Status code: ${response.statusCode}');
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Group added successfully')),
+        );
+        await fetchGroupsAndStudents(); // Refresh groups and ungrouped students immediately after adding a group
+      } else {
+        print('Failed to add group. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error adding group: $error');
     }
-  } catch (error) {
-    print('Error adding group: $error');
   }
-}
 
   void showEditWorkspaceDialog() {
     TextEditingController nameController = TextEditingController();
     TextEditingController domainsController = TextEditingController();
     TextEditingController limitController = TextEditingController();
-  
+
     // Load the current workspace details
-    final workspaceDetailsUrl = Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+    final workspaceDetailsUrl = Uri.parse(
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
     print('Fetching workspace details from: $workspaceDetailsUrl');
     http.get(workspaceDetailsUrl).then((response) {
       print('Workspace details response status: ${response.statusCode}');
@@ -311,7 +329,8 @@ class _AdminGroupState extends State<AdminGroup> {
         print('Workspace details: $responseData');
         setState(() {
           nameController.text = responseData['name'];
-          domainsController.text = (responseData['allowedDomains'] as List<dynamic>).join(', ');
+          domainsController.text =
+              (responseData['allowedDomains'] as List<dynamic>).join(', ');
           limitController.text = responseData['groupMemberLimit'].toString();
           groupLock = responseData['groupLock'];
         });
@@ -324,7 +343,7 @@ class _AdminGroupState extends State<AdminGroup> {
     }).catchError((error) {
       print('Error fetching workspace details: $error');
     });
-  
+
     showDialog(
       context: context,
       builder: (context) {
@@ -342,11 +361,13 @@ class _AdminGroupState extends State<AdminGroup> {
                     ),
                     TextField(
                       controller: domainsController,
-                      decoration: InputDecoration(labelText: 'Allowed Domains (comma-separated)'),
+                      decoration: InputDecoration(
+                          labelText: 'Allowed Domains (comma-separated)'),
                     ),
                     TextField(
                       controller: limitController,
-                      decoration: InputDecoration(labelText: 'Group Member Limit'),
+                      decoration:
+                          InputDecoration(labelText: 'Group Member Limit'),
                       keyboardType: TextInputType.number,
                     ),
                     Row(
@@ -371,7 +392,10 @@ class _AdminGroupState extends State<AdminGroup> {
                   onPressed: () async {
                     await editWorkspace(
                       nameController.text,
-                      domainsController.text.split(',').map((s) => s.trim()).toList(),
+                      domainsController.text
+                          .split(',')
+                          .map((s) => s.trim())
+                          .toList(),
                       int.parse(limitController.text),
                       groupLock,
                     );
@@ -387,7 +411,17 @@ class _AdminGroupState extends State<AdminGroup> {
     );
   }
 
-  Future<void> editWorkspace(String name, List<String> allowedDomains, int groupMemberLimit, bool groupLock) async {
+  void navigateToIndividualGroupPage(String groupId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => IndividualAdminGroup(groupId: groupId),
+      ),
+    );
+  }
+
+  Future<void> editWorkspace(String name, List<String> allowedDomains,
+      int groupMemberLimit, bool groupLock) async {
     final editUrl = Uri.parse('http://10.0.2.2:5000/workspaces/edit');
     try {
       final response = await http.put(
@@ -396,7 +430,8 @@ class _AdminGroupState extends State<AdminGroup> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'userId': '6671c8362ffea49f3018bf61',  // Replace with actual admin user ID
+          'userId':
+              '6671c8362ffea49f3018bf61', // Replace with actual admin user ID
           'workspaceId': widget.workspaceId,
           'name': name,
           'allowedDomains': allowedDomains,
@@ -490,54 +525,61 @@ class _AdminGroupState extends State<AdminGroup> {
                       ),
                       // Rest of the groups
                       ...currentGroups.map((group) {
-                        return Card(
-                          margin: const EdgeInsets.all(10),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      group.name,
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.delete),
-                                      onPressed: () {
-                                        deleteGroup(group.groupId);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 10),
-                                Column(
-                                  children: group.members.map((member) {
-                                    return ListTile(
-                                      title: Text(
-                                          '${member.firstName} ${member.lastName}'),
-                                      trailing: IconButton(
-                                        icon: Icon(Icons.edit),
+                        return GestureDetector(
+                          onTap: () {
+                            navigateToIndividualGroupPage(group.groupId);
+                          },
+                          child: Card(
+                            margin: const EdgeInsets.all(10),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        group.name,
+                                        style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete),
                                         onPressed: () {
-                                          showMoveStudentDialog(Student(
-                                            userId: member.userId,
-                                            email:
-                                                '', // Assuming email is not available in Member
-                                            firstName: member.firstName,
-                                            lastName: member.lastName,
-                                          ),
-                                          currentGroupId: group.groupId,);
+                                          deleteGroup(group.groupId);
                                         },
                                       ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                  SizedBox(height: 10),
+                                  Column(
+                                    children: group.members.map((member) {
+                                      return ListTile(
+                                        title: Text(
+                                            '${member.firstName} ${member.lastName}'),
+                                        trailing: IconButton(
+                                          icon: Icon(Icons.edit),
+                                          onPressed: () {
+                                            showMoveStudentDialog(
+                                              Student(
+                                                userId: member.userId,
+                                                email:
+                                                    '', // Assuming email is not available in Member
+                                                firstName: member.firstName,
+                                                lastName: member.lastName,
+                                              ),
+                                              currentGroupId: group.groupId,
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -605,7 +647,9 @@ class Group {
     return Group(
       groupId: json['groupId'],
       name: json['name'],
-      members: (json['members'] as List<dynamic>).map((member) => Member.fromJson(member)).toList(),
+      members: (json['members'] as List<dynamic>)
+          .map((member) => Member.fromJson(member))
+          .toList(),
     );
   }
 }
