@@ -220,9 +220,11 @@ router.put("/leave", async(req, res) => {
         const userId = req.body.userId;
         const workspaceId = req.body.workspaceId;
 
-        // Find user's group
-        const groupId = (await Getters.getGroupInWorkspace(userId, workspaceId))._id;
-        console.log(groupId);
+        // Find user's group id
+        const group = (await Getters.getGroupInWorkspace(userId, workspaceId));
+        let groupId;
+        if (group)
+            groupId = group._id;
 
         // Remove from workspace and group
         await Promise.all([
