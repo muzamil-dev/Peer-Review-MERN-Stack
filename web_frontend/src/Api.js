@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
-const getUrl = (prefix, route, postfix) => {
+const getUrl = (prefix, route) => {
     if (process.env.NODE_ENV === 'production') 
     {
-        return 'https://' + app_name +  '.herokuapp.com/' + prefix + route + postfix;
+        return 'https://' + app_name +  '.herokuapp.com/' + prefix + route;
     }
     else
     {        
@@ -29,7 +29,159 @@ const USERS = 'users/';
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
     Groups: {
+        /**
+         * Gets the group info for a group specified by groupId
+         * @param {string} groupId 
+         * @returns {Promise<{ status: number, data: {groupId: string, name: string, workspaceId: string}, message: string }>} Returns the group info
+         */
+        GetGroupInfo: async (groupId) => {
+            const response = await axios.get(getUrl(GROUPS, groupId))
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
+        },
 
+        /**
+         * Creates a new group in workspace specified by workspaceId
+         * @param {string} userId 
+         * @param {string} workspaceId 
+         * @returns {Promise<{ status: number, data: {}, message: string }>} Returns the newly created group's info
+         */
+        CreateGroup: async (userId, workspaceId) => {
+            const payload = {
+                userId,
+                workspaceId
+            };
+            const response = await axios.post(getUrl(GROUPS, 'create'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
+        },
+        /**
+         * Adds the user specified by id to the group specified by groupId
+         * @param {string} groupId 
+         * @param {string} userId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        JoinGroup: async (groupId, userId) => {
+            const payload = {
+                groupId,
+                userId
+            };
+            const response = await axios.put(getUrl(GROUPS, 'join'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Adds the user specified by id to the group specified by groupId
+         * @param {string} groupId 
+         * @param {string} userId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        LeaveGroup: async (groupId, userId) => {
+            const payload = {
+                groupId,
+                userId
+            };
+            const response = await axios.put(getUrl(GROUPS, 'leave'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Admin adds a user (specified by userId) to a group (specified by groupId), overrides member limit and locks
+         * @param {string} userId professor's id
+         * @param {string} targetId userId of the student that is being added
+         * @param {string} groupId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        AddUser: async (userId, targetId, groupId) => {
+            const payload = {
+                userId,
+                targetId,
+                groupId
+            };
+            const response = await axios.put(getUrl(GROUPS, 'addUser'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Admin removes a user (specified by userId) from a group (specified by groupId), overrides member limit and locks
+         * @param {string} userId professor's id
+         * @param {string} targetId userId of the student that is being added
+         * @param {string} groupId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        RemoveUser: async (userId, targetId, groupId) => {
+            const payload = {
+                userId,
+                targetId,
+                groupId
+            };
+            const response = await axios.put(getUrl(GROUPS, 'removeUser'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Deletes a group
+         * @param {string} userId 
+         * @param {string} groupId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        DeleteGroup: async (userId, groupId) => {
+            const payload = {
+                userId
+            };
+            const response = await axios.delete(getUrl(GROUPS, groupId), { data: payload })
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
     },
     Assignments: {
 
@@ -44,7 +196,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}, message: string }>} The specified user's data
          */
         GetById: async (id) => {
-            const response = await axios.get(getUrl(USERS, id, ''))
+            const response = await axios.get(getUrl(USERS, id))
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -67,7 +219,7 @@ export default {
                 email,
                 password
             };
-            const response = await axios.post(getUrl(USERS, 'login', ''), payload)
+            const response = await axios.post(getUrl(USERS, 'login'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -134,21 +286,16 @@ export default {
          * @returns {Promise<{ status: number, data: {}, message: string }>}
          */
         getUserWorkspaces: async (userId) => {
-            try {
-                const response = await axios.get(getUrl(USERS, `${userId}/workspaces`, ''));
-                return {
-                    status: response.status,
-                    data: response.data,
-                    message: null
-                };
-            } catch (err) {
-                console.error(err);
-                return {
-                    status: err.response ? err.response.status : 503,
-                    data: null,
-                    message: err.message || "Service Unavailable"
-                };
-            }
+            const response = await axios.get(getUrl(USERS, `${userId}/workspaces`))
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
         },
 
         /**
@@ -166,7 +313,7 @@ export default {
                 lastName,
                 id
             };
-            const response = await axios.put(getUrl(USERS, '', ''), payload)
+            const response = await axios.put(getUrl(USERS, ''), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -186,7 +333,7 @@ export default {
             const payload = {
                 id
             };
-            const response = await axios.delete(getUrl(USERS, '', ''), { data: payload })
+            const response = await axios.delete(getUrl(USERS, ''), { data: payload })
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -255,7 +402,7 @@ export default {
             const payload = {
                 users
             };
-            const response = await axios.post(getUrl(USERS, 'requestPasswordReset', ''), payload)
+            const response = await axios.post(getUrl(USERS, 'requestPasswordReset'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -274,7 +421,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} The list of assignments
          */
         GetAssignments: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/assignments'))
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/assignments`))
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -291,7 +438,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} The list of groups
          */
         GetGroups: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/groups'))
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/groups`))
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -319,7 +466,7 @@ export default {
                 groupMemberLimit,
                 numGroups
             };
-            const response = await axios.post(getUrl(WORKSPACES, 'create', ''), payload)
+            const response = await axios.post(getUrl(WORKSPACES, 'create'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -341,7 +488,7 @@ export default {
                 userId,
                 inviteCode
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'join', ''), payload)
+            const response = await axios.put(getUrl(WORKSPACES, 'join'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -364,7 +511,7 @@ export default {
                 userId,
                 workspaceId
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'leave', ''), payload)
+            const response = await axios.put(getUrl(WORKSPACES, 'leave'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -386,7 +533,7 @@ export default {
                 userId,
                 workspaceId
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'setInvite', ''), payload)
+            const response = await axios.put(getUrl(WORKSPACES, 'setInvite'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -415,7 +562,7 @@ export default {
                 groupMemberLimit,
                 groupLock
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'edit', ''), payload)
+            const response = await axios.put(getUrl(WORKSPACES, 'edit'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -437,7 +584,7 @@ export default {
                 userId,
                 workspaceId
             };
-            const response = await axios.delete(getUrl(WORKSPACES, workspaceId, '/delete'), { data: payload })
+            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}/delete`), { data: payload })
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -458,7 +605,7 @@ export default {
             const payload = {
                 userId
             };
-            const response = await axios.delete(getUrl(WORKSPACES, workspaceId, '/removeInvite'), { data: payload })
+            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}/removeInvite`), { data: payload })
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -475,7 +622,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
          */
         GetAllStudents: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/allStudents'))
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/allStudents`))
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -492,7 +639,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
          */
         GetStudentsWithoutGroup: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, workspaceId, '/studentsWithoutGroup'))
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/studentsWithoutGroup`))
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
