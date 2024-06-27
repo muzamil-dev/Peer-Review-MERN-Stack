@@ -199,12 +199,13 @@ export default {
         },
         /**
          * Requests a password reset for the user
+         * @param {string} id
          * @param {string} email 
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
 
-        RequestPasswordReset: async (email) => {
-            const payload = { email };
+        RequestPasswordReset: async (id, email) => {
+            const payload = { id, email };
             const response = await axios.post(getUrl(USERS, 'requestPasswordReset'), payload)
                 .catch((err) => {
                     console.error(err);

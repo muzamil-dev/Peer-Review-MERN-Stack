@@ -59,6 +59,7 @@ const buttonHoverStyle = {
 function ApiExamples() {
     const [email, setEmail] = useState('N/A');
     const [emailVerificationCode, setEmailVerificationCode] = useState('N/A');
+    const [password, setPassword] = useState('abc123');
     const [latestButton, setLatestButton] = useState('N/A');
     const [id, setId] = useState('N/A');
     const [workspaceId, setWorkspaceId] = useState('N/A');
@@ -88,24 +89,26 @@ function ApiExamples() {
         <div style={appStyle}>
             <div style={leftStyle}>
                 <h3>Manual Inputs</h3>
-                <p>Email</p>
-                <input onChange={(e) => setEmail(e.target.value)} />
-                <br/>
-                <p>Email Verification</p>
-                <input onChange={(e) => setEmailVerificationCode(e.target.value)} />
+                <p>Email <input onChange={(e) => setEmail(e.target.value)} /></p>
+                <p>Email Verification <input onChange={(e) => setEmailVerificationCode(e.target.value)} /></p>
+                <p>Password <input onChange={(e) => setPassword(e.target.value)} /></p>
+                
                 <h3>User Functions</h3>
                 <div style={buttonContainerStyle}>
                 {[
-                    { id: "CreateAccount", fn: () => Api.Users.CreateAccount('Brittany', 'Marie', 'Clark', email, 'abc123') },
+                    { id: "CreateAccount", fn: () => Api.Users.CreateAccount('Brittany', 'Marie', 'Clark', email, password) },
                     { id: "VerifyEmailCode", fn: () => Api.Users.VerifyEmailCode(email, emailVerificationCode) },
-                    { id: "DoLogin", fn: () => Api.Users.DoLogin(email, 'abc123')
+                    { id: "DoLogin", fn: () => Api.Users.DoLogin(email, password)
                         .then((response) => {
+                            setApiResponse(response);
                             const decoded = jwtDecode(response.data.accessToken);
                             setId(decoded.userId);
+                            return response;
                         })
                      },
                     { id: "EditAccount", fn: () => Api.Users.EditAccount(id, 'Tazeka', 'Marie', 'Liranov') },
                     { id: "RequestPasswordReset", fn: () => Api.Users.RequestPasswordReset(id, email) },
+                    { id: "ResetPassword", fn: () => Api.Users.ResetPassword(email, emailVerificationCode, password) },
                     { id: "DeleteAccount", fn: () => Api.Users.DeleteAccount(id) },
                     { id: "BulkCreateUsers", fn: () => console.error("TODO") },
                     { id: "GetById", fn: () => Api.Users.GetById(id) },
