@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './FormsPageAdmin.css'; // Make sure to create this CSS file
+import './FormsPageAdmin.css'; 
 
 const ViewFormsAdminPage = () => {
     const [forms, setForms] = useState([
@@ -20,11 +20,11 @@ const ViewFormsAdminPage = () => {
     );
 
     const handleFormClick = (formId) => {
-        navigate(`/create/${formId}`); // Update the path as needed
-    };
+        navigate(`/create/${formId}`); 
+    }
 
     const handleCreateForm = () => {
-        navigate('/create'); // Update the path as needed
+        navigate('/create');
     };
 
     return (
