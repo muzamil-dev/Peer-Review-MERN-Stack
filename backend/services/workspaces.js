@@ -14,11 +14,16 @@ export const getById = async(workspaceId) => {
             workspaceId: ws.id,
             name: ws.name
         }))[0];
+        if (!workspace)
+            return { 
+                error: "The requested workspace was not found", 
+                status: 404 
+            };
         // Return a single workspace
         return workspace;
     }
     catch(err){
-        return { error: err.message };
+        return { error: err.message, status: 500 };
     }
 }
 
@@ -50,7 +55,7 @@ export const getStudents = async(workspaceId) => {
         return students;
     }
     catch(err){
-        return { error: err.message };
+        return { error: err.message, status: 500 };
     }
 }
 
@@ -80,7 +85,7 @@ export const create = async(userId, name) => {
         return workspace;
     }
     catch(err){
-        return { error: err.message };
+        return { error: err.message, status: 500 };
     }
 }
 
@@ -99,14 +104,14 @@ export const join = async(userId, workspaceId) => {
         return res.rows[0];
     }
     catch(err){
-        return { error: err.message };
+        return { error: err.message, status: 500 };
     }
 }
 
 // Leave workspace
 export const leave = async(userId, workspaceId) => {
     try{
-        // Join
+        // Leave
         const res = await db.query(
             `delete from memberships
             where user_id = $1 and workspace_id = $2
@@ -116,6 +121,6 @@ export const leave = async(userId, workspaceId) => {
         return res.rows[0];
     }
     catch(err){
-        return { error: err.message };
+        return { error: err.message, status: 500 };
     }
 }
