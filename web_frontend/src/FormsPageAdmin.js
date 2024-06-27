@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './ViewFormsAdminPage.css'; // Make sure to create this CSS file
+import './FormsPageAdmin.css'; // Make sure to create this CSS file
 
 const ViewFormsAdminPage = () => {
     const [forms, setForms] = useState([

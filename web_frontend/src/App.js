@@ -22,7 +22,7 @@ function App() {
                     <Route path="/groupsAdmin/:workspaceId" element={<CustomGroupsPageAdmin />} />  // Add the route for CustomGroupsPageAdmin
                     <Route path="/ApiExamples" element={<ApiExamples />} />
                     <Route path="/formsAdmin" element={<FormsPageAdmin />} />  // Add the route for FormsPageAdmin
-                    <Route path="/create" element={<CreateFormPage />} /> // Add the route for CreateFormPage
+                    <Route path="/createForm" element={<CreateFormPage />} /> // Add the route for CreateFormPage
                 </Routes>
             </div>
         </Router>
