@@ -117,14 +117,15 @@ export const getStudents = async(workspaceId) => {
 }
 
 // Create a workspace
-export const create = async(userId, name) => {
+export const create = async(userId, settings) => {
     try{
         // Create the workspace
+        const { name, allowedDomains, groupMemberLimit } = settings;
         const res = await db.query(
-            `insert into workspaces (name)
-            values ($1)
-            returning *`,
-            [name]
+            `INSERT INTO workspaces (name, allowed_domains, group_member_limit)
+            VALUES ($1, $2, $3)
+            RETURNING *`,
+            [name, allowedDomains, groupMemberLimit]
         );
         // Make the creator an instructor of the workspace
         await db.query(
@@ -147,7 +148,7 @@ export const create = async(userId, name) => {
 }
 
 // Join a workspace
-// Edit to use invite code + allowedDomains instead of workspaceId
+// Edit to use allowedDomains as well
 export const join = async(userId, code) => {
     try{
         const res = await db.query(
