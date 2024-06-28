@@ -118,3 +118,64 @@ export const create = async(userId, workspaceId) => {
         return { error: err.message, status: 500 };
     }
 }
+
+export const join = async(userId, groupId) => {
+    try{
+        const check = await db.query(
+            `select g.id as group_to_join, g.name as group_name, m.group_id as group_joined, 
+            m.workspace_id, m.role, w.groups_locked as locked
+            from groups as g
+            left join memberships as m
+            on g.workspace_id = m.workspace_id and m.user_id = $1
+            left join workspaces as w
+            on g.workspace_id = w.id
+            where g.id = $2`,
+            [userId, groupId]
+        );
+
+        // Check that the group exists
+        const data = check.rows[0];
+        console.log(data);
+        if (!data)
+            return { 
+                error: "The requested group was not found", 
+                status: 404 
+            };
+        // Check that the user is in the workspace
+        if (!data.workspace_id)
+            return {
+                error: "Cannot join group: User is not in the same workspace as the group", 
+                status: 403
+            }
+        // Check if the group is locked
+        if (data.lock)
+            return { 
+                error: "Cannot join group: Groups are locked for this workspace", 
+                status: 403 
+            };
+        // Check that the user is a student
+        if (data.role !== "Student")
+            return { 
+                error: "Cannot join group: Only students can join groups", 
+                status: 400
+            };
+        // Check that the user isn't already in another group
+        if (data.group_joined)
+            return {
+                error: "Cannot join group: User is already in a group in this workspace",
+                status: 400
+            }
+
+        // Join the group
+        const res = await db.query(
+            `update memberships
+            set group_id = $1
+            where user_id = $2 and workspace_id = $3`,
+            [groupId, userId, data.workspace_id]
+        );
+        return { message: `Joined ${data.group_name} successfully!` };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
