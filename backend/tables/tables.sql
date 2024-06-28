@@ -9,6 +9,8 @@ create table users(
 create table workspaces(
     id serial primary key,
     name text not null,
+    invite_code text,
+    allowed_domains text[] not null default '{}',
     groups_created int not null default 0,
     groups_locked boolean not null default false
 );

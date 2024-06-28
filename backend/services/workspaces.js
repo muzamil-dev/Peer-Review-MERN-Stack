@@ -1,5 +1,7 @@
 import db from "../config.js";
 
+import generateCode from "./generateCode.js";
+
 // Get workspace by id
 export const getById = async(workspaceId) => {
     try{
@@ -90,18 +92,31 @@ export const create = async(userId, name) => {
 }
 
 // Join a workspace
-// Edit to use invite code instead of workspaceId
-export const join = async(userId, workspaceId) => {
+// Edit to use invite code + allowedDomains instead of workspaceId
+export const join = async(userId, code) => {
     try{
-        // Join
         const res = await db.query(
-            `insert into memberships
-            (user_id, workspace_id, role)
-            values ($1, $2, $3)
-            returning *`,
-            [userId, workspaceId, "Student"]
+            `SELECT *
+            FROM workspaces
+            WHERE invite_code = $1`,
+            [code]
         );
-        return res.rows[0];
+        const workspace = res.rows[0];
+        // Check the workspace's invite code
+        if (!workspace)
+            return { 
+                error: "Cannot join workspace: No workspace with this code was found", 
+                status: 400 
+            };
+        // Join
+        const _ = await db.query(
+            `INSERT INTO memberships
+            (user_id, workspace_id, role)
+            VALUES ($1, $2, $3)
+            RETURNING *`,
+            [userId, workspace.id, "Student"]
+        );
+        return { message: `Joined ${workspace.name} successfully!` };
     }
     catch(err){
         return { error: err.message, status: 500 };

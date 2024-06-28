@@ -6,9 +6,9 @@ import * as WorkspaceService from "./workspaces.js";
 export const getById = async(groupId) => {
     try{
         const res = await db.query(
-            `select *
-            from groups
-            where id = $1`,
+            `SELECT *
+            FROM groups
+            WHERE id = $1`,
             [groupId]
         );
         // Format the above query
@@ -34,14 +34,14 @@ export const getById = async(groupId) => {
 export const getMembers = async(groupId) => {
     try{
         const res = await db.query(
-            `select g.id as group_id, g.name, m.user_id, 
+            `SELECT g.id AS group_id, g.name, m.user_id, 
             u.first_name, u.last_name
-            from groups as g
-            left join memberships as m
-            on m.group_id = g.id
-            left join users as u
-            on m.user_id = u.id
-            where g.id = $1`,
+            FROM groups AS g
+            LEFT JOIN memberships AS m
+            ON m.group_id = g.id
+            LEFT JOIN users AS u
+            ON m.user_id = u.id
+            WHERE g.id = $1`,
             [groupId]
         );
 
@@ -75,22 +75,25 @@ export const getMembers = async(groupId) => {
     }
 }
 
+// Create a new group
+// Must have instructor role in workspace
 export const create = async(userId, workspaceId) => {
     try{
-        // Check if the workspace exists
-        const workspace = await WorkspaceService.getById(workspaceId);
-        // Return if an error happened
-        if (workspace.error)
-            return workspace;
         // Get the group's workspace
         const instructors = await db.query(
-            `select m.user_id, w.groups_created
-            from workspaces as w
-            join memberships as m
-            on m.workspace_id = w.id and m.role = 'Instructor'
-            where id = $1`,
+            `SELECT m.user_id, w.groups_created
+            FROM workspaces AS w
+            JOIN memberships AS m
+            ON m.workspace_id = w.id AND m.role = 'Instructor'
+            WHERE id = $1`,
             [workspaceId]
         );
+        // Check if the workspace exists
+        if (instructors.rows.length === 0)
+            return {
+                error: "Failed to create group: The requested workspace does not exist",
+                status: 404
+            };
         // Check if the user is an instructor
         const found = instructors.rows.find(user => user.user_id === userId);
         if (!found)
@@ -119,17 +122,18 @@ export const create = async(userId, workspaceId) => {
     }
 }
 
+// Join a group
 export const join = async(userId, groupId) => {
     try{
         const check = await db.query(
-            `select g.id as group_to_join, g.name as group_name, m.group_id as group_joined, 
-            m.workspace_id, m.role, w.groups_locked as locked
-            from groups as g
-            left join memberships as m
-            on g.workspace_id = m.workspace_id and m.user_id = $1
-            left join workspaces as w
-            on g.workspace_id = w.id
-            where g.id = $2`,
+            `SELECT g.id AS group_to_join, g.name AS group_name, m.group_id AS group_joined, 
+            m.workspace_id, m.role, w.groups_locked AS locked
+            FROM groups AS g
+            LEFT join memberships AS m
+            ON g.workspace_id = m.workspace_id AND m.user_id = $1
+            LEFT join workspaces AS w
+            ON g.workspace_id = w.id
+            WHERE g.id = $2`,
             [userId, groupId]
         );
 
@@ -145,13 +149,13 @@ export const join = async(userId, groupId) => {
         if (!data.workspace_id)
             return {
                 error: "Cannot join group: User is not in the same workspace as the group", 
-                status: 403
+                status: 400
             }
         // Check if the group is locked
         if (data.lock)
             return { 
                 error: "Cannot join group: Groups are locked for this workspace", 
-                status: 403 
+                status: 400 
             };
         // Check that the user is a student
         if (data.role !== "Student")
@@ -168,12 +172,60 @@ export const join = async(userId, groupId) => {
 
         // Join the group
         const res = await db.query(
-            `update memberships
-            set group_id = $1
-            where user_id = $2 and workspace_id = $3`,
+            `UPDATE memberships
+            SET group_id = $1
+            where user_id = $2 AND workspace_id = $3`,
             [groupId, userId, data.workspace_id]
         );
         return { message: `Joined ${data.group_name} successfully!` };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Leave a group
+// Join memberships table to check the group theyre in
+export const leave = async(userId, groupId) => {
+    try{
+        const res = await db.query(
+            `SELECT g.id, g.name, g.workspace_id, 
+            w.groups_locked AS lock, m.group_id AS group_joined
+            FROM groups AS g
+            JOIN workspaces AS w
+            ON g.workspace_id = w.id
+            JOIN memberships AS m
+            ON m.user_id = $1 AND m.workspace_id = g.workspace_id
+            WHERE g.id = $2`,
+            [userId, groupId]
+        );
+        const data = res.rows[0];
+        // Check if no data was returned, this means that no membership for that user/workspace was found
+        if (!data)
+            return {
+                error: "Cannot leave group: User is not a member of this workspace",
+                status: 400
+            };
+        // Check if the group is locked
+        if (data.lock)
+            return { 
+                error: "Cannot leave group: Groups are locked for this workspace", 
+                status: 400
+            };
+        // Check that the group being left is the group they are in
+        if (data.id !== data.group_joined)
+            return {
+                error: "Cannot leave group: User is not a member of this group",
+                status: 400
+            };
+        // Update the user's membership
+        const update = await db.query(
+            `UPDATE memberships
+            SET group_id = NULL
+            WHERE user_id = $1 AND workspace_id = $2`,
+            [userId, data.workspace_id]
+        );
+        return { message: `Left ${data.name} successfully!` };
     }
     catch(err){
         return { error: err.message, status: 500 };
