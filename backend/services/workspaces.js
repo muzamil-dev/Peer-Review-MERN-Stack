@@ -195,3 +195,39 @@ export const leave = async(userId, workspaceId) => {
         return { error: err.message, status: 500 };
     }
 }
+
+// Generate an invite code and set it
+export const setInvite = async(userId, workspaceId) => {
+    try{
+        // Check that the workspace exists and that the user is an instructor
+        const res = await db.query(
+            `SELECT w.id, w.name, m.* FROM workspaces as w
+            LEFT JOIN memberships as m
+            ON m.workspace_id = w.id AND m.user_id = $1
+            WHERE w.id = $2`,
+            [userId, workspaceId]
+        );
+        // Check that workspace exists
+        const data = res.rows[0];
+        if (!data)
+            return { 
+                error: "The requested workspace was not found", 
+                status: 404 
+            };
+        // Check that the user is an instructor
+        if (data.role !== "Instructor")
+            return { 
+                error: "Cannot set invite: Only instructors can set invites", 
+                status: 403
+            };
+        // Update the workspace
+        await db.query(
+            `UPDATE workspaces SET invite_code = $1 WHERE id = $2`,
+            [generateCode(), data.id]
+        );
+        return { message: "Invite code set successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
