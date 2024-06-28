@@ -12,6 +12,7 @@ create table workspaces(
     invite_code text,
     allowed_domains text[] not null default '{}',
     groups_created int not null default 0,
+    group_member_limit int,
     groups_locked boolean not null default false
 );
 

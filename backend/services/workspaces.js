@@ -6,9 +6,7 @@ import generateCode from "./generateCode.js";
 export const getById = async(workspaceId) => {
     try{
         const res = await db.query(
-            `select *
-            from workspaces
-            where id = $1`,
+            `SELECT * FROM workspaces WHERE id = $1`,
             [workspaceId]
         );
         // Format the above query
@@ -23,6 +21,63 @@ export const getById = async(workspaceId) => {
             };
         // Return a single workspace
         return workspace;
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Get all groups in a workspace
+// Returns an array of groups
+export const getGroups = async(workspaceId) => {
+    try{
+        // Check that the workspace exists
+        // Not using getById because group_member_limit is needed
+        const workspace = (await db.query(
+            `SELECT * FROM workspaces WHERE id = $1`,
+            [workspaceId]
+        )).rows[0];
+        if (!workspace)
+            return { 
+                error: "The requested workspace was not found", 
+                status: 404 
+            };
+
+        // Query for groups and members
+        const res = await db.query(
+            `SELECT g.id, g.name,
+            jsonb_agg(
+                jsonb_build_object(
+                    'userId', u.id,
+                    'firstName', u.first_name,
+                    'lastName', u.last_name
+                ) 
+            ) as members
+            FROM groups AS g
+            LEFT JOIN memberships AS m
+            ON g.id = m.group_id
+            LEFT JOIN users AS u
+            ON u.id = m.user_id
+            WHERE g.workspace_id = $1
+            GROUP BY g.id
+            ORDER BY g.id`,
+            [workspaceId]
+        );
+        // Format the above result
+        const groups = res.rows.map(group => {
+            if (!group.members[0].userId)
+                group.members = [];
+            return {
+                groupId: group.id,
+                name: group.name,
+                members: group.members
+            }
+        });
+        // Return formatted json
+        return {
+            groupMemberLimit: workspace.group_member_limit,
+            groups
+        };
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -128,9 +183,9 @@ export const leave = async(userId, workspaceId) => {
     try{
         // Leave
         const res = await db.query(
-            `delete from memberships
-            where user_id = $1 and workspace_id = $2
-            returning *`,
+            `DELETE FROM memberships
+            WHERE user_id = $1 AND workspace_id = $2
+            RETURNING *`,
             [userId, workspaceId]
         );
         return res.rows[0];
