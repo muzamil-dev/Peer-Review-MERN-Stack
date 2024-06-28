@@ -639,7 +639,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
          */
         GetStudentsWithoutGroup: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/studentsWithoutGroup`))
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/ungrouped`))
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;

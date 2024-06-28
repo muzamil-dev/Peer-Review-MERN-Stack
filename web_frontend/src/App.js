@@ -5,7 +5,7 @@ import LoginPage from './LoginPage';
 import DashboardPage from './DashboardPage';
 import Example from './ApiExamples';
 import CustomGroupsPage from './GroupsPage';  // Import the CustomGroupsPage component
-import CustomGroupsPageAdmin from './GroupsPageAdmin';  // Import the CustomGroupsPageAdmin component
+import GroupsPageAdmin from './GroupsPageAdmin';  // Import the CustomGroupsPageAdmin component
 import ApiExamples from './ApiExamples';
 import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin component
 import CreateFormPage from './CreateFormPageAdmin'; // Import the CreateFormPage component
@@ -18,11 +18,11 @@ function App() {
                     <Route path="/" element={<LoginPage />} />
                     <Route path="/DashboardPage" element={<DashboardPage />} />
                     <Route path="/ApiExamples" element={<Example />} />
-                    <Route path="/groups/:workspaceId" element={<CustomGroupsPage />} />  // Add the route for CustomGroupsPage
-                    <Route path="/groupsAdmin/:workspaceId" element={<CustomGroupsPageAdmin />} />  // Add the route for CustomGroupsPageAdmin
+                    <Route path="/groups/:workspaceId" element={<CustomGroupsPage />} />
+                    <Route path="/workspaces/:workspaceId/admin" element={<GroupsPageAdmin />} />
                     <Route path="/ApiExamples" element={<ApiExamples />} />
-                    <Route path="/formsAdmin" element={<FormsPageAdmin />} />  // Add the route for FormsPageAdmin
-                    <Route path="/createForm" element={<CreateFormPage />} /> // Add the route for CreateFormPage
+                    <Route path="/formsAdmin" element={<FormsPageAdmin />} />
+                    <Route path="/createForm" element={<CreateFormPage />} />
                 </Routes>
             </div>
         </Router>
