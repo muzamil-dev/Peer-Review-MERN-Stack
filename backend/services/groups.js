@@ -127,7 +127,7 @@ export const join = async(userId, groupId) => {
     try{
         const check = await db.query(
             `SELECT g.id AS group_to_join, g.name AS group_name, m.group_id AS group_joined, 
-            m.workspace_id, m.role, w.groups_locked AS locked
+            m.workspace_id, m.role, w.groups_locked AS locked, w.group_member_limit as mem_limit
             FROM groups AS g
             LEFT join memberships AS m
             ON g.workspace_id = m.workspace_id AND m.user_id = $1
@@ -139,7 +139,6 @@ export const join = async(userId, groupId) => {
 
         // Check that the group exists
         const data = check.rows[0];
-        console.log(data);
         if (!data)
             return { 
                 error: "The requested group was not found", 
@@ -167,6 +166,17 @@ export const join = async(userId, groupId) => {
         if (data.group_joined)
             return {
                 error: "Cannot join group: User is already in a group in this workspace",
+                status: 400
+            }
+        
+        // Check membership limit
+        const members = (await db.query(
+            `SELECT count(*) FROM memberships WHERE group_id = $1`,
+            [groupId]
+        )).rows[0];
+        if (members.count >= data.mem_limit)
+            return {
+                error: "Cannot join group: The group's member limit has been reached",
                 status: 400
             }
 
@@ -226,6 +236,54 @@ export const leave = async(userId, groupId) => {
             [userId, data.workspace_id]
         );
         return { message: `Left ${data.name} successfully!` };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Add a user to a group
+// This overrides locks and membership limits
+// TODO: Check that userId is an instructor
+export const addUser = async(userId, targetId, groupId) => {
+    try{
+        const check = await db.query(
+            `SELECT g.id AS group_to_join, g.name AS group_name, m.group_id AS group_joined, 
+            m.workspace_id, m.role
+            FROM groups AS g
+            LEFT join memberships AS m
+            ON g.workspace_id = m.workspace_id AND m.user_id = $1
+            LEFT join workspaces AS w
+            ON g.workspace_id = w.id
+            WHERE g.id = $2`,
+            [targetId, groupId]
+        );
+        // Check for any errors
+        const data = check.rows[0];
+        // Check that the group was found
+        if (!data)
+            return { 
+                error: "The requested group was not found", 
+                status: 404 
+            };
+        // Check that the user is in the workspace
+        if (!data.workspace_id)
+            return {
+                error: "Cannot join group: Target is not in the same workspace as the group", 
+                status: 400
+            }
+        // Check that the user is a student
+        if (data.role !== "Student")
+            return { 
+                error: "Cannot join group: Only students can join groups", 
+                status: 400
+            };
+        // Check that the user isn't already in another group
+        if (data.group_joined)
+            return {
+                error: "Cannot join group: Target is already in a group in this workspace",
+                status: 400
+            }
     }
     catch(err){
         return { error: err.message, status: 500 };
