@@ -116,6 +116,36 @@ export const getStudents = async(workspaceId) => {
     }
 }
 
+// Get all ungrouped students in a workspace
+// Returns an array of students
+export const getUngrouped = async(workspaceId) => {
+    try{
+        const res = await db.query(
+            `select m.*, u.first_name, u.last_name, 
+            u.email, g.name as group_name
+            from memberships as m
+            left join users as u
+            on m.user_id = u.id
+            left join groups as g
+            on m.group_id = g.id
+            where m.workspace_id = $1 and m.role = 'Student' AND m.group_id IS NULL`,
+            [workspaceId]
+        );
+        // Format the above query
+        const students = res.rows.map(row => ({
+            userId: row.user_id,
+            firstName: row.first_name,
+            lastName: row.last_name,
+            email: row.email,
+        }));
+        // Return the array
+        return students;
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
 // Create a workspace
 export const create = async(userId, settings) => {
     try{
@@ -196,8 +226,10 @@ export const leave = async(userId, workspaceId) => {
     }
 }
 
-// Generate an invite code and set it
-export const setInvite = async(userId, workspaceId) => {
+// Set the invite code of the workspace
+// The code will be generated in the endpoint and passed to 'code'
+// Set code to null to removeInvite
+export const setInvite = async(userId, workspaceId, code) => {
     try{
         // Check that the workspace exists and that the user is an instructor
         const res = await db.query(
@@ -223,7 +255,7 @@ export const setInvite = async(userId, workspaceId) => {
         // Update the workspace
         await db.query(
             `UPDATE workspaces SET invite_code = $1 WHERE id = $2`,
-            [generateCode(), data.id]
+            [code, data.id]
         );
         return { message: "Invite code set successfully" };
     }
