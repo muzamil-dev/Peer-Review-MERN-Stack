@@ -1,4 +1,3 @@
-// User ID Needs to be Updated When JWT Tokens are Implemented
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
