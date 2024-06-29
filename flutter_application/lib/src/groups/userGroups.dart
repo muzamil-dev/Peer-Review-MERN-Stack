@@ -7,8 +7,9 @@ import 'dart:convert';
 class UserGroup extends StatefulWidget {
   final String workspaceId;
   static const routeName = '/userGroups';
+  final String userId;
 
-  const UserGroup({required this.workspaceId});
+  const UserGroup({required this.workspaceId, required this.userId, super.key});
 
   @override
   State<UserGroup> createState() => _UserGroupState();
@@ -16,7 +17,6 @@ class UserGroup extends StatefulWidget {
 
 class _UserGroupState extends State<UserGroup> {
   List<dynamic> groups = [];
-  String userID = '667a2e4a8f5ce812352bba6f';
   int maxGroupLimit = -1;
   bool isWorkspaceLocked = false;
 
@@ -72,7 +72,7 @@ class _UserGroupState extends State<UserGroup> {
         },
         body: jsonEncode({
           'groupId': groupID,
-          'userId': userID,
+          'userId': widget.userId,
         }),
       );
       if (response.statusCode == 200) {
@@ -95,7 +95,7 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> leaveGroup(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
-    String groupID = getGroupID(userID);
+    String groupID = getGroupID();
 
     if (groupID == '') {
       return;
@@ -109,12 +109,11 @@ class _UserGroupState extends State<UserGroup> {
         },
         body: jsonEncode({
           'groupId': groupID,
-          'userId': userID,
+          'userId': widget.userId,
         }),
       );
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        print('Leave Group successful: $responseData');
+        // print('Leave Group successful: $responseData');
         setState(() {
           getGroupsData(context);
         });
@@ -134,7 +133,7 @@ class _UserGroupState extends State<UserGroup> {
 
   bool checkGroup(List<dynamic> currenGroupList) {
     for (var member in currenGroupList) {
-      if (member['userId'] == userID) {
+      if (member['userId'] == widget.userId) {
         return true;
       }
     }
@@ -143,12 +142,12 @@ class _UserGroupState extends State<UserGroup> {
 
   // Parses through groups list and returns the group which the user is currently in
   // If the user is not in a group , returns ''
-  String getGroupID(String userID) {
+  String getGroupID() {
     for (var group in groups) {
       var groupID = group['groupId'];
 
       for (var member in group['members']) {
-        if (member['userId'] == userID) {
+        if (member['userId'] == widget.userId) {
           return groupID;
         } else {
           continue;
