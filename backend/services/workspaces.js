@@ -1,6 +1,8 @@
 import db from "../config.js";
 
-import generateCode from "./generateCode.js";
+// TODO: Modify create route
+// TODO: Create edit route
+// TODO: Create delete route
 
 // Get workspace by id
 export const getById = async(workspaceId) => {
@@ -147,6 +149,7 @@ export const getUngrouped = async(workspaceId) => {
 }
 
 // Create a workspace
+// Modify to also allow creation of num groups
 export const create = async(userId, settings) => {
     try{
         // Create the workspace

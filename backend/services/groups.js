@@ -2,6 +2,10 @@ import db from "../config.js";
 
 import * as WorkspaceService from "./workspaces.js";
 
+// TODO: Create many
+// TOOD: Remove user
+// TODO: Delete group
+
 // Get a group by id
 export const getById = async(groupId) => {
     try{
@@ -122,12 +126,67 @@ export const create = async(userId, workspaceId) => {
     }
 }
 
+// Create many groups
+// Must have instructor role in workspace
+export const createMany = async(userId, workspaceId, numGroups) => {
+    try{
+        // Get the groups' workspace
+        const instructors = await db.query(
+            `SELECT m.user_id, w.groups_created
+            FROM workspaces AS w
+            JOIN memberships AS m
+            ON m.workspace_id = w.id AND m.role = 'Instructor'
+            WHERE id = $1`,
+            [workspaceId]
+        );
+        // Check if the workspace exists
+        if (instructors.rows.length === 0)
+            return {
+                error: "Failed to create group: The requested workspace does not exist",
+                status: 404
+            };
+        // Check if the user is an instructor
+        const found = instructors.rows.find(user => user.user_id === userId);
+        if (!found)
+            return {
+                error: "This user is not authorized to make this request",
+                status: 403
+            }
+        // Build the query
+        const curGroups = found.groups_created;
+        let insertQuery = `INSERT INTO groups (name, workspace_id) VALUES `;
+        for (let i = 1; i < numGroups; i++){
+            insertQuery += `('Group ${curGroups + i}', ${workspaceId}), `;
+        }
+        insertQuery += `('Group ${curGroups + numGroups}', ${workspaceId})
+                        RETURNING *`;
+        
+        // Create the groups
+        const [res, _] = await Promise.all([
+            db.query(insertQuery),
+            db.query(`update workspaces set groups_created = groups_created + $1 where id = $2`,
+                [numGroups, workspaceId])
+        ]);
+        // Format the result
+        const groups = res.rows.map(row => ({
+            groupId: row.id,
+            name: row.name,
+            workspaceId: row.workspace_id
+        }));
+        // Return the new group
+        return { message: "Groups created successfully", groups };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
 // Join a group
 export const join = async(userId, groupId) => {
     try{
         const check = await db.query(
             `SELECT g.id AS group_to_join, g.name AS group_name, m.group_id AS group_joined, 
-            m.workspace_id, m.role, w.groups_locked AS locked, w.group_member_limit as mem_limit
+            m.workspace_id, m.role, w.groups_locked AS locked, w.group_member_limit
             FROM groups AS g
             LEFT join memberships AS m
             ON g.workspace_id = m.workspace_id AND m.user_id = $1
@@ -174,7 +233,7 @@ export const join = async(userId, groupId) => {
             `SELECT count(*) FROM memberships WHERE group_id = $1`,
             [groupId]
         )).rows[0];
-        if (members.count >= data.mem_limit)
+        if (members.count >= data.group_member_limit)
             return {
                 error: "Cannot join group: The group's member limit has been reached",
                 status: 400
