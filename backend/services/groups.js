@@ -2,8 +2,6 @@ import db from "../config.js";
 
 import * as WorkspaceService from "./workspaces.js";
 
-// TODO: Remove user
-
 // Get a group by id
 export const getById = async(groupId) => {
     try{
@@ -364,39 +362,86 @@ export const addUser = async(userId, targetId, groupId) => {
     }
 }
 
+// Removes a user from their current group
+// This overrides locks and membership limits
+export const removeUser = async(userId, targetId, groupId) => {
+    try{
+        const res = await db.query(
+            `SELECT g.id AS group_to_leave, g.workspace_id, 
+            m1.group_id as target_cur_group, m2.role AS user_role
+            FROM groups AS g
+            LEFT JOIN memberships AS m1
+            ON m1.user_id = $1 AND m1.workspace_id = g.workspace_id
+            LEFT JOIN memberships as m2
+            ON m2.user_id = $2 AND m2.workspace_id = g.workspace_id
+            WHERE g.id = $3`,
+            [targetId, userId, groupId]
+        );
+        const data = res.rows[0];
+        // Check that the group was found
+        if (!data)
+            return { 
+                error: "The requested group was not found", 
+                status: 404 
+            };
+        // Check that the group being left is the group that target is in
+        if (data.group_to_leave !== data.target_cur_group)
+            return {
+                error: `Cannot remove target from this group because they are not a member`,
+                status: 400
+            }
+        // Check that the user making the request is an instructor
+        if (data.user_role !== "Instructor")
+            return { 
+                error: "User is not authorized to make this request", 
+                status: 403
+            };
+
+        // Remove the user from the group
+        await db.query(
+            `UPDATE memberships SET group_id = NULL
+            WHERE user_id = $1 and workspace_id = $2`,
+            [targetId, data.workspace_id]
+        );
+        return { message: "Target removed from group successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
 // Delete a group
 // User must be an instructor of the workspace that contains the group
 export const deleteGroup = async(userId, groupId) => {
     try{
-        const instructors = await db.query(
-            `SELECT m.user_id, m.role
+        // Get membership details of user userId in relation to the group's workspace
+        const res = await db.query(
+            `SELECT m.user_id, m.role AS user_role
             FROM groups AS g
-            JOIN workspaces AS w
-            ON g.workspace_id = w.id
-            JOIN memberships AS m
-            ON m.workspace_id = w.id AND m.role = 'Instructor'
-            WHERE g.id = $1`,
-            [groupId]
+            LEFT JOIN memberships AS m
+            ON m.workspace_id = g.workspace_id AND m.user_id = $1
+            WHERE g.id = $2`,
+            [userId, groupId]
         );
-        // If instructors is empty, then the group doesn't exist
-        if (instructors.rows.length === 0)
+        const instructor = res.rows[0];
+        // If instructor doesn't exist, the group was not found;
+        if (!instructor)
             return { 
                 error: "The requested group was not found", 
                 status: 404
             };
-        // Find if userId is an instructor
-        const found = instructors.rows.find(user => user.user_id === userId);
-        if (!found)
+        // Check if the user is an instructor
+        if (instructor.user_role !== "Instructor")
             return { 
                 error: "User is not authorized to make this request", 
                 status: 403
             };
         // Delete the group
-        const res = await db.query(
+        await db.query(
             `DELETE FROM groups WHERE id = $1 RETURNING *`,
             [groupId]
         );
-        return { message: `Deleted ${res.rows[0].name} successfully` };
+        return { message: `Deleted group successfully` };
     }
     catch(err){
         return { error: err.message, status: 500 };
