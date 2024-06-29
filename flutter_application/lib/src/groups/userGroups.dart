@@ -63,19 +63,8 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> joinGroup(BuildContext context, String groupID, index) async {
     final url = Uri.parse('http://10.0.2.2:5000/groups/join');
-    var currentGroup = groups[index];
-    var numMembers = currentGroup['members'].length;
-
     try {
-      // Check for Max Group Limit
-      if (numMembers == maxGroupLimit) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Join Group Failed: Max Group Limit Reached')),
-        );
-        return;
-      }
-
+      
       final response = await http.put(
         url,
         headers: {
@@ -191,8 +180,9 @@ class _UserGroupState extends State<UserGroup> {
   Widget displayGroupButtons(BuildContext context, index, groupID) {
     var currentGroup = groups[index];
     var userInCurrenGroup = checkGroup(currentGroup['members']);
+    var numMembers = currentGroup['members'].length;
 
-    if (isWorkspaceLocked) {
+    if (isWorkspaceLocked || (maxGroupLimit == numMembers && !userInCurrenGroup)) {
       return const SizedBox();
     }
 
