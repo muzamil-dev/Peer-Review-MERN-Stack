@@ -10,7 +10,7 @@ import groupRoutes from "./routes/groupRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import reviewAssignmentRoutes from "./routes/reviewAssignmentRoutes.js";
 import { TempUser } from "./models/tempUserModel.js";
-import cron from 'node-cron'; // Import node-cron
+import cron from 'node-cron';
 import cors from "cors";
 
 dotenv.config();
@@ -29,7 +29,7 @@ mongoose.connect(mongoDBURL, {
 }).then(() => {
     console.log('Connected to Database!!!!!');
 
-    // cron job to check for expired tokens and delete them
+    // delete expired tokens every hour
     cron.schedule('0 * * * *', async () => {
         try{
             const result = await TempUser.deleteMany({verificationTokenExpires: {$lt: Date.now()}});
