@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './DashboardPage.css';
-import Api from './Api.js';  // Adjust the path to where your Api.js file is located
-
+import Api from './Api.js'; 
 const DashboardPage = () => {
     const [workspaces, setWorkspaces] = useState([]);
     const [newWorkspaceName, setNewWorkspaceName] = useState('');
@@ -20,7 +19,7 @@ const DashboardPage = () => {
             if (response.status === 200) {
                 setWorkspaces(response.data);
             } else {
-                console.error('Failed to fetch workspaces:', response.error);
+                console.error('Failed to fetch workspaces:', response.message);
             }
         };
 
@@ -38,7 +37,7 @@ const DashboardPage = () => {
                 if (response.status === 200) {
                     setWorkspaces(response.data);
                 } else {
-                    console.error('Failed to fetch workspaces:', response.error);
+                    console.error('Failed to fetch workspaces:', response.message);
                 }
             };
 
