@@ -2,9 +2,7 @@ import db from "../config.js";
 
 import * as WorkspaceService from "./workspaces.js";
 
-// TODO: Create many
-// TOOD: Remove user
-// TODO: Delete group
+// TODO: Remove user
 
 // Get a group by id
 export const getById = async(groupId) => {
@@ -360,6 +358,45 @@ export const addUser = async(userId, targetId, groupId) => {
             [groupId, targetId, data.workspace_id]
         );
         return { message: "Target added to group successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Delete a group
+// User must be an instructor of the workspace that contains the group
+export const deleteGroup = async(userId, groupId) => {
+    try{
+        const instructors = await db.query(
+            `SELECT m.user_id, m.role
+            FROM groups AS g
+            JOIN workspaces AS w
+            ON g.workspace_id = w.id
+            JOIN memberships AS m
+            ON m.workspace_id = w.id AND m.role = 'Instructor'
+            WHERE g.id = $1`,
+            [groupId]
+        );
+        // If instructors is empty, then the group doesn't exist
+        if (instructors.rows.length === 0)
+            return { 
+                error: "The requested group was not found", 
+                status: 404
+            };
+        // Find if userId is an instructor
+        const found = instructors.rows.find(user => user.user_id === userId);
+        if (!found)
+            return { 
+                error: "User is not authorized to make this request", 
+                status: 403
+            };
+        // Delete the group
+        const res = await db.query(
+            `DELETE FROM groups WHERE id = $1 RETURNING *`,
+            [groupId]
+        );
+        return { message: `Deleted ${res.rows[0].name} successfully` };
     }
     catch(err){
         return { error: err.message, status: 500 };
