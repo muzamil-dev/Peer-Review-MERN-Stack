@@ -30,7 +30,7 @@ class _UserGroupState extends State<UserGroup> {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         setState(() {
-          groups = jsonResponse.toList();
+          groups = jsonResponse['groups'].toList();
         });
       }
     } catch (error) {
