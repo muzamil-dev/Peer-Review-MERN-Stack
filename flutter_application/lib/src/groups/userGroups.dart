@@ -91,6 +91,9 @@ class _UserGroupState extends State<UserGroup> {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         print('Leave Group successful: $responseData');
+        setState(() {
+          getGroupsData(context, widget.workspaceId);
+        });
       } else {
         final errorData = json.decode(response.body);
         print(
@@ -103,23 +106,6 @@ class _UserGroupState extends State<UserGroup> {
     } catch (error) {
       print("Error Joining groups: $error");
     }
-  }
-
-  Future<dynamic> getUser(String userID) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/$userID');
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        return data;
-      } else {
-        print("Error : Invalid Get User Status Code");
-      }
-    } catch (error) {
-      print("Error Getting User: $error");
-    }
-    return {};
   }
 
   bool checkGroup(List<dynamic> currenGroupList) {
