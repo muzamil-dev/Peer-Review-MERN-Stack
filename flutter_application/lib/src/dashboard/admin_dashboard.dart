@@ -28,18 +28,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
     Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
     userId = jwtDecodedToken['userId'];
     fetchWorkspaces();
-
   }
 
   Future<void> fetchWorkspaces() async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/users/$userId/workspaces');
+    final url = Uri.parse('http://10.0.2.2:5000/users/$userId/workspaces');
     try {
       final response = await http.get(url);
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        
+
         setState(() {
           workspaces =
               data.map((workspace) => Workspace.fromJson(workspace)).toList();
@@ -137,14 +135,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => AdminGroup(workspaceId: workspaceId, userId: userId,),
+          builder: (context) => AdminGroup(
+            workspaceId: workspaceId,
+            userId: userId,
+          ),
         ),
       );
     } else {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UserGroup(workspaceId: workspaceId, userId: userId),
+          builder: (context) =>
+              UserGroup(workspaceId: workspaceId, userId: userId),
         ),
       );
     }
@@ -225,6 +227,18 @@ class WorkspaceCard extends StatelessWidget {
   const WorkspaceCard({required this.workspace, required this.onTap, Key? key})
       : super(key: key);
 
+  Widget addMemberButton(BuildContext context) {
+    if (workspace.role == 'Instructor') {
+      return const IconButton(
+          onPressed: null,
+          icon: Icon(
+            Icons.person_add_alt_1,
+            color: Colors.black,
+          ));
+    }
+    return const SizedBox();
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -236,10 +250,16 @@ class WorkspaceCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                workspace.name,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    workspace.name,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  addMemberButton(context),
+                ],
               ),
               const SizedBox(height: 10),
               Text(
