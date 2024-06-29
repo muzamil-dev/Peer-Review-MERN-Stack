@@ -399,6 +399,9 @@ class _AdminGroupState extends State<AdminGroup> {
                       int.parse(limitController.text),
                       groupLock,
                     );
+                    if (groupLock) {
+                      await removeInviteCode(context);
+                    }
                     Navigator.of(context).pop();
                   },
                   child: const Text('Save'),
@@ -418,6 +421,27 @@ class _AdminGroupState extends State<AdminGroup> {
         builder: (context) => IndividualAdminGroup(groupId: groupId),
       ),
     );
+  }
+
+  Future<void> removeInviteCode(BuildContext context) async {
+    final url = Uri.parse(
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/removeInvite');
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'userId': widget.userId,
+        }),
+      );
+      if (response.statusCode == 200) {
+        print("Sucessfully Removed Invite Code.");
+      }
+    } catch (error) {
+      print("Error Removing Invite Code: $error");
+    }
   }
 
   Future<void> editWorkspace(String name, List<String> allowedDomains,
