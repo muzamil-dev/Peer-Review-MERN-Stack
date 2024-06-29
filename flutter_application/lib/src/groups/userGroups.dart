@@ -114,7 +114,7 @@ class _UserGroupState extends State<UserGroup> {
       );
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        print('Leave Group successful: $responseData');
+        // print('Leave Group successful: $responseData');
         setState(() {
           getGroupsData(context);
         });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/components/main_app_bar.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
 import 'CreateWorkspace.dart';
 import 'package:flutter_application/src/groups/adminGroups.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_application/src/groups/userGroups.dart';
 
 class AdminDashboard extends StatefulWidget {
   static const routeName = "/adminDashboard";
+  final token;
+  const AdminDashboard({@required this.token, super.key});
 
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
@@ -16,14 +19,15 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   List<Workspace> workspaces = [];
   bool isLoading = true;
-  final String userId =
-      '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+  late String userId; // Replace with the actual user ID
   final TextEditingController inviteCodeController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     fetchWorkspaces();
+    Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
+    userId = jwtDecodedToken['userId'];
   }
 
   Future<void> fetchWorkspaces() async {
@@ -31,13 +35,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
         'http://10.0.2.2:5000/users/6671c8362ffea49f3018bf61/workspaces');
     try {
       final response = await http.get(url);
+      
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
+        
         setState(() {
           workspaces =
               data.map((workspace) => Workspace.fromJson(workspace)).toList();
           isLoading = false;
         });
+
         //Navigator.pushNamed(context, '/createWorkspace');
       } else {
         throw Exception('Failed to load workspaces');

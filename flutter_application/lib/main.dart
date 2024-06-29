@@ -18,7 +18,6 @@ void main() {
       Login.routeName: (context) => const Login(),
       Signup.routeName: (context) => const Signup(),
       MyApp.routeName: (context) => const MyApp(),
-      AdminDashboard.routeName: (context) => AdminDashboard(),
       UserDashboard.routeName: (context) => const UserDashboard(),
       LoginSignup.routeName: (context) => const LoginSignup(),
       PasswordResetPage.routeName: (context) => PasswordResetPage(),
