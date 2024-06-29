@@ -105,6 +105,32 @@ class _UserGroupState extends State<UserGroup> {
     }
   }
 
+  Future<dynamic> getUser(String userID) async {
+    final url = Uri.parse('http://10.0.2.2:5000/users/$userID');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        return data;
+      } else {
+        print("Error : Invalid Get User Status Code");
+      }
+    } catch (error) {
+      print("Error Getting User: $error");
+    }
+    return {};
+  }
+
+  bool checkGroup(List<dynamic> currenGroupList) {
+    for (var member in currenGroupList) {
+      if (member['userId'] == userID) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Parses through groups list and returns the group which the user is currently in
   // If the user is not in a group , returns ''
   String getGroupID(String userID) {
@@ -139,6 +165,43 @@ class _UserGroupState extends State<UserGroup> {
         );
       }).toList(),
     );
+  }
+
+  Widget displayButtons(BuildContext context, index, groupID) {
+    var currentGroup = groups[index];
+    var userInCurrenGroup = checkGroup(currentGroup['members']);
+
+    if (!userInCurrenGroup) {
+      return TextButton(
+          onPressed: () async {
+            await leaveGroup(context);
+            await joinGroup(context, groupID);
+          },
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.green,
+          ),
+          child: const Padding(
+            padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+            child: Text("Join",
+                style: TextStyle(
+                  color: Colors.white,
+                )),
+          ));
+    }
+    return TextButton(
+        onPressed: () async {
+          await leaveGroup(context);
+        },
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.red,
+        ),
+        child: const Padding(
+          padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+          child: Text("Leave",
+              style: TextStyle(
+                color: Colors.white,
+              )),
+        ));
   }
 
   Widget groupCards(BuildContext context, index) {
@@ -196,36 +259,7 @@ class _UserGroupState extends State<UserGroup> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextButton(
-                  onPressed: () async {
-                    await leaveGroup(context);
-                    await joinGroup(context, groupID);
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                    child: Text("Join",
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
-                  )),
-              const SizedBox(
-                width: 20,
-              ),
-              TextButton(
-                  onPressed: null,
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.red,
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                    child: Text("Leave",
-                        style: TextStyle(
-                          color: Colors.white,
-                        )),
-                  )),
+              displayButtons(context, index, groupID),
             ],
           ),
         ],
