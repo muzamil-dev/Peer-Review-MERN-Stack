@@ -310,7 +310,7 @@ router.put("/setInvite", async (req, res) => {
         });
     }
     catch (err) {
-        console.log(err.message);
+        console.log(err);
         res.status(500).send({ message: err.message });
     }
 });
