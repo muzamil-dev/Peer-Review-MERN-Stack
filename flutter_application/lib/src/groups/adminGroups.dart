@@ -8,7 +8,8 @@ class AdminGroup extends StatefulWidget {
   static const routeName = '/adminGroups';
   final String userId; // User ID of Account User
 
-  const AdminGroup({super.key, required this.workspaceId, required this.userId});
+  const AdminGroup(
+      {super.key, required this.workspaceId, required this.userId});
 
   @override
   _AdminGroupState createState() => _AdminGroupState();
@@ -143,7 +144,8 @@ class _AdminGroupState extends State<AdminGroup> {
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Student added to the group successfully')),
+          const SnackBar(
+              content: Text('Student added to the group successfully')),
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
@@ -354,7 +356,8 @@ class _AdminGroupState extends State<AdminGroup> {
                   children: [
                     TextField(
                       controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Workspace Name'),
+                      decoration:
+                          const InputDecoration(labelText: 'Workspace Name'),
                     ),
                     TextField(
                       controller: domainsController,
@@ -363,14 +366,14 @@ class _AdminGroupState extends State<AdminGroup> {
                     ),
                     TextField(
                       controller: limitController,
-                      decoration:
-                          const InputDecoration(labelText: 'Group Member Limit'),
+                      decoration: const InputDecoration(
+                          labelText: 'Group Member Limit'),
                       keyboardType: TextInputType.number,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Group Lock'),
+                        const Text('Lock Workspace: '),
                         Switch(
                           value: groupLock,
                           onChanged: (value) {
@@ -471,7 +474,7 @@ class _AdminGroupState extends State<AdminGroup> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: Colors.white),
+            icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: showEditWorkspaceDialog,
           ),
         ],
