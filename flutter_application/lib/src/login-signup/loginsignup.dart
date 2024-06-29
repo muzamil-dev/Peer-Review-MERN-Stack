@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application/components/main_app_bar.dart';
 import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'dart:ui'; // for BackdropFilter
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -155,6 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
     initSharedPref();
   }
 
+// Allows for Persistent Storage of JWT Token
   void initSharedPref() async {
     prefs = await SharedPreferences.getInstance();
   }
@@ -174,13 +173,14 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
       if (response.statusCode == 200) {
-        // Navigate to dashboard
         final responseData = json.decode(response.body);
         var userToken = responseData['accessToken'];
         prefs.setString('token', userToken);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => AdminDashboard(token: userToken))); // Adjust the route name as needed
 
-      } else {
+        // Navigate to dashboard
+        Navigator.push(context, MaterialPageRoute(builder: (context) => AdminDashboard(token: userToken))); // Adjust the route name as needed
+      } 
+      else {
         // Login failed
         final errorData = json.decode(response.body);
         print('Login failed: ${response.statusCode}, ${errorData['message']}');
