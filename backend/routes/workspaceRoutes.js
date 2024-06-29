@@ -220,9 +220,18 @@ router.put("/leave", async(req, res) => {
         const userId = req.body.userId;
         const workspaceId = req.body.workspaceId;
 
+        // Find user's group id
+        const group = (await Getters.getGroupInWorkspace(userId, workspaceId));
+        let groupId;
+        if (group)
+            groupId = group._id;
+
+        // Remove from workspace and group
         await Promise.all([
             Removers.removeUserFromWorkspace(userId, workspaceId),
-            Removers.removeWorkspaceFromUser(userId, workspaceId)
+            Removers.removeWorkspaceFromUser(userId, workspaceId),
+            Removers.removeGroupFromUser(userId, groupId),
+            Removers.removeUserFromGroup(userId, groupId)
         ]);
 
         res.status(200).json({ message: "Workspace left successfully" });
@@ -232,6 +241,7 @@ router.put("/leave", async(req, res) => {
         res.status(500).send({ message: err.message });
     }
 });
+
 
 // Sets the active invite code
 router.put("/setInvite", async(req, res) => {
@@ -505,36 +515,7 @@ router.get("/:workspaceId/ungrouped", async (req, res) => {
     }
 });
 
-//moves student to group
-router.put("/:workspaceId/moveStudentToGroup", async (req, res) => {
-    try {
-        const { workspaceId } = req.params;
-        const { studentId, groupId } = req.body;
 
-        // Fetch the group and check existence
-        const group = await Group.findById(groupId);
-        if (!group || group.workspaceId.toString() !== workspaceId) {
-            return res.status(404).json({ message: "The provided group was not found in this workspace" });
-        }
-
-        // Remove student from current group if exists
-        await Group.updateMany(
-            { workspaceId },
-            { $pull: { userIds: studentId } }
-        );
-
-        // Add student to the new group
-        if (!group.userIds.includes(studentId)) {
-            group.userIds.push(studentId);
-            await group.save();
-        }
-
-        return res.json({ message: "Student moved to the group successfully" });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send({ message: err.message });
-    }
-});
 
 ////////////////////////////
 

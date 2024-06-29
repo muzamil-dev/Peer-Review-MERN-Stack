@@ -58,6 +58,18 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("Password Reset PAGE"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/userGroups");
+                },
+                child: const Text("USER GROUPS PAGE"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/adminGroups");
+                },
+                child: const Text("ADMIN GROUPS PAGE"),
+              ),
             ],
           ),
         ),
