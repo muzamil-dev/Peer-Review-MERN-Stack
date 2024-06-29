@@ -244,46 +244,63 @@ export const leave = async(userId, groupId) => {
 
 // Add a user to a group
 // This overrides locks and membership limits
-// TODO: Check that userId is an instructor
 export const addUser = async(userId, targetId, groupId) => {
     try{
         const check = await db.query(
-            `SELECT g.id AS group_to_join, g.name AS group_name, m.group_id AS group_joined, 
-            m.workspace_id, m.role
+            `SELECT g.id AS new_group, g.name AS new_group_name, m1.group_id AS target_cur_group, 
+            m1.workspace_id, m1.role as target_role, m2.role as user_role
             FROM groups AS g
-            LEFT join memberships AS m
-            ON g.workspace_id = m.workspace_id AND m.user_id = $1
-            LEFT join workspaces AS w
+            LEFT JOIN memberships AS m1
+            ON g.workspace_id = m1.workspace_id AND m1.user_id = $1
+            LEFT JOIN workspaces AS w
             ON g.workspace_id = w.id
-            WHERE g.id = $2`,
-            [targetId, groupId]
+            LEFT JOIN memberships as m2
+            ON g.workspace_id = m2.workspace_id AND m2.user_id = $2
+            WHERE g.id = $3`,
+            [targetId, userId, groupId]
         );
         // Check for any errors
         const data = check.rows[0];
+        
         // Check that the group was found
         if (!data)
             return { 
                 error: "The requested group was not found", 
                 status: 404 
             };
-        // Check that the user is in the workspace
+        // Check that the user is in the workspace. This will be null if no membership was found
+        // between the target and the workspace
         if (!data.workspace_id)
             return {
                 error: "Cannot join group: Target is not in the same workspace as the group", 
                 status: 400
             }
         // Check that the user is a student
-        if (data.role !== "Student")
+        if (data.target_role !== "Student")
             return { 
                 error: "Cannot join group: Only students can join groups", 
                 status: 400
             };
         // Check that the user isn't already in another group
-        if (data.group_joined)
+        if (data.target_cur_group)
             return {
                 error: "Cannot join group: Target is already in a group in this workspace",
                 status: 400
             }
+        // Check that the user making the request is an instructor
+        if (data.user_role !== "Instructor")
+            return { 
+                error: "User is not authorized to make this request", 
+                status: 403
+            };
+
+        // Move the user to the group
+        await db.query(
+            `UPDATE memberships SET group_id = $1
+            WHERE user_id = $2 and workspace_id = $3`,
+            [groupId, targetId, data.workspace_id]
+        );
+        return { message: "Target added to group successfully" };
     }
     catch(err){
         return { error: err.message, status: 500 };
