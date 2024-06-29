@@ -622,7 +622,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
          */
         GetAllStudents: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/allStudents`))
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/students`))
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
