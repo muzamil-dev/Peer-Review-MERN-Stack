@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/app.dart';
 import 'package:flutter_application/src/dashboard/user_dashboard.dart';
+import 'package:flutter_application/src/groups/adminGroups.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
 import 'package:flutter_application/src/login-signup/loginsignup.dart';
 import 'package:flutter_application/src/login-signup/signup.dart';
@@ -25,9 +26,10 @@ void main() async {
       LoginSignup.routeName: (context) => const LoginSignup(),
       PasswordResetPage.routeName: (context) => PasswordResetPage(),
       CreateWorkspace.routeName: (context) => CreateWorkspace(userId: '6671c8362ffea49f3018bf61'),
-      // Manually Implemented UserID for Raheem Sterling in Flutter Workspace for Debugging purposes
+      // Manually Implemented User Groups Page for Raheem Sterling in Flutter Workspace for Debugging purposes
       UserGroup.routeName: (context) => const UserGroup(workspaceId: '667a22ad8f5ce812352bba01', userId: '667a2e4a8f5ce812352bba6f',),
-      // AdminGroup.routeName: (context) => AdminGroup(workspaceId: '667a22ad8f5ce812352bba01', userId: ,),
+      // Manually Added Admin Groups Page route in Flutter Workspace for debugging purposes
+      AdminGroup.routeName: (context) => AdminGroup(workspaceId: '667a22ad8f5ce812352bba01', userId: '6671c8362ffea49f3018bf61',),
     },
   ));
 }
