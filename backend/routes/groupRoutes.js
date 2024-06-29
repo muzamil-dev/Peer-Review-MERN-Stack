@@ -158,7 +158,7 @@ router.put("/join", async(req, res) => {
         const memberLimit = (await Workspace.findById(workspaceId)
                             .select('groupMemberLimit')).groupMemberLimit;
         // Check the group's member limit
-        if (memberLimit && group.userIds.length >= memberLimit)
+        if (memberLimit && group.userIds.length > memberLimit)
             return res.status(400).json({
                 message: "Cannot join group because the member limit has been reached"
             });
