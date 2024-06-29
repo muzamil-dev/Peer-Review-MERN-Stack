@@ -4,9 +4,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';  // Import Bootstrap CSS
 import LoginPage from './LoginPage';
 import DashboardPage from './DashboardPage';
 import Example from './ApiExamples';
-import GroupsPage from './GroupsPage';  // Import the GroupsPage component
-import GroupsPageAdmin from './GroupsPageAdmin';  // Import the GroupsPageAdmin component
+import CustomGroupsPage from './GroupsPage';  // Import the CustomGroupsPage component
+import GroupsPageAdmin from './GroupsPageAdmin';  // Import the CustomGroupsPageAdmin component
 import ApiExamples from './ApiExamples';
+import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin component
+import CreateFormPage from './CreateFormPageAdmin'; // Import the CreateFormPage component
 
 function App() {
     return (
@@ -16,9 +18,11 @@ function App() {
                     <Route path="/" element={<LoginPage />} />
                     <Route path="/DashboardPage" element={<DashboardPage />} />
                     <Route path="/ApiExamples" element={<Example />} />
-                    <Route path="/groups/:workspaceId" element={<GroupsPage />} />  // Add the route for GroupsPage
-                    <Route path="/groupsAdmin/:workspaceId" element={<GroupsPageAdmin />} />  // Add the route for GroupsPageAdmin
+                    <Route path="/groups/:workspaceId" element={<CustomGroupsPage />} />
+                    <Route path="/workspaces/:workspaceId/admin" element={<GroupsPageAdmin />} />
                     <Route path="/ApiExamples" element={<ApiExamples />} />
+                    <Route path="/formsAdmin" element={<FormsPageAdmin />} />
+                    <Route path="/createForm" element={<CreateFormPage />} />
                 </Routes>
             </div>
         </Router>

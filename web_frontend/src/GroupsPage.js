@@ -7,8 +7,8 @@ const GroupsPage = () => {
     const navigate = useNavigate();
     const { maxGroupSize, numGroups } = location.state;
 
-    const userFirstName = 'Firstname'; // Replace with actual user data
-    const userLastName = 'Lastname'; // Replace with actual user data
+    const userFirstName = 'Firstname'; // Replace with actual name
+    const userLastName = 'Lastname'; // Replace with actual last name
     const userFullName = `${userFirstName} ${userLastName}`;
 
     const [groups, setGroups] = useState(Array.from({ length: numGroups }, (_, index) => ({

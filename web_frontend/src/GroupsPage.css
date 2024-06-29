@@ -17,6 +17,15 @@
     right: 20px;
 }
 
+.workspace-admin {
+    padding: 20px;
+}
+
+.header-large {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
 .top-right-container .btn-primary {
     background-color: #007bff;
     color: white;

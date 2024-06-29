@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application/components/main_app_bar.dart';
+import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'dart:ui'; // for BackdropFilter
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class LoginSignup extends StatefulWidget {
@@ -134,11 +135,28 @@ class _LoginSignupState extends State<LoginSignup> {
   }
 }
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController resetEmailController = TextEditingController();
+  late SharedPreferences prefs;
+
+  @override
+  void initState() {
+    super.initState();
+    initSharedPref();
+  }
+
+// Allows for Persistent Storage of JWT Token
+  void initSharedPref() async {
+    prefs = await SharedPreferences.getInstance();
+  }
 
   Future<void> loginUser(BuildContext context, String email, String password) async{
     final url = Uri.parse('http://10.0.2.2:5000/users/login');
@@ -155,11 +173,14 @@ class LoginScreen extends StatelessWidget {
         }),
       );
       if (response.statusCode == 200) {
-        // Navigate to dashboard
         final responseData = json.decode(response.body);
-        print('Login successful: $responseData');
-        Navigator.pushNamed(context, '/adminDashboard'); // Adjust the route name as needed
-      } else {
+        var userToken = responseData['accessToken'];
+        prefs.setString('token', userToken);
+
+        // Navigate to dashboard
+        Navigator.push(context, MaterialPageRoute(builder: (context) => AdminDashboard(token: userToken))); // Adjust the route name as needed
+      } 
+      else {
         // Login failed
         final errorData = json.decode(response.body);
         print('Login failed: ${response.statusCode}, ${errorData['message']}');

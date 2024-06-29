@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './DashboardPage.css';
-import Api from './Api.js';  // Adjust the path to where your Api.js file is located
-
+import Api from './Api.js'; 
 const DashboardPage = () => {
     const [workspaces, setWorkspaces] = useState([]);
     const [newWorkspaceName, setNewWorkspaceName] = useState('');
