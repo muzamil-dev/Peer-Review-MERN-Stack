@@ -25,14 +25,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   void initState() {
     super.initState();
-    fetchWorkspaces();
     Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
     userId = jwtDecodedToken['userId'];
+    fetchWorkspaces();
+
   }
 
   Future<void> fetchWorkspaces() async {
     final url = Uri.parse(
-        'http://10.0.2.2:5000/users/6671c8362ffea49f3018bf61/workspaces');
+        'http://10.0.2.2:5000/users/$userId/workspaces');
     try {
       final response = await http.get(url);
       

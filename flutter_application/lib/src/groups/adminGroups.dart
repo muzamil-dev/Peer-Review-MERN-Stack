@@ -73,7 +73,6 @@ class _AdminGroupState extends State<AdminGroup> {
           currentGroups = (responseData['groups'] as List<dynamic>)
               .map((group) => Group.fromJson(group))
               .toList();
-          groupLock = responseData['groupLock'];
         });
       } else {
         throw Exception('Failed to load groups');
@@ -428,8 +427,7 @@ class _AdminGroupState extends State<AdminGroup> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'userId':
-              '6671c8362ffea49f3018bf61', // Replace with actual admin user ID
+          'userId': widget.userId, // Replace with actual admin user ID
           'workspaceId': widget.workspaceId,
           'name': name,
           'allowedDomains': allowedDomains,
@@ -589,8 +587,8 @@ class _AdminGroupState extends State<AdminGroup> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: showAddGroupDialog,
-        child: const Icon(Icons.add),
         backgroundColor: const Color.fromARGB(255, 117, 147, 177),
+        child: const Icon(Icons.add),
       ),
     );
   }
