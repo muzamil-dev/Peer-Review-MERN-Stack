@@ -18,24 +18,43 @@ class _UserGroupState extends State<UserGroup> {
   List<dynamic> groups = [];
   String userID = '667a2e4a8f5ce812352bba6f';
   int maxGroupLimit = -1;
-  bool isWorkspaceLocked = true;
+  bool isWorkspaceLocked = false;
 
   @override
   void initState() {
     super.initState();
-    getGroupsData(context, widget.workspaceId);
+    getGroupsData(context);
   }
 
-  Future<void> getGroupsData(BuildContext context, String workspaceId) async {
-    final url =
-        Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
+  Future<void> getLockedStatus(BuildContext context) async {
+    final url = Uri.parse(
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         setState(() {
+          isWorkspaceLocked = jsonResponse['groupLock'];
+        });
+      }
+    } catch (error) {
+      print("Error Getting Locked Status: $error");
+    }
+  }
+
+  Future<void> getGroupsData(BuildContext context) async {
+    final url = Uri.parse(
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        await getLockedStatus(context);
+        setState(() {
           groups = jsonResponse['groups'].toList();
           maxGroupLimit = jsonResponse['groupMemberLimit'];
+          
         });
       }
     } catch (error) {
@@ -70,7 +89,7 @@ class _UserGroupState extends State<UserGroup> {
       );
       if (response.statusCode == 200) {
         setState(() {
-          getGroupsData(context, widget.workspaceId);
+          getGroupsData(context);
         });
       } else {
         final errorData = json.decode(response.body);
@@ -109,7 +128,7 @@ class _UserGroupState extends State<UserGroup> {
         final responseData = json.decode(response.body);
         print('Leave Group successful: $responseData');
         setState(() {
-          getGroupsData(context, widget.workspaceId);
+          getGroupsData(context);
         });
       } else {
         final errorData = json.decode(response.body);
@@ -222,7 +241,7 @@ class _UserGroupState extends State<UserGroup> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Text(
-                'Workspace Locked',
+                'Workspace: Locked',
                 style: TextStyle(
                   color: Colors.white,
                 ),
@@ -237,7 +256,29 @@ class _UserGroupState extends State<UserGroup> {
             ],
           ));
     }
-    return const Icon(Icons.lock_open);
+    return TextButton(
+        onPressed: null,
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.green,
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'Workspace: Open',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Icon(
+              Icons.lock_open,
+              color: Colors.white,
+            ),
+          ],
+        ));
   }
 
   Widget groupCards(BuildContext context, index) {
@@ -340,12 +381,21 @@ class _UserGroupState extends State<UserGroup> {
         },
         itemCount: groups.length,
       ),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
-        backgroundColor: Colors.green,
-        child: Icon(
-          Icons.check,
-          color: Colors.white,
+      floatingActionButton: const SizedBox(
+        height: 70,
+        width: 70,
+        child: FittedBox(
+          child: FloatingActionButton(
+            // shape: RoundedRectangleBorder(
+            //   borderRadius: BorderRadius.circular(8),
+            // ),
+            onPressed: null,
+            backgroundColor: Colors.green,
+            child: Icon(
+              Icons.home,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );
