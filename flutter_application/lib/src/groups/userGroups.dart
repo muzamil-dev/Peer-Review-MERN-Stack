@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// User ID Needs to be Updated When JWT Tokens are Implemented
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -54,7 +54,6 @@ class _UserGroupState extends State<UserGroup> {
         setState(() {
           groups = jsonResponse['groups'].toList();
           maxGroupLimit = jsonResponse['groupMemberLimit'];
-          
         });
       }
     } catch (error) {
@@ -72,7 +71,7 @@ class _UserGroupState extends State<UserGroup> {
       if (numMembers == maxGroupLimit) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Join Group Failed: Group Max Limit is Reached')),
+              content: Text('Join Group Failed: Max Group Limit Reached')),
         );
         return;
       }
@@ -265,7 +264,7 @@ class _UserGroupState extends State<UserGroup> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Text(
-              'Workspace: Open',
+              'Workspace: Unlocked',
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -392,7 +391,7 @@ class _UserGroupState extends State<UserGroup> {
             onPressed: null,
             backgroundColor: Colors.green,
             child: Icon(
-              Icons.home,
+              Icons.list_alt,
               color: Colors.white,
             ),
           ),
