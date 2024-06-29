@@ -1,8 +1,8 @@
 import db from "../config.js";
 
-// TODO: Modify create route
+import * as GroupService from './groups.js';
+
 // TODO: Create edit route
-// TODO: Create delete route
 
 // Get workspace by id
 export const getById = async(workspaceId) => {
@@ -153,7 +153,7 @@ export const getUngrouped = async(workspaceId) => {
 export const create = async(userId, settings) => {
     try{
         // Create the workspace
-        const { name, allowedDomains, groupMemberLimit } = settings;
+        const { name, allowedDomains, groupMemberLimit, numGroups } = settings;
         const res = await db.query(
             `INSERT INTO workspaces (name, allowed_domains, group_member_limit)
             VALUES ($1, $2, $3)
@@ -172,6 +172,9 @@ export const create = async(userId, settings) => {
             workspaceId: ws.id,
             name: ws.name
         }))[0];
+        // Create groups
+        if (numGroups)
+            await GroupService.createMany(userId, workspace.workspaceId, numGroups);
         // Return the workspace
         return workspace;
     }
@@ -261,6 +264,42 @@ export const setInvite = async(userId, workspaceId, code) => {
             [code, data.id]
         );
         return { message: "Invite code set successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Delete the workspace
+export const deleteWorkspace = async(userId, workspaceId) => {
+    try{
+        const res = await db.query(
+            `SELECT w.id as workspace_id, m.role AS user_role
+            FROM workspaces AS w
+            LEFT JOIN memberships as m
+            ON w.id = m.workspace_id AND m.user_id = $1
+            WHERE w.id = $2`,
+            [userId, workspaceId]
+        );
+        const data = res.rows[0];
+        // Check that the workspace exists
+        if (!data)
+            return { 
+                error: "The requested workspace was not found", 
+                status: 404 
+            };
+        // Check that the user is an instructor of the workspace
+        if (data.user_role !== "Instructor")
+            return { 
+                error: "User is not authorized to delete this workspace", 
+                status: 403
+            };
+        // Delete the workspace
+        await db.query(
+            `DELETE FROM workspaces WHERE id = $1`,
+            [workspaceId]
+        );
+        return { message: "Workspace deleted successfully" };
     }
     catch(err){
         return { error: err.message, status: 500 };
