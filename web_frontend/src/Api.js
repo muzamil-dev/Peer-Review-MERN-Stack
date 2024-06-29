@@ -650,6 +650,23 @@ export default {
                 message: response.data.message
             };
         },
+        /**
+         * Gets the details of the specified workspace
+         * @param {string} workspaceId
+         * @returns {Promise<{ status: number, data: { name: string, allowedDomains: string[], groupMemberLimit: number, groupLock: boolean }, message: string }>} The workspace details
+         */
+        GetWorkspaceDetails: async (workspaceId) => {
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/details`))
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
+        },
 
     }
 };

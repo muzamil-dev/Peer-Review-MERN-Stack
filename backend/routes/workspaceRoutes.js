@@ -14,17 +14,17 @@ import { ReviewAssignment } from '../models/reviewAssignmentModel.js';
 const router = express.Router();
 
 // Gets a list of assignments made in the workspace
-router.get("/:workspaceId/assignments", async(req, res) => {
-    try{
+router.get("/:workspaceId/assignments", async (req, res) => {
+    try {
         // Get the workspace
         const { workspaceId } = req.params;
         const workspace = await Workspace.findById(workspaceId);
         // Check that the workspace exists
         if (!workspace)
-            return res.status(404).json({ 
-                message: "The provided workspace was not found in our database" 
+            return res.status(404).json({
+                message: "The provided workspace was not found in our database"
             });
-        
+
         // Get the assignments with the provided workspaceId
         const assignments = await ReviewAssignment.find(
             { workspaceId }
@@ -41,23 +41,23 @@ router.get("/:workspaceId/assignments", async(req, res) => {
         );
         return res.json(formatted);
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
 });
 
 // Gets a list of groups from the workspace
-router.get("/:workspaceId/groups", async(req, res) => {
-    try{
+router.get("/:workspaceId/groups", async (req, res) => {
+    try {
         // Get the workspace
         const { workspaceId } = req.params;
         const workspace = await Workspace.findById(workspaceId)
-        .select('groupMemberLimit');
+            .select('groupMemberLimit');
         // Check that the workspace exists
         if (!workspace)
-            return res.status(404).json({ 
-                message: "The provided workspace was not found in our database" 
+            return res.status(404).json({
+                message: "The provided workspace was not found in our database"
             });
 
         // Get all groups from workspace
@@ -84,7 +84,7 @@ router.get("/:workspaceId/groups", async(req, res) => {
         };
         return res.json(groupObj);
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
@@ -93,26 +93,47 @@ router.get("/:workspaceId/groups", async(req, res) => {
 //get workspace name
 router.get('/:workspaceId/name', async (req, res) => {
     try {
-      const { workspaceId } = req.params;
-      const workspace = await Workspace.findById(workspaceId);
-      if (!workspace) {
-        return res.status(404).json({ message: 'Workspace not found' });
-      }
-      res.json({ name: workspace.name });
+        const { workspaceId } = req.params;
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) {
+            return res.status(404).json({ message: 'Workspace not found' });
+        }
+        res.json({ name: workspace.name });
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: err.message });
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Get workspace details
+router.get("/:workspaceId/details", async (req, res) => {
+    try {
+        const { workspaceId } = req.params;
+        const workspace = await Workspace.findById(workspaceId);
+        if (!workspace) {
+            return res.status(404).json({ message: 'Workspace not found' });
+        }
+        res.json({
+            name: workspace.name,
+            allowedDomains: workspace.allowedDomains,
+            groupMemberLimit: workspace.groupMemberLimit,
+            inviteCode: workspace.inviteCode,
+            groupLock: workspace.groupLock
+        });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: err.message });
     }
 });
 
 // Creates a new workspace
 // Required: name
 // Optional: numGroups, groupMemberLimit, allowedDomains
-router.post("/create", async(req, res) => {
-    try{
+router.post("/create", async (req, res) => {
+    try {
         // Check for the workspace name
-        const {name, userId, allowedDomains, groupMemberLimit, numGroups} = req.body;
-        if (!name || !userId){
+        const { name, userId, allowedDomains, groupMemberLimit, numGroups } = req.body;
+        if (!name || !userId) {
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
@@ -133,20 +154,20 @@ router.post("/create", async(req, res) => {
         ]);
 
         // Create groups if provided
-        if (numGroups && numGroups > 0){
+        if (numGroups && numGroups > 0) {
             const workspaceId = workspace._id;
             const groups = Array(numGroups);
             for (let i = 1; i <= numGroups; i++)
-                groups[i-1] = { name: `Group ${i}`, workspaceId };
+                groups[i - 1] = { name: `Group ${i}`, workspaceId };
             await Group.insertMany(groups);
         }
-        
+
         return res.status(201).json({
             message: "Workspace created successfully",
             workspaceId: workspace._id
         });
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
@@ -154,14 +175,14 @@ router.post("/create", async(req, res) => {
 
 // Join a workspace
 // Required: inviteCode
-router.put("/join", async(req, res) => {
-    try{
+router.put("/join", async (req, res) => {
+    try {
         const body = req.body;
         // Get userId and workspaceId
         const userId = body.userId;
         const inviteCode = body.inviteCode;
         // Check that the invite code was given
-        if (!body.inviteCode){
+        if (!body.inviteCode) {
             return res.status(400).json({ message: "One or more required fields was not present" });
         }
         // Get relevant info from the user and workspace
@@ -178,13 +199,13 @@ router.put("/join", async(req, res) => {
         // Check if user is already in workspace
         const workspaces = (await User.findById(userId)).workspaceIds;
         const found = workspaces.find(space => space.workspaceId.equals(workspaceId));
-        if (found){
+        if (found) {
             return res.status(400).json({ message: "The given user is already in the workspace" });
         }
 
         // Check if user's email contains an allowed domain
-        if (workspace.allowedDomains !== null 
-            && workspace.allowedDomains.length > 0){
+        if (workspace.allowedDomains !== null
+            && workspace.allowedDomains.length > 0) {
             // Check the list of domains if an allowedDomains list exists
             const userDomain = userInfo.email.split('@')[1];
             const domainCheck = (domain, userDomain) => {
@@ -192,7 +213,7 @@ router.put("/join", async(req, res) => {
                 return domainPattern.test(userDomain);
             }
             const foundDomain = workspace.allowedDomains.find(domain => domainCheck(domain, userDomain));
-            if (!foundDomain){
+            if (!foundDomain) {
                 return res.status(403).json({ message: "The given user is not authorized to join this workspace." });
             }
         }
@@ -203,11 +224,11 @@ router.put("/join", async(req, res) => {
             Adders.addWorkspaceToUser(userId, workspaceId, "Student")
         ]);
         // Return success message
-        res.json({ 
-            message: "Workspace joined successfully!", workspaceId 
+        res.json({
+            message: "Workspace joined successfully!", workspaceId
         });
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
@@ -215,8 +236,8 @@ router.put("/join", async(req, res) => {
 
 // Leave a workspace
 // Required: workspaceId
-router.put("/leave", async(req, res) => {
-    try{
+router.put("/leave", async (req, res) => {
+    try {
         const userId = req.body.userId;
         const workspaceId = req.body.workspaceId;
 
@@ -227,20 +248,20 @@ router.put("/leave", async(req, res) => {
 
         res.status(200).json({ message: "Workspace left successfully" });
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
 });
 
 // Sets the active invite code
-router.put("/setInvite", async(req, res) => {
-    try{
+router.put("/setInvite", async (req, res) => {
+    try {
         const inviteCode = generateCode();
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
-            return res.status(403).json({ 
-                message: "The provided user is not authorized to set invite codes" 
+            return res.status(403).json({
+                message: "The provided user is not authorized to set invite codes"
             });
         // Set the invite code
         const workspace = await Workspace.updateOne(
@@ -249,16 +270,16 @@ router.put("/setInvite", async(req, res) => {
         );
         // Check that the workspace was updated
         if (!workspace.matchedCount)
-            return res.status(404).json({ 
-                message: "The provided workspace wasn't found in our database" 
+            return res.status(404).json({
+                message: "The provided workspace wasn't found in our database"
             });
 
-        return res.json({ 
+        return res.json({
             message: "Invite code updated successfully",
             inviteCode
         });
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
@@ -267,14 +288,14 @@ router.put("/setInvite", async(req, res) => {
 // Edit a workspace
 // Required: workspaceId
 // Optional: name, allowedDomains, groupMemberLimit
-router.put("/edit", async(req, res) => {
-    try{
+router.put("/edit", async (req, res) => {
+    try {
         const { workspaceId, name, allowedDomains, groupMemberLimit, groupLock } = req.body;
         const update = {};
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
-            return res.status(403).json({ 
-                message: "The provided user is not authorized to edit this workspace" 
+            return res.status(403).json({
+                message: "The provided user is not authorized to edit this workspace"
             });
 
         // Check that workspaceId was provided
@@ -283,7 +304,7 @@ router.put("/edit", async(req, res) => {
                 message: "One or more required fields is not present"
             });
         // Check optional fields
-        if (name && typeof(name) === "string")
+        if (name && typeof (name) === "string")
             update.name = name;
         if (allowedDomains && Array.isArray(allowedDomains))
             update.allowedDomains = allowedDomains;
@@ -294,11 +315,11 @@ router.put("/edit", async(req, res) => {
 
         // Update the workspace
         const updated = await Workspace.updateOne(
-            { _id: workspaceId }, update 
+            { _id: workspaceId }, update
         );
         return res.status(200).json({ message: "Workspace updated successfully" });
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
@@ -308,20 +329,20 @@ router.put("/edit", async(req, res) => {
 // Reset the domains by passing an empty array
 // Required: workspaceId, allowedDomains (array)
 // deprecated :(
-router.put("/setAllowedDomains", async(req, res) => {
-    try{
+router.put("/setAllowedDomains", async (req, res) => {
+    try {
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.body.workspaceId))
-            return res.status(403).json({ 
-                message: "The provided user is not authorized to delete this workspace" 
+            return res.status(403).json({
+                message: "The provided user is not authorized to delete this workspace"
             });
 
         // Return if allowedDomains is not specified
-        if (!req.body.allowedDomains){
-            return res.status(400).json({ message: "One or more required fields was not present"} );
+        if (!req.body.allowedDomains) {
+            return res.status(400).json({ message: "One or more required fields was not present" });
         }
-        else if (!Array.isArray(req.body.allowedDomains)){
-            return res.status(400).json({ message: "Field allowedDomains must be an array"} );
+        else if (!Array.isArray(req.body.allowedDomains)) {
+            return res.status(400).json({ message: "Field allowedDomains must be an array" });
         }
         // Set the invite code
         const workspace = await Workspace.updateOne(
@@ -330,21 +351,21 @@ router.put("/setAllowedDomains", async(req, res) => {
         );
         // Check that the workspace was updated
         if (!workspace.matchedCount)
-            return res.status(404).json({ 
-                message: "The provided workspace wasn't found in our database" 
+            return res.status(404).json({
+                message: "The provided workspace wasn't found in our database"
             });
 
         return res.status(200).json({ message: "Allowed Domains set successfully" });
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
 });
 
 // Deletes the given workspace
-router.delete("/:workspaceId/delete", async(req, res) => {
-    try{
+router.delete("/:workspaceId/delete", async (req, res) => {
+    try {
         // Get all workspace users
         const workspace = await Workspace.findById(
             req.params.workspaceId
@@ -352,12 +373,12 @@ router.delete("/:workspaceId/delete", async(req, res) => {
 
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, workspace._id))
-            return res.status(403).json({ 
-                message: "The provided user is not authorized to delete this workspace" 
+            return res.status(403).json({
+                message: "The provided user is not authorized to delete this workspace"
             });
         // Check that the workspace exists
         if (!workspace)
-            return res.status(404).json({ 
+            return res.status(404).json({
                 message: "The provided workspace wasn't found in our database"
             });
 
@@ -378,22 +399,22 @@ router.delete("/:workspaceId/delete", async(req, res) => {
             Group.deleteMany({ workspaceId: req.body.workspaceId }),
             Workspace.findByIdAndDelete(req.body.workspaceId)
         ]);
-        
+
         return res.status(200).json({ message: "Workspace deleted successfully" });
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
 });
 
 // Removes the active invite code
-router.delete("/:workspaceId/removeInvite", async(req, res) => {
-    try{
+router.delete("/:workspaceId/removeInvite", async (req, res) => {
+    try {
         // Check that the user is the instructor
         if (!await Checkers.checkInstructor(req.body.userId, req.params.workspaceId))
-            return res.status(403).json({ 
-                message: "The provided user is not authorized to delete this workspace" 
+            return res.status(403).json({
+                message: "The provided user is not authorized to delete this workspace"
             });
         // Set the invite code
         const workspace = await Workspace.updateOne(
@@ -402,13 +423,13 @@ router.delete("/:workspaceId/removeInvite", async(req, res) => {
         );
         // Check that the workspace was updated
         if (!workspace.matchedCount)
-            return res.status(404).json({ 
-                message: "The provided workspace wasn't found in our database" 
+            return res.status(404).json({
+                message: "The provided workspace wasn't found in our database"
             });
 
         return res.status(200).json({ message: "Invite code removed successfully" });
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
         res.status(500).send({ message: err.message });
     }
