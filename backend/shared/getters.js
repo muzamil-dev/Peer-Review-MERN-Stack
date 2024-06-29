@@ -154,7 +154,7 @@ export async function getGroupReviewsByAssignment(groupId, assignmentId){
                 completed: review.completed
             })
         );
-        // Split between completed and incomplete
+        // Split between completed and incompletec
         const completedReviews = formattedReviews.filter(r => r.completed);
         const incompleteReviews = formattedReviews.filter(r => !r.completed);
         // Add to the object

@@ -126,6 +126,26 @@ router.get("/:workspaceId/details", async (req, res) => {
     }
 });
 
+// Get workspace details
+router.get("/:workspaceId/details", async (req, res) => {
+    try {
+      const { workspaceId } = req.params;
+      const workspace = await Workspace.findById(workspaceId);
+      if (!workspace) {
+        return res.status(404).json({ message: 'Workspace not found' });
+      }
+      res.json({
+        name: workspace.name,
+        allowedDomains: workspace.allowedDomains,
+        groupMemberLimit: workspace.groupMemberLimit,
+        groupLock: workspace.groupLock
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ message: err.message });
+    }
+  });
+
 // Creates a new workspace
 // Required: name
 // Optional: numGroups, groupMemberLimit, allowedDomains
@@ -241,9 +261,18 @@ router.put("/leave", async (req, res) => {
         const userId = req.body.userId;
         const workspaceId = req.body.workspaceId;
 
+        // Find user's group id
+        const group = (await Getters.getGroupInWorkspace(userId, workspaceId));
+        let groupId;
+        if (group)
+            groupId = group._id;
+
+        // Remove from workspace and group
         await Promise.all([
             Removers.removeUserFromWorkspace(userId, workspaceId),
-            Removers.removeWorkspaceFromUser(userId, workspaceId)
+            Removers.removeWorkspaceFromUser(userId, workspaceId),
+            Removers.removeGroupFromUser(userId, groupId),
+            Removers.removeUserFromGroup(userId, groupId)
         ]);
 
         res.status(200).json({ message: "Workspace left successfully" });
@@ -253,6 +282,7 @@ router.put("/leave", async (req, res) => {
         res.status(500).send({ message: err.message });
     }
 });
+
 
 // Sets the active invite code
 router.put("/setInvite", async (req, res) => {

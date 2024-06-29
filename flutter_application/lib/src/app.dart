@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/main_app_bar.dart';
+import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'package:flutter_application/src/login-signup/loginsignup.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatelessWidget {
+  final token;
+  
   const MyApp({
     super.key,
+    required this.token,
   });
 
   static const routeName = "/debug";
@@ -17,7 +22,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
+      home: 
+      Scaffold(
         appBar: MainAppBar(title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
         body: Center(
           child: Column(
@@ -58,16 +64,30 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("Password Reset PAGE"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/userGroups");
+                },
+                child: const Text("USER GROUPS PAGE"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/adminGroups");
+                },
+                child: const Text("ADMIN GROUPS PAGE"),
+              ),
             ],
           ),
         ),
       ),
+      // - - - Uncomment this line for Production
+      // (JwtDecoder.isExpired(token) == false)? AdminDashboard(token: token): const LoginSignup(), 
       routes: {
         //'/login': (context) => LoginScreen(), // Add the LoginScreen route
         //'/signup': (context) => SignUpScreen(), // Add the SignUpScreen route
         //'/userDashboard': (context) => UserDashboardScreen(), // Add the UserDashboardScreen route
         // '/adminDashboard': (context) => AdminDashboardScreen(), // Uncomment and add AdminDashboardScreen route if necessary
-        '/loginsignup': (context) => LoginSignup(), // Add the LoginSignupScreen route
+        '/loginsignup': (context) => const LoginSignup(), // Add the LoginSignupScreen route
       },
     );
     // Glue the SettingsController to the MaterialApp.
@@ -76,3 +96,4 @@ class MyApp extends StatelessWidget {
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
   }
 }
+
