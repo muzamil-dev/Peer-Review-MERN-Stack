@@ -18,7 +18,7 @@ class _UserGroupState extends State<UserGroup> {
   List<dynamic> groups = [];
   String userID = '667a2e4a8f5ce812352bba6f';
   int maxGroupLimit = -1;
-  bool isWorkspaceLocked = false;
+  bool isWorkspaceLocked = true;
 
   @override
   void initState() {
@@ -227,7 +227,13 @@ class _UserGroupState extends State<UserGroup> {
                   color: Colors.white,
                 ),
               ),
-              Icon(Icons.lock),
+              SizedBox(
+                width: 10,
+              ),
+              Icon(
+                Icons.lock,
+                color: Colors.white,
+              ),
             ],
           ));
     }
