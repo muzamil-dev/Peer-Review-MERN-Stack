@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -73,24 +76,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Join Workspace'),
+          title: const Text('Join Workspace'),
           content: TextField(
             controller: inviteCodeController,
-            decoration: InputDecoration(labelText: 'Invite Code'),
+            decoration: const InputDecoration(labelText: 'Invite Code'),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 joinWorkspace(inviteCodeController.text);
                 Navigator.pop(context);
               },
-              child: Text('Join'),
+              child: const Text('Join'),
             ),
           ],
         );
@@ -113,7 +116,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Workspace joined successfully')),
+          const SnackBar(content: Text('Workspace joined successfully')),
         );
         fetchWorkspaces(); // Refresh workspaces after joining
       } else {
@@ -125,7 +128,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     } catch (err) {
       print('Error joining workspace: $err');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error joining workspace')),
+        const SnackBar(content: Text('Error joining workspace')),
       );
     }
   }
@@ -170,13 +173,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
       body: Container(
         color: const Color(0xFF004080), // Set background color
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : ListView.builder(
                 itemCount: workspaces.length,
                 itemBuilder: (context, index) {
                   return WorkspaceCard(
                     workspace: workspaces[index],
                     onTap: navigateToGroupPage,
+                    userId: userId,
                   );
                 },
               ),
@@ -223,15 +227,92 @@ class Workspace {
 class WorkspaceCard extends StatelessWidget {
   final Workspace workspace;
   final Function(String, String) onTap;
+  final String userId;
 
-  const WorkspaceCard({required this.workspace, required this.onTap, Key? key})
-      : super(key: key);
+  const WorkspaceCard(
+      {required this.workspace,
+      required this.onTap,
+      required this.userId,
+      super.key});
+
+  Future<Object> createInviteCode(BuildContext context) async {
+    final url = Uri.parse('http://10.0.2.2:5000/workspaces/setInvite');
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'userId': userId,
+          'workspaceId': workspace.workspaceId,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        return jsonResponse;
+      } else {
+        print("Create Invite Code Unsuccessful");
+      }
+    } catch (error) {
+      print("Error Creating Invite Code: $error");
+    }
+    return {
+      "message": "Invite Code not Created",
+      "inviteCode": null,
+    };
+  }
+
+  Future<void> inviteDialog(BuildContext context) async {
+    dynamic inviteCodeObject = await createInviteCode(context);
+    String inviteCode = inviteCodeObject['inviteCode'];
+
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(width: 28.0),
+                const Center(
+                    child: Text(
+                  "Invite Code",
+                  style: TextStyle(fontSize: 24.0),
+                )),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(
+                    Icons.close_sharp,
+                    color: Colors.black,
+                    size: 28.0,
+                  ),
+                )
+              ],
+            ),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  inviteCode,
+                  style: const TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
 
   Widget addMemberButton(BuildContext context) {
     if (workspace.role == 'Instructor') {
-      return const IconButton(
-          onPressed: null,
-          icon: Icon(
+      return IconButton(
+          onPressed: () {
+            inviteDialog(context);
+          },
+          icon: const Icon(
             Icons.person_add_alt_1,
             color: Colors.black,
           ));
