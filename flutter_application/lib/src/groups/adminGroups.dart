@@ -6,8 +6,9 @@ import 'package:http/http.dart' as http;
 class AdminGroup extends StatefulWidget {
   final String workspaceId;
   static const routeName = '/adminGroups';
+  final String userId; // User ID of Account User
 
-  const AdminGroup({super.key, required this.workspaceId});
+  const AdminGroup({super.key, required this.workspaceId, required this.userId});
 
   @override
   _AdminGroupState createState() => _AdminGroupState();
@@ -19,8 +20,6 @@ class _AdminGroupState extends State<AdminGroup> {
   bool isLoading = true;
   String workspaceName = '';
   bool groupLock = false;
-  final String adminUserId =
-      '6671c8362ffea49f3018bf61'; // Replace with actual admin user ID
 
   @override
   void initState() {
@@ -54,7 +53,7 @@ class _AdminGroupState extends State<AdminGroup> {
     } catch (error) {
       print('Error fetching workspace details: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load workspace details')),
+        const SnackBar(content: Text('Failed to load workspace details')),
       );
     }
   }
@@ -112,12 +111,12 @@ class _AdminGroupState extends State<AdminGroup> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          'userId': adminUserId,
+          'userId': widget.userId,
         }),
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Group deleted successfully')),
+          const SnackBar(content: Text('Group deleted successfully')),
         );
         await fetchGroups(); // Refresh groups after deletion
         await fetchUngroupedStudents(); // Refresh ungrouped students after deletion
@@ -138,14 +137,14 @@ class _AdminGroupState extends State<AdminGroup> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          'userId': adminUserId,
+          'userId': widget.userId,
           'targetId': userId,
           'groupId': groupId,
         }),
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Student added to the group successfully')),
+          const SnackBar(content: Text('Student added to the group successfully')),
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
@@ -157,7 +156,7 @@ class _AdminGroupState extends State<AdminGroup> {
     } catch (err) {
       print('Error adding student to group: $err');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding student to group')),
+        const SnackBar(content: Text('Error adding student to group')),
       );
     }
   }
@@ -171,14 +170,14 @@ class _AdminGroupState extends State<AdminGroup> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          'userId': adminUserId,
+          'userId': widget.userId,
           'targetId': userId,
           'groupId': groupId,
         }),
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
               content: Text('Student removed from the group successfully')),
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
@@ -191,7 +190,7 @@ class _AdminGroupState extends State<AdminGroup> {
     } catch (err) {
       print('Error removing student from group: $err');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error removing student from group')),
+        const SnackBar(content: Text('Error removing student from group')),
       );
     }
   }
@@ -201,14 +200,14 @@ class _AdminGroupState extends State<AdminGroup> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Student'),
+          title: const Text('Edit Student'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (currentGroupId !=
                   null) // Only show "Kick" if the student is in a group
                 ListTile(
-                  title: Text('Kick from Group',
+                  title: const Text('Kick from Group',
                       style: TextStyle(color: Colors.red)),
                   onTap: () {
                     removeStudentFromGroup(student.userId, currentGroupId);
@@ -235,7 +234,7 @@ class _AdminGroupState extends State<AdminGroup> {
                       ))
                   .toList(),
               ListTile(
-                title: Text('Kick from Workspace',
+                title: const Text('Kick from Workspace',
                     style: TextStyle(color: Colors.red)),
                 onTap: () {
                   kickStudent(student.userId);
@@ -264,7 +263,7 @@ class _AdminGroupState extends State<AdminGroup> {
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
               content: Text('Student kicked from the workspace successfully')),
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
@@ -277,7 +276,7 @@ class _AdminGroupState extends State<AdminGroup> {
     } catch (err) {
       print('Error kicking student from workspace: $err');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error kicking student from workspace')),
+        const SnackBar(content: Text('Error kicking student from workspace')),
       );
     }
   }
@@ -296,12 +295,12 @@ class _AdminGroupState extends State<AdminGroup> {
         },
         body: jsonEncode(<String, String>{
           'workspaceId': widget.workspaceId,
-          'userId': adminUserId,
+          'userId': widget.userId,
         }),
       );
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Group added successfully')),
+          const SnackBar(content: Text('Group added successfully')),
         );
         await fetchGroupsAndStudents(); // Refresh groups and ungrouped students immediately after adding a group
       } else {
@@ -336,7 +335,7 @@ class _AdminGroupState extends State<AdminGroup> {
       } else {
         print('Failed to load workspace details: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load workspace details')),
+          const SnackBar(content: Text('Failed to load workspace details')),
         );
       }
     }).catchError((error) {
@@ -349,30 +348,30 @@ class _AdminGroupState extends State<AdminGroup> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Edit Workspace'),
+              title: const Text('Edit Workspace'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: nameController,
-                      decoration: InputDecoration(labelText: 'Workspace Name'),
+                      decoration: const InputDecoration(labelText: 'Workspace Name'),
                     ),
                     TextField(
                       controller: domainsController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           labelText: 'Allowed Domains (comma-separated)'),
                     ),
                     TextField(
                       controller: limitController,
                       decoration:
-                          InputDecoration(labelText: 'Group Member Limit'),
+                          const InputDecoration(labelText: 'Group Member Limit'),
                       keyboardType: TextInputType.number,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Group Lock'),
+                        const Text('Group Lock'),
                         Switch(
                           value: groupLock,
                           onChanged: (value) {
@@ -400,7 +399,7 @@ class _AdminGroupState extends State<AdminGroup> {
                     );
                     Navigator.of(context).pop();
                   },
-                  child: Text('Save'),
+                  child: const Text('Save'),
                 ),
               ],
             );
@@ -440,7 +439,7 @@ class _AdminGroupState extends State<AdminGroup> {
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Workspace updated successfully')),
+          const SnackBar(content: Text('Workspace updated successfully')),
         );
         fetchWorkspaceName(); // Refresh the workspace name
       } else {
@@ -452,7 +451,7 @@ class _AdminGroupState extends State<AdminGroup> {
     } catch (err) {
       print('Error editing workspace: $err');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error editing workspace')),
+        const SnackBar(content: Text('Error editing workspace')),
       );
     }
   }
@@ -464,7 +463,7 @@ class _AdminGroupState extends State<AdminGroup> {
       appBar: AppBar(
         title: Text(
           workspaceName.isEmpty ? 'Loading...' : workspaceName,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -474,13 +473,13 @@ class _AdminGroupState extends State<AdminGroup> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.edit, color: Colors.white),
+            icon: const Icon(Icons.edit, color: Colors.white),
             onPressed: showEditWorkspaceDialog,
           ),
         ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 // Container to list ungrouped students
@@ -494,12 +493,12 @@ class _AdminGroupState extends State<AdminGroup> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'Ungrouped Students',
                                 style: TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold),
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               ListView.builder(
                                 shrinkWrap: true,
                                 itemCount: ungroupedStudents.length,
@@ -510,7 +509,7 @@ class _AdminGroupState extends State<AdminGroup> {
                                         '${student.firstName} ${student.lastName}'),
                                     subtitle: Text(student.email),
                                     trailing: IconButton(
-                                      icon: Icon(Icons.edit),
+                                      icon: const Icon(Icons.edit),
                                       onPressed: () {
                                         showMoveStudentDialog(student);
                                       },
@@ -553,14 +552,14 @@ class _AdminGroupState extends State<AdminGroup> {
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 10),
+                                  const SizedBox(height: 10),
                                   Column(
                                     children: group.members.map((member) {
                                       return ListTile(
                                         title: Text(
                                             '${member.firstName} ${member.lastName}'),
                                         trailing: IconButton(
-                                          icon: Icon(Icons.edit),
+                                          icon: const Icon(Icons.edit),
                                           onPressed: () {
                                             showMoveStudentDialog(
                                               Student(
@@ -590,8 +589,8 @@ class _AdminGroupState extends State<AdminGroup> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: showAddGroupDialog,
-        child: Icon(Icons.add),
-        backgroundColor: Color.fromARGB(255, 117, 147, 177),
+        child: const Icon(Icons.add),
+        backgroundColor: const Color.fromARGB(255, 117, 147, 177),
       ),
     );
   }

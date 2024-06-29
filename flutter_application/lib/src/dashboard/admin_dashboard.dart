@@ -19,7 +19,7 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   List<Workspace> workspaces = [];
   bool isLoading = true;
-  late String userId; // Replace with the actual user ID
+  late String userId;
   final TextEditingController inviteCodeController = TextEditingController();
 
   @override
@@ -136,14 +136,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => AdminGroup(workspaceId: workspaceId),
+          builder: (context) => AdminGroup(workspaceId: workspaceId, userId: userId,),
         ),
       );
     } else {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UserGroup(workspaceId: workspaceId),
+          builder: (context) => UserGroup(workspaceId: workspaceId, userId: userId),
         ),
       );
     }
