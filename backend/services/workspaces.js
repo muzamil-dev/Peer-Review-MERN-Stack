@@ -2,7 +2,7 @@ import db from "../config.js";
 
 import * as GroupService from './groups.js';
 
-// TODO: Create edit route
+// TODO: Edit join for allowed domains
 
 // Get workspace by id
 export const getById = async(workspaceId) => {
@@ -177,6 +177,60 @@ export const create = async(userId, settings) => {
             await GroupService.createMany(userId, workspace.workspaceId, numGroups);
         // Return the workspace
         return workspace;
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Edit a workspace
+// Possible updates: name, allowedDomains, groupMemberLimit
+export const edit = async(userId, workspaceId, settings) => {
+    // Create the workspace
+    try{
+        const res = await db.query(
+            `SELECT w.id as workspace_id, m.role AS user_role
+            FROM workspaces AS w
+            LEFT JOIN memberships as m
+            ON w.id = m.workspace_id AND m.user_id = $1
+            WHERE w.id = $2`,
+            [userId, workspaceId]
+        );
+        const data = res.rows[0];
+        // Check that the workspace exists
+        if (!data)
+            return { 
+                error: "The requested workspace was not found", 
+                status: 404 
+            };
+        // Check that the user is an instructor of the workspace
+        if (data.user_role !== "Instructor")
+            return { 
+                error: "User is not authorized to edit this workspace", 
+                status: 403
+            };
+
+        // Create updates object based on database fields
+        const updates = {};
+        if (settings.name)
+            updates.name = settings.name;
+        if (settings.allowedDomains)
+            updates.allowed_domains = settings.allowedDomains;
+        if (settings.groupMemberLimit || settings.groupMemberLimit === null)
+            updates.group_member_limit = settings.groupMemberLimit;
+        // Generate the query string
+        const keys = Object.keys(updates);
+        const values = Object.values(updates);
+        const setClause = keys.map((key, idx) => `${key} = $${idx + 1}`).join(', ');
+        // Push workspace id onto list of values to use in query
+        values.push(workspaceId);
+
+        // Build and send the query
+        const query = `UPDATE workspaces SET ${setClause} WHERE id = $${values.length}`
+        await db.query(
+            query, values
+        );
+        return { message: "Workspace updated successfully" };
     }
     catch(err){
         return { error: err.message, status: 500 };

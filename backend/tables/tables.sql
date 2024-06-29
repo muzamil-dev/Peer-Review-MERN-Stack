@@ -29,3 +29,11 @@ create table memberships(
     role text not null,
     primary key (user_id, workspace_id)
 );
+
+CREATE TABLE assignments(
+    id SERIAL PRIMARY KEY,
+    workspace_id INT REFERENCES workspaces (id) ON DELETE CASCADE,
+    start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    due_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    description TEXT
+);
