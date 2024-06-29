@@ -1,5 +1,7 @@
 import db from "../config.js";
 
+// TODO: Re-add signup features
+
 // Get a user by their id
 export const getUserById = async(userId) => {
     try{

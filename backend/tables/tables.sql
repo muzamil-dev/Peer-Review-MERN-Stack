@@ -32,8 +32,21 @@ create table memberships(
 
 CREATE TABLE assignments(
     id SERIAL PRIMARY KEY,
-    workspace_id INT REFERENCES workspaces (id) ON DELETE CASCADE,
+    workspace_id INT NOT NULL REFERENCES workspaces (id) ON DELETE CASCADE,
     start_date TIMESTAMP WITH TIME ZONE NOT NULL,
     due_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    description TEXT
+    questions TEXT[] NOT NULL,
+    description TEXT,
+    started BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE reviews(
+    id SERIAL PRIMARY KEY,
+    assignment_id INT REFERENCES assignments (id) ON DELETE CASCADE,
+    group_id INT REFERENCES groups (id) ON DELETE CASCADE,
+    user_id INT REFERENCES users (id) ON DELETE CASCADE,
+    target_id INT REFERENCES users (id) ON DELETE CASCADE,
+    completed BOOLEAN NOT NULL DEFAULT false,
+    ratings INT[],
+    UNIQUE(assignment_id, user_id, target_id)
 );
