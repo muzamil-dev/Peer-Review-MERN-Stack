@@ -18,6 +18,7 @@ class _UserGroupState extends State<UserGroup> {
   List<dynamic> groups = [];
   String userID = '667a2e4a8f5ce812352bba6f';
   int maxGroupLimit = -1;
+  bool isWorkspaceLocked = false;
 
   @override
   void initState() {
@@ -48,8 +49,7 @@ class _UserGroupState extends State<UserGroup> {
     var numMembers = currentGroup['members'].length;
 
     try {
-
-      // Check for Max Group Limit 
+      // Check for Max Group Limit
       if (numMembers == maxGroupLimit) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -57,7 +57,7 @@ class _UserGroupState extends State<UserGroup> {
         );
         return;
       }
-      
+
       final response = await http.put(
         url,
         headers: {
@@ -170,9 +170,13 @@ class _UserGroupState extends State<UserGroup> {
     );
   }
 
-  Widget displayButtons(BuildContext context, index, groupID) {
+  Widget displayGroupButtons(BuildContext context, index, groupID) {
     var currentGroup = groups[index];
     var userInCurrenGroup = checkGroup(currentGroup['members']);
+
+    if (isWorkspaceLocked) {
+      return const SizedBox();
+    }
 
     if (!userInCurrenGroup) {
       return TextButton(
@@ -205,6 +209,29 @@ class _UserGroupState extends State<UserGroup> {
                 color: Colors.white,
               )),
         ));
+  }
+
+  Widget lockWidget(BuildContext context) {
+    if (isWorkspaceLocked) {
+      return TextButton(
+          onPressed: null,
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.redAccent,
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text(
+                'Workspace Locked',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              Icon(Icons.lock),
+            ],
+          ));
+    }
+    return const Icon(Icons.lock_open);
   }
 
   Widget groupCards(BuildContext context, index) {
@@ -262,7 +289,7 @@ class _UserGroupState extends State<UserGroup> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              displayButtons(context, index, groupID),
+              displayGroupButtons(context, index, groupID),
             ],
           ),
         ],
@@ -279,11 +306,17 @@ class _UserGroupState extends State<UserGroup> {
         iconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        title: const Text(
-          'Groups',
-          style: TextStyle(
-            color: Colors.white,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Groups',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            lockWidget(context),
+          ],
         ),
       ),
       body: ListView.separated(
