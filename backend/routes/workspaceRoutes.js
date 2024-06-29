@@ -105,6 +105,26 @@ router.get('/:workspaceId/name', async (req, res) => {
     }
 });
 
+// Get workspace details
+router.get("/:workspaceId/details", async (req, res) => {
+    try {
+      const { workspaceId } = req.params;
+      const workspace = await Workspace.findById(workspaceId);
+      if (!workspace) {
+        return res.status(404).json({ message: 'Workspace not found' });
+      }
+      res.json({
+        name: workspace.name,
+        allowedDomains: workspace.allowedDomains,
+        groupMemberLimit: workspace.groupMemberLimit,
+        groupLock: workspace.groupLock
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ message: err.message });
+    }
+  });
+
 // Creates a new workspace
 // Required: name
 // Optional: numGroups, groupMemberLimit, allowedDomains
@@ -515,7 +535,36 @@ router.get("/:workspaceId/ungrouped", async (req, res) => {
     }
 });
 
+//moves student to group
+router.put("/:workspaceId/moveStudentToGroup", async (req, res) => {
+    try {
+        const { workspaceId } = req.params;
+        const { studentId, groupId } = req.body;
 
+        // Fetch the group and check existence
+        const group = await Group.findById(groupId);
+        if (!group || group.workspaceId.toString() !== workspaceId) {
+            return res.status(404).json({ message: "The provided group was not found in this workspace" });
+        }
+
+        // Remove student from current group if exists
+        await Group.updateMany(
+            { workspaceId },
+            { $pull: { userIds: studentId } }
+        );
+
+        // Add student to the new group
+        if (!group.userIds.includes(studentId)) {
+            group.userIds.push(studentId);
+            await group.save();
+        }
+
+        return res.json({ message: "Student moved to the group successfully" });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send({ message: err.message });
+    }
+});
 
 ////////////////////////////
 
