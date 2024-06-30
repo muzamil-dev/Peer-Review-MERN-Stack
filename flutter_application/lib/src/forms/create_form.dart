@@ -21,7 +21,7 @@ class _CreateFormState extends State<CreateForm> {
   List<Field> fields = [];
   List<TextEditingController> questionControllers = [];
   List<TextEditingController> valueControllers = [];
-  
+
   TextEditingController availableFromController = TextEditingController();
   TextEditingController dueUntillController = TextEditingController();
   TextEditingController formName = TextEditingController();
@@ -56,79 +56,82 @@ class _CreateFormState extends State<CreateForm> {
 
   Widget editFormsPage(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              children: [
-                Form(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Form Name
-                      const Text(
-                        "Form Name",
-                        style: TextStyle(fontSize: 25),
-                      ),
-                      const SizedBox(height: 5),
-                      TextFormField(
-                        controller: formName,
-                        decoration: const InputDecoration(
-                          labelText: 'Form Name',
-                          filled: true,
+      resizeToAvoidBottomInset: false,
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                children: [
+                  Form(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Form Name
+                        const Text(
+                          "Form Name",
+                          style: TextStyle(fontSize: 25),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      TextFormField(
-                        controller: availableFromController,
-                        decoration: const InputDecoration(
-                          labelText: 'Available From',
-                          filled: true,
-                          prefixIcon: Icon(Icons.calendar_today),
+                        const SizedBox(height: 5),
+                        TextFormField(
+                          controller: formName,
+                          decoration: const InputDecoration(
+                            labelText: 'Form Name',
+                            filled: true,
+                          ),
                         ),
-                        readOnly: true,
-                        onTap: () {
-                          _selectDate(availableFromController);
-                        },
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      TextFormField(
-                        controller: dueUntillController,
-                        decoration: const InputDecoration(
-                          labelText: 'Available Untill',
-                          filled: true,
-                          prefixIcon: Icon(Icons.calendar_month_outlined),
+                        const SizedBox(
+                          height: 15,
                         ),
-                        readOnly: true,
-                        onTap: () {
-                          _selectDate(dueUntillController);
-                        },
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      // Form Settings
-
-                      // Form Fields (ListView Builder)
-                      const Text(
-                        'Fields',
-                        style: TextStyle(fontSize: 25),
-                      ),
-                      formFields(context),
-                      // Available from Untill
-                    ],
+                        TextFormField(
+                          controller: availableFromController,
+                          decoration: const InputDecoration(
+                            labelText: 'Available From',
+                            filled: true,
+                            prefixIcon: Icon(Icons.calendar_today),
+                          ),
+                          readOnly: true,
+                          onTap: () {
+                            _selectDate(availableFromController);
+                          },
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        TextFormField(
+                          controller: dueUntillController,
+                          decoration: const InputDecoration(
+                            labelText: 'Available Untill',
+                            filled: true,
+                            prefixIcon: Icon(Icons.calendar_month_outlined),
+                          ),
+                          readOnly: true,
+                          onTap: () {
+                            _selectDate(dueUntillController);
+                          },
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        // Form Settings
+        
+                        // Form Fields (ListView Builder)
+                        const Text(
+                          'Fields',
+                          style: TextStyle(fontSize: 25),
+                        ),
+                        formFields(context),
+                        // Available from Untill
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: createForm,
@@ -139,7 +142,7 @@ class _CreateFormState extends State<CreateForm> {
 
   Widget formFields(BuildContext context) {
     return SizedBox(
-      height: 400,
+      height: 425,
       child: Scrollbar(
         child: ListView.separated(
           itemBuilder: (context, index) {
@@ -156,7 +159,6 @@ class _CreateFormState extends State<CreateForm> {
   }
 
   Widget formChild(BuildContext context, index) {
-    
     return Container(
         key: UniqueKey(),
         decoration: BoxDecoration(
