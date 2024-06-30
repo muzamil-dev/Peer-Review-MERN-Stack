@@ -12,7 +12,7 @@ import * as ReviewService from './reviews.js';
 export const getById = async(assignmentId) => {
     try{
         const res = await db.query(
-            `SELECT * FROM assignments where id = $1`,
+            `SELECT * FROM assignments WHERE id = $1`,
             [assignmentId]
         );
         const data = res.rows[0];
@@ -32,6 +32,46 @@ export const getById = async(assignmentId) => {
             description: data.description,
             started: data.started
         };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Get all assignments for a given workspace
+export const getByWorkspace = async(workspaceId) => {
+    try{
+        const res = await db.query(
+            `SELECT a.*, w.id AS workspace_id
+            FROM workspaces AS w
+            LEFT JOIN assignments AS a
+            ON w.id = a.workspace_id
+            WHERE w.id = $1
+            ORDER BY id`,
+            [workspaceId]
+        );
+        const data = res.rows;
+        // Workspace does not exist if no rows are found
+        if (data.length === 0)
+            return { 
+                error: "The requested workspace was not found", 
+                status: 404 
+            };
+        // Workspace exists, but no assignments were found
+        if (data.length === 1 && data[0].id === null)
+            return [];
+
+        // Format the data
+        return data.map(row => ({
+            assignmentId: row.id,
+            workspaceId: row.workspace_id,
+            startDate: row.start_date,
+            dueDate: row.due_date,
+            questions: row.questions,
+            description: row.description,
+            started: row.started
+        }));
+        return res.rows;
     }
     catch(err){
         return { error: err.message, status: 500 };
