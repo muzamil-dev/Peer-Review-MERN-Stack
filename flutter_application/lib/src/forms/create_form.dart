@@ -133,12 +133,6 @@ class _CreateFormState extends State<CreateForm> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: createForm,
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniCenterFloat,
     );
   }
 
@@ -242,6 +236,12 @@ class _CreateFormState extends State<CreateForm> {
           backgroundColor: const Color(0xff004080),
         ),
         body: _widgetTabOptions(context).elementAt(_currentIndex),
+        floatingActionButton: FloatingActionButton(
+          onPressed: createForm,
+          child: const Icon(Icons.add),
+        ),
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniCenterDocked,
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           type: BottomNavigationBarType.fixed,
