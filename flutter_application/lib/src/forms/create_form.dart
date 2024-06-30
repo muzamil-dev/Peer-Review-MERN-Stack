@@ -116,7 +116,7 @@ class _CreateFormState extends State<CreateForm> {
                           height: 15,
                         ),
                         // Form Settings
-        
+
                         // Form Fields (ListView Builder)
                         const Text(
                           'Fields',
@@ -137,6 +137,8 @@ class _CreateFormState extends State<CreateForm> {
         onPressed: createForm,
         child: const Icon(Icons.add),
       ),
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterFloat,
     );
   }
 
@@ -170,6 +172,7 @@ class _CreateFormState extends State<CreateForm> {
         ),
         padding: const EdgeInsets.all(10),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             TextFormField(
               controller: questionControllers[index],
@@ -185,6 +188,9 @@ class _CreateFormState extends State<CreateForm> {
                 filled: true,
               ),
             ),
+            const SizedBox(
+              height: 10,
+            ),
             IconButton(
                 onPressed: () {
                   print(fields[index].question);
@@ -195,8 +201,11 @@ class _CreateFormState extends State<CreateForm> {
                   });
                 },
                 icon: const Icon(
-                  CupertinoIcons.delete_simple,
-                  color: Colors.redAccent,
+                  CupertinoIcons.delete,
+                  color: Colors.white,
+                ),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
                 )),
           ],
         ));
