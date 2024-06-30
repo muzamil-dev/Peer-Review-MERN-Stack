@@ -105,7 +105,9 @@ class _CreateFormState extends State<CreateForm> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                _formKey.currentState!.validate();
+                                if (_formKey.currentState!.validate() == false) {
+                                  return;
+                                }
                                 List<String> questions = [];
                                 for (var field in valueControllers) {
                                   questions.add(field.text);
