@@ -18,8 +18,6 @@ class CreateForm extends StatefulWidget {
 class _CreateFormState extends State<CreateForm> {
   int _currentIndex = 0;
   int numFields = 0;
-  List<Field> fields = [];
-  List<TextEditingController> questionControllers = [];
   List<TextEditingController> valueControllers = [];
 
   TextEditingController availableFromController = TextEditingController();
@@ -30,11 +28,37 @@ class _CreateFormState extends State<CreateForm> {
     return <Widget>[editFormsPage(context), studentViewPage(context)];
   }
 
+  Future<void> createAssignment(
+      BuildContext context, List<String> questions) async {
+    final url = Uri.parse('http://10.0.2.2:5000/assignments/create');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-type': 'application/json'},
+        body: jsonEncode({
+          "userId": widget.userId,
+          "workspaceId": widget.workspaceId,
+          "startDate": availableFromController.text,
+          "dueDate": dueUntillController.text,
+          "questions": questions,
+        }),
+      );
+      if (response.statusCode == 201) {
+        print("Assignment Created Successfully");
+        final jsonResponse = json.decode(response.body);
+        print("Response : ${jsonResponse['message']}");
+      } else {
+        final errorData = json.decode(response.body);
+        print("Error Creating Assignment: $errorData");
+      }
+    } catch (error) {
+      print("Error Creating Assignment: $error");
+    }
+  }
+
   void createForm() {
-    Field child = Field(question: '', value: '');
     setState(() {
-      fields.add(child);
-      questionControllers.add(TextEditingController());
+      numFields += 1;
       valueControllers.add(TextEditingController());
     });
   }
@@ -148,7 +172,7 @@ class _CreateFormState extends State<CreateForm> {
             height: 15,
             thickness: 0,
           ),
-          itemCount: fields.length,
+          itemCount: numFields,
         ),
       ),
     );
@@ -166,15 +190,13 @@ class _CreateFormState extends State<CreateForm> {
         ),
         padding: const EdgeInsets.all(10),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            TextFormField(
-              controller: questionControllers[index],
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                filled: true,
-              ),
+            Text(
+              "Field ${index + 1}",
+              style: const TextStyle(fontSize: 25),
             ),
+            const SizedBox(height: 10),
             TextFormField(
               controller: valueControllers[index],
               decoration: const InputDecoration(
@@ -185,22 +207,25 @@ class _CreateFormState extends State<CreateForm> {
             const SizedBox(
               height: 10,
             ),
-            IconButton(
-                onPressed: () {
-                  print(fields[index].question);
-                  setState(() {
-                    fields.removeAt(index);
-                    valueControllers.removeAt(index);
-                    questionControllers.removeAt(index);
-                  });
-                },
-                icon: const Icon(
-                  CupertinoIcons.delete,
-                  color: Colors.white,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                )),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                    onPressed: () {
+                      setState(() {
+                        numFields -= 1;
+                        valueControllers.removeAt(index);
+                      });
+                    },
+                    icon: const Icon(
+                      CupertinoIcons.delete,
+                      color: Colors.white,
+                    ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                    )),
+              ],
+            ),
           ],
         ));
   }
@@ -222,8 +247,22 @@ class _CreateFormState extends State<CreateForm> {
                 'Create Form',
                 style: TextStyle(color: Colors.white),
               ),
+              // Submits and Resets Form
               IconButton(
-                onPressed: () => print('Field 2: ${fields[1].question}'),
+                onPressed: () async {
+                  List<String> questions = [];
+                  for (var field in valueControllers) {
+                    questions.add(field.text);
+                  }
+                  await createAssignment(context, questions);
+                  setState(() {
+                    formName.text = '';
+                    availableFromController.text = '';
+                    dueUntillController.text = '';
+                    valueControllers = [];
+                    numFields = 0;
+                  });
+                },
                 icon: const Icon(
                   Icons.check,
                   color: Colors.white,
@@ -260,11 +299,4 @@ class _CreateFormState extends State<CreateForm> {
           },
         ));
   }
-}
-
-class Field {
-  String question;
-  String value;
-
-  Field({required this.question, required this.value});
 }
