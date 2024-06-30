@@ -105,7 +105,8 @@ class _CreateFormState extends State<CreateForm> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                if (_formKey.currentState!.validate() == false) {
+                                if (_formKey.currentState!.validate() ==
+                                    false) {
                                   return;
                                 }
                                 List<String> questions = [];
@@ -235,7 +236,8 @@ class _CreateFormState extends State<CreateForm> {
   Widget formFields(BuildContext context) {
     return SizedBox(
       height: 425,
-      child: Scrollbar(
+      child: RawScrollbar(
+        thumbColor: Colors.black,
         child: ListView.separated(
           itemBuilder: (context, index) {
             return formChild(context, index);
