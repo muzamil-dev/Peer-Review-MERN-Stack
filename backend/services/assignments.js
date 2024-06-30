@@ -2,8 +2,6 @@ import db from '../config.js';
 
 import * as ReviewService from './reviews.js';
 
-// TODO: Modify create to check for instructor + create reviews if start date
-// TODO: Create edit assignment
 // LATER: Potentially edit so that review does not require group_id (use joins)
 
 // Get an assignment by its id
@@ -69,7 +67,6 @@ export const getByWorkspace = async(workspaceId) => {
             description: row.description,
             started: row.started
         }));
-        return res.rows;
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -77,8 +74,32 @@ export const getByWorkspace = async(workspaceId) => {
 }
 
 // Create a new assignment
+// Edit to phase out questions array in assignments
 export const create = async(userId, workspaceId, settings) => {
     try{
+        const res = await db.query(
+            `SELECT w.id AS workspace_id, m.role AS user_role
+            FROM workspaces AS w
+            LEFT JOIN memberships as m
+            ON w.id = m.workspace_id AND m.user_id = $1
+            WHERE w.id = $2`,
+            [userId, workspaceId]
+        );
+        const data = res.rows[0];
+        // Check that the workspace exists
+        if (!data)
+            return {
+                error: "The requested workspace was not found",
+                status: 404
+            }
+        // Check that the user is an instructor
+        if (data.user_role !== "Instructor")
+            return { 
+                error: "User is not authorized to create assignments", 
+                status: 403
+            };
+
+        // Create the assignment
         const { startDate, dueDate, questions, description } = settings;
         // Insert the fields
         // Check for a start date. If none was provided set it to now
@@ -94,15 +115,76 @@ export const create = async(userId, workspaceId, settings) => {
             started = true
 
         // Insert the assignment
-        const res = await db.query(
+        const assignmentRes = await db.query(
             `INSERT INTO assignments (workspace_id, start_date, due_date, questions, description, started)
             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
             [workspaceId, start_date.toISOString(), due_date, questions, description, started]
         );
+        // Get the assignment id
+        const assignmentId = assignmentRes.rows[0].id;
+        // Insert the questions
+        let questionsQuery = `INSERT INTO questions (assignment_id, question) VALUES `
+        questionsQuery += questions.map((_, index) => `($1, $${index+2})`).join(', ');
+        const questionsRes = await db.query(questionsQuery, [assignmentId, ...questions]);
         // Create reviews if assignment has already started
         if (started)
-            await ReviewService.createReviews(res.rows[0].id);
+            await ReviewService.createReviews(assignmentId);
         return { message: "Created assignment successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Edit an assignment
+// Change to create reviews if start date is reached
+export const edit = async(userId, assignmentId, settings) => {
+    try{
+        const res = await db.query(
+            `SELECT a.*, a.id AS assignment_id, m.role AS user_role
+            FROM assignments AS a
+            LEFT JOIN memberships as m
+            ON a.workspace_id = m.workspace_id AND m.user_id = $1
+            WHERE a.id = $2`,
+            [userId, assignmentId]
+        );
+        const data = res.rows[0];
+        // Check that the assignment exists
+        if (!data)
+            return {
+                error: "The requested assignment was not found",
+                status: 404
+            }
+        // Check that the user is an instructor
+        if (data.user_role !== "Instructor")
+            return { 
+                error: "User is not authorized to edit this assignment", 
+                status: 403
+            };
+        
+        // Format settings to use the same columns as the database
+        const updates = {};
+        if (settings.startDate)
+            updates.start_date = (new Date(settings.startDate)).toISOString();
+        if (settings.dueDate)
+            updates.due_date = (new Date(settings.dueDate)).toISOString();
+        if (settings.questions)
+            updates.questions = settings.questions;
+        if (settings.description !== undefined) // description can be null or empty
+            updates.description = settings.description;
+
+        // Build the update query
+        let updateQuery = `UPDATE assignments SET `;
+        // Build the set clause
+        const keys = Object.keys(updates);
+        const values = Object.values(updates);
+        updateQuery += keys.map((key, index) => `${key} = $${index+1}`).join(', ');
+        // Complete the query with assignment id
+        updateQuery += ` WHERE id = $${values.length+1}`;
+        
+        // Query the update
+        const updateRes = await db.query(updateQuery, [...values, data.assignment_id]);
+        return { message: "Assignment updated successfully" };
     }
     catch(err){
         return { error: err.message, status: 500 };
