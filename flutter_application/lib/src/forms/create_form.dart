@@ -19,6 +19,7 @@ class _CreateFormState extends State<CreateForm> {
   int _currentIndex = 0;
   int numFields = 0;
   List<TextEditingController> valueControllers = [];
+  final _formKey = GlobalKey<FormState>();
 
   TextEditingController availableFromController = TextEditingController();
   TextEditingController dueUntillController = TextEditingController();
@@ -90,13 +91,49 @@ class _CreateFormState extends State<CreateForm> {
               child: Column(
                 children: [
                   Form(
+                    key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Form Name
-                        const Text(
-                          "Form Name",
-                          style: TextStyle(fontSize: 25),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Form Name",
+                              style: TextStyle(fontSize: 25),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                _formKey.currentState!.validate();
+                                List<String> questions = [];
+                                for (var field in valueControllers) {
+                                  questions.add(field.text);
+                                }
+                                await createAssignment(context, questions);
+                                setState(() {
+                                  formName.text = '';
+                                  availableFromController.text = '';
+                                  dueUntillController.text = '';
+                                  valueControllers = [];
+                                  numFields = 0;
+                                });
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.green,
+                              ),
+                              child: const Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Create Form",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 5),
                         TextFormField(
@@ -105,12 +142,24 @@ class _CreateFormState extends State<CreateForm> {
                             labelText: 'Form Name',
                             filled: true,
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter a non-empty field";
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(
                           height: 15,
                         ),
                         TextFormField(
                           controller: availableFromController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter a non-empty field";
+                            }
+                            return null;
+                          },
                           decoration: const InputDecoration(
                             labelText: 'Available From',
                             filled: true,
@@ -126,6 +175,12 @@ class _CreateFormState extends State<CreateForm> {
                         ),
                         TextFormField(
                           controller: dueUntillController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter a non-empty field";
+                            }
+                            return null;
+                          },
                           decoration: const InputDecoration(
                             labelText: 'Available Untill',
                             filled: true,
@@ -142,10 +197,25 @@ class _CreateFormState extends State<CreateForm> {
                         // Form Settings
 
                         // Form Fields (ListView Builder)
-                        const Text(
-                          'Fields',
-                          style: TextStyle(fontSize: 25),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Fields',
+                              style: TextStyle(fontSize: 25),
+                            ),
+                            IconButton(
+                              onPressed: createForm,
+                              icon: const Icon(
+                                Icons.add,
+                                color: Colors.white,
+                              ),
+                              style: IconButton.styleFrom(
+                                  backgroundColor: Colors.green),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 5),
                         formFields(context),
                         // Available from Untill
                       ],
@@ -180,20 +250,20 @@ class _CreateFormState extends State<CreateForm> {
 
   Widget formChild(BuildContext context, index) {
     return Container(
-        key: UniqueKey(),
         decoration: BoxDecoration(
-          color: Color.fromARGB(255, 233, 228, 228),
+          color: Color.fromARGB(255, 255, 255, 255),
           border: Border.all(
             width: 2,
             color: Colors.black,
           ),
+          borderRadius: BorderRadius.circular(5),
         ),
         padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              "Field ${index + 1}",
+              "Question ${index + 1}",
               style: const TextStyle(fontSize: 25),
             ),
             const SizedBox(height: 10),
@@ -240,47 +310,20 @@ class _CreateFormState extends State<CreateForm> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Row(
+          title: const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Create Form',
                 style: TextStyle(color: Colors.white),
               ),
               // Submits and Resets Form
-              IconButton(
-                onPressed: () async {
-                  List<String> questions = [];
-                  for (var field in valueControllers) {
-                    questions.add(field.text);
-                  }
-                  await createAssignment(context, questions);
-                  setState(() {
-                    formName.text = '';
-                    availableFromController.text = '';
-                    dueUntillController.text = '';
-                    valueControllers = [];
-                    numFields = 0;
-                  });
-                },
-                icon: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                ),
-                style: IconButton.styleFrom(backgroundColor: Colors.green),
-              ),
             ],
           ),
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: const Color(0xff004080),
         ),
         body: _widgetTabOptions(context).elementAt(_currentIndex),
-        floatingActionButton: FloatingActionButton(
-          onPressed: createForm,
-          child: const Icon(Icons.add),
-        ),
-        floatingActionButtonLocation:
-            FloatingActionButtonLocation.miniCenterDocked,
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           type: BottomNavigationBarType.fixed,
