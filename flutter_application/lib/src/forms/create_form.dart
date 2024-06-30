@@ -101,7 +101,8 @@ class _CreateFormState extends State<CreateForm> {
                           children: [
                             const Text(
                               "Form Name",
-                              style: TextStyle(fontSize: 25),
+                              style: TextStyle(
+                                  fontSize: 25, fontWeight: FontWeight.bold),
                             ),
                             TextButton(
                               onPressed: () async {
@@ -205,7 +206,8 @@ class _CreateFormState extends State<CreateForm> {
                           children: [
                             const Text(
                               'Fields',
-                              style: TextStyle(fontSize: 25),
+                              style: TextStyle(
+                                  fontSize: 25, fontWeight: FontWeight.bold),
                             ),
                             IconButton(
                               onPressed: createForm,
@@ -220,7 +222,6 @@ class _CreateFormState extends State<CreateForm> {
                         ),
                         const SizedBox(height: 5),
                         formFields(context),
-                        // Available from Untill
                       ],
                     ),
                   ),
@@ -234,28 +235,32 @@ class _CreateFormState extends State<CreateForm> {
   }
 
   Widget formFields(BuildContext context) {
-    return SizedBox(
-      height: 425,
-      child: RawScrollbar(
-        thumbColor: Colors.black,
-        child: ListView.separated(
-          itemBuilder: (context, index) {
-            return formChild(context, index);
-          },
-          separatorBuilder: (BuildContext context, index) => const Divider(
-            height: 15,
-            thickness: 0,
+    if (numFields == 0) {
+      return displayEmptyWidget(context);
+    } else {
+      return SizedBox(
+        height: 400,
+        child: RawScrollbar(
+          thumbColor: Colors.black,
+          child: ListView.separated(
+            itemBuilder: (context, index) {
+              return formChild(context, index);
+            },
+            separatorBuilder: (BuildContext context, index) => const Divider(
+              height: 15,
+              thickness: 0,
+            ),
+            itemCount: numFields,
           ),
-          itemCount: numFields,
         ),
-      ),
-    );
+      );
+    }
   }
 
   Widget formChild(BuildContext context, index) {
     return Container(
         decoration: BoxDecoration(
-          color: Color.fromARGB(255, 255, 255, 255),
+          color: const Color.fromARGB(255, 255, 255, 255),
           border: Border.all(
             width: 2,
             color: Colors.black,
@@ -306,7 +311,17 @@ class _CreateFormState extends State<CreateForm> {
 
   Widget studentViewPage(BuildContext context) {
     return const Column(
-      children: [Center(child: const Text("Student View Page"))],
+      children: [Center(child: Text("Student View Page"))],
+    );
+  }
+
+  Widget displayEmptyWidget(BuildContext context) {
+    return const Center(
+      child: Text(
+        "Press The + Button to Create Fields",
+        style:
+            TextStyle(color: Color.fromARGB(255, 110, 103, 103), fontSize: 16),
+      ),
     );
   }
 
