@@ -18,12 +18,25 @@ class CreateForm extends StatefulWidget {
 class _CreateFormState extends State<CreateForm> {
   int _currentIndex = 0;
   int numFields = 0;
+  List<Field> fields = [];
+  List<TextEditingController> questionControllers = [];
+  List<TextEditingController> valueControllers = [];
+  
   TextEditingController availableFromController = TextEditingController();
   TextEditingController dueUntillController = TextEditingController();
   TextEditingController formName = TextEditingController();
 
   List<Widget> _widgetTabOptions(BuildContext context) {
     return <Widget>[editFormsPage(context), studentViewPage(context)];
+  }
+
+  void createForm() {
+    Field child = Field(question: '', value: '');
+    setState(() {
+      fields.add(child);
+      questionControllers.add(TextEditingController());
+      valueControllers.add(TextEditingController());
+    });
   }
 
   Future<void> _selectDate(TextEditingController controller) async {
@@ -118,11 +131,7 @@ class _CreateFormState extends State<CreateForm> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            numFields += 1;
-          });
-        },
+        onPressed: createForm,
         child: const Icon(Icons.add),
       ),
     );
@@ -140,42 +149,50 @@ class _CreateFormState extends State<CreateForm> {
             height: 15,
             thickness: 0,
           ),
-          itemCount: numFields,
+          itemCount: fields.length,
         ),
       ),
     );
   }
 
   Widget formChild(BuildContext context, index) {
+    
     return Container(
+        key: UniqueKey(),
         decoration: BoxDecoration(
           color: Color.fromARGB(255, 233, 228, 228),
           border: Border.all(
             width: 2,
             color: Colors.black,
           ),
-          borderRadius: BorderRadius.circular(10),
         ),
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
             TextFormField(
-              controller: dueUntillController,
+              controller: questionControllers[index],
               decoration: const InputDecoration(
                 labelText: 'Name',
                 filled: true,
               ),
             ),
             TextFormField(
-              controller: dueUntillController,
+              controller: valueControllers[index],
               decoration: const InputDecoration(
                 labelText: 'Value',
                 filled: true,
               ),
             ),
-            const IconButton(
-                onPressed: null,
-                icon: Icon(
+            IconButton(
+                onPressed: () {
+                  print(fields[index].question);
+                  setState(() {
+                    fields.removeAt(index);
+                    valueControllers.removeAt(index);
+                    questionControllers.removeAt(index);
+                  });
+                },
+                icon: const Icon(
                   CupertinoIcons.delete_simple,
                   color: Colors.redAccent,
                 )),
@@ -201,7 +218,7 @@ class _CreateFormState extends State<CreateForm> {
                 style: TextStyle(color: Colors.white),
               ),
               IconButton(
-                onPressed: () => print("Hello World!"),
+                onPressed: () => print('Field 2: ${fields[1].question}'),
                 icon: const Icon(
                   Icons.check,
                   color: Colors.white,
@@ -232,4 +249,11 @@ class _CreateFormState extends State<CreateForm> {
           },
         ));
   }
+}
+
+class Field {
+  String question;
+  String value;
+
+  Field({required this.question, required this.value});
 }
