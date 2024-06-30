@@ -1,59 +1,70 @@
 import db from '../config.js';
 
+import * as ReviewService from './reviews.js';
+
+// TODO: Modify create to check for instructor + create reviews if start date
+// TODO: Create edit assignment
+// TODO: Create delete assignment
+// TODO: Create getByWorkspace
 // LATER: Potentially edit so that review does not require group_id (use joins)
 
-// Create a new assignment
-export const create = async(userId, workspaceId, settings) => {
+// Get an assignment by its id
+export const getById = async(assignmentId) => {
     try{
-        const { startDate, dueDate, questions, description } = settings;
-        // Insert the fields
-        const start_date = (new Date(startDate)).toISOString();
-        const due_date = (new Date(dueDate)).toISOString();
         const res = await db.query(
-            `INSERT INTO assignments (workspace_id, start_date, due_date, questions, description)
-            VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [workspaceId, start_date, due_date, questions, description]
+            `SELECT * FROM assignments where id = $1`,
+            [assignmentId]
         );
-        return { message: "Created assignment successfully" };
+        const data = res.rows[0];
+        // Check if assignment was found
+        if (!data)
+            return {
+                error: "The requested assignment was not found",
+                status: 404
+            }
+        // Return the formatted assignment data
+        return {
+            assignmentId: data.id,
+            workspaceId: data.workspace_id,
+            startDate: data.start_date,
+            dueDate: data.due_date,
+            questions: data.questions,
+            description: data.description,
+            started: data.started
+        };
     }
     catch(err){
         return { error: err.message, status: 500 };
     }
 }
 
-// Create reviews for an assignment
-// These will made close to when an assignment opens
-export const createReviews = async(assignmentId) => {
+// Create a new assignment
+export const create = async(userId, workspaceId, settings) => {
     try{
-        // Get a list of users within each group
+        const { startDate, dueDate, questions, description } = settings;
+        // Insert the fields
+        // Check for a start date. If none was provided set it to now
+        let start_date;
+        if (!startDate)
+            start_date = new Date(Date.now());
+        else
+            start_date = new Date(startDate);
+
+        const due_date = (new Date(dueDate)).toISOString();
+        let started = false;
+        if (start_date <= Date.now())
+            started = true
+
+        // Insert the assignment
         const res = await db.query(
-            `SELECT g.id as group_id, array_agg(m.user_id) AS group_members
-            FROM assignments AS a
-            JOIN groups AS g
-            ON g.workspace_id = a.workspace_id
-            JOIN memberships AS m
-            ON g.id = m.group_id
-            WHERE a.id = $1
-            GROUP BY g.id`,
-            [assignmentId]
+            `INSERT INTO assignments (workspace_id, start_date, due_date, questions, description, started)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [workspaceId, start_date.toISOString(), due_date, questions, description, started]
         );
-        // Build the query
-        let query = `INSERT INTO reviews (assignment_id, group_id, user_id, target_id) VALUES `
-        const quads = [];
-        res.rows.forEach(row => {
-            const group = row.group_id;
-            const members = row.group_members;
-            for (let i = 0; i < members.length; i++){
-                for (let j = 0; j < members.length; j++){
-                    if (i === j)
-                        continue;
-                    quads.push(`(${assignmentId}, ${group}, ${members[i]}, ${members[j]})`);
-                }
-            }
-        });
-        query += quads.join(', ');
-        await db.query(query);
-        return;
+        // Create reviews if assignment has already started
+        if (started)
+            await ReviewService.createReviews(res.rows[0].id);
+        return { message: "Created assignment successfully" };
     }
     catch(err){
         return { error: err.message, status: 500 };
