@@ -76,6 +76,12 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("ADMIN GROUPS PAGE"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/createForm");
+                },
+                child: const Text("CREATE FORMS PAGE"),
+              ),
             ],
           ),
         ),
