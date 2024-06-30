@@ -4,8 +4,6 @@ import * as ReviewService from './reviews.js';
 
 // TODO: Modify create to check for instructor + create reviews if start date
 // TODO: Create edit assignment
-// TODO: Create delete assignment
-// TODO: Create getByWorkspace
 // LATER: Potentially edit so that review does not require group_id (use joins)
 
 // Get an assignment by its id
@@ -105,6 +103,42 @@ export const create = async(userId, workspaceId, settings) => {
         if (started)
             await ReviewService.createReviews(res.rows[0].id);
         return { message: "Created assignment successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Delete an assignment
+export const deleteAssignment = async(userId, assignmentId) => {
+    try{
+        const res = await db.query(
+            `SELECT a.id as assignment_id, a.workspace_id, m.role AS user_role
+            FROM assignments AS a
+            LEFT JOIN memberships as m
+            ON a.workspace_id = m.workspace_id AND m.user_id = $1
+            WHERE a.id = $2`,
+            [userId, assignmentId]
+        );
+        const data = res.rows[0];
+        // Check that the assignment exists
+        if (!data)
+            return {
+                error: "The requested assignment was not found",
+                status: 404
+            }
+        // Check that the user is an instructor
+        if (data.user_role !== "Instructor")
+            return { 
+                error: "User is not authorized to delete this assignment", 
+                status: 403
+            };
+        // Delete the assignment
+        await db.query(
+            `DELETE FROM assignments WHERE id = $1`,
+            [assignmentId]
+        );
+        return { message: "Assignment deleted successfully" };
     }
     catch(err){
         return { error: err.message, status: 500 };
