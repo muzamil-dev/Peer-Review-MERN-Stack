@@ -53,7 +53,6 @@ CREATE TABLE reviews(
 
 CREATE TABLE questions(
     id SERIAL PRIMARY KEY,
-    assignment_id INT REFERENCES assignments (id) ON DELETE CASCADE,
     question TEXT NOT NULL
 );
 
@@ -61,4 +60,10 @@ CREATE TABLE rating(
     review_id INT REFERENCES reviews (id) ON DELETE CASCADE,
     question_id INT REFERENCES questions (id) ON DELETE CASCADE,
     rating INT NOT NULL
+);
+
+CREATE TABLE assignment_questions(
+    assignment_id INT REFERENCES assignments (id) ON DELETE CASCADE,
+    question_id INT REFERENCES questions (id) ON DELETE CASCADE,
+    PRIMARY KEY (assignment_id, question_id)
 );

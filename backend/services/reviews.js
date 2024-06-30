@@ -20,7 +20,7 @@ export const createReviews = async(assignmentId) => {
         );
         // Build the query
         let query = `INSERT INTO reviews (assignment_id, group_id, user_id, target_id) VALUES `
-        const quads = [];
+        const insertions = [];
         res.rows.forEach(row => {
             const group = row.group_id;
             const members = row.group_members;
@@ -28,15 +28,24 @@ export const createReviews = async(assignmentId) => {
                 for (let j = 0; j < members.length; j++){
                     if (i === j)
                         continue;
-                    quads.push(`(${assignmentId}, ${group}, ${members[i]}, ${members[j]})`);
+                    insertions.push(`(${assignmentId}, ${group}, ${members[i]}, ${members[j]})`);
                 }
             }
         });
-        query += quads.join(', ');
+        query += insertions.join(', ');
         await db.query(query);
         return;
     }
     catch(err){
         return { error: err.message, status: 500 };
     }
+}
+
+// Submit a review
+// Check that the userId matches the userId for the review
+// Get assignment id of review, join question ids from assignment_questions
+// Check that the ratings array length matches the number of questions
+// Create ratings (review_id, question_id, rating)
+export const submit = async(userId, reviewId) => {
+
 }
