@@ -14,7 +14,11 @@ export const getById = async(workspaceId) => {
         // Format the above query
         const workspace = res.rows.map(ws => ({
             workspaceId: ws.id,
-            name: ws.name
+            name: ws.name,
+            inviteCode: ws.invite_code,
+            allowedDomains: ws.allowed_domains,
+            groupMemberLimit: ws.group_member_limit,
+            groupLock: ws.groups_locked
         }))[0];
         if (!workspace)
             return { 

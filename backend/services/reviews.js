@@ -186,10 +186,11 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
             GROUP BY rt.assignment_id, rt.target_id)
 
             /* Join the target's name to the new table */
-            SELECT assignment_target_table.*, u.first_name, u.last_name
-            FROM assignment_target_table
+            SELECT att.target_id as "targetId", att.reviews, 
+            u.first_name as "firstName", u.last_name as "lastName"
+            FROM assignment_target_table as att
             JOIN users AS u
-            ON target_id = u.id`,
+            ON att.target_id = u.id`,
             [targetId, assignmentId]
         );
         // Check if the reviews were found
@@ -202,14 +203,7 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
 
         // Filter complete reviews, incomplete reviews will be excluded
         const reviews = data.reviews.filter(review => review.ratings !== null);
-
-        // Return formatted object
-        return {
-            targetId: data.target_id,
-            firstName: data.first_name,
-            lastName: data.last_name,
-            reviews
-        };
+        return reviews;
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -248,7 +242,7 @@ export const createReviews = async(assignmentId) => {
         });
         query += insertions.join(', ');
         await db.query(query);
-        return;
+        return { message: "Created reviews successfully" };
     }
     catch(err){
         return { error: err.message, status: 500 };
