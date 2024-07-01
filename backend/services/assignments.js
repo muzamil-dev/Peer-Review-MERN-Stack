@@ -22,6 +22,7 @@ export const getById = async(assignmentId) => {
         // Return the formatted assignment data
         return {
             assignmentId: data.id,
+            name: data.name,
             workspaceId: data.workspace_id,
             startDate: data.start_date,
             dueDate: data.due_date,
@@ -61,6 +62,7 @@ export const getByWorkspace = async(workspaceId) => {
         // Format the data
         return data.map(row => ({
             assignmentId: row.id,
+            name: row.name,
             workspaceId: row.workspace_id,
             startDate: row.start_date,
             dueDate: row.due_date,
@@ -101,7 +103,7 @@ export const create = async(userId, workspaceId, settings) => {
             };
 
         // Create the assignment
-        const { startDate, dueDate, questions, description } = settings;
+        const { name, startDate, dueDate, questions, description } = settings;
         // Insert the fields
         // Check for a start date. If none was provided set it to now
         let start_date;
@@ -117,9 +119,9 @@ export const create = async(userId, workspaceId, settings) => {
 
         // Insert the assignment
         const assignmentRes = await db.query(
-            `INSERT INTO assignments (workspace_id, start_date, due_date, questions, description, started)
+            `INSERT INTO assignments (name, workspace_id, start_date, due_date, description, started)
             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [workspaceId, start_date.toISOString(), due_date, questions, description, started]
+            [name, workspaceId, start_date.toISOString(), due_date, description, started]
         );
         // Get the assignment id
         const assignmentId = assignmentRes.rows[0].id;
@@ -174,6 +176,8 @@ export const edit = async(userId, assignmentId, settings) => {
         
         // Format settings to use the same columns as the database
         const updates = {};
+        if (settings.name)
+            updates.name = settings.name;
         if (settings.startDate)
             updates.start_date = (new Date(settings.startDate)).toISOString();
         if (settings.dueDate)

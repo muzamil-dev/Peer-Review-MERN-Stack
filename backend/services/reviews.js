@@ -232,9 +232,9 @@ export const submit = async(userId, reviewId, ratings) => {
             }
         // Mark the review as completed
         const setComplete = await db.query(
-            `UPDATE reviews SET ratings = $1, completed = true
-            WHERE id = $2`,
-            [ratings, reviewId]
+            `UPDATE reviews SET completed = true
+            WHERE id = $1`,
+            [reviewId]
         );
 
         // Generate the ratings
