@@ -33,6 +33,7 @@ router.get("/:workspaceId/assignments", async(req, res) => {
         const formatted = assignments.map(
             asn => ({
                 assignmentId: asn._id,
+                name: asn.name,
                 startDate: asn.startDate,
                 dueDate: asn.dueDate,
                 description: asn.description,
