@@ -1,7 +1,5 @@
 import db from "../config.js";
 
-import * as WorkspaceService from "./workspaces.js";
-
 // Get a group by id
 export const getById = async(groupId) => {
     try{

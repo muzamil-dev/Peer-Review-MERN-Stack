@@ -1,60 +1,153 @@
 import db from '../config.js';
 
-// TODO: (look below)
-// Likely wont add edit review
-
 // Format the return data
+// Change to enforce certain ordering
 export const getById = async(reviewId) => {
     try{
+        // Demon query
         const res = await db.query(
-            `SELECT t1.*, u1.first_name, u1.last_name,
-            u2.first_name AS target_first_name, u2.last_name AS target_last_name
-            FROM 
-            (SELECT r.user_id, r.target_id, r.completed,
-            jsonb_agg(
-                jsonb_build_object(
-                    'question', q.question,
-                    'rating', ra.rating
-                )
-            ) AS ratings
+            `WITH rating_table AS
+            (SELECT r.user_id, r.target_id, q.question, ra.rating
             FROM reviews AS r
             LEFT JOIN ratings AS ra
             ON r.id = ra.review_id
             LEFT JOIN questions AS q
-            ON ra.question_id = q.id
+            ON q.id = ra.question_id
             WHERE r.id = $1
-            GROUP BY r.id) t1
+            ORDER BY q.id),
+            
+            grouped_table AS 
+            (SELECT user_id, target_id,
+            jsonb_agg(
+                jsonb_build_object(
+                    'question', question,
+                    'rating', rating
+                )
+            ) FILTER (WHERE rating IS NOT NULL) AS ratings
+            FROM rating_table
+            GROUP BY user_id, target_id)
+            
+            SELECT g.ratings, u1.first_name, u1.last_name,
+            u2.first_name AS target_first_name,
+            u2.last_name AS target_last_name
+            FROM grouped_table AS g
             JOIN users AS u1
-            ON t1.user_id = u1.id
+            ON g.user_id = u1.id
             JOIN users AS u2
-            ON t1.target_id = u2.id`,
+            ON g.target_id = u2.id`,
             [reviewId]
         );
         // Check that the review exists
         const data = res.rows[0];
-        return data;
         if (!data)
             return { 
                 error: "The requested review was not found", 
                 status: 404 
             };
-        // Check if the review was completed
-        if (!data.completed)
-            ratings = [];
-
-        return res.rows[0];
+            
+        // Format the data
+        const formatted = {
+            firstName: data.first_name,
+            lastName: data.last_name,
+            targetFirstName: data.target_first_name,
+            targetLastName: data.target_last_name,
+            ratings: data.ratings
+        }
+        return formatted;
     }
     catch(err){
         return { error: err.message, status: 500 };
     }
 }
 
+// Get all reviews for a given assignment/user
+// Read the blocks of sql and comments above each block to get 
+// a better understanding of the query (it is very long)
 export const getByAssignmentAndUser = async(userId, assignmentId) => {
+    try{
+        const res = await db.query(
+            `/* Get the ids for assignments, users, targets. Join the question, rating,
+            and target's name to each review to be grouped */
+            WITH review_table AS
+            (SELECT r.assignment_id, r.user_id, r.id, r.target_id, ra.rating, q.question
+            FROM reviews AS r
+            LEFT JOIN ratings as ra
+            ON r.id = ra.review_id
+            LEFT JOIN questions as q
+            ON ra.question_id = q.id
+            WHERE r.user_id = $1 AND r.assignment_id = $2
+            ORDER BY r.id),
 
+            /* Group to create a list of reviews */
+            ratings_table AS
+            (SELECT assignment_id, user_id, target_id,
+            jsonb_agg(
+                jsonb_build_object(
+                    'question', question,
+                    'rating', rating
+                )
+            ) FILTER (WHERE rating IS NOT NULL) AS ratings
+            FROM review_table
+            JOIN users AS u
+            ON target_id = u.id
+            GROUP BY assignment_id, user_id, target_id),
+            
+            /* Group to create a single row with an array of reviews */
+            assignment_user_table AS
+            (SELECT rt.assignment_id, rt.user_id,
+            jsonb_agg(
+                jsonb_build_object(
+                    'targetId', rt.target_id,
+                    'firstName', u.first_name,
+                    'lastName', u.last_name,
+                    'ratings', rt.ratings
+                )
+            ) AS reviews
+            FROM ratings_table AS rt
+            JOIN users AS u
+            ON rt.target_id = u.id
+            GROUP BY rt.assignment_id, rt.user_id)
+            
+            /* Join the user's name to the new table */
+            SELECT assignment_user_table.*, u.first_name, u.last_name
+            FROM assignment_user_table
+            JOIN users AS u
+            ON user_id = u.id
+            `,
+            [userId, assignmentId]
+        );
+        const data = res.rows[0];
+        if (!data)
+            return {
+                error: "The requested reviews were not found",
+                status: 404
+            };
+
+        // Filter complete and incomplete reviews
+        const completedReviews = data.reviews.filter(review => review.ratings !== null);
+        const incompleteReviews = data.reviews.filter(review => review.ratings === null);
+
+        // Return formatted object
+        return {
+            userId: data.user_id,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            completedReviews,
+            incompleteReviews
+        };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
 }
 
 export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
+    try{
 
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
 }
 
 // Create reviews for an assignment
