@@ -456,7 +456,7 @@ class _CreateFormState extends State<CreateForm> {
                       return Container(
                         decoration: BoxDecoration(
                             border: Border.all(color: Colors.black, width: 1)),
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -468,7 +468,7 @@ class _CreateFormState extends State<CreateForm> {
                               ),
                             ),
                             const SizedBox(
-                              height: 20,
+                              height: 7,
                             ),
                             Text(
                               valueControllers[index].text,
