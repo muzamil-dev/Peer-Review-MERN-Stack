@@ -19,6 +19,7 @@ class _CreateFormState extends State<CreateForm> {
   int _currentIndex = 0;
   int numFields = 0;
   List<TextEditingController> valueControllers = [];
+  List<String> addFormPageErrors = [];
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController availableFromController = TextEditingController();
@@ -310,9 +311,83 @@ class _CreateFormState extends State<CreateForm> {
   }
 
   Widget studentViewPage(BuildContext context) {
-    return const Column(
-      children: [Center(child: Text("Student View Page"))],
-    );
+    if (invalidFormFields()) {
+      return Container(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Fix these items in the Add Form Page:",
+              style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 15.0,
+            ),
+            SizedBox(
+              height: 150,
+              child: ListView.builder(
+                itemCount: addFormPageErrors.length,
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                            ),
+                            width: 7,
+                            height: 7,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(addFormPageErrors[index]),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      )
+                    ],
+                  );
+                },
+              ),
+            )
+          ],
+        ),
+      );
+    } else {
+      return const Column(
+        children: [
+          Text("Student View Page"),
+        ],
+      );
+    }
+  }
+
+  bool invalidFormFields() {
+    // And Field Makes Sure Errors are only added to the List on the Student View Page
+    if (formName.text == '' && _currentIndex == 1) {
+      addFormPageErrors
+          .add("Empty Form Name: Enter a Name in the Add Form Tab");
+    }
+    if (availableFromController.text == '' && _currentIndex == 1) {
+      addFormPageErrors
+          .add("Empty Start Date: Enter a Start Date in the Add Form Tab");
+    }
+    if (dueUntillController.text == '' && _currentIndex == 1) {
+      addFormPageErrors
+          .add("Empty Due Date: Enter a Due Date in the Add Form Tab");
+    }
+
+    if (valueControllers.isEmpty && _currentIndex == 1) {
+      addFormPageErrors
+          .add("Empty Fields: Add Atleast One Field in the Add Form Tab");
+    }
+
+    return addFormPageErrors.isNotEmpty;
   }
 
   Widget displayEmptyWidget(BuildContext context) {
@@ -357,6 +432,10 @@ class _CreateFormState extends State<CreateForm> {
           onTap: (index) {
             setState(() {
               _currentIndex = index;
+
+              if (_currentIndex == 0) {
+                addFormPageErrors = [];
+              }
             });
           },
         ));
