@@ -318,8 +318,8 @@ class _CreateFormState extends State<CreateForm> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              "Fix these items in the Add Form Page:",
-              style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+              "Fix these in the Add Form Page:",
+              style: TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold),
             ),
             const SizedBox(
               height: 15.0,
@@ -332,7 +332,10 @@ class _CreateFormState extends State<CreateForm> {
                   return Column(
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
+                          const SizedBox(width: 40),
+                          // Bullet Point Container
                           Container(
                             decoration: const BoxDecoration(
                               color: Colors.black,
@@ -344,7 +347,10 @@ class _CreateFormState extends State<CreateForm> {
                           const SizedBox(
                             width: 10,
                           ),
-                          Text(addFormPageErrors[index]),
+                          Text(
+                            addFormPageErrors[index],
+                            style: const TextStyle(fontSize: 18),
+                          ),
                         ],
                       ),
                       const SizedBox(
@@ -368,23 +374,21 @@ class _CreateFormState extends State<CreateForm> {
   }
 
   bool invalidFormFields() {
-    // And Field Makes Sure Errors are only added to the List on the Student View Page
-    if (formName.text == '' && _currentIndex == 1) {
-      addFormPageErrors
-          .add("Empty Form Name: Enter a Name in the Add Form Tab");
-    }
-    if (availableFromController.text == '' && _currentIndex == 1) {
-      addFormPageErrors
-          .add("Empty Start Date: Enter a Start Date in the Add Form Tab");
-    }
-    if (dueUntillController.text == '' && _currentIndex == 1) {
-      addFormPageErrors
-          .add("Empty Due Date: Enter a Due Date in the Add Form Tab");
-    }
+    // Outer Condition Prevents too many Additons of addFormPageErrors while changing tabs between Add Form and Student View
+    if (addFormPageErrors.length <= 4) {
+      if (formName.text == '') {
+        addFormPageErrors.add("Empty Form Name: Enter a Name");
+      }
+      if (availableFromController.text == '') {
+        addFormPageErrors.add("Empty Start Date: Enter a Start Date");
+      }
+      if (dueUntillController.text == '') {
+        addFormPageErrors.add("Empty Due Date: Enter a Due Date");
+      }
 
-    if (valueControllers.isEmpty && _currentIndex == 1) {
-      addFormPageErrors
-          .add("Empty Fields: Add Atleast One Field in the Add Form Tab");
+      if (valueControllers.isEmpty) {
+        addFormPageErrors.add("Empty Fields: Add Atleast One Field");
+      }
     }
 
     return addFormPageErrors.isNotEmpty;
