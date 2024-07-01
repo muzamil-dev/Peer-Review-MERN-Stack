@@ -54,7 +54,6 @@ export async function getUserReviewsByAssignment(userId, assignmentId){
             reviewId: review._id,
             targetId: review.targetId,
             firstName: targetNames[index].firstName,
-            middleName: targetNames[index].middleName,
             lastName: targetNames[index].lastName,
             ratings: review.ratings,
             completed: review.completed
@@ -67,7 +66,6 @@ export async function getUserReviewsByAssignment(userId, assignmentId){
     return {
         userId,
         firstName: user.firstName,
-        middleName: user.middleName,
         lastName: user.lastName,
         completedReviews,
         incompleteReviews
@@ -154,7 +152,7 @@ export async function getGroupReviewsByAssignment(groupId, assignmentId){
                 completed: review.completed
             })
         );
-        // Split between completed and incompletec
+        // Split between completed and incomplete
         const completedReviews = formattedReviews.filter(r => r.completed);
         const incompleteReviews = formattedReviews.filter(r => !r.completed);
         // Add to the object

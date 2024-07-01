@@ -7,6 +7,10 @@ const reviewAssignmentSchema = mongoose.Schema(
             ref: "workspace",
             required: true
         },
+        name: {
+            type: String,
+            required: true
+        },
         description: {
             type: String,
             required: false
