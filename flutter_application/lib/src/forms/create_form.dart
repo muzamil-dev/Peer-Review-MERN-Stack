@@ -117,9 +117,7 @@ class _CreateFormState extends State<CreateForm> {
                                 }
                                 await createAssignment(context, questions);
                                 setState(() {
-                                  formName.text = '';
-                                  availableFromController.text = '';
-                                  dueUntillController.text = '';
+                                  _formKey.currentState!.reset();
                                   valueControllers = [];
                                   numFields = 0;
                                 });
