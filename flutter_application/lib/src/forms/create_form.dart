@@ -375,7 +375,7 @@ class _CreateFormState extends State<CreateForm> {
 
   bool invalidFormFields() {
     // Outer Condition Prevents too many Additons of addFormPageErrors while changing tabs between Add Form and Student View
-    if (addFormPageErrors.length <= 4) {
+    if (_currentIndex == 1) {
       if (formName.text == '') {
         addFormPageErrors.add("Empty Form Name: Enter a Name");
       }
