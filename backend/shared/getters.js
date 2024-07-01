@@ -54,7 +54,6 @@ export async function getUserReviewsByAssignment(userId, assignmentId){
             reviewId: review._id,
             targetId: review.targetId,
             firstName: targetNames[index].firstName,
-            middleName: targetNames[index].middleName,
             lastName: targetNames[index].lastName,
             ratings: review.ratings,
             completed: review.completed
@@ -67,7 +66,6 @@ export async function getUserReviewsByAssignment(userId, assignmentId){
     return {
         userId,
         firstName: user.firstName,
-        middleName: user.middleName,
         lastName: user.lastName,
         completedReviews,
         incompleteReviews
