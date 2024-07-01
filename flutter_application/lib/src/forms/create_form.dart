@@ -143,7 +143,9 @@ class _CreateFormState extends State<CreateForm> {
                         TextFormField(
                           controller: formName,
                           decoration: const InputDecoration(
-                            labelText: 'Form Name',
+                            border: OutlineInputBorder(),
+                            hintText: "Enter Your Form Name",
+                            labelText: "Form Name",
                             filled: true,
                           ),
                           validator: (value) {
@@ -165,6 +167,7 @@ class _CreateFormState extends State<CreateForm> {
                             return null;
                           },
                           decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
                             labelText: 'Available From',
                             filled: true,
                             prefixIcon: Icon(Icons.calendar_today),
@@ -186,6 +189,7 @@ class _CreateFormState extends State<CreateForm> {
                             return null;
                           },
                           decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
                             labelText: 'Available Untill',
                             filled: true,
                             prefixIcon: Icon(Icons.calendar_month_outlined),
@@ -279,6 +283,7 @@ class _CreateFormState extends State<CreateForm> {
             TextFormField(
               controller: valueControllers[index],
               decoration: const InputDecoration(
+                border: OutlineInputBorder(),
                 labelText: 'Value',
                 filled: true,
               ),
@@ -368,10 +373,129 @@ class _CreateFormState extends State<CreateForm> {
     if (invalidFormFields()) {
       return invalidFormPage(context);
     } else {
-      return const Column(
-        children: [
-          Text("Student View Page"),
-        ],
+      return Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title of Assignment
+            Container(
+              margin: const EdgeInsets.fromLTRB(3.0, 0, 0, 0),
+              child: Text(
+                formName.text,
+                style: const TextStyle(
+                    fontSize: 35.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  const Text(
+                    "Due: ",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    dueUntillController.text,
+                    style: const TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 15,
+                  ),
+                  const Text(
+                    "Questions: ",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "${valueControllers.length}",
+                    style: const TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 15,
+                  ),
+                  const Text(
+                    "Status: ",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const CircleAvatar(
+                    radius: 15,
+                    backgroundColor: Colors.red,
+                    child: IconButton(
+                      onPressed: null,
+                      icon: Icon(
+                        Icons.close_outlined,
+                        color: Colors.white,
+                        size: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+                child: ListView.separated(
+                    itemBuilder: (context, index) {
+                      return Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black, width: 1)),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Question ${index + 1}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Text(
+                              valueControllers[index].text,
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            const TextField(
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: "Enter your response",
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const Divider(
+                        height: 10,
+                        thickness: 0,
+                      );
+                    },
+                    itemCount: valueControllers.length)),
+          ],
+        ),
       );
     }
   }
