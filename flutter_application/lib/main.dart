@@ -15,7 +15,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
-
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     initialRoute: MyApp.routeName,

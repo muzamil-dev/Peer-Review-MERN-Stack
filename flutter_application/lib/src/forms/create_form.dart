@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/widgets.dart';
 
 class CreateForm extends StatefulWidget {
   static const routeName = '/createForm';
@@ -394,10 +393,15 @@ class _CreateFormState extends State<CreateForm> {
 
   Widget displayEmptyWidget(BuildContext context) {
     return const Center(
-      child: Text(
-        "Press The + Button to Create Fields",
-        style:
-            TextStyle(color: Color.fromARGB(255, 110, 103, 103), fontSize: 16),
+      child: Column(
+        children: [
+          SizedBox(height: 150),
+          Text(
+            "Press The + Button to Create Fields",
+            style: TextStyle(
+                color: Color.fromARGB(255, 110, 103, 103), fontSize: 16),
+          ),
+        ],
       ),
     );
   }
