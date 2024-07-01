@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+//TODO: Fix Validation For Create Form Button to incorporate checking if there are valid fields
+
+import "package:flutter/material.dart";
+import "package:flutter/cupertino.dart";
+import "package:http/http.dart" as http;
+import "dart:convert";
 
 class CreateForm extends StatefulWidget {
   static const routeName = '/createForm';
@@ -307,60 +309,64 @@ class _CreateFormState extends State<CreateForm> {
         ));
   }
 
+  Widget invalidFormPage(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            "Fix these in the Add Form Page:",
+            style: TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            height: 15.0,
+          ),
+          SizedBox(
+            height: 150,
+            child: ListView.builder(
+              itemCount: addFormPageErrors.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(width: 40),
+                        // Bullet Point Container
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.black,
+                            shape: BoxShape.circle,
+                          ),
+                          width: 7,
+                          height: 7,
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          addFormPageErrors[index],
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10.0,
+                    )
+                  ],
+                );
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   Widget studentViewPage(BuildContext context) {
     if (invalidFormFields()) {
-      return Container(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Fix these in the Add Form Page:",
-              style: TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(
-              height: 15.0,
-            ),
-            SizedBox(
-              height: 150,
-              child: ListView.builder(
-                itemCount: addFormPageErrors.length,
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const SizedBox(width: 40),
-                          // Bullet Point Container
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.black,
-                              shape: BoxShape.circle,
-                            ),
-                            width: 7,
-                            height: 7,
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            addFormPageErrors[index],
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      )
-                    ],
-                  );
-                },
-              ),
-            )
-          ],
-        ),
-      );
+      return invalidFormPage(context);
     } else {
       return const Column(
         children: [
