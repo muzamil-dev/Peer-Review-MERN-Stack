@@ -66,7 +66,7 @@ export const getById = async(reviewId) => {
 export const getByAssignmentAndUser = async(userId, assignmentId) => {
     try{
         const res = await db.query(
-            `/* Get the ids for assignments, users, targets. Join the question, rating,
+            `/* Get the review ids for reviews with specified assignment/user. Join the question, rating,
             and target's name to each review to be grouped */
             WITH review_table AS
             (SELECT r.assignment_id, r.user_id, r.id, r.target_id, ra.rating, q.question
@@ -112,8 +112,7 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
             SELECT assignment_user_table.*, u.first_name, u.last_name
             FROM assignment_user_table
             JOIN users AS u
-            ON user_id = u.id
-            `,
+            ON user_id = u.id`,
             [userId, assignmentId]
         );
         const data = res.rows[0];
@@ -143,7 +142,74 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
 
 export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
     try{
+        const res = await db.query(
+            `/* Get the review ids for reviews with specified assignment/user. Join the question, rating,
+            and target's name to each review to be grouped */
+            WITH review_table AS
+            (SELECT r.assignment_id, r.user_id, r.id, r.target_id, ra.rating, q.question
+            FROM reviews AS r
+            LEFT JOIN ratings as ra
+            ON r.id = ra.review_id
+            LEFT JOIN questions as q
+            ON ra.question_id = q.id
+            WHERE r.target_id = $1 AND r.assignment_id = $2
+            ORDER BY r.id),
 
+            /* Group to create a list of reviews */
+            ratings_table AS
+            (SELECT assignment_id, user_id, target_id,
+            jsonb_agg(
+                jsonb_build_object(
+                    'question', question,
+                    'rating', rating
+                )
+            ) FILTER (WHERE rating IS NOT NULL) AS ratings
+            FROM review_table
+            JOIN users AS u
+            ON user_id = u.id
+            GROUP BY assignment_id, user_id, target_id),
+
+            /* Group to create a single row with an array of reviews */
+            assignment_target_table AS
+            (SELECT rt.assignment_id, rt.target_id,
+            jsonb_agg(
+                jsonb_build_object(
+                    'userId', rt.user_id,
+                    'firstName', u.first_name,
+                    'lastName', u.last_name,
+                    'ratings', rt.ratings
+                )
+            ) AS reviews
+            FROM ratings_table AS rt
+            JOIN users AS u
+            ON rt.user_id = u.id
+            GROUP BY rt.assignment_id, rt.target_id)
+
+            /* Join the target's name to the new table */
+            SELECT assignment_target_table.*, u.first_name, u.last_name
+            FROM assignment_target_table
+            JOIN users AS u
+            ON target_id = u.id`,
+            [targetId, assignmentId]
+        );
+        // Check if the reviews were found
+        const data = res.rows[0];
+        if (!data)
+            return {
+                error: "The requested reviews were not found",
+                status: 404
+            };
+
+        // Filter complete reviews, incomplete reviews will be excluded
+        const reviews = data.reviews.filter(review => review.ratings !== null);
+
+        // Return formatted object
+        return {
+            targetId: data.target_id,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            reviews
+        };
     }
     catch(err){
         return { error: err.message, status: 500 };
