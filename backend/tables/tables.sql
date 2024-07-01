@@ -56,10 +56,11 @@ CREATE TABLE questions(
     question TEXT NOT NULL
 );
 
-CREATE TABLE rating(
+CREATE TABLE ratings(
     review_id INT REFERENCES reviews (id) ON DELETE CASCADE,
     question_id INT REFERENCES questions (id) ON DELETE CASCADE,
-    rating INT NOT NULL
+    rating INT NOT NULL,
+    PRIMARY KEY (review_id, question_id)
 );
 
 CREATE TABLE assignment_questions(

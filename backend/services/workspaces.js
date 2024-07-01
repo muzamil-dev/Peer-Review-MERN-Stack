@@ -162,9 +162,9 @@ export const create = async(userId, settings) => {
         );
         // Make the creator an instructor of the workspace
         await db.query(
-            `insert into memberships
+            `INSERT INTO memberships
             (user_id, workspace_id, role)
-            values ($1, $2, $3)`,
+            VALUES ($1, $2, $3)`,
             [userId, res.rows[0].id, "Instructor"]
         );
         // Format the above query
