@@ -1,41 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './GroupsPageAdmin.module.css'; // Import the CSS file as a module
-import Api from './Api.js'; // Adjust the path to where your Api.js file is located
+import Api from './Api.js';  // Adjust the path to where your Api.js file is located
 
 const GroupsPageUser = () => {
     const [groups, setGroups] = useState([]);
+    const [ungroupedMembers, setUngroupedMembers] = useState([]);
     const { workspaceId } = useParams(); // Assuming you're using React Router v6
     const navigate = useNavigate();
+    const [joinedGroup, setJoinedGroup] = useState(null); // Track the joined group
+
+    const fetchGroups = async () => {
+        const response = await Api.Workspace.GetGroups(workspaceId);
+        if (response.status === 200 && Array.isArray(response.data.groups)) {
+            setGroups(response.data.groups);
+            // Check if user is already in a group
+            const userInGroup = response.data.groups.find(group => {
+                return group.members.some(member => member.userId === '6671c8362ffea49f3018bf61');
+            });
+            if (userInGroup) {
+                setJoinedGroup(userInGroup.groupId); // Set joinedGroup if user is already in a group
+            } else {
+                setJoinedGroup(null);
+            }
+        } else {
+            console.error('Failed to fetch groups:', response.message);
+            setGroups([]); // Ensure groups is an array even on error
+        }
+    };
+
+    const fetchUngroupedMembers = async () => {
+        const response = await Api.Workspace.GetStudentsWithoutGroup(workspaceId);
+        if (response.status === 200 && Array.isArray(response.data)) {
+            setUngroupedMembers(response.data);
+        } else {
+            console.error('Failed to fetch ungrouped members:', response.message);
+            setUngroupedMembers([]); // Ensure ungroupedMembers is an array even on error
+        }
+    };
 
     useEffect(() => {
-        const fetchGroups = async () => {
-            const response = await Api.Workspace.GetGroups(workspaceId);
-            if (response.status === 200 && Array.isArray(response.data.groups)) {
-                setGroups(response.data.groups);
-            } else {
-                console.error('Failed to fetch groups:', response.message);
-                setGroups([]);
-            }
-        };
-
         fetchGroups();
+        fetchUngroupedMembers();
     }, [workspaceId]);
 
     const handleJoinGroup = async (groupId) => {
         const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
         const response = await Api.Groups.AddUser(userId, groupId);
         if (response.success) {
-            // Update groups state to reflect the join
-            setGroups(groups.map(group => {
-                if (group.groupId === groupId) {
-                    return {
-                        ...group,
-                        members: [...group.members, { userId: userId, firstName: 'Firstname', lastName: 'Lastname' }]
-                    };
-                }
-                return group;
-            }));
+            fetchGroups(); // Refresh groups after joining
+            setJoinedGroup(groupId); // Update joinedGroup state
         } else {
             console.error('Failed to join group:', response.message);
         }
@@ -43,25 +57,17 @@ const GroupsPageUser = () => {
 
     const handleLeaveGroup = async (groupId) => {
         const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
-        const response = await Api.Groups.RemoveUser(userId, groupId);
+        const response = await Api.Groups.RemoveUser(userId, userId, groupId);
         if (response.success) {
-            // Update groups state to reflect the leave
-            setGroups(groups.map(group => {
-                if (group.groupId === groupId) {
-                    return {
-                        ...group,
-                        members: group.members.filter(member => member.userId !== userId)
-                    };
-                }
-                return group;
-            }));
+            fetchGroups(); // Refresh groups after leaving
+            setJoinedGroup(null); // Clear joinedGroup state
         } else {
             console.error('Failed to leave group:', response.message);
         }
     };
 
     const handleDashboard = () => {
-        navigate('/dashboard'); // Navigate to dashboard page
+        navigate('/DashboardPage'); // Navigate to dashboard page
     };
 
     return (
@@ -84,19 +90,19 @@ const GroupsPageUser = () => {
                                         ))}
                                     </ul>
                                     <div className="mt-auto">
-                                        {!group.members.some(member => member.userId === '6671c8362ffea49f3018bf61') ? (
-                                            <button
-                                                className="btn btn-success"
-                                                onClick={() => handleJoinGroup(group.groupId)}
-                                            >
-                                                Join
-                                            </button>
-                                        ) : (
+                                        {joinedGroup === group.groupId ? (
                                             <button
                                                 className="btn btn-danger"
                                                 onClick={() => handleLeaveGroup(group.groupId)}
                                             >
                                                 Leave
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="btn btn-success"
+                                                onClick={() => handleJoinGroup(group.groupId)}
+                                            >
+                                                {group.members.some(member => member.userId === '6671c8362ffea49f3018bf61') ? 'Joined' : 'Join'}
                                             </button>
                                         )}
                                     </div>
