@@ -168,7 +168,8 @@ class _EditFormState extends State<EditForm> {
                                 if (isValidForm(_formKey) == false) {
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(const SnackBar(
-                                    content: Text('Create Form Failed: \nLook at Student View Page for Errors'),
+                                    content: Text(
+                                        'Edit Form Failed: \nLook at Student View Page for Errors'),
                                   ));
                                   return;
                                 }
