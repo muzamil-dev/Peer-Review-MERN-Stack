@@ -207,6 +207,7 @@ router.put("/edit", async(req, res) => {
         return res.status(403).json({ message: "The provided user is not authorized to make this request" });
     // Check for edits on: startDate, dueDate, description, questions
     const edits = {};
+    if (req.body.name) edits.name = req.body.name;
     if (req.body.startDate) edits.startDate = new Date(req.body.startDate);
     if (req.body.dueDate) edits.dueDate = new Date(req.body.dueDate);
     if (req.body.description) edits.description = req.body.description;
