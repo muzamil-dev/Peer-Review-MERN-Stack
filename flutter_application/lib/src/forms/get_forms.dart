@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class GetAssignments extends StatefulWidget {
   final String userId;
@@ -62,6 +63,19 @@ class _GetAssignmentsState extends State<GetAssignments> {
     }
   }
 
+  String getDateString(String date) {
+    // Parse the input date string
+    DateTime dateTime = DateTime.parse(date);
+
+    // Define the desired date format
+    DateFormat dateFormat = DateFormat("MM/dd/yy");
+
+    // Format the DateTime object to the desired string format
+    String formattedDate = dateFormat.format(dateTime);
+
+    return formattedDate;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,15 +108,42 @@ class _GetAssignmentsState extends State<GetAssignments> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Start Date: "),
-                                Text(assignment.startDate)
+                                Text(getDateString(assignment.startDate))
                               ],
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Due Date: "),
-                                Text(assignment.dueDate)
+                                Text(getDateString(assignment.dueDate))
                               ],
+                            ),
+                            const SizedBox(height: 20),
+                            Container(
+                              width: double.infinity,
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text("Questions: ",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        )),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: assignment.questions
+                                          .map<Widget>((question) {
+                                        return Text(
+                                          question,
+                                          style: const TextStyle(fontSize: 16),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ]),
                             ),
                           ],
                         ),
@@ -136,5 +177,9 @@ class Assignment {
       dueDate: json['dueDate'],
       questions: json['questions'],
     );
+  }
+
+  List<dynamic> getQuestions() {
+    return questions;
   }
 }
