@@ -55,9 +55,11 @@ class _EditFormState extends State<EditForm> {
           for (var question in jsonResponse['questions']) {
             valueControllers.add(TextEditingController(text: question));
           }
-          availableFromController.text = jsonResponse['startDate'];
-          dueUntillController.text = jsonResponse['dueDate'];
-          formName.text = 'MANUALLY ADDING ASSIGNMENT NAME';
+          // Slices Strings to Not include Extraneous info other than date
+          availableFromController.text = jsonResponse['startDate'].substring(0, 10);
+          dueUntillController.text = jsonResponse['dueDate'].substring(0, 10);
+
+          formName.text = 'MANUAL ASSIGNMENT NAME';
           numFields = valueControllers.length;
         });
       }
