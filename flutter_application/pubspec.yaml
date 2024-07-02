@@ -17,6 +17,7 @@ dependencies:
   shared_preferences:
   jwt_decoder:
   cupertino_icons:
+  intl:
   flutter_localizations:
     sdk: flutter
 
