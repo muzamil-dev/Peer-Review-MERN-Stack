@@ -1,5 +1,3 @@
-//TODO: Fix Validation For Create Form Button to incorporate checking if there are valid fields
-
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
 import "package:http/http.dart" as http;
@@ -37,8 +35,9 @@ class _CreateFormState extends State<CreateForm> {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-type': 'application/json'},
+        headers: {'content-type': 'application/json'},
         body: jsonEncode({
+          "name": formName.text,
           "userId": widget.userId,
           "workspaceId": widget.workspaceId,
           "startDate": availableFromController.text,
