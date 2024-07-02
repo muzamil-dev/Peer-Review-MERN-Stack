@@ -51,8 +51,7 @@ class _CreateFormState extends State<CreateForm> {
         final jsonResponse = json.decode(response.body);
         print("Response : ${jsonResponse['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Succesfully Created Assignment")));
+            const SnackBar(content: Text("Succesfully Created Assignment")));
       } else {
         final errorData = json.decode(response.body);
         print("Error Creating Assignment: $errorData");
@@ -84,6 +83,18 @@ class _CreateFormState extends State<CreateForm> {
     }
   }
 
+  bool isValidForm(GlobalKey key) {
+    if (_formKey.currentState!.validate() == false) {
+      print("Validation Failed!");
+      return false;
+    }
+
+    if (valueControllers.isEmpty) {
+      return false;
+    }
+    return true;
+  }
+
   Widget addFormsPage(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -111,10 +122,14 @@ class _CreateFormState extends State<CreateForm> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                if (_formKey.currentState!.validate() ==
-                                    false) {
+                                if (isValidForm(_formKey) == false) {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content: Text('Create Form Failed: Look at Student View Page for Errors'),
+                                  ));
                                   return;
                                 }
+
                                 List<String> questions = [];
                                 for (var field in valueControllers) {
                                   questions.add(field.text);
@@ -207,7 +222,8 @@ class _CreateFormState extends State<CreateForm> {
                         ),
                         // Form Settings
 
-                        // Form Fields (ListView Builder)
+                        // Form Fields (Li
+                        // Builder)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -550,7 +566,7 @@ class _CreateFormState extends State<CreateForm> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Create Form',
+                'Create Form Page',
                 style: TextStyle(color: Colors.white),
               ),
               // Submits and Resets Form

@@ -56,7 +56,8 @@ class _EditFormState extends State<EditForm> {
             valueControllers.add(TextEditingController(text: question));
           }
           // Slices Strings to Not include Extraneous info other than date
-          availableFromController.text = jsonResponse['startDate'].substring(0, 10);
+          availableFromController.text =
+              jsonResponse['startDate'].substring(0, 10);
           dueUntillController.text = jsonResponse['dueDate'].substring(0, 10);
 
           formName.text = 'MANUAL ASSIGNMENT NAME';
@@ -95,9 +96,7 @@ class _EditFormState extends State<EditForm> {
       if (response.statusCode == 200) {
         print("Succesfully Edited Assignment!");
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Succesfully Edited Assignment'))
-        );
+            const SnackBar(content: Text('Succesfully Edited Assignment')));
         // Route Back To Admin Page
       }
     } catch (error) {
@@ -127,6 +126,18 @@ class _EditFormState extends State<EditForm> {
     }
   }
 
+  bool isValidForm(GlobalKey key) {
+    if (_formKey.currentState!.validate() == false) {
+      print("Validation Failed!");
+      return false;
+    }
+
+    if (valueControllers.isEmpty) {
+      return false;
+    }
+    return true;
+  }
+
   Widget editFormsPage(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -154,11 +165,14 @@ class _EditFormState extends State<EditForm> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                if (_formKey.currentState!.validate() ==
-                                    false) {
-                                  print("Validation Failed!");
+                                if (isValidForm(_formKey) == false) {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content: Text('Create Form Failed: \nLook at Student View Page for Errors'),
+                                  ));
                                   return;
                                 }
+
                                 List<String> questions = [];
                                 for (var field in valueControllers) {
                                   questions.add(field.text);
@@ -597,7 +611,7 @@ class _EditFormState extends State<EditForm> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Create Form',
+                'Edit Form Page',
                 style: TextStyle(color: Colors.white),
               ),
               // Submits and Resets Form
@@ -612,7 +626,7 @@ class _EditFormState extends State<EditForm> {
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_today_rounded), label: 'Add Form'),
+                icon: Icon(Icons.calendar_today_rounded), label: 'Edit Form'),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.eyeglasses),
               label: 'Student View',
