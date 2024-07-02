@@ -166,6 +166,9 @@ class _EditFormState extends State<EditForm> {
                                 await editAssignment(context);
                                 setState(() {
                                   _formKey.currentState!.reset();
+                                  formName.text = '';
+                                  availableFromController.text = '';
+                                  dueUntillController.text = '';
                                   valueControllers = [];
                                   numFields = 0;
                                 });
