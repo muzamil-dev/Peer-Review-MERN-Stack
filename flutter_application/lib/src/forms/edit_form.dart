@@ -69,7 +69,7 @@ class _EditFormState extends State<EditForm> {
   }
 
   Future<void> editAssignment(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/assignments');
+    final url = Uri.parse('http://10.0.2.2:5000/assignments/edit');
     List<String> questions = [];
 
     for (var controller in valueControllers) {
@@ -97,7 +97,7 @@ class _EditFormState extends State<EditForm> {
         // Route Back To Admin Page
       }
     } catch (error) {
-      print("Error Getting Assignmnet: $error");
+      print("Error Editing Assignmnet: $error");
     }
   }
 
@@ -152,12 +152,14 @@ class _EditFormState extends State<EditForm> {
                               onPressed: () async {
                                 if (_formKey.currentState!.validate() ==
                                     false) {
+                                  print("Validation Failed!");
                                   return;
                                 }
                                 List<String> questions = [];
                                 for (var field in valueControllers) {
                                   questions.add(field.text);
                                 }
+                                await editAssignment(context);
                                 setState(() {
                                   _formKey.currentState!.reset();
                                   valueControllers = [];
