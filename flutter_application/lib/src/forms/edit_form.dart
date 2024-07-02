@@ -87,6 +87,7 @@ class _EditFormState extends State<EditForm> {
           "userId": widget.userId,
           "workspaceId": widget.workspaceId,
           "assignmentId": widget.assignmentId,
+          "name": formName.text,
           "startDate": availableFromController.text,
           "dueDate": dueUntillController.text,
           "questions": questions,
