@@ -58,8 +58,8 @@ class _EditFormState extends State<EditForm> {
           }
           // Slices Strings to Not include Extraneous info other than date
           availableFromController.text =
-              jsonResponse['startDate'].substring(0, 10);
-          dueUntillController.text = jsonResponse['dueDate'].substring(0, 10);
+              getDateString(jsonResponse['startDate'].substring(0, 10));
+          dueUntillController.text = getDateString(jsonResponse['dueDate'].substring(0, 10));
 
           formName.text = jsonResponse['name'];
           numFields = valueControllers.length;
