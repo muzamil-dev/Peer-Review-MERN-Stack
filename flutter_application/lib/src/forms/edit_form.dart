@@ -94,6 +94,10 @@ class _EditFormState extends State<EditForm> {
 
       if (response.statusCode == 200) {
         print("Succesfully Edited Assignment!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Succesfully Edited Assignment'))
+        );
         // Route Back To Admin Page
       }
     } catch (error) {

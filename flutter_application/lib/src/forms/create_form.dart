@@ -28,7 +28,7 @@ class _CreateFormState extends State<CreateForm> {
   TextEditingController formName = TextEditingController();
 
   List<Widget> _widgetTabOptions(BuildContext context) {
-    return <Widget>[editFormsPage(context), studentViewPage(context)];
+    return <Widget>[addFormsPage(context), studentViewPage(context)];
   }
 
   Future<void> createAssignment(
@@ -50,6 +50,9 @@ class _CreateFormState extends State<CreateForm> {
         print("Assignment Created Successfully");
         final jsonResponse = json.decode(response.body);
         print("Response : ${jsonResponse['message']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Succesfully Created Assignment")));
       } else {
         final errorData = json.decode(response.body);
         print("Error Creating Assignment: $errorData");
@@ -81,7 +84,7 @@ class _CreateFormState extends State<CreateForm> {
     }
   }
 
-  Widget editFormsPage(BuildContext context) {
+  Widget addFormsPage(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
