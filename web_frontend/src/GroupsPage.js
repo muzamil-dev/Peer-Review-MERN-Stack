@@ -5,23 +5,23 @@ import Api from './Api.js';  // Adjust the path to where your Api.js file is loc
 
 const GroupsPageUser = () => {
     const [groups, setGroups] = useState([]);
-    const [ungroupedMembers, setUngroupedMembers] = useState([]);
     const { workspaceId } = useParams(); // Assuming you're using React Router v6
     const navigate = useNavigate();
-    const [joinedGroup, setJoinedGroup] = useState(null); // Track the joined group
+    const [joinedGroupId, setJoinedGroupId] = useState(null); // Track the joined group
 
     const fetchGroups = async () => {
         const response = await Api.Workspace.GetGroups(workspaceId);
         if (response.status === 200 && Array.isArray(response.data.groups)) {
             setGroups(response.data.groups);
+
             // Check if user is already in a group
             const userInGroup = response.data.groups.find(group => {
                 return group.members.some(member => member.userId === '6671c8362ffea49f3018bf61');
             });
             if (userInGroup) {
-                setJoinedGroup(userInGroup.groupId); // Set joinedGroup if user is already in a group
+                setJoinedGroupId(userInGroup.groupId); // Set joinedGroup if user is already in a group
             } else {
-                setJoinedGroup(null);
+                setJoinedGroupId(null);
             }
         } else {
             console.error('Failed to fetch groups:', response.message);
@@ -29,27 +29,24 @@ const GroupsPageUser = () => {
         }
     };
 
-    const fetchUngroupedMembers = async () => {
-        const response = await Api.Workspace.GetStudentsWithoutGroup(workspaceId);
-        if (response.status === 200 && Array.isArray(response.data)) {
-            setUngroupedMembers(response.data);
-        } else {
-            console.error('Failed to fetch ungrouped members:', response.message);
-            setUngroupedMembers([]); // Ensure ungroupedMembers is an array even on error
-        }
-    };
-
     useEffect(() => {
         fetchGroups();
-        fetchUngroupedMembers();
     }, [workspaceId]);
 
     const handleJoinGroup = async (groupId) => {
+        if (joinedGroupId !== null) {
+            return; // Prevent joining another group if already in one
+        }
         const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
         const response = await Api.Groups.AddUser(userId, groupId);
         if (response.success) {
-            fetchGroups(); // Refresh groups after joining
-            setJoinedGroup(groupId); // Update joinedGroup state
+            setGroups(groups.map(group => {
+                if (group.groupId === groupId) {
+                    return { ...group, members: [...group.members, { userId, firstName: 'Firstname', lastName: 'Lastname' }] };
+                }
+                return group;
+            }));
+            setJoinedGroupId(groupId); // Update joinedGroup state
         } else {
             console.error('Failed to join group:', response.message);
         }
@@ -59,8 +56,13 @@ const GroupsPageUser = () => {
         const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
         const response = await Api.Groups.RemoveUser(userId, userId, groupId);
         if (response.success) {
-            fetchGroups(); // Refresh groups after leaving
-            setJoinedGroup(null); // Clear joinedGroup state
+            setGroups(groups.map(group => {
+                if (group.groupId === groupId) {
+                    return { ...group, members: group.members.filter(member => member.userId !== userId) };
+                }
+                return group;
+            }));
+            setJoinedGroupId(null); // Clear joinedGroup state
         } else {
             console.error('Failed to leave group:', response.message);
         }
@@ -90,19 +92,28 @@ const GroupsPageUser = () => {
                                         ))}
                                     </ul>
                                     <div className="mt-auto">
-                                        {joinedGroup === group.groupId ? (
-                                            <button
-                                                className="btn btn-danger"
-                                                onClick={() => handleLeaveGroup(group.groupId)}
-                                            >
-                                                Leave
-                                            </button>
+                                        {joinedGroupId === group.groupId ? (
+                                            <>
+                                                <button
+                                                    className="btn btn-success"
+                                                    disabled
+                                                >
+                                                    Joined
+                                                </button>
+                                                <button
+                                                    className="btn btn-danger"
+                                                    onClick={() => handleLeaveGroup(group.groupId)}
+                                                >
+                                                    Leave
+                                                </button>
+                                            </>
                                         ) : (
                                             <button
                                                 className="btn btn-success"
                                                 onClick={() => handleJoinGroup(group.groupId)}
+                                                disabled={joinedGroupId !== null}
                                             >
-                                                {group.members.some(member => member.userId === '6671c8362ffea49f3018bf61') ? 'Joined' : 'Join'}
+                                                Join
                                             </button>
                                         )}
                                     </div>

@@ -24,6 +24,26 @@
     gap: 20px;
 }
 
+.headerContainer {
+    display: flex;
+    justify-content: center; /* Center content horizontally */
+    align-items: center;
+    position: relative; /* Allows absolute positioning of the button */
+    margin-bottom: 20px; /* Adjust as needed */
+}
+
+.centeredTitle {
+    text-align: center;
+    flex-grow: 1;
+}
+
+/* .dashboardButton {
+    position: absolute;
+    right: 200px;
+    top: 50%;
+    transform: translateY(-50%);
+} */
+
 .ungroupedCard {
     width: 100%;
     background-color: rgba(255, 255, 255, 0);
