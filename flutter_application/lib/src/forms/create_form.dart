@@ -451,49 +451,52 @@ class _CreateFormState extends State<CreateForm> {
               height: 20,
             ),
             Expanded(
-                child: ListView.separated(
-                    itemBuilder: (context, index) {
-                      return Container(
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black, width: 1)),
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Question ${index + 1}",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 25,
+                child: RawScrollbar(
+                  thumbColor: Colors.black,
+                  child: ListView.separated(
+                      itemBuilder: (context, index) {
+                        return Container(
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black, width: 1)),
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Question ${index + 1}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 25,
+                                ),
                               ),
-                            ),
-                            const SizedBox(
-                              height: 7,
-                            ),
-                            Text(
-                              valueControllers[index].text,
-                              style: TextStyle(fontSize: 20),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            const TextField(
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: "Enter your response",
+                              const SizedBox(
+                                height: 7,
                               ),
-                            )
-                          ],
-                        ),
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return const Divider(
-                        height: 10,
-                        thickness: 0,
-                      );
-                    },
-                    itemCount: valueControllers.length)),
+                              Text(
+                                valueControllers[index].text,
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              const TextField(
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: "Enter your response",
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) {
+                        return const Divider(
+                          height: 10,
+                          thickness: 0,
+                        );
+                      },
+                      itemCount: valueControllers.length),
+                )),
           ],
         ),
       );
