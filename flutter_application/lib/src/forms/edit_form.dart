@@ -3,6 +3,7 @@
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
 import "package:http/http.dart" as http;
+import 'package:intl/intl.dart';
 import "dart:convert";
 
 class EditForm extends StatefulWidget {
@@ -112,6 +113,19 @@ class _EditFormState extends State<EditForm> {
     });
   }
 
+   String getDateString(String date) {
+    // Parse the input date string
+    DateTime dateTime = DateTime.parse(date);
+
+    // Define the desired date format
+    DateFormat dateFormat = DateFormat("MM/dd/yy");
+
+    // Format the DateTime object to the desired string format
+    String formattedDate = dateFormat.format(dateTime);
+
+    return formattedDate;
+  }
+
   Future<void> _selectDate(TextEditingController controller) async {
     DateTime? picked = await showDatePicker(
       context: context,
@@ -122,7 +136,7 @@ class _EditFormState extends State<EditForm> {
 
     if (picked != null) {
       setState(() {
-        controller.text = picked.toString().split(" ")[0];
+        controller.text = getDateString(picked.toString().split(" ")[0]);
       });
     }
   }
