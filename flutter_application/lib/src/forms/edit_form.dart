@@ -60,7 +60,7 @@ class _EditFormState extends State<EditForm> {
               jsonResponse['startDate'].substring(0, 10);
           dueUntillController.text = jsonResponse['dueDate'].substring(0, 10);
 
-          formName.text = 'MANUAL ASSIGNMENT NAME';
+          formName.text = jsonResponse['name'];
           numFields = valueControllers.length;
         });
       }
