@@ -7,7 +7,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 /// The Widget that configures your application.
 class MyApp extends StatelessWidget {
   final token;
-  
+
   const MyApp({
     super.key,
     required this.token,
@@ -22,9 +22,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: 
-      Scaffold(
-        appBar: MainAppBar(title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
+      home: Scaffold(
+        appBar: MainAppBar(
+            title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
         body: Center(
           child: Column(
             children: [
@@ -82,18 +82,25 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("CREATE FORMS PAGE"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/getAssignments");
+                },
+                child: const Text("VIEW FORMS PAGE"),
+              ),
             ],
           ),
         ),
       ),
       // - - - Uncomment this line for Production
-      // (JwtDecoder.isExpired(token) == false)? AdminDashboard(token: token): const LoginSignup(), 
+      // (JwtDecoder.isExpired(token) == false)? AdminDashboard(token: token): const LoginSignup(),
       routes: {
         //'/login': (context) => LoginScreen(), // Add the LoginScreen route
         //'/signup': (context) => SignUpScreen(), // Add the SignUpScreen route
         //'/userDashboard': (context) => UserDashboardScreen(), // Add the UserDashboardScreen route
         // '/adminDashboard': (context) => AdminDashboardScreen(), // Uncomment and add AdminDashboardScreen route if necessary
-        '/loginsignup': (context) => const LoginSignup(), // Add the LoginSignupScreen route
+        '/loginsignup': (context) =>
+            const LoginSignup(), // Add the LoginSignupScreen route
       },
     );
     // Glue the SettingsController to the MaterialApp.
@@ -102,4 +109,3 @@ class MyApp extends StatelessWidget {
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
   }
 }
-
