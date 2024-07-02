@@ -9,10 +9,12 @@ class EditForm extends StatefulWidget {
   static const routeName = '/editForm';
   final String userId;
   final String assignmentId;
+  final String workspaceId;
 
   const EditForm(
       {required this.userId,
       required this.assignmentId,
+      required this.workspaceId,
       super.key});
 
   @override
@@ -41,10 +43,11 @@ class _EditFormState extends State<EditForm> {
   }
 
   Future<void> getAssignmentData() async {
-    final url = Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
+    final url =
+        Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
     try {
       final response = await http.get(url);
-      
+
       if (response.statusCode == 200) {
         print("Succesfully Got Assignment!");
         final jsonResponse = json.decode(response.body);
@@ -55,33 +58,43 @@ class _EditFormState extends State<EditForm> {
           availableFromController.text = jsonResponse['startDate'];
           dueUntillController.text = jsonResponse['dueDate'];
           formName.text = 'MANUALLY ADDING ASSIGNMENT NAME';
+          numFields = valueControllers.length;
         });
       }
-    }
-    catch (error) {
+    } catch (error) {
       print("Error Getting Assignmnet: $error");
     }
   }
 
   Future<void> editAssignment(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/assignments');
-    try {
-      final response = await http.get(url);
-      
-      if (response.statusCode == 200) {
-        print("Succesfully Got Assignment!");
-        final jsonResponse = json.decode(response.body);
-        setState(() {
-          for (var question in jsonResponse['questions']) {
-            valueControllers.add(TextEditingController(text: question));
-          }
-          availableFromController.text = jsonResponse['startDate'];
-          dueUntillController.text = jsonResponse['dueDate'];
-          formName.text = 'MANUALLY ADDING ASSIGNMENT NAME';
-        });
-      }
+    List<String> questions = [];
+
+    for (var controller in valueControllers) {
+      questions.add(controller.text);
     }
-    catch (error) {
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "userId": widget.userId,
+          "workspaceId": widget.workspaceId,
+          "assignmentId": widget.assignmentId,
+          "startDate": availableFromController.text,
+          "dueDate": dueUntillController.text,
+          "questions": questions,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Succesfully Edited Assignment!");
+        // Route Back To Admin Page
+      }
+    } catch (error) {
       print("Error Getting Assignmnet: $error");
     }
   }
