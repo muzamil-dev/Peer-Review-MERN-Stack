@@ -88,6 +88,9 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("EDIT FORMS PAGE"),
               ),
+              ElevatedButton(onPressed: () {
+                Navigator.pushNamed(context, "/getAssignments");
+              }, child: const Text("GET ASSIGNMENTS PAGE"))
             ],
           ),
         ),
