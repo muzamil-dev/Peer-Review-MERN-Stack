@@ -5,18 +5,21 @@ import "package:flutter/cupertino.dart";
 import "package:http/http.dart" as http;
 import "dart:convert";
 
-class CreateForm extends StatefulWidget {
-  static const routeName = '/createForm';
+class EditForm extends StatefulWidget {
+  static const routeName = '/editForm';
   final String userId;
-  final String workspaceId;
-  const CreateForm(
-      {required this.userId, required this.workspaceId, super.key});
+  final String assignmentId;
+
+  const EditForm(
+      {required this.userId,
+      required this.assignmentId,
+      super.key});
 
   @override
-  State<CreateForm> createState() => _CreateFormState();
+  State<EditForm> createState() => _EditFormState();
 }
 
-class _CreateFormState extends State<CreateForm> {
+class _EditFormState extends State<EditForm> {
   int _currentIndex = 0;
   int numFields = 0;
   List<TextEditingController> valueControllers = [];
@@ -27,39 +30,63 @@ class _CreateFormState extends State<CreateForm> {
   TextEditingController dueUntillController = TextEditingController();
   TextEditingController formName = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    getAssignmentData();
+  }
+
   List<Widget> _widgetTabOptions(BuildContext context) {
     return <Widget>[editFormsPage(context), studentViewPage(context)];
   }
 
-  Future<void> createAssignment(
-      BuildContext context, List<String> questions) async {
-    final url = Uri.parse('http://10.0.2.2:5000/assignments/create');
+  Future<void> getAssignmentData() async {
+    final url = Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
     try {
-      final response = await http.post(
-        url,
-        headers: {'Content-type': 'application/json'},
-        body: jsonEncode({
-          "userId": widget.userId,
-          "workspaceId": widget.workspaceId,
-          "startDate": availableFromController.text,
-          "dueDate": dueUntillController.text,
-          "questions": questions,
-        }),
-      );
-      if (response.statusCode == 201) {
-        print("Assignment Created Successfully");
+      final response = await http.get(url);
+      
+      if (response.statusCode == 200) {
+        print("Succesfully Got Assignment!");
         final jsonResponse = json.decode(response.body);
-        print("Response : ${jsonResponse['message']}");
-      } else {
-        final errorData = json.decode(response.body);
-        print("Error Creating Assignment: $errorData");
+        setState(() {
+          for (var question in jsonResponse['questions']) {
+            valueControllers.add(TextEditingController(text: question));
+          }
+          availableFromController.text = jsonResponse['startDate'];
+          dueUntillController.text = jsonResponse['dueDate'];
+          formName.text = 'MANUALLY ADDING ASSIGNMENT NAME';
+        });
       }
-    } catch (error) {
-      print("Error Creating Assignment: $error");
+    }
+    catch (error) {
+      print("Error Getting Assignmnet: $error");
     }
   }
 
-  void createForm() {
+  Future<void> editAssignment(BuildContext context) async {
+    final url = Uri.parse('http://10.0.2.2:5000/assignments');
+    try {
+      final response = await http.get(url);
+      
+      if (response.statusCode == 200) {
+        print("Succesfully Got Assignment!");
+        final jsonResponse = json.decode(response.body);
+        setState(() {
+          for (var question in jsonResponse['questions']) {
+            valueControllers.add(TextEditingController(text: question));
+          }
+          availableFromController.text = jsonResponse['startDate'];
+          dueUntillController.text = jsonResponse['dueDate'];
+          formName.text = 'MANUALLY ADDING ASSIGNMENT NAME';
+        });
+      }
+    }
+    catch (error) {
+      print("Error Getting Assignmnet: $error");
+    }
+  }
+
+  void addFormField() {
     setState(() {
       numFields += 1;
       valueControllers.add(TextEditingController());
@@ -116,7 +143,6 @@ class _CreateFormState extends State<CreateForm> {
                                 for (var field in valueControllers) {
                                   questions.add(field.text);
                                 }
-                                await createAssignment(context, questions);
                                 setState(() {
                                   _formKey.currentState!.reset();
                                   valueControllers = [];
@@ -130,7 +156,7 @@ class _CreateFormState extends State<CreateForm> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Create Form",
+                                    "Edit Form",
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 14),
                                   ),
@@ -214,7 +240,7 @@ class _CreateFormState extends State<CreateForm> {
                                   fontSize: 25, fontWeight: FontWeight.bold),
                             ),
                             IconButton(
-                              onPressed: createForm,
+                              onPressed: addFormField,
                               icon: const Icon(
                                 Icons.add,
                                 color: Colors.white,
