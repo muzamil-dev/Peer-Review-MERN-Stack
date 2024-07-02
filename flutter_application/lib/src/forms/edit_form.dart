@@ -179,14 +179,10 @@ class _EditFormState extends State<EditForm> {
                                   questions.add(field.text);
                                 }
                                 await editAssignment(context);
-                                setState(() {
-                                  _formKey.currentState!.reset();
-                                  formName.text = '';
-                                  availableFromController.text = '';
-                                  dueUntillController.text = '';
-                                  valueControllers = [];
-                                  numFields = 0;
-                                });
+                                ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content: Text(
+                                        'Edited Form Successfully!')));
                               },
                               style: TextButton.styleFrom(
                                 backgroundColor: Colors.green,
