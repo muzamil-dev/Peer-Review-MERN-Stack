@@ -3,6 +3,7 @@ import 'package:flutter_application/src/app.dart';
 import 'package:flutter_application/src/dashboard/user_dashboard.dart';
 import 'package:flutter_application/src/forms/create_form.dart';
 import 'package:flutter_application/src/forms/get_forms.dart';
+import 'package:flutter_application/src/forms/edit_form.dart';
 import 'package:flutter_application/src/groups/adminGroups.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
 import 'package:flutter_application/src/login-signup/loginsignup.dart';
@@ -46,7 +47,12 @@ void main() async {
           userId: '6670afc2446c5daced6600ca'),
       GetAssignments.routeName: (context) => const GetAssignments(
           workspaceId: '66809591ef78ec4180c850f1',
-          userId: '6670afc2446c5daced6600ca')
+          userId: '6670afc2446c5daced6600ca'),
+      // Manually Added Edit Forms Page for Debugging Purposes, User: Kazi Amin DB
+      EditForm.routeName: (context) => const EditForm(
+          assignmentId: '668463078347b0241d032f5d',
+          workspaceId: '66809591ef78ec4180c850f1',
+          userId: '6670afc2446c5daced6600ca'),
     },
   ));
 }

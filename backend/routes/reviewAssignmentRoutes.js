@@ -26,6 +26,7 @@ router.get("/:assignmentId", async(req, res) => {
         // Format the assignment information
         const formattedAssignment = {
             assignmentId: assignment._id,
+            name: assignment.name,
             workspaceId: assignment.workspaceId,
             description: assignment.description,
             questions: assignment.questions,
@@ -125,7 +126,7 @@ router.post("/create", async(req, res) => {
         const userId = body.userId
         const workspaceId = body.workspaceId
         // Check for required fields
-        if (!body.dueDate || !body.questions || body.questions.length < 1){
+        if (!body.name || !body.dueDate || !body.questions || body.questions.length < 1){
             return res.status(400).json({ message: "One or more required fields is not present" });
         }
 
@@ -140,10 +141,11 @@ router.post("/create", async(req, res) => {
             return res.status(403).json({ message: "The provided user is not authorized to make this request" });
 
         // Add required fields to a new object
+        const name = body.name;
         const dueDate = new Date(body.dueDate);
         const questions = body.questions;
 
-        const assignmentObj = { workspaceId, dueDate, questions};
+        const assignmentObj = { name, workspaceId, dueDate, questions};
 
         // Look for optional fields
         if (body.startDate) assignmentObj.startDate = new Date(body.startDate);

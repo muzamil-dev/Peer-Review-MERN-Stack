@@ -1,20 +1,27 @@
+//TODO: Fix FORM NAME IN GET ASSIGNMENTS ONCE THE API IS UPDATED
+
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
 import "package:http/http.dart" as http;
 import "dart:convert";
 
-class CreateForm extends StatefulWidget {
-  static const routeName = '/createForm';
+class EditForm extends StatefulWidget {
+  static const routeName = '/editForm';
   final String userId;
+  final String assignmentId;
   final String workspaceId;
-  const CreateForm(
-      {required this.userId, required this.workspaceId, super.key});
+
+  const EditForm(
+      {required this.userId,
+      required this.assignmentId,
+      required this.workspaceId,
+      super.key});
 
   @override
-  State<CreateForm> createState() => _CreateFormState();
+  State<EditForm> createState() => _EditFormState();
 }
 
-class _CreateFormState extends State<CreateForm> {
+class _EditFormState extends State<EditForm> {
   int _currentIndex = 0;
   int numFields = 0;
   List<TextEditingController> valueControllers = [];
@@ -25,42 +32,79 @@ class _CreateFormState extends State<CreateForm> {
   TextEditingController dueUntillController = TextEditingController();
   TextEditingController formName = TextEditingController();
 
-  List<Widget> _widgetTabOptions(BuildContext context) {
-    return <Widget>[addFormsPage(context), studentViewPage(context)];
+  @override
+  void initState() {
+    super.initState();
+    getAssignmentData();
   }
 
-  Future<void> createAssignment(
-      BuildContext context, List<String> questions) async {
-    final url = Uri.parse('http://10.0.2.2:5000/assignments/create');
+  List<Widget> _widgetTabOptions(BuildContext context) {
+    return <Widget>[editFormsPage(context), studentViewPage(context)];
+  }
+
+  Future<void> getAssignmentData() async {
+    final url =
+        Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
     try {
-      final response = await http.post(
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        print("Succesfully Got Assignment!");
+        final jsonResponse = json.decode(response.body);
+        setState(() {
+          for (var question in jsonResponse['questions']) {
+            valueControllers.add(TextEditingController(text: question));
+          }
+          // Slices Strings to Not include Extraneous info other than date
+          availableFromController.text =
+              jsonResponse['startDate'].substring(0, 10);
+          dueUntillController.text = jsonResponse['dueDate'].substring(0, 10);
+
+          formName.text = 'MANUAL ASSIGNMENT NAME';
+          numFields = valueControllers.length;
+        });
+      }
+    } catch (error) {
+      print("Error Getting Assignmnet: $error");
+    }
+  }
+
+  Future<void> editAssignment(BuildContext context) async {
+    final url = Uri.parse('http://10.0.2.2:5000/assignments/edit');
+    List<String> questions = [];
+
+    for (var controller in valueControllers) {
+      questions.add(controller.text);
+    }
+
+    try {
+      final response = await http.put(
         url,
-        headers: {'content-type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: jsonEncode({
-          "name": formName.text,
           "userId": widget.userId,
           "workspaceId": widget.workspaceId,
+          "assignmentId": widget.assignmentId,
           "startDate": availableFromController.text,
           "dueDate": dueUntillController.text,
           "questions": questions,
         }),
       );
-      if (response.statusCode == 201) {
-        print("Assignment Created Successfully");
-        final jsonResponse = json.decode(response.body);
-        print("Response : ${jsonResponse['message']}");
+
+      if (response.statusCode == 200) {
+        print("Succesfully Edited Assignment!");
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Succesfully Created Assignment")));
-      } else {
-        final errorData = json.decode(response.body);
-        print("Error Creating Assignment: $errorData");
+            const SnackBar(content: Text('Succesfully Edited Assignment')));
+        // Route Back To Admin Page
       }
     } catch (error) {
-      print("Error Creating Assignment: $error");
+      print("Error Editing Assignmnet: $error");
     }
   }
 
-  void createForm() {
+  void addFormField() {
     setState(() {
       numFields += 1;
       valueControllers.add(TextEditingController());
@@ -94,7 +138,7 @@ class _CreateFormState extends State<CreateForm> {
     return true;
   }
 
-  Widget addFormsPage(BuildContext context) {
+  Widget editFormsPage(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
@@ -124,7 +168,8 @@ class _CreateFormState extends State<CreateForm> {
                                 if (isValidForm(_formKey) == false) {
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(const SnackBar(
-                                    content: Text('Create Form Failed: Look at Student View Page for Errors'),
+                                    content: Text(
+                                        'Edit Form Failed: \nLook at Student View Page for Errors'),
                                   ));
                                   return;
                                 }
@@ -133,9 +178,12 @@ class _CreateFormState extends State<CreateForm> {
                                 for (var field in valueControllers) {
                                   questions.add(field.text);
                                 }
-                                await createAssignment(context, questions);
+                                await editAssignment(context);
                                 setState(() {
                                   _formKey.currentState!.reset();
+                                  formName.text = '';
+                                  availableFromController.text = '';
+                                  dueUntillController.text = '';
                                   valueControllers = [];
                                   numFields = 0;
                                 });
@@ -147,7 +195,7 @@ class _CreateFormState extends State<CreateForm> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Create Form",
+                                    "Edit Form",
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 14),
                                   ),
@@ -221,8 +269,7 @@ class _CreateFormState extends State<CreateForm> {
                         ),
                         // Form Settings
 
-                        // Form Fields (Li
-                        // Builder)
+                        // Form Fields (ListView Builder)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -232,7 +279,7 @@ class _CreateFormState extends State<CreateForm> {
                                   fontSize: 25, fontWeight: FontWeight.bold),
                             ),
                             IconButton(
-                              onPressed: createForm,
+                              onPressed: addFormField,
                               icon: const Icon(
                                 Icons.add,
                                 color: Colors.white,
@@ -565,7 +612,7 @@ class _CreateFormState extends State<CreateForm> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Create Form Page',
+                'Edit Form Page',
                 style: TextStyle(color: Colors.white),
               ),
               // Submits and Resets Form
@@ -580,7 +627,7 @@ class _CreateFormState extends State<CreateForm> {
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_today_rounded), label: 'Add Form'),
+                icon: Icon(Icons.calendar_today_rounded), label: 'Edit Form'),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.eyeglasses),
               label: 'Student View',

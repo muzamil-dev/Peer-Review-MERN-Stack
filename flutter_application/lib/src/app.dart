@@ -22,9 +22,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
-        appBar: MainAppBar(
-            title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
+      home: 
+      Scaffold(
+        appBar: const MainAppBar(title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
         body: Center(
           child: Column(
             children: [
@@ -84,9 +84,9 @@ class MyApp extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, "/getAssignments");
+                  Navigator.pushNamed(context, "/editForm");
                 },
-                child: const Text("VIEW FORMS PAGE"),
+                child: const Text("EDIT FORMS PAGE"),
               ),
             ],
           ),
