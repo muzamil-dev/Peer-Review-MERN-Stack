@@ -128,15 +128,27 @@ export const create = async(userId, workspaceId, settings) => {
         const assignmentId = assignmentRes.rows[0].id;
 
         // Insert the questions
-        let questionsQuery = `INSERT INTO questions (assignment_id, question) VALUES `
-        questionsQuery += questions.map((_, index) => `($1, $${index+2})`).join(', ');
-        questionsQuery += `RETURNING id`;
-        const questionsRes = await db.query(questionsQuery, [assignmentId, ...questions]);
+        const questionRes = await createQuestions(assignmentId, questions);
 
         // Create reviews if assignment has already started
         if (started)
             await ReviewService.createReviews(assignmentId);
         return { message: "Created assignment successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Helper function for adding review questions
+export const createQuestions = async(assignmentId, questions) => {
+    try{
+        // Insert the questions
+        let questionsQuery = `INSERT INTO questions (assignment_id, question) VALUES `
+        questionsQuery += questions.map((_, index) => `($1, $${index+2})`).join(', ');
+        questionsQuery += `RETURNING id`;
+        const questionRes = await db.query(questionsQuery, [assignmentId, ...questions]);
+        return questionRes;
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -178,8 +190,6 @@ export const edit = async(userId, assignmentId, settings) => {
             updates.start_date = (new Date(settings.startDate)).toISOString();
         if (settings.dueDate)
             updates.due_date = (new Date(settings.dueDate)).toISOString();
-        if (settings.questions)
-            updates.questions = settings.questions;
         if (settings.description !== undefined) // description can be null or empty
             updates.description = settings.description;
 
@@ -194,6 +204,16 @@ export const edit = async(userId, assignmentId, settings) => {
         
         // Query the update
         const updateRes = await db.query(updateQuery, [...values, data.assignment_id]);
+
+        // Set the questions if provided
+        if (settings.questions){
+            const questionRes = await Promise.all([
+                db.query(
+                `UPDATE questions SET in_use = false WHERE assignment_id = $1`,
+                [assignmentId]),
+                createQuestions(assignmentId, settings.questions)
+            ]);
+        }
         return { message: "Assignment updated successfully" };
     }
     catch(err){
