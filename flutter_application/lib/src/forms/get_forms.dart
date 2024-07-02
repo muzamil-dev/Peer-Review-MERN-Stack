@@ -26,13 +26,12 @@ class _GetAssignmentsState extends State<GetAssignments> {
     super.initState();
     //Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
     //userId = jwtDecodedToken['userId'];
-    print("hello");
     fetchAssignments();
   }
 
   Future<void> fetchAssignments() async {
     final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/667a22ad8f5ce812352bba01/assignments');
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/assignments');
     try {
       final response = await http.get(
         url,
