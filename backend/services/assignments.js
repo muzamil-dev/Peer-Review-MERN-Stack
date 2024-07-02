@@ -2,8 +2,9 @@ import db from '../config.js';
 
 import * as ReviewService from './reviews.js';
 
+// TODO: Edit getById, getByWorkspace to use questions table
+
 // LATER: Potentially edit so that review does not require group_id (use joins)
-// LATER: Remove questions array and ratings array
 
 // Get an assignment by its id
 export const getById = async(assignmentId) => {
@@ -127,15 +128,10 @@ export const create = async(userId, workspaceId, settings) => {
         const assignmentId = assignmentRes.rows[0].id;
 
         // Insert the questions
-        let questionsQuery = `INSERT INTO questions (question) VALUES `
-        questionsQuery += questions.map((_, index) => `($${index+1})`).join(', ');
+        let questionsQuery = `INSERT INTO questions (assignment_id, question) VALUES `
+        questionsQuery += questions.map((_, index) => `($1, $${index+2})`).join(', ');
         questionsQuery += `RETURNING id`;
-        const questionsRes = await db.query(questionsQuery, questions);
-
-        // Link the questions to the assignment
-        let linkQuery = `INSERT INTO assignment_questions VALUES `
-        linkQuery += questions.map((_, index) => `($1, $${index+2})`).join(', ');
-        const linkRes = await db.query(linkQuery, [assignmentId, ...questionsRes.rows.map(row => row.id)]);
+        const questionsRes = await db.query(questionsQuery, [assignmentId, ...questions]);
 
         // Create reviews if assignment has already started
         if (started)

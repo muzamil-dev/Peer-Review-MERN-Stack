@@ -5,6 +5,9 @@ import cron from "node-cron";
 // Import database client
 import db from "./config.js";
 
+// Import service for cron job
+import * as ReviewService from './services/reviews.js';
+
 // Import routers
 import workspaceRoutes from './routes/workspaces.js';
 
@@ -24,9 +27,17 @@ app.use("/workspaces", workspaceRoutes);
 await db.connect();
 console.log(`Connected to the database.`);
 
-// Sample cron job runs every 5 seconds
-cron.schedule('0 * * * *', () => {
-    console.log('Ran the job');
+// Sample cron job runs every minute
+cron.schedule('0 * * * * *', async() => {
+    const res = await db.query(
+        `UPDATE assignments
+        SET started = false
+        WHERE started = false AND start_date <= $1
+        RETURNING id`,
+        [(new Date(Date.now())).toISOString()]
+    );
+    const assignments = res.rows;
+    console.log(`Updated ${assignments.length} assignments`);
 });
 
 app.listen(PORT, () => {
