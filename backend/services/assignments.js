@@ -207,6 +207,16 @@ export const edit = async(userId, assignmentId, settings) => {
         if (settings.description !== undefined) // description can be null or empty
             updates.description = settings.description;
 
+        // Set the questions if provided
+        if (settings.questions){
+            await Promise.all([
+                // Delete old questions
+                db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignmentId]),
+                // Add new questions
+                createQuestions(assignmentId, settings.questions)
+            ]);
+        }
+
         // Build the update query
         let updateQuery = `UPDATE assignments SET `;
         // Build the set clause
@@ -219,22 +229,6 @@ export const edit = async(userId, assignmentId, settings) => {
         // Query the update
         const updateRes = await db.query(updateQuery, [...values, data.assignment_id]);
 
-        // Set the questions if provided
-        if (settings.questions){
-            await Promise.all([
-                // Delete old questions
-                db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignmentId]),
-                // Delete old ratings for assignment
-                db.query(
-                    `DELETE FROM ratings AS ra
-                    USING reviews AS r
-                    WHERE r.id = ra.review_id
-                    AND r.assignment_id = $1`, [assignmentId]
-                ),
-                // Add new questions
-                createQuestions(assignmentId, settings.questions)
-            ]);
-        }
         return { message: "Assignment updated successfully" };
     }
     catch(err){

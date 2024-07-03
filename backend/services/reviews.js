@@ -4,17 +4,15 @@ import db from '../config.js';
 // Change to enforce certain ordering
 export const getById = async(reviewId) => {
     try{
-        // Demon query
         const res = await db.query(
             `WITH rating_table AS
-            (SELECT r.user_id, r.target_id, q.question, ra.rating
+            (SELECT r.user_id, r.target_id, q.question, q.id AS question_id, ra.rating
             FROM reviews AS r
             LEFT JOIN ratings AS ra
             ON r.id = ra.review_id
             LEFT JOIN questions AS q
             ON q.id = ra.question_id
-            WHERE r.id = $1
-            ORDER BY q.id),
+            WHERE r.id = $1),
             
             grouped_table AS 
             (SELECT user_id, target_id,
@@ -22,7 +20,7 @@ export const getById = async(reviewId) => {
                 jsonb_build_object(
                     'question', question,
                     'rating', rating
-                )
+                ) ORDER BY question_id
             ) FILTER (WHERE rating IS NOT NULL) AS ratings
             FROM rating_table
             GROUP BY user_id, target_id)
@@ -69,7 +67,7 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
             `/* Get the review ids for reviews with specified assignment/user. Join the question, rating,
             and target's name to each review to be grouped */
             WITH review_table AS
-            (SELECT r.assignment_id, r.user_id, r.id, r.target_id, ra.rating, q.question
+            (SELECT r.assignment_id, r.user_id, r.id, r.target_id, ra.rating, q.question, q.id AS question_id
             FROM reviews AS r
             LEFT JOIN ratings as ra
             ON r.id = ra.review_id
@@ -85,7 +83,7 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
                 jsonb_build_object(
                     'question', question,
                     'rating', rating
-                )
+                ) ORDER BY question_id
             ) FILTER (WHERE rating IS NOT NULL) AS ratings
             FROM review_table
             JOIN users AS u
@@ -146,7 +144,7 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
             `/* Get the review ids for reviews with specified assignment/user. Join the question, rating,
             and target's name to each review to be grouped */
             WITH review_table AS
-            (SELECT r.assignment_id, r.user_id, r.id, r.target_id, ra.rating, q.question
+            (SELECT r.assignment_id, r.user_id, r.id, r.target_id, ra.rating, q.question, q.id AS question_id
             FROM reviews AS r
             LEFT JOIN ratings as ra
             ON r.id = ra.review_id
@@ -162,7 +160,7 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
                 jsonb_build_object(
                     'question', question,
                     'rating', rating
-                )
+                ) ORDER BY question_id
             ) FILTER (WHERE rating IS NOT NULL) AS ratings
             FROM review_table
             JOIN users AS u
@@ -202,15 +200,15 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
             };
 
         // Filter complete reviews, incomplete reviews will be excluded
-        const reviews = data.reviews.filter(review => review.ratings !== null);
-        return reviews;
+        data.reviews = data.reviews.filter(review => review.ratings !== null);
+        return data;
     }
     catch(err){
         return { error: err.message, status: 500 };
     }
 }
 
-// Create reviews for an assignment
+// Helper function to create reviews for an assignment
 // These will made close to when an assignment opens
 export const createReviews = async(assignmentId) => {
     try{
