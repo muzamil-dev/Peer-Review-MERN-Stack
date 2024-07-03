@@ -4,15 +4,27 @@ import db from "../config.js";
 export const getById = async(groupId) => {
     try{
         const res = await db.query(
-            `SELECT *
-            FROM groups
-            WHERE id = $1`,
+            `SELECT g.*, jsonb_agg(
+                jsonb_build_object(
+                    'userId', u.id,
+                    'firstName', u.first_name,
+                    'lastName', u.last_name
+                ) ORDER BY u.id
+            ) AS members
+            FROM groups AS g
+            LEFT JOIN memberships AS m
+            ON g.id = m.group_id
+            LEFT JOIN users AS u
+            ON u.id = m.user_id
+            WHERE g.id = $1
+            GROUP BY g.id`,
             [groupId]
         );
         // Format the above query
         const group = res.rows.map(row => ({
             groupId: row.id,
             name: row.name,
+            members: row.members,
             workspaceId: row.workspace_id
         }))[0];
         // Return
@@ -22,51 +34,6 @@ export const getById = async(groupId) => {
                 status: 404 
             };
         return group;
-    }
-    catch(err){
-        return { error: err.message, status: 500 };
-    }
-}
-
-// Get all members of a given group
-export const getMembers = async(groupId) => {
-    try{
-        const res = await db.query(
-            `SELECT g.id AS group_id, g.name, m.user_id, 
-            u.first_name, u.last_name
-            FROM groups AS g
-            LEFT JOIN memberships AS m
-            ON m.group_id = g.id
-            LEFT JOIN users AS u
-            ON m.user_id = u.id
-            WHERE g.id = $1`,
-            [groupId]
-        );
-
-        let members;
-        // Check if the group does not exist
-        if (res.rows.length == 0)
-            return { 
-                error: "The requested group was not found", 
-                status: 404 
-            };
-        // Check if the group exists and has no members
-        else if (res.rows.length === 1 && res.rows[0].user_id === null)
-            members = [];
-        // Group exists and has members
-        else {
-            members = res.rows.map(row => ({
-                userId: row.user_id,
-                firstName: row.first_name,
-                lastName: row.last_name
-            }));
-        }
-        // Return formatted member list
-        return {
-            name: res.rows[0].name,
-            groupId: res.rows[0].group_id,
-            members
-        };
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -110,10 +77,9 @@ export const create = async(userId, workspaceId) => {
         const group = res.rows.map(row => ({
             groupId: row.id,
             name: row.name,
-            workspaceId: row.workspace_id
         }))[0];
         // Return the new group
-        return group;
+        return { message: "Created group successfully", group };
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -165,7 +131,6 @@ export const createMany = async(userId, workspaceId, numGroups) => {
         const groups = res.rows.map(row => ({
             groupId: row.id,
             name: row.name,
-            workspaceId: row.workspace_id
         }));
         // Return the new group
         return { message: "Groups created successfully", groups };
@@ -227,7 +192,7 @@ export const join = async(userId, groupId) => {
             `SELECT count(*) FROM memberships WHERE group_id = $1`,
             [groupId]
         )).rows[0];
-        if (members.count >= data.group_member_limit)
+        if (data.group_member_limit && members.count >= data.group_member_limit)
             return {
                 error: "Cannot join group: The group's member limit has been reached",
                 status: 400
