@@ -260,7 +260,7 @@ export const submit = async(userId, reviewId, ratings) => {
                 jsonb_build_object(
                     'question', q.question,
                     'question_id', q.id
-                )
+                ) ORDER BY q.id
             ) AS questions
             FROM reviews as r
             LEFT JOIN questions AS q
@@ -282,12 +282,19 @@ export const submit = async(userId, reviewId, ratings) => {
                 error: "Incorrect review submission",
                 status: 400
             }
-        // Check that the number of ratings is equal to the number of questions
-        if (ratings.length !== data.questions.length)
+        
+        // Already in sorted order
+        const questionIds = data.questions.map(question => question.question_id);
+        // Sort the ratings by question id
+        const ratingQuestionIds = ratings.map(rating => rating.questionId);
+        ratingQuestionIds.sort((a, b) => a - b);
+
+        if (JSON.stringify(questionIds) !== JSON.stringify(ratingQuestionIds))
             return {
-                error: "Incomplete review submission",
+                error: "Incorrect review submission",
                 status: 400
-            }
+            } 
+        
         // Mark the review as completed
         const setComplete = await db.query(
             `UPDATE reviews SET completed = true
@@ -296,12 +303,14 @@ export const submit = async(userId, reviewId, ratings) => {
         );
 
         // Generate the ratings
-        const questionIds = data.questions.map(q => q.question_id);
+        const ids = ratings.map(rating => rating.questionId);
+        const newRatings = ratings.map(rating => rating.rating);
+
         let ratingsQuery = `INSERT INTO ratings VALUES `;
         ratingsQuery += questionIds.map(
             (_, idx) => `($1, $${idx+2}, $${idx+2+ratings.length})`
         ).join(', ');
-        const insertRatings = await db.query(ratingsQuery, [data.id, ...questionIds, ...ratings])
+        const insertRatings = await db.query(ratingsQuery, [data.id, ...ids, ...newRatings]);
         return { message: "Review submitted successfully" };
     }
     catch(err){

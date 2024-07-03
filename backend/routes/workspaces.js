@@ -28,11 +28,22 @@ router.get("/:workspaceId/assignments", async(req, res) => {
     return res.status(200).json(data);
 });
 
-// Gets a list of groups from the workspace
+// Gets a list of groups (with members) from the workspace
 router.get("/:workspaceId/groups", async(req, res) => {
     const { workspaceId } = req.params;
     // Make the call to the service
     const data = await WorkspaceService.getGroups(workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+});
+
+// Gets a list of students from the workspace
+router.get("/:workspaceId/students", async(req, res) => {
+    const { workspaceId } = req.params;
+    // Make the call to the service
+    const data = await WorkspaceService.getStudents(workspaceId);
     // Send the error if the service returned one
     if (data.error)
         return res.status(data.status).json({ message: data.error });

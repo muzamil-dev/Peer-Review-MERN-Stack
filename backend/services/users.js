@@ -6,7 +6,7 @@ import db from "../config.js";
 export const getUserById = async(userId) => {
     try{
         const res = await db.query
-        (`select * from users where id = $1`, [userId]);
+        (`SELECT * FROM users WHERE id = $1`, [userId]);
         return res.rows[0];
     }
     catch(err){
@@ -32,10 +32,10 @@ export const createUser = async(user) => {
     const fields = [user.firstName, user.lastName, user.email, user.password];
     try{
         const res = await db.query(
-            `insert into users
+            `INSERT INTO users
             (first_name, last_name, email, password)
-            values ($1, $2, $3, $4)
-            returning *`,
+            VALUES ($1, $2, $3, $4)
+            RETURNING *`,
             fields
         );
         return res.rows[0];

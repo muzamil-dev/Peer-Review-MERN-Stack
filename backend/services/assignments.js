@@ -2,15 +2,21 @@ import db from '../config.js';
 
 import * as ReviewService from './reviews.js';
 
-// TODO: Edit getById, getByWorkspace to use questions table
-
-// LATER: Potentially edit so that review does not require group_id (use joins)
-
 // Get an assignment by its id
 export const getById = async(assignmentId) => {
     try{
         const res = await db.query(
-            `SELECT * FROM assignments WHERE id = $1`,
+            `SELECT a.*, jsonb_agg(
+                jsonb_build_object(
+                    'questionId', q.id,
+                    'question', q.question
+                ) ORDER BY q.id
+            ) AS questions
+            FROM assignments AS a
+            JOIN questions AS q
+            ON a.id = q.assignment_id
+            WHERE a.id = $1
+            GROUP BY a.id`,
             [assignmentId]
         );
         const data = res.rows[0];
@@ -41,12 +47,20 @@ export const getById = async(assignmentId) => {
 export const getByWorkspace = async(workspaceId) => {
     try{
         const res = await db.query(
-            `SELECT a.*, w.id AS workspace_id
+            `SELECT a.*, jsonb_agg(
+                jsonb_build_object(
+                    'questionId', q.id,
+                    'question', q.question
+                ) ORDER BY q.id
+            ) AS questions
             FROM workspaces AS w
             LEFT JOIN assignments AS a
             ON w.id = a.workspace_id
+            LEFT JOIN questions AS q
+            ON a.id = q.assignment_id
             WHERE w.id = $1
-            ORDER BY id`,
+            GROUP BY a.id
+            ORDER BY a.due_date`,
             [workspaceId]
         );
         const data = res.rows;
@@ -207,16 +221,19 @@ export const edit = async(userId, assignmentId, settings) => {
 
         // Set the questions if provided
         if (settings.questions){
-            // Delete old questions and ratings
-            await db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignmentId]);
-            await db.query(
-                `DELETE FROM ratings AS ra
-                USING reviews AS r
-                WHERE r.id = ra.review_id
-                AND r.assignment_id = $1`, [assignmentId]
-            );
-            // Add new questions
-            createQuestions(assignmentId, settings.questions);
+            await Promise.all([
+                // Delete old questions
+                db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignmentId]),
+                // Delete old ratings for assignment
+                db.query(
+                    `DELETE FROM ratings AS ra
+                    USING reviews AS r
+                    WHERE r.id = ra.review_id
+                    AND r.assignment_id = $1`, [assignmentId]
+                ),
+                // Add new questions
+                createQuestions(assignmentId, settings.questions)
+            ]);
         }
         return { message: "Assignment updated successfully" };
     }
