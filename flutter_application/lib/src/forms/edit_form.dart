@@ -1,9 +1,10 @@
-//TODO: Fix FORM NAME IN GET ASSIGNMENTS ONCE THE API IS UPDATED
+//TODO: ADD DESIGN
 
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
 import "package:http/http.dart" as http;
 import 'package:intl/intl.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import "dart:convert";
 
 class EditForm extends StatefulWidget {
@@ -59,7 +60,8 @@ class _EditFormState extends State<EditForm> {
           // Slices Strings to Not include Extraneous info other than date
           availableFromController.text =
               getDateString(jsonResponse['startDate'].substring(0, 10));
-          dueUntillController.text = getDateString(jsonResponse['dueDate'].substring(0, 10));
+          dueUntillController.text =
+              getDateString(jsonResponse['dueDate'].substring(0, 10));
 
           formName.text = jsonResponse['name'];
           numFields = valueControllers.length;
@@ -113,7 +115,7 @@ class _EditFormState extends State<EditForm> {
     });
   }
 
-   String getDateString(String date) {
+  String getDateString(String date) {
     // Parse the input date string
     DateTime dateTime = DateTime.parse(date);
 
@@ -194,10 +196,10 @@ class _EditFormState extends State<EditForm> {
                                   questions.add(field.text);
                                 }
                                 await editAssignment(context);
-                                ScaffoldMessenger.of(context)
-                                      .showSnackBar(const SnackBar(
-                                    content: Text(
-                                        'Edited Form Successfully!')));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content:
+                                            Text('Edited Form Successfully!')));
                               },
                               style: TextButton.styleFrom(
                                 backgroundColor: Colors.green,
@@ -397,7 +399,7 @@ class _EditFormState extends State<EditForm> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            "Fix these in the Add Form Page:",
+            "Fix these in the Edit Form Page:",
             style: TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold),
           ),
           const SizedBox(
@@ -555,12 +557,22 @@ class _EditFormState extends State<EditForm> {
                           const SizedBox(
                             height: 15,
                           ),
-                          const TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: "Enter your response",
+                          RatingBar.builder(
+                            initialRating: 0,
+                            minRating: 0,
+                            direction: Axis.horizontal,
+                            allowHalfRating: false,
+                            itemCount: 5,
+                            itemPadding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            itemBuilder: (context, _) => const Icon(
+                              Icons.star,
+                              color: Colors.amber,
                             ),
-                          )
+                            onRatingUpdate: (rating) {
+                              print(rating);
+                            },
+                          ),
                         ],
                       ),
                     );
@@ -580,7 +592,7 @@ class _EditFormState extends State<EditForm> {
   }
 
   bool invalidFormFields() {
-    // Outer Condition Prevents too many Additons of addFormPageErrors while changing tabs between Add Form and Student View
+    // Outer Condition Prevents too many Additons of addFormPageErrors while changing tabs between Edit Form and Student View
     if (_currentIndex == 1) {
       if (formName.text == '') {
         addFormPageErrors.add("Empty Form Name: Enter a Name");

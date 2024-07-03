@@ -1,7 +1,10 @@
+// TODO: ADD DESIGN
+
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
 import "package:http/http.dart" as http;
 import 'package:intl/intl.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import "dart:convert";
 
 class CreateForm extends StatefulWidget {
@@ -138,7 +141,8 @@ class _CreateFormState extends State<CreateForm> {
                                 if (isValidForm(_formKey) == false) {
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(const SnackBar(
-                                    content: Text('Create Form Failed: Look at Student View Page for Errors'),
+                                    content: Text(
+                                        'Create Form Failed: Look at Student View Page for Errors'),
                                   ));
                                   return;
                                 }
@@ -511,12 +515,22 @@ class _CreateFormState extends State<CreateForm> {
                           const SizedBox(
                             height: 15,
                           ),
-                          const TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: "Enter your response",
+                          RatingBar.builder(
+                            initialRating: 0,
+                            minRating: 0,
+                            direction: Axis.horizontal,
+                            allowHalfRating: false,
+                            itemCount: 5,
+                            itemPadding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            itemBuilder: (context, _) => const Icon(
+                              Icons.star,
+                              color: Colors.amber,
                             ),
-                          )
+                            onRatingUpdate: (rating) {
+                              print(rating);
+                            },
+                          ),
                         ],
                       ),
                     );
