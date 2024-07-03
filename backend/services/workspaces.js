@@ -245,19 +245,55 @@ export const edit = async(userId, workspaceId, settings) => {
 // Edit to use allowedDomains as well
 export const join = async(userId, code) => {
     try{
-        const res = await db.query(
+        const workspace = (await db.query(
             `SELECT *
             FROM workspaces
             WHERE invite_code = $1`,
             [code]
-        );
-        const workspace = res.rows[0];
+        )).rows[0];
         // Check the workspace's invite code
         if (!workspace)
             return { 
                 error: "Cannot join workspace: No workspace with this code was found", 
-                status: 400 
+                status: 404
             };
+        
+        // Get the user's email
+        const user = (await db.query(
+            `SELECT email, workspace_id FROM users
+            LEFT JOIN memberships
+            ON user_id = id AND workspace_id = $1
+            WHERE id = $2`,
+            [workspace.id, userId]
+        )).rows[0];
+        // Check that the user is found and not in the workspace
+        if (!user)
+            return { 
+                error: "The requested user was not found", 
+                status: 404
+            };
+        if (user.workspace_id !== null)
+            return { 
+                error: "User is already in this workspace", 
+                status: 400
+            };
+
+        // Check the workspace's allowed domains, if there are any
+        if (workspace.allowed_domains && workspace.allowed_domains.length > 0){
+            const userDomain = user.email.split('@')[1];
+            const domainCheck = (domain, userDomain) => {
+                const domainPattern = new RegExp(domain);
+                return domainPattern.test(userDomain);
+            }
+            const foundDomain = workspace.allowed_domains.find(domain => domainCheck(domain, userDomain));
+            if (!foundDomain){
+                return { 
+                    error: "The given user is not authorized to join this workspace.",
+                    status: 403
+                };
+            }
+        }
+
         // Join
         const _ = await db.query(
             `INSERT INTO memberships
