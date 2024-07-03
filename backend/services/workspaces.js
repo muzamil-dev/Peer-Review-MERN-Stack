@@ -2,8 +2,6 @@ import db from "../config.js";
 
 import * as GroupService from './groups.js';
 
-// TODO: Edit join for allowed domains
-
 // Get workspace by id
 export const getById = async(workspaceId) => {
     try{
@@ -188,7 +186,7 @@ export const create = async(userId, settings) => {
 }
 
 // Edit a workspace
-// Possible updates: name, allowedDomains, groupMemberLimit
+// Possible updates: name, allowedDomains, groupMemberLimit, groupLock
 export const edit = async(userId, workspaceId, settings) => {
     // Create the workspace
     try{
@@ -222,6 +220,9 @@ export const edit = async(userId, workspaceId, settings) => {
             updates.allowed_domains = settings.allowedDomains;
         if (settings.groupMemberLimit || settings.groupMemberLimit === null)
             updates.group_member_limit = settings.groupMemberLimit;
+        if (settings.groupLock === true || settings.groupLock === false)
+            updates.groups_locked = settings.groupLock
+
         // Generate the query string
         const keys = Object.keys(updates);
         const values = Object.values(updates);
@@ -319,7 +320,7 @@ export const leave = async(userId, workspaceId) => {
             RETURNING *`,
             [userId, workspaceId]
         );
-        return res.rows[0];
+        return { message: "Left workspace successfully" };
     }
     catch(err){
         return { error: err.message, status: 500 };
