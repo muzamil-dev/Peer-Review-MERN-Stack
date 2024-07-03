@@ -264,7 +264,7 @@ export const submit = async(userId, reviewId, ratings) => {
             ) AS questions
             FROM reviews as r
             LEFT JOIN questions AS q
-            ON q.assignment_id = r.assignment_id AND q.in_use = true
+            ON q.assignment_id = r.assignment_id
             WHERE r.id = $1
             GROUP BY r.id`,
             [reviewId]

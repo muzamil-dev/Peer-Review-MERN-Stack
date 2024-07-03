@@ -27,17 +27,23 @@ app.use("/workspaces", workspaceRoutes);
 await db.connect();
 console.log(`Connected to the database.`);
 
-// Sample cron job runs every minute
+// Once per minute cron job
+// Releases the reviews for a corresponding assignment
 cron.schedule('0 * * * * *', async() => {
     const res = await db.query(
         `UPDATE assignments
-        SET started = false
+        SET started = true
         WHERE started = false AND start_date <= $1
         RETURNING id`,
         [(new Date(Date.now())).toISOString()]
     );
-    const assignments = res.rows;
-    console.log(`Updated ${assignments.length} assignments`);
+    // Get all ids of review assignments
+    const ids = res.rows.map(obj => obj.id);
+    // Create reviews for each assignment
+    ids.forEach(id => {
+        ReviewService.createReviews(id);
+    });
+    console.log(`Updated ${ids.length} assignments`);
 });
 
 app.listen(PORT, () => {

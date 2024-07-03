@@ -10,7 +10,7 @@ create table workspaces(
     id serial primary key,
     name text not null,
     invite_code text,
-    allowed_domains text[] not null default '{}',
+    allowed_domains text[],
     groups_created int not null default 0,
     group_member_limit int,
     groups_locked boolean not null default false
@@ -53,8 +53,7 @@ CREATE TABLE reviews(
 CREATE TABLE questions(
     id SERIAL PRIMARY KEY,
     question TEXT NOT NULL,
-    assignment_id INT REFERENCES assignments (id) ON DELETE CASCADE,
-    in_use BOOLEAN NOT NULL DEFAULT true
+    assignment_id INT REFERENCES assignments (id) ON DELETE CASCADE
 );
 
 CREATE TABLE ratings(

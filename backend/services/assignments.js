@@ -207,12 +207,16 @@ export const edit = async(userId, assignmentId, settings) => {
 
         // Set the questions if provided
         if (settings.questions){
-            const questionRes = await Promise.all([
-                db.query(
-                `UPDATE questions SET in_use = false WHERE assignment_id = $1`,
-                [assignmentId]),
-                createQuestions(assignmentId, settings.questions)
-            ]);
+            // Delete old questions and ratings
+            await db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignmentId]);
+            await db.query(
+                `DELETE FROM ratings AS ra
+                USING reviews AS r
+                WHERE r.id = ra.review_id
+                AND r.assignment_id = $1`, [assignmentId]
+            );
+            // Add new questions
+            createQuestions(assignmentId, settings.questions);
         }
         return { message: "Assignment updated successfully" };
     }
