@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cron from "node-cron";
+import cors from "cors";
 
 // Import database client
 import db from "./config.js";
@@ -25,6 +26,7 @@ const PORT = process.env.PORT || 5000;
 // Initialize the app
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // Define routes
 app.use("/users", userRoutes);
