@@ -23,7 +23,7 @@ class _UserDashboardState extends State<UserDashboard> {
   String userName = '';
   List<Object> assignments = [];
   int _currentIndex = 0;
-  Map<String, int> assignmentProgress = {};
+  Map<String, int> itemsLeft = {};
 
   // Initializes User Name and assignments variables upon page load
   @override
@@ -84,8 +84,7 @@ class _UserDashboardState extends State<UserDashboard> {
         final jsonResponse = json.decode(response.body);
         if (mounted) {
           setState(() {
-            assignmentProgress[assignmentId] =
-                jsonResponse["incompleteReviews"].length;
+            itemsLeft[assignmentId] = jsonResponse["incompleteReviews"].length;
           });
         }
       }
@@ -157,24 +156,13 @@ class _UserDashboardState extends State<UserDashboard> {
                 "${currentAssignment['name']}",
                 style: const TextStyle(fontSize: 25),
               ),
-              const Row(
+              Row(
                 children: [
-                  Text(
+                  const Text(
                     "Status: ",
                     style: TextStyle(fontSize: 18),
                   ),
-                  CircleAvatar(
-                    radius: 15,
-                    backgroundColor: Colors.red,
-                    child: IconButton(
-                      onPressed: null,
-                      icon: Icon(
-                        Icons.close_outlined,
-                        color: Colors.white,
-                        size: 15,
-                      ),
-                    ),
-                  ),
+                  statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
                 ],
               ),
             ],
@@ -183,7 +171,9 @@ class _UserDashboardState extends State<UserDashboard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                  "Items Left to Complete: ${assignmentProgress[currentAssignmentId]}"),
+                "Items Left to Complete: ${itemsLeft[currentAssignmentId]}",
+                style: const TextStyle(fontSize: 17),
+              ),
               const IconButton(
                   onPressed: null, icon: Icon(Icons.arrow_drop_down)),
             ],
@@ -191,6 +181,36 @@ class _UserDashboardState extends State<UserDashboard> {
         ],
       ),
     );
+  }
+
+  Widget statusIcon(BuildContext context, int itemsLeft) {
+    if (itemsLeft == 0) {
+      return const CircleAvatar(
+        radius: 20,
+        backgroundColor: Colors.green,
+        child: IconButton(
+          onPressed: null,
+          icon: Icon(
+            Icons.check,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+      );
+    } else {
+      return const CircleAvatar(
+        radius: 20,
+        backgroundColor: Colors.red,
+        child: IconButton(
+          onPressed: null,
+          icon: Icon(
+            Icons.close,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+      );
+    }
   }
 
   // Widget for Profile Display Page
