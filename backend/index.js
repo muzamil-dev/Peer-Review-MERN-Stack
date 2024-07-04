@@ -14,6 +14,7 @@ import groupRoutes from './routes/groups.js';
 import workspaceRoutes from './routes/workspaces.js';
 import assignmentRoutes from './routes/assignments.js';
 import reviewRoutes from './routes/reviews.js';
+import jwtRoutes from './routes/jwt.js';
 
 // Access env variables
 dotenv.config();
@@ -31,6 +32,7 @@ app.use("/groups", groupRoutes);
 app.use("/workspaces", workspaceRoutes);
 app.use("/assignments", assignmentRoutes);
 app.use("/reviews", reviewRoutes);
+app.use("/jwt", jwtRoutes);
 
 // Connect to the database
 await db.connect();

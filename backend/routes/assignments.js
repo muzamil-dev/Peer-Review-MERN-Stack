@@ -1,10 +1,20 @@
 import express from 'express';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Import JWT
+import verifyJWT from '../middleware/verifyJWT.js';
 
 // Import services
 import * as AssignmentService from '../services/assignments.js';
 import * as ReviewService from '../services/reviews.js';
 
 const router = express.Router();
+
+// Require JWT
+if (process.env.JWT_ENABLED === "true")
+    router.use(verifyJWT);
 
 // Get the details of an assignment
 router.get("/:assignmentId", async(req, res) => {

@@ -1,4 +1,10 @@
 import express from 'express';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Import JWT
+import verifyJWT from '../middleware/verifyJWT.js';
 
 // Import services
 import * as WorkspaceService from '../services/workspaces.js';
@@ -8,6 +14,10 @@ import * as AssignmentService from '../services/assignments.js';
 import generateCode from '../services/generateCode.js';
 
 const router = express.Router();
+
+// Require JWT
+if (process.env.JWT_ENABLED === "true")
+    router.use(verifyJWT);
 
 // Get details about a specific workspace
 router.get("/:workspaceId", async(req, res) => {

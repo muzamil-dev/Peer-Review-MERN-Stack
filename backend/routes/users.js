@@ -1,4 +1,10 @@
 import express from 'express';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Import JWT
+import verifyJWT from '../middleware/verifyJWT.js';
 
 // Import services
 import * as UserService from '../services/users.js';
@@ -66,6 +72,10 @@ router.post("/verifyEmail", async(req, res) => {
         return res.status(data.status).json({ message: data.error });
     return res.status(201).json(data);
 });
+
+// Require JWT
+if (process.env.JWT_ENABLED === "true")
+    router.use(verifyJWT);
 
 // Get all workspaces that a user is in
 router.get(["/:userId/workspaces", "/workspaces"], async(req, res) => {

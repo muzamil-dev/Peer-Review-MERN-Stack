@@ -82,6 +82,11 @@ export const login = async(email, password) => {
             process.env.REFRESH_TOKEN_SECRET,
             { expiresIn: "1d" }
         );
+        // Insert the refresh token into the database
+        const refreshUpload = await db.query(
+            `UPDATE users SET refresh_token = $1 WHERE id = $2`,
+            [refreshToken, data.userId]
+        );
         return {
             accessToken, refreshToken,
             refreshTokenAge: 24*60*60*1000
