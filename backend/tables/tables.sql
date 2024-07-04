@@ -3,7 +3,7 @@ create table temp_users(
     last_name TEXT NOT NULL,
     email TEXT PRIMARY KEY,
     password TEXT NOT NULL,
-    verification_token TEXT,
+    verification_token TEXT UNIQUE,
     verification_token_expiry TIMESTAMP WITH TIME ZONE
 );
 
@@ -16,14 +16,20 @@ create table users(
     refresh_token TEXT
 );
 
+create table password_reset(
+    email TEXT REFERENCES users (email) ON DELETE CASCADE,
+    reset_token TEXT UNIQUE,
+    reset_token_expiry TIMESTAMP WITH TIME ZONE
+);
+
 create table workspaces(
-    id serial primary key,
-    name text not null,
-    invite_code text,
-    allowed_domains text[],
-    groups_created int not null DEFAULT 0,
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    invite_code TEXT,
+    allowed_domains TEXT[],
+    groups_created INT NOT NULL DEFAULT 0,
     group_member_limit INT,
-    groups_locked boolean not null default false
+    groups_locked BOOLEAN NOT NULL default false
 );
 
 create table groups(

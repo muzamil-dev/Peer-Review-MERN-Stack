@@ -128,6 +128,11 @@ export const verifyEmail = async(token) => {
     }
 }
 
+// Function to request a password reset
+export const requestPasswordReset = async(email) => {
+    
+}
+
 // Get a user by their id
 export const getUserById = async(userId) => {
     try{
