@@ -13,6 +13,28 @@ import { ReviewAssignment } from '../models/reviewAssignmentModel.js';
 
 const router = express.Router();
 
+//get workspace details
+router.get('/:workspaceId', async (req, res) => {
+    try {
+      const { workspaceId } = req.params;
+      const workspace = await Workspace.findById(workspaceId);
+      if (!workspace) {
+        return res.status(404).json({ message: 'Workspace not found' });
+      }
+      res.json({
+        workspaceId: workspace._id,
+        name: workspace.name,
+        allowedDomains: workspace.allowedDomains,
+        inviteCode: workspace.inviteCode,
+        groupMemberLimit: workspace.groupMemberLimit,
+        groupLock: workspace.groupLock
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: err.message });
+    }
+});
+
 // Gets a list of assignments made in the workspace
 router.get("/:workspaceId/assignments", async(req, res) => {
     try{

@@ -23,13 +23,17 @@ class UserDashboard extends StatefulWidget {
 
 class _UserDashboardState extends State<UserDashboard> {
   late String userName;
+  late List<Object> assignments;
 
+  // Initializes User Name and assignments variables upon page load
   @override
   initState() {
     super.initState();
     getUser(context);
+    getAllAssignments(context);
   }
 
+  // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/${widget.userId}');
     try {
@@ -43,6 +47,25 @@ class _UserDashboardState extends State<UserDashboard> {
     }
     catch(error) {
       print("Error Getting User: $error");
+    }
+  }
+
+  // Gets All Assignments in the Given Workspace
+  Future<void> getAllAssignments(BuildContext context) async{
+    final url = Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}/assignments');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+
+        for (var response in jsonResponse) {
+          assignments.add(response);
+        }
+      }
+    }
+    catch (error) {
+      print("Error Getting Workspace Assignments: $error");
     }
   }
 

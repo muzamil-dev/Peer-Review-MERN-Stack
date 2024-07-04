@@ -39,8 +39,8 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchWorkspaceDetails() async {
-    final workspaceDetailsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+    final workspaceDetailsUrl =
+        Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
     try {
       final response = await http.get(workspaceDetailsUrl);
       if (response.statusCode == 200) {
