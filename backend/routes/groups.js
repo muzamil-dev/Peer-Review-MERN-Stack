@@ -1,8 +1,6 @@
 import express from 'express';
 
 // Import services
-import * as WorkspaceService from '../services/workspaces.js';
-import * as AssignmentService from '../services/assignments.js';
 import * as GroupService from '../services/groups.js';
 
 const router = express.Router();

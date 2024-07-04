@@ -55,7 +55,7 @@ export const getGroups = async(workspaceId) => {
                     'userId', u.id,
                     'firstName', u.first_name,
                     'lastName', u.last_name
-                ) 
+                ) ORDER BY u.id
             ) as members
             FROM groups AS g
             LEFT JOIN memberships AS m

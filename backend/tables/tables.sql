@@ -1,9 +1,19 @@
+create table temp_users(
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT PRIMARY KEY,
+    password TEXT NOT NULL,
+    verification_token TEXT,
+    verification_token_expiry TIMESTAMP WITH TIME ZONE
+);
+
 create table users(
-    id serial primary key,
-    first_name text not null,
-    last_name text not null,
-    email text unique not null,
-    password text not null
+    id SERIAL PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    refresh_token TEXT
 );
 
 create table workspaces(
@@ -11,8 +21,8 @@ create table workspaces(
     name text not null,
     invite_code text,
     allowed_domains text[],
-    groups_created int not null default 0,
-    group_member_limit int,
+    groups_created int not null DEFAULT 0,
+    group_member_limit INT,
     groups_locked boolean not null default false
 );
 
@@ -46,7 +56,6 @@ CREATE TABLE reviews(
     group_id INT REFERENCES groups (id) ON DELETE CASCADE,
     user_id INT REFERENCES users (id) ON DELETE CASCADE,
     target_id INT REFERENCES users (id) ON DELETE CASCADE,
-    completed BOOLEAN NOT NULL DEFAULT false,
     UNIQUE(assignment_id, user_id, target_id)
 );
 
