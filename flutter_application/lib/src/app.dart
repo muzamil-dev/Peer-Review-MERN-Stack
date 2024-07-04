@@ -22,9 +22,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: 
-      Scaffold(
-        appBar: const MainAppBar(title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
+      home: Scaffold(
+        appBar: const MainAppBar(
+            title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
         body: Center(
           child: Column(
             children: [
@@ -45,12 +45,6 @@ class MyApp extends StatelessWidget {
                   Navigator.pushNamed(context, "/adminDashboard");
                 },
                 child: const Text("ADMIN DASHBOARD PAGE"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, "/userDashboard");
-                },
-                child: const Text("USER DASHBOARD PAGE"),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -88,9 +82,17 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("EDIT FORMS PAGE"),
               ),
-              ElevatedButton(onPressed: () {
-                Navigator.pushNamed(context, "/getAssignments");
-              }, child: const Text("GET ASSIGNMENTS PAGE"))
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/getAssignments");
+                  },
+                  child: const Text("GET ASSIGNMENTS PAGE")),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/userDashboard");
+                },
+                child: const Text("USER DASHBOARD PAGE"),
+              ),
             ],
           ),
         ),

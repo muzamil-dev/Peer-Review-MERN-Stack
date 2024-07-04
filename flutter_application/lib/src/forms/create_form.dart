@@ -1,4 +1,4 @@
-// TODO: ADD DESIGN
+// TODO: ADD DESIGN and ADD SETTINGS OPTION
 
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
