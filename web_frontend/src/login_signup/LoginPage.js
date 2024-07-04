@@ -1,5 +1,5 @@
 // src/LoginPage.js
-import Api from "./Api.js";
+import Api from "../Api.js";
 import React, { useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -42,7 +42,7 @@ const LoginPage = () => {
         try {
             const response = await Api.Users.DoLogin(loginData.email, loginData.password);
             if (response.status === 200) {
-                // alert('Login successful');
+                localStorage.setItem('accessToken', response.data.accessToken); // Store JWT in local storage
                 enqueueSnackbar('Login successful', { variant: 'success' });
                 navigate('/DashboardPage');
             // Redirect or perform additional actions after successful login
@@ -62,7 +62,7 @@ const LoginPage = () => {
         e.preventDefault();
         if (signupData.password !== signupData.confirmPassword) {
             // alert('Passwords do not match');
-            enqueueSnackbar('Passwords do not match', { variance: 'error' });
+            enqueueSnackbar('Passwords do not match', { variant: 'error' });
             return;
         }
         //setIsLoading(true);

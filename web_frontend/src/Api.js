@@ -215,20 +215,18 @@ export default {
          * @returns {Promise<{ status: number, data: { accessToken: string }, message: string }>} The freshly logged in user's data
          */
         DoLogin: async (email, password) => {
-            const payload = {
-                email,
-                password
-            };
-            const response = await axios.post(getUrl(USERS, 'login'), payload)
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
-            return {
-                status: response.status,
-                data: response.data,
-                message: response.data.message
-            };
+            const payload = { email, password };
+            try {
+                const response = await axios.post(getUrl(USERS, 'login'), payload);
+                return {
+                    status: response.status,
+                    data: response.data,
+                    message: response.data.message
+                };
+            } catch (err) {
+                console.error(err);
+                return err.response || Response503;
+            }
         },
 
         /**
@@ -240,24 +238,24 @@ export default {
          * @param {string} password 
          * @returns {Promise<{ status: number, data: {}, message: string }>} The freshly created user's data
          */
-        CreateAccount: async (firstName, middleName, lastName, email, password) => {
+        CreateAccount: async (firstName, lastName, email, password) => {
             const payload = {
                 firstName,
-                middleName,
                 lastName,
                 email,
                 password
             };
-            const response = await axios.post(getUrl(USERS, 'signup'), payload)
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
-            return {
-                status: response.status,
-                data: response.data,
-                message: response.data.message
-            };
+            try {
+                const response = await axios.post(getUrl(USERS, 'signup'), payload);
+                return {
+                    status: response.status,
+                    data: response.data,
+                    message: response.data.message
+                };
+            } catch (err) {
+                console.error(err);
+                return err.response || Response503;
+            }
         },
         
         /**
