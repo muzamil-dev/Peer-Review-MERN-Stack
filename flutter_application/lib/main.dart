@@ -52,7 +52,7 @@ void main() async {
           assignmentId: '6686d808eeac6248b17225a6',
           workspaceId: '66809591ef78ec4180c850f1',
           userId: '6670afc2446c5daced6600ca'),
-      UserDashboard.routeName: (context) => const UserDashboard(),
+      UserDashboard.routeName: (context) => const UserDashboard(userId: '667a2e4a8f5ce812352bba6f', workspaceId: '66809591ef78ec4180c850f1',),
     },
   ));
 }
