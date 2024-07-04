@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/main_app_bar.dart';
-import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'package:flutter_application/src/login-signup/loginsignup.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatelessWidget {
