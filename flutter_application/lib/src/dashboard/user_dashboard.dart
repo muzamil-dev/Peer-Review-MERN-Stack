@@ -177,7 +177,6 @@ class _UserDashboardState extends State<UserDashboard> {
 
   Widget assignmentLink(BuildContext context, int currentAssignmentId) {
     var assignmentReviews = (incompleteReviews[currentAssignmentId] as List);
-    print(assignmentReviews);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,6 +198,7 @@ class _UserDashboardState extends State<UserDashboard> {
           builder: (context) => StudentReview(
             userId: userId,
             targetUserId: targetUserId,
+            assignmentId: assignmentId,
           ),
         ));
   }
@@ -235,9 +235,9 @@ class _UserDashboardState extends State<UserDashboard> {
 
   // Widget for Profile Display Page
   Widget profilePage(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
-        Text("Welcome $userName"),
+        Text("Student Profile Page"),
       ],
     );
   }
