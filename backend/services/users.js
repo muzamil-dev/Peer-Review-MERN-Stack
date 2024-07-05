@@ -6,6 +6,7 @@ import crypto from "crypto";
 
 // Function to send emails
 import { sendEmail } from './emailService.js';
+import generateCode from "./generateCode.js";
 
 dotenv.config();
 
@@ -135,15 +136,59 @@ export const verifyEmail = async(token) => {
 
 // Function to request a password reset
 export const requestPasswordReset = async(email) => {
-    
+    try{
+        // Find the user
+        const user = await getByEmail(email);
+        if (!user)
+            return {
+                error: "No user was found with this email",
+                status: 404
+            }
+        else if (user.error)
+            return user;
+
+        // Generate the password token
+        const resetToken = generateCode();
+        const resetTokenExpires = new Date(Date.now() + 60*60*1000).toISOString(); // 1 hour
+        // Insert the token into the password reset table
+        const resetQuery = await db.query(
+            `INSERT INTO password_reset VALUES ($1, $2, $3)
+            ON CONFLICT(email) DO UPDATE SET
+            email = EXCLUDED.email,
+            reset_token = EXCLUDED.reset_token,
+            reset_token_expiry = EXCLUDED.reset_token_expiry`,
+            [email, resetToken, resetTokenExpires]
+        );
+        const message = `
+            <p>Your password reset token is: <strong>${resetToken}</strong></p>
+            <p>Please use this token to reset your password. The token is valid for 1 hour.</p>
+        `;
+        await sendEmail(user.email, 'Password Reset', message);
+        return { message: "Password reset email sent" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
 }
 
 // Get a user by their id
-export const getUserById = async(userId) => {
+export const getById = async(userId) => {
     try{
         const res = await db.query
         (`SELECT * FROM users WHERE id = $1`, [userId]);
-        return res.rows[0];
+        // Return if not found
+        const data = res.rows[0];
+        if (!data)
+            return {
+                error: "No user was found with this id",
+                status: 404
+            }
+        return {
+            userId: data.id,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            email: data.email
+        };
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -151,7 +196,7 @@ export const getUserById = async(userId) => {
 }
 
 // Get user by their email
-export const getUserByEmail = async(email) => {
+export const getByEmail = async(email) => {
     try{
         const res = await db.query
         (`SELECT * FROM users WHERE email = $1`, [email]);
