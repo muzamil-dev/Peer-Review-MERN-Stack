@@ -26,6 +26,7 @@ class _UserDashboardState extends State<UserDashboard> {
   int _currentIndex = 0;
   Map<int, int> itemsLeft = {};
   Map<int, Object> incompleteReviews = {};
+  Map<int, Object> completedReviews = {};
 
   // Initializes User Name and assignments variables upon page load
   @override
@@ -88,6 +89,7 @@ class _UserDashboardState extends State<UserDashboard> {
           setState(() {
             itemsLeft[assignmentId] = jsonResponse["incompleteReviews"].length;
             incompleteReviews[assignmentId] = jsonResponse["incompleteReviews"];
+            completedReviews[assignmentId] = jsonResponse["completedReviews"];
           });
         }
       }
@@ -161,11 +163,11 @@ class _UserDashboardState extends State<UserDashboard> {
               style: const TextStyle(fontSize: 25),
             ),
             subtitle: Text(
-              "Items Left: ${itemsLeft[currentAssignmentId]}",
+              "Items Left To Complete: ${itemsLeft[currentAssignmentId]}",
               style: const TextStyle(fontSize: 17),
             ),
             children: [
-              assignmentLink(context, currentAssignmentId),
+              assignmentLinks(context, currentAssignmentId),
             ],
           ),
         ],
@@ -175,21 +177,47 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
-  Widget assignmentLink(BuildContext context, int currentAssignmentId) {
-    var assignmentReviews = (incompleteReviews[currentAssignmentId] as List);
+  Widget assignmentLinks(BuildContext context, int currentAssignmentId) {
+    List assignmentReviews;
+
+    // Allows for Editing of Existing reviews for Users that have completed an assignment
+    if (itemsLeft[currentAssignmentId] == 0) {
+      assignmentReviews = (completedReviews[currentAssignmentId] as List);
+    } else {
+      assignmentReviews = (incompleteReviews[currentAssignmentId] as List);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: assignmentReviews.map<Widget>((review) {
-        return TextButton(
-            onPressed: () {
-              navigateToStudentReview(widget.userId, review["targetId"],
-                  currentAssignmentId, review["reviewId"]);
-            },
-            child: Text(
-                "Review for ${review["firstName"]} ${review["lastName"]}"));
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircleAvatar(
+              radius: 3,
+              backgroundColor: Colors.black,
+            ),
+            TextButton(
+                onPressed: () {
+                  navigateToStudentReview(widget.userId, review["targetId"],
+                      currentAssignmentId, review["reviewId"]);
+                },
+                child: reviewText(context, review, currentAssignmentId)),
+          ],
+        );
       }).toList(),
     );
+  }
+
+  Widget reviewText(
+      BuildContext context, dynamic review, int currentAssignmentId) {
+    if (itemsLeft[currentAssignmentId] == 0) {
+      return Text(
+          "Edit Review for ${review["firstName"]} ${review["lastName"]}");
+    } else {
+      return Text(
+          "Complete Review for ${review["firstName"]} ${review["lastName"]}");
+    }
   }
 
   void navigateToStudentReview(
@@ -204,7 +232,7 @@ class _UserDashboardState extends State<UserDashboard> {
             reviewId: reviewId,
           ),
         ));
-    
+
     // Resets Assignments list upon returning back from review page
     setState(() {
       assignments = [];
@@ -215,27 +243,27 @@ class _UserDashboardState extends State<UserDashboard> {
   Widget statusIcon(BuildContext context, int itemsLeft) {
     if (itemsLeft == 0) {
       return const CircleAvatar(
-        radius: 15,
+        radius: 20,
         backgroundColor: Colors.green,
         child: IconButton(
           onPressed: null,
           icon: Icon(
             Icons.check,
             color: Colors.white,
-            size: 15,
+            size: 20,
           ),
         ),
       );
     } else {
       return const CircleAvatar(
-        radius: 15,
+        radius: 20,
         backgroundColor: Colors.red,
         child: IconButton(
           onPressed: null,
           icon: Icon(
             Icons.close,
             color: Colors.white,
-            size: 15,
+            size: 20,
           ),
         ),
       );
@@ -253,8 +281,6 @@ class _UserDashboardState extends State<UserDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    
-
     return Scaffold(
         appBar: const MainAppBar(
           title: "Dashboard",
