@@ -142,45 +142,51 @@ class _UserDashboardState extends State<UserDashboard> {
     var currentAssignment = assignments[index];
     int currentAssignmentId = (currentAssignment as Map)["assignmentId"];
 
-    return Container(
-      decoration:
-          BoxDecoration(border: Border.all(width: 3, color: Colors.black)),
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "${currentAssignment['name']}",
-                style: const TextStyle(fontSize: 25),
-              ),
-              Row(
-                children: [
-                  const Text(
-                    "Status: ",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Items Left to Complete: ${itemsLeft[currentAssignmentId]}",
-                style: const TextStyle(fontSize: 17),
-              ),
-              const IconButton(
-                  onPressed: null, icon: Icon(Icons.arrow_drop_down)),
-            ],
-          )
-        ],
-      ),
-    );
+    // Checking to make sure the current assignment has non null items
+    if (itemsLeft[currentAssignmentId] != null) {
+      return Container(
+        decoration:
+            BoxDecoration(border: Border.all(width: 3, color: Colors.black)),
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "${currentAssignment['name']}",
+                  style: const TextStyle(fontSize: 25),
+                ),
+                Row(
+                  children: [
+                    const Text(
+                      "Status: ",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
+                  ],
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Items Left: ${itemsLeft[currentAssignmentId]}",
+                  style: const TextStyle(fontSize: 17),
+                ),
+                const IconButton(
+                    onPressed: null, icon: Icon(Icons.arrow_drop_down)),
+              ],
+            )
+          ],
+        ),
+      );
+    }
+    else {
+      return const SizedBox();
+    }
   }
 
   Widget statusIcon(BuildContext context, int itemsLeft) {
