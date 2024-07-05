@@ -4,7 +4,7 @@ import 'dart:convert';
 
 class CreateWorkspace extends StatefulWidget {
   static const routeName = "/createWorkspace";
-  final String userId;
+  final int userId;
 
   CreateWorkspace({required this.userId});
 
@@ -32,7 +32,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
         );
         return;
       }
-
+      print("User Id: ${widget.userId}");
       final response = await http.post(
         url,
         headers: {
@@ -55,6 +55,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
         );
       } else {
         final errorData = json.decode(response.body);
+        print("Status Code: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );

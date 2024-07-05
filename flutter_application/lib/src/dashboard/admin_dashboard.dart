@@ -9,7 +9,7 @@ import 'package:flutter_application/src/groups/userGroups.dart';
 
 class AdminDashboard extends StatefulWidget {
   static const routeName = "/adminDashboard";
-  final token;
+  final dynamic token;
   const AdminDashboard({@required this.token, super.key});
 
   @override
@@ -19,7 +19,7 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   List<Workspace> workspaces = [];
   bool isLoading = true;
-  late String userId;
+  late int userId;
   final TextEditingController inviteCodeController = TextEditingController();
 
   @override
@@ -130,7 +130,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  void navigateToGroupPage(String workspaceId, String role) {
+  void navigateToGroupPage(int workspaceId, String role) {
     if (role == 'Instructor') {
       Navigator.push(
         context,
@@ -205,7 +205,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 }
 
 class Workspace {
-  final String workspaceId;
+  final int workspaceId;
   final String name;
   final String role;
 
@@ -223,8 +223,8 @@ class Workspace {
 
 class WorkspaceCard extends StatelessWidget {
   final Workspace workspace;
-  final Function(String, String) onTap;
-  final String userId;
+  final Function(int, String) onTap;
+  final int userId;
 
   const WorkspaceCard(
       {required this.workspace,

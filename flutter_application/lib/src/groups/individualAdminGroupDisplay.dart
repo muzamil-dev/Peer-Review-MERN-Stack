@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class IndividualAdminGroup extends StatefulWidget {
-  final String groupId;
+  final int groupId;
 
   const IndividualAdminGroup({super.key, required this.groupId});
 

@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class GetAssignments extends StatefulWidget {
-  final String userId;
-  final String workspaceId;
+  final int userId;
+  final int workspaceId;
 
   const GetAssignments(
       {super.key, required this.workspaceId, required this.userId});
@@ -157,7 +157,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
 }
 
 class Assignment {
-  String id;
+  int id;
   String startDate;
   String dueDate;
   List<dynamic> questions;

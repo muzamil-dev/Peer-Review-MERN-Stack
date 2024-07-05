@@ -24,6 +24,17 @@ router.post("/", async(req, res) => {
     return res.status(201).json(data);
 });
 
+// Get user by id
+router.get(["/", "/:userId"], async(req, res) => {
+    const userId = req.params.userId || req.body.userId;
+    // Call the service
+    const data = await UserService.getById(userId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+});
+
 // Sign up for an account
 router.post("/signup", async(req, res) => {
     // Check for required fields

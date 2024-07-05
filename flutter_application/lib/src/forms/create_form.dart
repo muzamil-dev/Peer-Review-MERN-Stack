@@ -9,8 +9,8 @@ import "dart:convert";
 
 class CreateForm extends StatefulWidget {
   static const routeName = '/createForm';
-  final String userId;
-  final String workspaceId;
+  final int userId;
+  final int workspaceId;
   const CreateForm(
       {required this.userId, required this.workspaceId, super.key});
 
@@ -49,7 +49,7 @@ class _CreateFormState extends State<CreateForm> {
           "questions": questions,
         }),
       );
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         print("Assignment Created Successfully");
         final jsonResponse = json.decode(response.body);
         print("Response : ${jsonResponse['message']}");

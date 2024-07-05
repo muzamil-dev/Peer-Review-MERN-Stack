@@ -7,10 +7,7 @@ import 'package:flutter_application/src/forms/edit_form.dart';
 import 'package:flutter_application/src/groups/adminGroups.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
 import 'package:flutter_application/src/login-signup/loginsignup.dart';
-import 'package:flutter_application/src/login-signup/signup.dart';
-import 'package:flutter_application/src/login-signup/login.dart';
 import 'package:flutter_application/src/login-signup/passwordReset.dart';
-import 'package:flutter_application/src/dashboard/CreateWorkspace.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -21,41 +18,33 @@ void main() async {
     debugShowCheckedModeBanner: false,
     initialRoute: MyApp.routeName,
     routes: {
-      Login.routeName: (context) => const Login(),
-      Signup.routeName: (context) => const Signup(),
       MyApp.routeName: (context) => MyApp(
             token: prefs.getString('token'),
           ),
+
       LoginSignup.routeName: (context) => const LoginSignup(),
       PasswordResetPage.routeName: (context) => PasswordResetPage(),
-      CreateWorkspace.routeName: (context) =>
-          CreateWorkspace(userId: '6671c8362ffea49f3018bf61'),
-      // Manually Implemented User Groups Page for Raheem Sterling in Flutter Workspace for Debugging purposes
-      UserGroup.routeName: (context) => const UserGroup(
-            workspaceId: '667a22ad8f5ce812352bba01',
-            userId: '667a2e4a8f5ce812352bba6f',
-          ),
-      // Manually Added Admin Groups Page route in Flutter Workspace for debugging purposes
       AdminGroup.routeName: (context) => const AdminGroup(
-            workspaceId: '667a22ad8f5ce812352bba01',
-            userId: '6671c8362ffea49f3018bf61',
+            workspaceId: 14,
+            userId: 3,
+          ),
+      UserGroup.routeName: (context) => const UserGroup(
+            workspaceId: 14,
+            userId: 14,
           ),
       // Manually Added Create Forms Page for Debugging purposes. H alkhateeb
-      CreateForm.routeName: (context) => const CreateForm(
-          workspaceId: '667b32c640553ebab619b4fc',
-          userId: '6671c8362ffea49f3018bf61'),
-      GetAssignments.routeName: (context) => const GetAssignments(
-          workspaceId: '667b32c640553ebab619b4fc',
-          userId: '6671c8362ffea49f3018bf61'),
+      CreateForm.routeName: (context) =>
+          const CreateForm(workspaceId: 14, userId: 3),
+      GetAssignments.routeName: (context) =>
+          const GetAssignments(workspaceId: 14, userId: 3),
       // Manually Added Edit Forms Page for Debugging Purposes, User: Hashim DB
-      EditForm.routeName: (context) => const EditForm(
-          assignmentId: '6686edbc34ce67fd267800c0',
-          workspaceId: '667b32c640553ebab619b4fc',
-          userId: '6671c8362ffea49f3018bf61'),
+      EditForm.routeName: (context) =>
+          const EditForm(assignmentId: '1', workspaceId: 14, userId: 3),
       // User Dashboard Page for Raheem Sterling
-      UserDashboard.routeName: (context) => const UserDashboard(userId: '667a2e4a8f5ce812352bba6f', workspaceId: '667b32c640553ebab619b4fc',),
+      UserDashboard.routeName: (context) => const UserDashboard(
+            userId: 14,
+            workspaceId: 14,
+          ),
     },
   ));
 }
-
-// JGMP-ZRFB-PKMX

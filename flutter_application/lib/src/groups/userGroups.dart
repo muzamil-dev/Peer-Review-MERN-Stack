@@ -4,9 +4,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class UserGroup extends StatefulWidget {
-  final String workspaceId;
+  final int workspaceId;
   static const routeName = '/userGroups';
-  final String userId;
+  final int userId;
 
   const UserGroup({required this.workspaceId, required this.userId, super.key});
 
@@ -60,7 +60,7 @@ class _UserGroupState extends State<UserGroup> {
     }
   }
 
-  Future<void> joinGroup(BuildContext context, String groupID, index) async {
+  Future<void> joinGroup(BuildContext context, int groupID, index) async {
     final url = Uri.parse('http://10.0.2.2:5000/groups/join');
     try {
       
@@ -94,7 +94,7 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> leaveGroup(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
-    String groupID = getGroupID();
+    int groupID = getGroupID();
 
     if (groupID == '') {
       return;
@@ -141,7 +141,7 @@ class _UserGroupState extends State<UserGroup> {
 
   // Parses through groups list and returns the group which the user is currently in
   // If the user is not in a group , returns ''
-  String getGroupID() {
+  int getGroupID() {
     for (var group in groups) {
       var groupID = group['groupId'];
 
@@ -153,7 +153,7 @@ class _UserGroupState extends State<UserGroup> {
         }
       }
     }
-    return '';
+    return -1;
   }
 
   Widget loadStudentsInGroup(BuildContext context, index) {

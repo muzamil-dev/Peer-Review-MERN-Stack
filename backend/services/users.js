@@ -215,3 +215,27 @@ export const deleteUser = async(userId) => {
         return { error: err.message, status: 500 };
     }
 }
+
+// Get a user by their id
+export const getById = async(userId) => {
+    try{
+        const res = await db.query
+        (`SELECT * FROM users WHERE id = $1`, [userId]);
+        // Return if not found
+        const data = res.rows[0];
+        if (!data)
+            return {
+                error: "No user was found with this id",
+                status: 404
+            }
+        return {
+            userId: data.id,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            email: data.email
+        };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}

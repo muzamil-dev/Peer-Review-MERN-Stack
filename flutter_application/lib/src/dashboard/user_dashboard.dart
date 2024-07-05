@@ -5,8 +5,8 @@ import "package:http/http.dart" as http;
 import "dart:convert";
 
 class UserDashboard extends StatefulWidget {
-  final String userId;
-  final String workspaceId;
+  final int userId;
+  final int workspaceId;
   static const routeName = "/userDashboard";
 
   const UserDashboard({
@@ -23,7 +23,7 @@ class _UserDashboardState extends State<UserDashboard> {
   String userName = '';
   List<Object> assignments = [];
   int _currentIndex = 0;
-  Map<String, int> itemsLeft = {};
+  Map<int, int> itemsLeft = {};
 
   // Initializes User Name and assignments variables upon page load
   @override
@@ -74,7 +74,7 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   Future<void> getAssignmentProgress(
-      BuildContext context, String assignmentId) async {
+      BuildContext context, int assignmentId) async {
     final url = Uri.parse(
         'http://10.0.2.2:5000/assignments/$assignmentId/user/${widget.userId}');
     try {
@@ -140,7 +140,7 @@ class _UserDashboardState extends State<UserDashboard> {
 
   Widget assignmentItem(BuildContext context, index) {
     var currentAssignment = assignments[index];
-    String currentAssignmentId = (currentAssignment as Map)["assignmentId"];
+    int currentAssignmentId = (currentAssignment as Map)["assignmentId"];
 
     return Container(
       decoration:

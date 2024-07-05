@@ -9,9 +9,9 @@ import "dart:convert";
 
 class EditForm extends StatefulWidget {
   static const routeName = '/editForm';
-  final String userId;
+  final int userId;
   final String assignmentId;
-  final String workspaceId;
+  final int workspaceId;
 
   const EditForm(
       {required this.userId,

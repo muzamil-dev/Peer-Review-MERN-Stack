@@ -6,9 +6,9 @@ import 'package:flutter_application/src/groups/individualAdminGroupDisplay.dart'
 import 'package:http/http.dart' as http;
 
 class AdminGroup extends StatefulWidget {
-  final String workspaceId;
+  final int workspaceId;
   static const routeName = '/adminGroups';
-  final String userId; // User ID of Account User
+  final int userId; // User ID of Account User
 
   const AdminGroup(
       {super.key, required this.workspaceId, required this.userId});
@@ -104,7 +104,7 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  Future<void> deleteGroup(String groupId) async {
+  Future<void> deleteGroup(int groupId) async {
     final deleteUrl = Uri.parse('http://10.0.2.2:5000/groups/$groupId');
     try {
       final response = await http.delete(
@@ -112,7 +112,7 @@ class _AdminGroupState extends State<AdminGroup> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode({
           'userId': widget.userId,
         }),
       );
@@ -130,7 +130,7 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  Future<void> addStudentToGroup(String userId, String groupId) async {
+  Future<void> addStudentToGroup(int userId, int groupId) async {
     final addUserUrl = Uri.parse('http://10.0.2.2:5000/groups/addUser');
     try {
       final response = await http.put(
@@ -138,7 +138,7 @@ class _AdminGroupState extends State<AdminGroup> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode({
           'userId': widget.userId,
           'targetId': userId,
           'groupId': groupId,
@@ -164,7 +164,7 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  Future<void> removeStudentFromGroup(String userId, String groupId) async {
+  Future<void> removeStudentFromGroup(int userId, int groupId) async {
     final removeUserUrl = Uri.parse('http://10.0.2.2:5000/groups/removeUser');
     try {
       final response = await http.put(
@@ -172,7 +172,7 @@ class _AdminGroupState extends State<AdminGroup> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode({
           'userId': widget.userId,
           'targetId': userId,
           'groupId': groupId,
@@ -198,7 +198,7 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  void showMoveStudentDialog(Student student, {String? currentGroupId}) {
+  void showMoveStudentDialog(Student student, {int? currentGroupId}) {
     showDialog(
       context: context,
       builder: (context) {
@@ -251,7 +251,7 @@ class _AdminGroupState extends State<AdminGroup> {
     );
   }
 
-  Future<void> kickStudent(String userId) async {
+  Future<void> kickStudent(int userId) async {
     final kickUrl = Uri.parse('http://10.0.2.2:5000/workspaces/leave');
     try {
       final response = await http.put(
@@ -259,7 +259,7 @@ class _AdminGroupState extends State<AdminGroup> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode({
           'userId': userId,
           'workspaceId': widget.workspaceId,
         }),
@@ -296,7 +296,7 @@ class _AdminGroupState extends State<AdminGroup> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode({
           'workspaceId': widget.workspaceId,
           'userId': widget.userId,
         }),
@@ -416,7 +416,7 @@ class _AdminGroupState extends State<AdminGroup> {
     );
   }
 
-  void navigateToIndividualGroupPage(String groupId) {
+  void navigateToIndividualGroupPage(int groupId) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -671,7 +671,7 @@ class Workspace {
 }
 
 class Member {
-  String userId;
+  int userId;
   String firstName;
   String lastName;
 
@@ -688,7 +688,7 @@ class Member {
 }
 
 class Group {
-  String groupId;
+  int groupId;
   String name;
   List<Member> members;
 
@@ -710,7 +710,7 @@ class Group {
 }
 
 class Student {
-  String userId;
+  int userId;
   String email;
   String firstName;
   String lastName;
