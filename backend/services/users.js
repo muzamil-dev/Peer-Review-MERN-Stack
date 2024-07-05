@@ -171,6 +171,40 @@ export const requestPasswordReset = async(email) => {
     }
 }
 
+// Reset the user's password based on their password reset token
+export const resetPassword = async(token, password) => {
+    try{
+        // Find the token in the password reset table
+        const res = await db.query(
+            `SELECT * FROM password_reset WHERE reset_token = $1`,
+            [token]
+        );
+        const data = res.rows[0];
+        if (!data)
+            return {
+                error: "No password reset with this token was found",
+                status: 404
+            };
+        // Check that the token hasn't expired
+        if ((new Date(data.reset_token_expiry)) < Date.now())
+            return {
+                error: "The reset token has already expired",
+                status: 400
+            };
+        // Delete the token from the password_reset table
+        db.query(`DELETE FROM password_reset WHERE reset_token = $1`, [token]);
+        // Insert the new password
+        const pwInsert = await db.query(
+            `UPDATE users SET password = $1 WHERE email = $2`,
+            [password, data.email]
+        );
+        return { message: "New password set successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
 // Get a user by their id
 export const getById = async(userId) => {
     try{
