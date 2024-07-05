@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/main_app_bar.dart';
-import 'package:flutter_application/src/reviews/student-review.dart';
+import 'package:flutter_application/src/reviews/student_review.dart';
 import "package:http/http.dart" as http;
 import "dart:convert";
 

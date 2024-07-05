@@ -83,8 +83,9 @@ class _StudentReviewState extends State<StudentReview> {
           startDate = getDateString(jsonResponse["startDate"]);
           dueDate = getDateString(jsonResponse["dueDate"]);
           questions = jsonResponse["questions"];
+          // ignore: unused_local_variable
           for (var i in jsonResponse["questions"]) {
-            ratings.add(0);
+            ratings.add(3);
           }
         });
       }
@@ -111,15 +112,7 @@ class _StudentReviewState extends State<StudentReview> {
     }
   }
 
-  Widget displayRating(BuildContext context, int index) {
-    // Checks to see if the
-    if (index < ratings.length) {
-      return Text("Rating ${ratings[index].toInt()} / 5");
-    }
-    else {
-      return const Text("Rating: 0.0");
-    }
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -221,7 +214,7 @@ class _StudentReviewState extends State<StudentReview> {
                   itemBuilder: (context, index) {
                     Map currentReviewObject = (questions[index] as Map);
                     String currentQuestion = currentReviewObject["question"];
-
+                    
                     return Container(
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black, width: 1)),
@@ -239,7 +232,7 @@ class _StudentReviewState extends State<StudentReview> {
                                   fontSize: 25,
                                 ),
                               ),
-                              displayRating(context, index),
+                              Text("Rating ${ratings[index].toInt()} / 5"),
                             ],
                           ),
                           const SizedBox(
@@ -254,7 +247,7 @@ class _StudentReviewState extends State<StudentReview> {
                             height: 15,
                           ),
                           RatingBar.builder(
-                            initialRating: 0,
+                            initialRating: 3,
                             minRating: 0,
                             direction: Axis.horizontal,
                             allowHalfRating: false,
@@ -270,7 +263,6 @@ class _StudentReviewState extends State<StudentReview> {
                                 ratings[index] = rating;
                               });
                             },
-                            
                           ),
                         ],
                       ),
