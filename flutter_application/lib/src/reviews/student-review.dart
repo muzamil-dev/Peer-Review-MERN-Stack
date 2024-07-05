@@ -10,7 +10,11 @@ class StudentReview extends StatefulWidget {
   final int targetUserId;
   final int assignmentId;
 
-  const StudentReview({required this.userId, required this.targetUserId, required this.assignmentId, super.key});
+  const StudentReview(
+      {required this.userId,
+      required this.targetUserId,
+      required this.assignmentId,
+      super.key});
 
   @override
   State<StudentReview> createState() => _StudentReviewState();
@@ -18,6 +22,7 @@ class StudentReview extends StatefulWidget {
 
 class _StudentReviewState extends State<StudentReview> {
   String assignmentName = '';
+  String targetUserName = '';
   String startDate = '';
   String dueDate = '';
   List<dynamic> questions = [];
@@ -26,6 +31,7 @@ class _StudentReviewState extends State<StudentReview> {
   void initState() {
     super.initState();
     getAssignmentDetails(context);
+    getUser(context);
   }
 
   String getDateString(String date) {
@@ -40,22 +46,41 @@ class _StudentReviewState extends State<StudentReview> {
 
     return formattedDate;
   }
-  
+
+  // Gets Current User Information
+  Future<void> getUser(BuildContext context) async {
+    final url = Uri.parse('http://10.0.2.2:5000/users/${widget.targetUserId}');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        print("Got User Successfully!");
+        final jsonResponse = json.decode(response.body);
+        setState(() {
+          targetUserName =
+              jsonResponse['firstName'] + ' ' + jsonResponse['lastName'];
+        });
+      }
+    } catch (error) {
+      print("Error Getting User: $error");
+    }
+  }
+
   void getAssignmentDetails(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
+    final url =
+        Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         setState(() {
-            assignmentName = jsonResponse["name"];
-            startDate = getDateString(jsonResponse["startDate"]);
-            dueDate = getDateString(jsonResponse["dueDate"]);
-            questions = jsonResponse["questions"];
+          assignmentName = jsonResponse["name"];
+          startDate = getDateString(jsonResponse["startDate"]);
+          dueDate = getDateString(jsonResponse["dueDate"]);
+          questions = jsonResponse["questions"];
         });
       }
-    }
-    catch (error) {
+    } catch (error) {
       print("Error Getting Review Details: $error");
     }
   }
@@ -67,17 +92,25 @@ class _StudentReviewState extends State<StudentReview> {
         title: const Text("Student Review Page"),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(14.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Title of Assignment
             Container(
               margin: const EdgeInsets.fromLTRB(3.0, 0, 0, 0),
-              child: Text(
-                assignmentName,
-                style: const TextStyle(
-                    fontSize: 35.0, fontWeight: FontWeight.bold),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    assignmentName,
+                    style: const TextStyle(
+                        fontSize: 35.0, fontWeight: FontWeight.bold),
+                  ),
+                  Text("Review for $targetUserName",
+                      style: const TextStyle(
+                          fontSize: 16.0, fontWeight: FontWeight.w600)),
+                ],
               ),
             ),
             const SizedBox(
