@@ -9,11 +9,13 @@ class StudentReview extends StatefulWidget {
   final int userId;
   final int targetUserId;
   final int assignmentId;
+  final int reviewId;
 
   const StudentReview(
       {required this.userId,
       required this.targetUserId,
       required this.assignmentId,
+      required this.reviewId,
       super.key});
 
   @override
@@ -25,7 +27,10 @@ class _StudentReviewState extends State<StudentReview> {
   String targetUserName = '';
   String startDate = '';
   String dueDate = '';
+  // Keeps Track of Every Question
   List<dynamic> questions = [];
+  // Keeps Track of the Ratings Of Every Question
+  List<double> ratings = [];
 
   @override
   void initState() {
@@ -78,10 +83,41 @@ class _StudentReviewState extends State<StudentReview> {
           startDate = getDateString(jsonResponse["startDate"]);
           dueDate = getDateString(jsonResponse["dueDate"]);
           questions = jsonResponse["questions"];
+          for (var i in jsonResponse["questions"]) {
+            ratings.add(0);
+          }
         });
       }
     } catch (error) {
       print("Error Getting Review Details: $error");
+    }
+  }
+
+  void submitReview(BuildContext context) async {
+    final url = Uri.parse("http://10.0.2.2:5000/reviews/submit");
+    try {
+      final response = await http.post(url,
+          headers: {'content-type': 'application/json'},
+          body: jsonEncode({
+            "userId": widget.userId,
+            "reviewId": widget.reviewId,
+            "ratings": ratings,
+          }));
+      if (response.statusCode == 200) {
+        print("Review Submitted Successfully!");
+      }
+    } catch (error) {
+      print("Error Submitting Review: $error");
+    }
+  }
+
+  Widget displayRating(BuildContext context, int index) {
+    // Checks to see if the
+    if (index < ratings.length) {
+      return Text("Rating ${ratings[index].toInt()} / 5");
+    }
+    else {
+      return const Text("Rating: 0.0");
     }
   }
 
@@ -183,8 +219,8 @@ class _StudentReviewState extends State<StudentReview> {
               thumbColor: Colors.black,
               child: ListView.separated(
                   itemBuilder: (context, index) {
-                    Map currentQuestionObject = (questions[index] as Map);
-                    String currentQuestion = currentQuestionObject["question"];
+                    Map currentReviewObject = (questions[index] as Map);
+                    String currentQuestion = currentReviewObject["question"];
 
                     return Container(
                       decoration: BoxDecoration(
@@ -193,12 +229,18 @@ class _StudentReviewState extends State<StudentReview> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Question ${index + 1}",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Question ${index + 1}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 25,
+                                ),
+                              ),
+                              displayRating(context, index),
+                            ],
                           ),
                           const SizedBox(
                             height: 7,
@@ -224,8 +266,11 @@ class _StudentReviewState extends State<StudentReview> {
                               color: Colors.amber,
                             ),
                             onRatingUpdate: (rating) {
-                              print(rating);
+                              setState(() {
+                                ratings[index] = rating;
+                              });
                             },
+                            
                           ),
                         ],
                       ),
@@ -242,6 +287,16 @@ class _StudentReviewState extends State<StudentReview> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            submitReview(context);
+          },
+          backgroundColor: Colors.green,
+          child: const Icon(
+            Icons.check,
+            color: Colors.white,
+            size: 40,
+          )),
     );
   }
 }

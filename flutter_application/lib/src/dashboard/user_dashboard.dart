@@ -183,7 +183,7 @@ class _UserDashboardState extends State<UserDashboard> {
       children: assignmentReviews.map<Widget>((review) {
         return TextButton(
             onPressed: () {
-              navigateToStudentReview(widget.userId, review["targetId"], currentAssignmentId);
+              navigateToStudentReview(widget.userId, review["targetId"], currentAssignmentId, review["reviewId"]);
             },
             child: Text(
                 "Review for ${review["firstName"]} ${review["lastName"]}"));
@@ -191,7 +191,7 @@ class _UserDashboardState extends State<UserDashboard> {
     );
   }
 
-  void navigateToStudentReview(int userId, int targetUserId, int assignmentId) {
+  void navigateToStudentReview(int userId, int targetUserId, int assignmentId, int reviewId) {
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -199,6 +199,7 @@ class _UserDashboardState extends State<UserDashboard> {
             userId: userId,
             targetUserId: targetUserId,
             assignmentId: assignmentId,
+            reviewId: reviewId,
           ),
         ));
   }

@@ -91,12 +91,6 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("USER DASHBOARD PAGE"),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, "/studentReview");
-                },
-                child: const Text("STUDENT REVIEW PAGE"),
-              ),
             ],
           ),
         ),
