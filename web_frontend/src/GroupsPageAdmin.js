@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './GroupsPageAdmin.module.css'; // Import the CSS file as a module
 import Api from './Api.js';  // Adjust the path to where your Api.js file is located
+import { jwtDecode } from 'jwt-decode';
 
 const GroupsPageAdmin = () => {
     const [ungroupedMembers, setUngroupedMembers] = useState([]);
@@ -21,14 +22,39 @@ const GroupsPageAdmin = () => {
     const { workspaceId } = useParams(); // Assuming you're using React Router v6
     const navigate = useNavigate();
 
+    const getCurrentUserId = () => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            return null;
+        }
+        const decodedToken = jwtDecode(token);
+        return decodedToken.userId;
+    }
+
+    const handleAssignToGroup = async (userId, groupId) => {
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return;
+        }
+        const response = await Api.Groups.AddUser(currentUserId, userId, groupId);
+        if (response.success) {
+            setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== userId));
+            fetchGroups(); // Refetch groups to update the UI
+        } else {
+            console.error('Failed to assign user to group:', response.message);
+        }
+    };
+
     const fetchWorkspaceDetails = async () => {
         const response = await Api.Workspace.GetWorkspaceDetails(workspaceId);
         if (response.status === 200) {
+            const allowedDomains = response.data.allowedDomains || [];
             setWorkspaceDetails(response.data);
             setInviteCode(response.data.inviteCode); // Update inviteCode state
             setFormData({
                 name: response.data.name,
-                allowedDomains: response.data.allowedDomains.join(', '),
+                allowedDomains: allowedDomains.join(', '),
                 groupMemberLimit: response.data.groupMemberLimit,
                 groupLock: response.data.groupLock
             });
@@ -85,8 +111,12 @@ const GroupsPageAdmin = () => {
     };
 
     const handleKickFromGroup = async (targetId) => {
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
-        const response = await Api.Groups.RemoveUser(userId, targetId, editGroupId);
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return;
+        }
+        const response = await Api.Groups.RemoveUser(currentUserId, targetId, editGroupId);
         if (response.success) {
             setSelectedGroupMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
             // Update the group members in the groups state
@@ -108,32 +138,46 @@ const GroupsPageAdmin = () => {
             console.error('Failed to kick from group:', response.message);
         }
     };
-    
+
 
     const handleKickFromWorkspace = async (targetId) => {
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return;
+        }
         const response = await Api.Workspace.LeaveWorkspace(targetId, workspaceId);
         if (response.success) {
-            setSelectedGroupMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
+            setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
         } else {
             console.error('Failed to kick from workspace:', response.message);
         }
     };
+    
 
     const handleDeleteGroup = async (groupId) => {
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
-        const response = await Api.Groups.DeleteGroup(userId, groupId);
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return;
+        }
+        const response = await Api.Groups.DeleteGroup(currentUserId, groupId);
         if (response.success) {
             setGroups(groups.filter(group => group.groupId !== groupId));
         } else {
             console.error('Failed to delete group:', response.message);
         }
     };
+    
 
     const handleCreateGroup = async () => {
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return;
+        }
         try {
-            const response = await Api.Groups.CreateGroup(userId, workspaceId);
+            const response = await Api.Groups.CreateGroup(currentUserId, workspaceId);
             if (response.status === 201) {
                 setGroups([...groups, response.data]);
             } else {
@@ -143,12 +187,17 @@ const GroupsPageAdmin = () => {
             console.error('Error creating group:', error);
         }
     };
+    
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return;
+        }
         const allowedDomainsArray = formData.allowedDomains.trim() ? formData.allowedDomains.split(',').map(domain => domain.trim()) : [];
-        const response = await Api.Workspace.EditWorkspace(userId, workspaceId, formData.name, allowedDomainsArray, formData.groupMemberLimit, formData.groupLock);
+        const response = await Api.Workspace.EditWorkspace(currentUserId, workspaceId, formData.name, allowedDomainsArray, formData.groupMemberLimit, formData.groupLock);
         if (response.success) {
             setWorkspaceDetails({
                 name: formData.name,
@@ -162,50 +211,56 @@ const GroupsPageAdmin = () => {
             console.error('Failed to edit workspace:', response.message);
         }
     };
-
+    
     const handleGroupChangesSubmit = async (event) => {
         event.preventDefault();
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return;
+        }
     
         const changes = Object.entries(selectedMemberGroup).map(([memberId, newGroupId]) => ({
             memberId,
             newGroupId
         }));
     
+        console.log('Processing group changes:', changes);
+    
         for (const change of changes) {
             const { memberId, newGroupId } = change;
     
-            // If the member is not in the editGroupId anymore, skip the remove step
-            const memberInCurrentGroup = selectedGroupMembers.some(member => member.userId === memberId);
-    
-            if (memberInCurrentGroup) {
-                // Remove the user from the current group
-                const removeResponse = await Api.Groups.RemoveUser(userId, memberId, editGroupId);
-                if (!removeResponse.success) {
-                    console.error(`Failed to remove user ${memberId} from group ${editGroupId}:`, removeResponse.message);
-                    continue;
-                }
-    
-                // Update ungroupedMembers state if the member is not moved to a new group
-                if (!newGroupId) {
-                    setUngroupedMembers(prevMembers => [...prevMembers, selectedGroupMembers.find(member => member.userId === memberId)]);
+            // Remove the user from all current groups
+            for (const group of groups) {
+                const memberInCurrentGroup = group.members.some(member => member.userId === memberId);
+                if (memberInCurrentGroup) {
+                    console.log(`Removing user ${memberId} from group ${group.groupId}`);
+                    const removeResponse = await Api.Groups.RemoveUser(currentUserId, memberId, group.groupId);
+                    console.log('Remove response:', removeResponse);
+                    if (!removeResponse.success) {
+                        console.error(`Failed to remove user ${memberId} from group ${group.groupId}:`, removeResponse.message);
+                        continue;
+                    }
                 }
             }
     
-            // Add the user to the new group
-            const addResponse = await Api.Groups.AddUser(userId, memberId, newGroupId);
-            if (!addResponse.success) {
-                console.error(`Failed to add user ${memberId} to group ${newGroupId}:`, addResponse.message);
-            } else {
-                // Remove from ungroupedMembers state if the member is added to a group
-                setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== memberId));
+            // Add the user to the new group if specified
+            if (newGroupId) {
+                console.log(`Adding user ${memberId} to group ${newGroupId}`);
+                const addResponse = await Api.Groups.AddUser(currentUserId, memberId, newGroupId);
+                console.log('Add response:', addResponse);
+                if (!addResponse.success) {
+                    console.error(`Failed to add user ${memberId} to group ${newGroupId}:`, addResponse.message);
+                } else {
+                    setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== memberId));
+                }
             }
         }
     
         setEditGroupId(null);
         fetchGroups(); // Refetch groups to update the UI
     };
-
+    
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -222,8 +277,12 @@ const GroupsPageAdmin = () => {
     };
 
     const handleCreateInviteCode = async () => {
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
-        const response = await Api.Workspace.SetInviteCode(userId, workspaceId);
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return;
+        }
+        const response = await Api.Workspace.SetInviteCode(currentUserId, workspaceId);
         if (response.success) {
             setInviteCode(response.inviteCode); // Update inviteCode state
             setWorkspaceDetails(prevDetails => ({
@@ -234,10 +293,15 @@ const GroupsPageAdmin = () => {
             console.error('Failed to create invite code:', response.message);
         }
     };
+    
 
     const handleDeleteInviteCode = async () => {
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
-        const response = await Api.Workspace.RemoveActiveInvite(userId, workspaceId);
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return;
+        }
+        const response = await Api.Workspace.RemoveActiveInvite(currentUserId, workspaceId);
         if (response.success) {
             setInviteCode(null); // Update inviteCode state
             setWorkspaceDetails(prevDetails => ({
@@ -248,6 +312,7 @@ const GroupsPageAdmin = () => {
             console.error('Failed to delete invite code:', response.message);
         }
     };
+    
 
     const openForm = () => {
         setIsFormOpen(true);
@@ -349,6 +414,7 @@ const GroupsPageAdmin = () => {
                                                 <th>First Name</th>
                                                 <th>Last Name</th>
                                                 <th>Email</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -357,6 +423,26 @@ const GroupsPageAdmin = () => {
                                                     <td>{member.firstName}</td>
                                                     <td>{member.lastName}</td>
                                                     <td>{member.email}</td>
+                                                    <td>
+                                                        <select
+                                                            value={selectedMemberGroup[member.userId] || ''}
+                                                            onChange={(e) => handleAssignToGroup(member.userId, e.target.value)}
+                                                            className={`${styles.dropdown} form-select`}
+                                                        >
+                                                            <option value="">Assign to group</option>
+                                                            {groups.map(group => (
+                                                                <option key={group.groupId} value={group.groupId}>
+                                                                    {group.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <button
+                                                            className="btn btn-danger ml-2"
+                                                            onClick={() => handleKickFromWorkspace(member.userId)}
+                                                        >
+                                                            Kick
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -366,6 +452,7 @@ const GroupsPageAdmin = () => {
                         </div>
                     </div>
                 )}
+
                 <div className="container">
                     <div className="row">
                         {Array.isArray(groups) && groups.map((group) => (
