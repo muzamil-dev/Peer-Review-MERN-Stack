@@ -106,6 +106,7 @@ class _StudentReviewState extends State<StudentReview> {
           }));
       if (response.statusCode == 200) {
         print("Review Submitted Successfully!");
+        Navigator.pop(context);
       }
     } catch (error) {
       print("Error Submitting Review: $error");
