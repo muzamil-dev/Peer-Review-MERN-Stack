@@ -24,6 +24,7 @@ class _UserDashboardState extends State<UserDashboard> {
   List<Object> assignments = [];
   int _currentIndex = 0;
   Map<int, int> itemsLeft = {};
+  Map<int, Object> incompleteReviews = {};
 
   // Initializes User Name and assignments variables upon page load
   @override
@@ -85,6 +86,7 @@ class _UserDashboardState extends State<UserDashboard> {
         if (mounted) {
           setState(() {
             itemsLeft[assignmentId] = jsonResponse["incompleteReviews"].length;
+            incompleteReviews[assignmentId] = jsonResponse["incompleteReviews"];
           });
         }
       }
@@ -105,9 +107,11 @@ class _UserDashboardState extends State<UserDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Welcome $userName!",
-            style: const TextStyle(fontSize: 25.0),
+          Center(
+            child: Text(
+              "Welcome $userName!",
+              style: const TextStyle(fontSize: 25.0),
+            ),
           ),
           const SizedBox(
             height: 15,
@@ -115,9 +119,6 @@ class _UserDashboardState extends State<UserDashboard> {
           const Text(
             "Assignments",
             style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(
-            height: 10,
           ),
           Expanded(
             child: RawScrollbar(
@@ -144,75 +145,77 @@ class _UserDashboardState extends State<UserDashboard> {
 
     // Checking to make sure the current assignment has non null items
     if (itemsLeft[currentAssignmentId] != null) {
-      return Container(
-        decoration:
-            BoxDecoration(border: Border.all(width: 3, color: Colors.black)),
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ExpansionTile(
+            leading: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  "${currentAssignment['name']}",
-                  style: const TextStyle(fontSize: 25),
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      "Status: ",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
-                  ],
-                ),
+                statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Items Left: ${itemsLeft[currentAssignmentId]}",
-                  style: const TextStyle(fontSize: 17),
-                ),
-                const IconButton(
-                    onPressed: null, icon: Icon(Icons.arrow_drop_down)),
-              ],
-            )
-          ],
-        ),
+            title: Text(
+              "${currentAssignment['name']}",
+              style: const TextStyle(fontSize: 25),
+            ),
+            subtitle: Text(
+              "Items Left: ${itemsLeft[currentAssignmentId]}",
+              style: const TextStyle(fontSize: 17),
+            ),
+            children: [
+              assignmentLink(context, currentAssignmentId),
+            ],
+          ),
+        ],
       );
-    }
-    else {
+    } else {
       return const SizedBox();
     }
+  }
+
+  Widget assignmentLink(BuildContext context, int currentAssignmentId) {
+    var assignmentReviews = (incompleteReviews[currentAssignmentId] as List);
+    print("Current Assignment Reviews: $assignmentReviews");
+    print("Length Reviews: ${assignmentReviews.length}");
+
+    // String userName =
+    //     currentReview['firstName'] + ' ' + currentReview['lastName'];
+    // int reviewId = currentReview['reviewId'];
+    // int targetUserId = currentReview['targetId'];
+    return Column(
+    children: assignmentReviews.map<Widget>((review) {
+      return ListTile(
+        title: Text("Review ${review}"),
+      );
+    }).toList(),
+  );
   }
 
   Widget statusIcon(BuildContext context, int itemsLeft) {
     if (itemsLeft == 0) {
       return const CircleAvatar(
-        radius: 20,
+        radius: 15,
         backgroundColor: Colors.green,
         child: IconButton(
           onPressed: null,
           icon: Icon(
             Icons.check,
             color: Colors.white,
-            size: 20,
+            size: 15,
           ),
         ),
       );
     } else {
       return const CircleAvatar(
-        radius: 20,
+        radius: 15,
         backgroundColor: Colors.red,
         child: IconButton(
           onPressed: null,
           icon: Icon(
             Icons.close,
             color: Colors.white,
-            size: 20,
+            size: 15,
           ),
         ),
       );
