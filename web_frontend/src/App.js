@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';  // Import Bootstrap CSS
 import LoginPage from './login_signup/LoginPage';
-import DashboardPage from './DashboardPage';
+import DashboardPage from './Home/DashboardPage';
 import Example from './ApiExamples';
 import CustomGroupsPage from './GroupsPage';  // Import the CustomGroupsPage component
 import GroupsPageAdmin from './GroupsPageAdmin';  // Import the CustomGroupsPageAdmin component

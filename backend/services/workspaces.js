@@ -3,8 +3,8 @@ import db from "../config.js";
 import * as GroupService from './groups.js';
 
 // Get workspace by id
-export const getById = async(workspaceId) => {
-    try{
+export const getById = async (workspaceId) => {
+    try {
         const res = await db.query(
             `SELECT * FROM workspaces WHERE id = $1`,
             [workspaceId]
@@ -25,8 +25,7 @@ export const getById = async(workspaceId) => {
             };
         // Return a single workspace
         return workspace;
-    }
-    catch(err){
+    } catch (err) {
         return { error: err.message, status: 500 };
     }
 }

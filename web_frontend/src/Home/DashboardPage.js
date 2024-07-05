@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
 import './DashboardPage.css';
-import Api from './Api.js';
+import Api from '../Api.js';
 
 const DashboardPage = () => {
     const [workspaces, setWorkspaces] = useState([]);
@@ -93,7 +93,16 @@ const DashboardPage = () => {
             numGroups ? parseInt(numGroups, 10) : undefined
         );
     
-        if (response.status === 201) {
+        if (response.status === 201 || response.status === 200) {
+            const fetchWorkspaces = async () => {
+                const response = await Api.Users.getUserWorkspaces(userId);
+                if (response.status === 200) {
+                    setWorkspaces(response.data);
+                } else {
+                    console.error('Failed to fetch workspaces:', response.message);
+                }
+            };
+            
             const newWorkspace = {
                 workspaceId: response.workspaceId,
                 name: newWorkspaceName,
@@ -115,7 +124,13 @@ const DashboardPage = () => {
 
     const handleWorkspaceClick = (workspaceId) => {
         const workspace = workspaces.find(w => w.workspaceId === workspaceId);
-        navigate(`/groups/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
+        console.log('Workspace:', workspace); // Log the workspace object
+        console.log('Role:', workspace.role); // Log the role of the user in the workspace
+        if (workspace.role === 'Instructor') {
+            navigate(`/workspaces/${workspaceId}/admin`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
+        } else {
+            navigate(`/groups/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
+        }
     };
 
     return (
