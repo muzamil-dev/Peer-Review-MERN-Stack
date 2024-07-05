@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/main_app_bar.dart';
+import 'package:flutter_application/src/reviews/submit-review.dart';
 import "package:http/http.dart" as http;
 import "dart:convert";
 
@@ -176,20 +177,30 @@ class _UserDashboardState extends State<UserDashboard> {
 
   Widget assignmentLink(BuildContext context, int currentAssignmentId) {
     var assignmentReviews = (incompleteReviews[currentAssignmentId] as List);
-    print("Current Assignment Reviews: $assignmentReviews");
-    print("Length Reviews: ${assignmentReviews.length}");
+    print(assignmentReviews);
 
-    // String userName =
-    //     currentReview['firstName'] + ' ' + currentReview['lastName'];
-    // int reviewId = currentReview['reviewId'];
-    // int targetUserId = currentReview['targetId'];
     return Column(
-    children: assignmentReviews.map<Widget>((review) {
-      return ListTile(
-        title: Text("Review ${review}"),
-      );
-    }).toList(),
-  );
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: assignmentReviews.map<Widget>((review) {
+        return TextButton(
+            onPressed: () {
+              navigateToStudentReview(widget.userId, review["targetId"], currentAssignmentId);
+            },
+            child: Text(
+                "Review for ${review["firstName"]} ${review["lastName"]}"));
+      }).toList(),
+    );
+  }
+
+  void navigateToStudentReview(int userId, int targetUserId, int assignmentId) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => StudentReview(
+            userId: userId,
+            targetUserId: targetUserId,
+          ),
+        ));
   }
 
   Widget statusIcon(BuildContext context, int itemsLeft) {

@@ -8,6 +8,7 @@ import 'package:flutter_application/src/groups/adminGroups.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
 import 'package:flutter_application/src/login-signup/loginsignup.dart';
 import 'package:flutter_application/src/login-signup/passwordReset.dart';
+import 'package:flutter_application/src/reviews/submit-review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -45,6 +46,10 @@ void main() async {
             userId: 14,
             workspaceId: 14,
           ),
+      StudentReview.routeName: (context) => const StudentReview(
+        userId: 14,
+        targetUserId: 15,
+      ),
     },
   ));
 }
