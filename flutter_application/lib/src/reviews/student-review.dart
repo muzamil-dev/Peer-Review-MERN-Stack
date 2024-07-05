@@ -17,11 +17,10 @@ class StudentReview extends StatefulWidget {
 }
 
 class _StudentReviewState extends State<StudentReview> {
-  late String assignmentName;
-  late String startDate;
-  late String dueDate;
-
-  late List<Object> questions;
+  String assignmentName = '';
+  String startDate = '';
+  String dueDate = '';
+  List<dynamic> questions = [];
 
   @override
   void initState() {
@@ -65,7 +64,7 @@ class _StudentReviewState extends State<StudentReview> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Student Review Page"),
+        title: const Text("Student Review Page"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
