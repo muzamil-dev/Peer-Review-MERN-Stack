@@ -6,12 +6,8 @@ import * as ReviewService from './reviews.js';
 export const getById = async(assignmentId) => {
     try{
         const res = await db.query(
-            `SELECT a.*, jsonb_agg(
-                jsonb_build_object(
-                    'questionId', q.id,
-                    'question', q.question
-                ) ORDER BY q.id
-            ) AS questions
+            `SELECT a.*, 
+            array_agg(q.question ORDER BY q.id) AS questions
             FROM assignments AS a
             JOIN questions AS q
             ON a.id = q.assignment_id
