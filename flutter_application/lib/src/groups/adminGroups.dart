@@ -320,7 +320,7 @@ class _AdminGroupState extends State<AdminGroup> {
 
     // Load the current workspace details
     final workspaceDetailsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
     print('Fetching workspace details from: $workspaceDetailsUrl');
     http.get(workspaceDetailsUrl).then((response) {
       print('Workspace details response status: ${response.statusCode}');

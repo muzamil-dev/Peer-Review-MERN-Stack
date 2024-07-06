@@ -27,7 +27,7 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> getLockedStatus(BuildContext context) async {
     final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
 
     try {
       final response = await http.get(url);
