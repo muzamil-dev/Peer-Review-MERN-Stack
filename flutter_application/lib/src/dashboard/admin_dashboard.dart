@@ -221,7 +221,7 @@ class Workspace {
   }
 }
 
-class WorkspaceCard extends StatelessWidget {
+class WorkspaceCard extends StatefulWidget {
   final Workspace workspace;
   final Function(int, String) onTap;
   final int userId;
@@ -232,7 +232,12 @@ class WorkspaceCard extends StatelessWidget {
       required this.userId,
       super.key});
 
-  Future<Object> createInviteCode(BuildContext context) async {
+  @override
+  State<WorkspaceCard> createState() => _WorkspaceCardState();
+}
+
+class _WorkspaceCardState extends State<WorkspaceCard> {
+  Future<void> createInviteCode(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/setInvite');
     try {
       final response = await http.put(
@@ -241,28 +246,40 @@ class WorkspaceCard extends StatelessWidget {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'userId': userId,
-          'workspaceId': workspace.workspaceId,
+          'userId': widget.userId,
+          'workspaceId': widget.workspace.workspaceId,
         }),
       );
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        return jsonResponse;
+      
       } else {
         print("Create Invite Code Unsuccessful");
       }
     } catch (error) {
       print("Error Creating Invite Code: $error");
     }
-    return {
-      "message": "Invite Code not Created",
-      "inviteCode": null,
-    };
+  }
+
+  Future<Object> getWorkspaceInfo(BuildContext context) async {
+    final url = Uri.parse("http://10.0.2.2:5000/workspaces/${widget.workspace.workspaceId}");
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        return jsonResponse;
+      }
+    }
+    catch (error) {
+      print("Error Getting Workspace Info: $error");
+    }
+    return {};
   }
 
   Future<void> inviteDialog(BuildContext context) async {
-    dynamic inviteCodeObject = await createInviteCode(context);
-    String inviteCode = inviteCodeObject['inviteCode'];
+    await createInviteCode(context);
+    Map workspaceDetails = await getWorkspaceInfo(context) as Map;
+    String inviteCode = workspaceDetails["inviteCode"];
 
     return showDialog(
         context: context,
@@ -304,7 +321,7 @@ class WorkspaceCard extends StatelessWidget {
   }
 
   Widget addMemberButton(BuildContext context) {
-    if (workspace.role == 'Instructor') {
+    if (widget.workspace.role == 'Instructor') {
       return IconButton(
           onPressed: () {
             inviteDialog(context);
@@ -320,7 +337,7 @@ class WorkspaceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onTap(workspace.workspaceId, workspace.role),
+      onTap: () => widget.onTap(widget.workspace.workspaceId, widget.workspace.role),
       child: Card(
         margin: const EdgeInsets.all(10),
         child: Padding(
@@ -332,7 +349,7 @@ class WorkspaceCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    workspace.name,
+                    widget.workspace.name,
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.bold),
                   ),
@@ -341,7 +358,7 @@ class WorkspaceCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Role: ${workspace.role}',
+                'Role: ${widget.workspace.role}',
                 style: const TextStyle(fontSize: 16),
               ),
             ],
