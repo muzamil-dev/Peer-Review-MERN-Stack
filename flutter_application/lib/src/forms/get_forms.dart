@@ -136,7 +136,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                       children: assignment.questions
                                           .map<Widget>((question) {
                                         return Text(
-                                          question,
+                                          question["question"],
                                           style: const TextStyle(fontSize: 16),
                                         );
                                       }).toList(),
