@@ -1,4 +1,3 @@
-// TODO: FIX WEIRD ERRORS
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/forms/get_forms.dart';
@@ -513,33 +512,34 @@ class _AdminGroupState extends State<AdminGroup> {
                 Expanded(
                   child: ListView(
                     children: [
-                      Card(
-                        margin: const EdgeInsets.all(10),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                "View Assignments",
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GetAssignments(
+                                workspaceId: widget.workspaceId,
+                                userId: widget.userId,
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.arrow_forward),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => GetAssignments(
-                                        workspaceId: widget.workspaceId,
-                                        userId: widget.userId,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
+                            ),
+                          );
+                        },
+                        child: const Card(
+                          margin: EdgeInsets.all(10),
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "View Assignments",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Icon(Icons.arrow_forward),
+                              ],
+                            ),
                           ),
                         ),
                       ),
