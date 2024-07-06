@@ -13,10 +13,10 @@ const leftStyle = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
     width: "30%",
     color: "white",
     padding: "20px",
+    overflowY: 'auto',
 };
 
 const rightStyle = {
@@ -33,7 +33,6 @@ const rightStyle = {
 const buttonContainerStyle = {
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
 };
 
 const buttonStyle = {
@@ -93,102 +92,68 @@ function ApiExamples() {
             <div style={leftStyle}>
                 <h3>Manual Inputs</h3>
                 <p>Email <input onChange={(e) => setEmail(e.target.value)} /></p>
-                <p>Email Verification <input onChange={(e) => setEmailVerificationCode(e.target.value)} /></p>
                 <p>Password <input onChange={(e) => setPassword(e.target.value)} /></p>
+                <p>Email Verification <input onChange={(e) => setEmailVerificationCode(e.target.value)} /></p>
                 <p>TargetId <input onChange={(e) => setTargetId(e.target.value)} /></p>
-                
-                <h3>User Functions</h3>
                 <div style={buttonContainerStyle}>
-                {[
-                    { userId: "CreateAccount", fn: () => Api.Users.CreateAccount('Brittany', 'Marie', 'Clark', email, password) },
-                    { userId: "VerifyEmailCode", fn: () => Api.Users.VerifyEmailCode(email, emailVerificationCode) },
-                    { userId: "DoLogin", fn: () => Api.Users.DoLogin(email, password)
-                        .then((response) => {
-                            setApiResponse(response);
-                            const decoded = jwtDecode(response.data.accessToken);
-                            setUserId(decoded.userId);
-                            return response;
-                        })
-                     },
-                    { userId: "EditAccount", fn: () => Api.Users.EditAccount(userId, 'Tazeka', 'Marie', 'Liranov') },
-                    { userId: "RequestPasswordReset", fn: () => Api.Users.RequestPasswordReset(userId, email) },
-                    { userId: "ResetPassword", fn: () => Api.Users.ResetPassword(email, emailVerificationCode, password) },
-                    { userId: "DeleteAccount", fn: () => Api.Users.DeleteAccount(userId) },
-                    { userId: "BulkCreateUsers", fn: () => console.error("TODO") },
-                    { userId: "GetById", fn: () => Api.Users.GetById(userId) },
-                ].map((endpoint, index) => (
-                    <button
-                        key={index}
-                        style={buttonStyle}
-                        onMouseEnter={(e) =>
-                            (e.target.style.backgroundColor =
-                            buttonHoverStyle.backgroundColor)
-                        }
-                        onMouseLeave={(e) =>
-                            (e.target.style.backgroundColor = buttonStyle.backgroundColor)
-                        }
-                        onClick={() => handleButtonClick(endpoint.userId, endpoint.fn)}
-                    >
-                        {endpoint.userId}
-                    </button>
-                ))}
+                    <h3>User Functions</h3>
+                    {[
+                        { userId: "CreateAccount", fn: () => Api.Users.CreateAccount('Brittany', 'Clark', email, password) },
+                        { userId: "VerifyEmailCode", fn: () => Api.Users.VerifyEmailCode(email, emailVerificationCode) },
+                        { userId: "DoLogin", fn: () => Api.Users.DoLogin(email, password)
+                            .then((response) => {
+                                setApiResponse(response);
+                                const decoded = jwtDecode(response.data.accessToken);
+                                setUserId(decoded.userId);
+                                localStorage.setItem('accessToken', response.data.accessToken);
+                                return response;
+                            })
+                        },
+                        { userId: "RequestPasswordReset", fn: () => Api.Users.RequestPasswordReset(userId, email) },
+                        { userId: "ResetPassword", fn: () => Api.Users.ResetPassword(email, emailVerificationCode, password) },
+                        { userId: "DeleteAccount", fn: () => Api.Users.DeleteAccount(userId) },
+                        { userId: "BulkCreateUsers", fn: () => console.error("TODO") },
+                    ].map((endpoint, index) => (
+                        <button
+                            key={index}
+                            style={buttonStyle}
+                            onMouseEnter={(e) =>
+                                (e.target.style.backgroundColor =
+                                buttonHoverStyle.backgroundColor)
+                            }
+                            onMouseLeave={(e) =>
+                                (e.target.style.backgroundColor = buttonStyle.backgroundColor)
+                            }
+                            onClick={() => handleButtonClick(endpoint.userId, endpoint.fn)}
+                        >
+                            {endpoint.userId}
+                        </button>
+                    ))}
                 </div>
                 <h3>Workspace Functions</h3>
                 <div style={buttonContainerStyle}>
-                {[
-                    { userId: "CreateWorkspace", fn: () => Api.Workspace.CreateWorkspace('MyWorkspace', userId, ['ucf\\.edu'], 5, 12)
-                        .then((response) => {
-                            setWorkspaceId(response.workspaceId);
-                            return response;
-                        }) },
-                    { userId: "GetGroups", fn: () => Api.Workspace.GetGroups(workspaceId) },
-                    { userId: "GetAssignments", fn: () => Api.Workspace.GetAssignments(workspaceId)},
-                    { userId: "SetInviteCode", fn: () => Api.Workspace.SetInviteCode(userId, workspaceId) 
-                        .then((response) => {
-                            setInviteCode(response.inviteCode);
-                            return response;
-                        }) },
-                    { userId: "JoinWorkspace", fn: () => Api.Workspace.JoinWorkspace(userId, workspaceId, inviteCode) },
-                    { userId: "LeaveWorkspace", fn: () => Api.Workspace.LeaveWorkspace(userId, workspaceId) },
-                    { userId: "EditWorkspace", fn: () => Api.Workspace.EditWorkspace(userId, workspaceId, 'MyEditedWorkspace', ['ucf\\.edu'], 6) },
-                    { userId: "DeleteWorkspace", fn: () => Api.Workspace.DeleteWorkspace(userId, workspaceId) },
-                    { userId: "RemoveActiveInvite", fn: () => Api.Workspace.RemoveActiveInvite(userId, workspaceId) },
-                    { userId: "GetAllStudents", fn: () => Api.Workspace.GetAllStudents(workspaceId) },
-                    { userId: "GetStudentsWithoutGroup", fn: () => Api.Workspace.GetStudentsWithoutGroup(workspaceId) },
-                ].map((endpoint, index) => (
-                    <button
-                    key={index}
-                    style={buttonStyle}
-                    onMouseEnter={(e) =>
-                        (e.target.style.backgroundColor =
-                        buttonHoverStyle.backgroundColor)
-                    }
-                    onMouseLeave={(e) =>
-                        (e.target.style.backgroundColor = buttonStyle.backgroundColor)
-                    }
-                    onClick={() => handleButtonClick(endpoint.userId, endpoint.fn)}
-                    >
-                    {endpoint.userId}
-                    </button>
-                ))}
-                </div>
-                <h3>Group Functions</h3>
-                <div style={buttonContainerStyle}>
-                {[
-                    { userId: "CreateGroup", fn: () => Api.Groups.CreateGroup(userId, workspaceId)
-                        .then((response) => {
-                            setGroupId(response.data.groupId);
-                            return response;
-                        })
-                     },
-                    { userId: "GetGroupInfo", fn: () => Api.Groups.GetGroupInfo(groupId) },
-                    { userId: "JoinGroup", fn: () => Api.Groups.JoinGroup(groupId, userId) },
-                    { userId: "LeaveGroup", fn: () => Api.Groups.LeaveGroup(groupId, userId) },
-                    { userId: "AddUser", fn: () => Api.Groups.AddUser(userId, targetId, groupId) },
-                    { userId: "RemoveUser", fn: () => Api.Groups.RemoveUser(userId, targetId, groupId) },
-                    { userId: "DeleteGroup", fn: () => Api.Groups.DeleteGroup(userId, groupId) },
-                ].map((endpoint, index) => (
-                    <button
+                    {[
+                        { userId: "CreateWorkspace", fn: () => Api.Workspace.CreateWorkspace('MyWorkspace', userId, ['ucf\\.edu'], 5)
+                            .then((response) => {
+                                setWorkspaceId(response.workspaceId);
+                                return response;
+                            }) },
+                        { userId: "GetGroups", fn: () => Api.Workspace.GetGroups(workspaceId) },
+                        { userId: "GetAssignments", fn: () => Api.Workspace.GetAssignments(workspaceId)},
+                        { userId: "SetInviteCode", fn: () => Api.Workspace.SetInviteCode(userId, workspaceId) 
+                            .then((response) => {
+                                setInviteCode(response.inviteCode);
+                                return response;
+                            }) },
+                        { userId: "JoinWorkspace", fn: () => Api.Workspace.JoinWorkspace(userId, workspaceId, inviteCode) },
+                        { userId: "LeaveWorkspace", fn: () => Api.Workspace.LeaveWorkspace(userId, workspaceId) },
+                        { userId: "EditWorkspace", fn: () => Api.Workspace.EditWorkspace(userId, workspaceId, 'MyEditedWorkspace', ['ucf\\.edu'], 6) },
+                        { userId: "DeleteWorkspace", fn: () => Api.Workspace.DeleteWorkspace(userId, workspaceId) },
+                        { userId: "RemoveActiveInvite", fn: () => Api.Workspace.RemoveActiveInvite(userId, workspaceId) },
+                        { userId: "GetAllStudents", fn: () => Api.Workspace.GetAllStudents(workspaceId) },
+                        { userId: "GetStudentsWithoutGroup", fn: () => Api.Workspace.GetStudentsWithoutGroup(workspaceId) },
+                    ].map((endpoint, index) => (
+                        <button
                         key={index}
                         style={buttonStyle}
                         onMouseEnter={(e) =>
@@ -199,10 +164,42 @@ function ApiExamples() {
                             (e.target.style.backgroundColor = buttonStyle.backgroundColor)
                         }
                         onClick={() => handleButtonClick(endpoint.userId, endpoint.fn)}
-                    >
+                        >
                         {endpoint.userId}
-                    </button>
-                ))}
+                        </button>
+                    ))}
+                </div>
+                <h3>Group Functions</h3>
+                <div style={buttonContainerStyle}>
+                    {[
+                        { userId: "CreateGroup", fn: () => Api.Groups.CreateGroup(userId, workspaceId)
+                            .then((response) => {
+                                setGroupId(response.data.group.groupId);
+                                return response;
+                            })
+                        },
+                        { userId: "GetGroupInfo", fn: () => Api.Groups.GetGroupInfo(groupId) },
+                        { userId: "JoinGroup", fn: () => Api.Groups.JoinGroup(groupId, userId) },
+                        { userId: "LeaveGroup", fn: () => Api.Groups.LeaveGroup(groupId, userId) },
+                        { userId: "AddUser", fn: () => Api.Groups.AddUser(userId, targetId, groupId) },
+                        { userId: "RemoveUser", fn: () => Api.Groups.RemoveUser(userId, targetId, groupId) },
+                        { userId: "DeleteGroup", fn: () => Api.Groups.DeleteGroup(userId, groupId) },
+                    ].map((endpoint, index) => (
+                        <button
+                            key={index}
+                            style={buttonStyle}
+                            onMouseEnter={(e) =>
+                                (e.target.style.backgroundColor =
+                                buttonHoverStyle.backgroundColor)
+                            }
+                            onMouseLeave={(e) =>
+                                (e.target.style.backgroundColor = buttonStyle.backgroundColor)
+                            }
+                            onClick={() => handleButtonClick(endpoint.userId, endpoint.fn)}
+                        >
+                            {endpoint.userId}
+                        </button>
+                    ))}
                 </div>
             </div>
             <div style={rightStyle}>

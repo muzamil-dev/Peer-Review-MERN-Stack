@@ -12,12 +12,17 @@ const getUrl = (prefix, route) => {
     }
 };
 
+const getConfig = () => ({
+    headers: {
+         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+    }
+});
+
 const Response503 = {
     status: 503,
     success: false,
     data: {},
     message: 'Service temporarily unavailable'
-    //message: 'Service temporarily unavailable'
 };
 
 const GROUPS = 'groups/';
@@ -26,22 +31,18 @@ const REVIEWS = 'reviews/';
 const WORKSPACES = 'workspaces/';
 const USERS = 'users/';
 
-// eslint-disable-next-line import/no-anonymous-default-export
 export default {
     Groups: {
         /**
          * Gets the group info for a group specified by groupId
          * @param {string} groupId 
-         * @returns {Promise<{ status: number, data: {groupId: string, name: string, workspaceId: string}, message: string }>} Returns the group info
+         * @returns {Promise<{ 
+         *  status: number, 
+         *  data: {groupId: string, name: string, workspaceId: string}, 
+         *  message: string }>} Returns the group info
          */
         GetGroupInfo: async (groupId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            const response = await axios.get(getUrl(GROUPS, groupId), config)
+            const response = await axios.get(getUrl(GROUPS, groupId), getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -60,17 +61,11 @@ export default {
          * @returns {Promise<{ status: number, data: {}, message: string }>} Returns the newly created group's info
          */
         CreateGroup: async (userId, workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 userId,
                 workspaceId
             };
-            const response = await axios.post(getUrl(GROUPS, 'create'), payload, config)
+            const response = await axios.post(getUrl(GROUPS, 'create'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -88,17 +83,11 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         JoinGroup: async (groupId, userId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 groupId,
                 userId
             };
-            const response = await axios.put(getUrl(GROUPS, 'join'), payload, config)
+            const response = await axios.put(getUrl(GROUPS, 'join'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -116,17 +105,11 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         LeaveGroup: async (groupId, userId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 groupId,
                 userId
             };
-            const response = await axios.put(getUrl(GROUPS, 'leave'), payload, config)
+            const response = await axios.put(getUrl(GROUPS, 'leave'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -145,18 +128,12 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         AddUser: async (userId, targetId, groupId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 userId,
                 targetId,
                 groupId
             };
-            const response = await axios.put(getUrl(GROUPS, 'addUser'), payload, config)
+            const response = await axios.put(getUrl(GROUPS, 'addUser'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -175,18 +152,12 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         RemoveUser: async (userId, targetId, groupId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 userId,
                 targetId,
                 groupId
             };
-            const response = await axios.put(getUrl(GROUPS, 'removeUser'), payload, config)
+            const response = await axios.put(getUrl(GROUPS, 'removeUser'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -204,16 +175,10 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         DeleteGroup: async (userId, groupId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 userId
             };
-            const response = await axios.delete(getUrl(GROUPS, groupId), { data: payload, ...config})
+            const response = await axios.delete(getUrl(GROUPS, groupId), { data: payload, ...getConfig()})
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -233,12 +198,14 @@ export default {
     },
     Users: {
         /**
-         * Gets a user by their ID.
-         * @param {number} id 
-         * @returns {Promise<{ status: number, data: {}, message: string }>} The specified user's data
+         * Log the specified user in.
+         * @param {string} email 
+         * @param {string} password 
+         * @returns {Promise<{ status: number, data: { accessToken: string }, message: string }>} The freshly logged in user's data
          */
-        GetById: async (id) => {
-            const response = await axios.get(getUrl(USERS, id))
+        DoLogin: async (email, password) => {
+            const payload = { email, password };
+            const response = await axios.post(getUrl(USERS, 'login'), payload)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -248,27 +215,6 @@ export default {
                 data: response.data,
                 message: response.data.message
             };
-        },
-
-        /**
-         * Log the specified user in.
-         * @param {string} email 
-         * @param {string} password 
-         * @returns {Promise<{ status: number, data: { accessToken: string }, message: string }>} The freshly logged in user's data
-         */
-        DoLogin: async (email, password) => {
-            const payload = { email, password };
-            try {
-                const response = await axios.post(getUrl(USERS, 'login'), payload);
-                return {
-                    status: response.status,
-                    data: response.data,
-                    message: response.data.message
-                };
-            } catch (err) {
-                console.error(err);
-                return err.response || Response503;
-            }
         },
 
         /**
@@ -287,17 +233,16 @@ export default {
                 email,
                 password
             };
-            try {
-                const response = await axios.post(getUrl(USERS, 'signup'), payload);
-                return {
-                    status: response.status,
-                    data: response.data,
-                    message: response.data.message
-                };
-            } catch (err) {
-                console.error(err);
-                return err.response || Response503;
-            }
+            const response = await axios.post(getUrl(USERS, 'signup'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
         },
         
         /**
@@ -326,40 +271,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}, message: string }>}
          */
         getUserWorkspaces: async () => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            const response = await axios.get(getUrl(USERS, `workspaces`), config)
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
-            return {
-                status: response.status,
-                data: response.data,
-                message: response.data.message
-            };
-        },
-
-        /**
-         * Edit the account with the corresponding id
-         * @param {number} id 
-         * @param {string} firstName 
-         * @param {string} middleName 
-         * @param {string} lastName 
-         * @returns {Promise<{ status: number, data: {}, message: string }>} The edited user's updated data
-         */
-        EditAccount: async (id, firstName, middleName, lastName) => {
-            const payload = {
-                firstName,
-                middleName,
-                lastName,
-                id
-            };
-            const response = await axios.put(getUrl(USERS, ''), payload)
+            const response = await axios.get(getUrl(USERS, `workspaces`), getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -467,13 +379,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} The list of assignments
          */
         GetAssignments: async (workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/assignments`),config)
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/assignments`), getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -490,13 +396,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} The list of groups
          */
         GetGroups: async (workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/groups`) ,config)
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/groups`), getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -524,13 +424,7 @@ export default {
                 groupMemberLimit,
                 numGroups
             };
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            const response = await axios.post(getUrl(WORKSPACES, 'create'), payload, config)
+            const response = await axios.post(getUrl(WORKSPACES, 'create'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -548,17 +442,11 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string, workspaceId: string }>}
          */
         JoinWorkspace: async (userId, inviteCode) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };  
             const payload = {
                 userId,
                 inviteCode
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'join'), payload, config)
+            const response = await axios.put(getUrl(WORKSPACES, 'join'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -577,17 +465,11 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         LeaveWorkspace: async (userId, workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 userId,
                 workspaceId
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'leave'), payload, config)
+            const response = await axios.put(getUrl(WORKSPACES, 'leave'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -605,17 +487,11 @@ export default {
          * @returns {Promise<{ status: number, message: string, inviteCode: string }>}
          */
         SetInviteCode: async (userId, workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 userId,
                 workspaceId
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'setInvite'), payload, config)
+            const response = await axios.put(getUrl(WORKSPACES, 'setInvite'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -636,12 +512,6 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         EditWorkspace: async (userId, workspaceId, name, allowedDomains, groupMemberLimit, groupLock) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 userId,
                 workspaceId,
@@ -650,7 +520,7 @@ export default {
                 groupMemberLimit,
                 groupLock
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'edit'), payload, config)
+            const response = await axios.put(getUrl(WORKSPACES, 'edit'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -668,17 +538,11 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         DeleteWorkspace: async (userId, workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 userId,
                 workspaceId
             };
-            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}/delete`), { data: payload, ...config })
+            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}`), { data: payload, ...getConfig() })
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -696,16 +560,10 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         RemoveActiveInvite: async (userId, workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
             const payload = {
                 userId
             };
-            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}/removeInvite`), { data: payload, ...config})
+            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}/removeInvite`), { data: payload, ...getConfig()})
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -722,13 +580,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
          */
         GetAllStudents: async (workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/students`), config)
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/students`), getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -745,13 +597,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
          */
         GetStudentsWithoutGroup: async (workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/ungrouped`), config)
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/ungrouped`), getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -768,13 +614,7 @@ export default {
          * @returns {Promise<{ status: number, data: { name: string, allowedDomains: string[], groupMemberLimit: number, groupLock: boolean }, message: string }>} The workspace details
          */
         GetWorkspaceDetails: async (workspaceId) => {
-            const token = localStorage.getItem('accessToken');
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}`), config)
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}`), getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
