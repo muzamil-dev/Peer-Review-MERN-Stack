@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/groups/userGroups.dart';
 import 'package:flutter_application/src/reviews/student_review.dart';
 import 'package:intl/intl.dart';
 import "package:http/http.dart" as http;
@@ -273,6 +274,24 @@ class _UserDashboardState extends State<UserDashboard> {
     });
   }
 
+  void navigateToGroupsPage() async {
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UserGroup(
+            userId: widget.userId,
+            workspaceId: widget.workspaceId,
+          ),
+        ));
+
+    // Resets Assignments list upon returning back from review page
+    setState(() {
+      assignments = [];
+      totalItemsLeft = 0;
+      getAllAssignments(context);
+    });
+  }
+
   Widget statusIcon(BuildContext context, int itemsLeft) {
     if (itemsLeft == 0) {
       return const CircleAvatar(
@@ -316,13 +335,13 @@ class _UserDashboardState extends State<UserDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Row(
+          title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Dashboard"),
               IconButton(
-                  onPressed: null,
-                  icon: Column(
+                  onPressed: navigateToGroupsPage,
+                  icon: const Column(
                     children: [
                       Icon(Icons.group),
                       Text("View Groups"),
