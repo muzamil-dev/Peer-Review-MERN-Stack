@@ -1,4 +1,4 @@
-//TODO: ADD DESIGN AND SETTINGS OPTION 
+//TODO: ADD DESIGN AND SETTINGS OPTION
 
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
@@ -100,11 +100,16 @@ class _EditFormState extends State<EditForm> {
       if (response.statusCode == 200) {
         print("Succesfully Edited Assignment!");
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Succesfully Edited Assignment')));
+            const SnackBar(content: Text('Edited Form Successfully!')));
         // Route Back To Admin Page
+        Navigator.pop(context);
+      } else if (response.statusCode == 400) {
+        final jsonResponse = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(jsonResponse["message"])));
       }
     } catch (error) {
-      print("Error Editing Assignmnet: $error");
+      print("Error Editing Assignment: $error");
     }
   }
 
@@ -196,10 +201,6 @@ class _EditFormState extends State<EditForm> {
                                   questions.add(field.text);
                                 }
                                 await editAssignment(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content:
-                                            Text('Edited Form Successfully!')));
                               },
                               style: TextButton.styleFrom(
                                 backgroundColor: Colors.green,

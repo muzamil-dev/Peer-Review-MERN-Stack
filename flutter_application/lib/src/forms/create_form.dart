@@ -53,8 +53,10 @@ class _CreateFormState extends State<CreateForm> {
         print("Assignment Created Successfully");
         final jsonResponse = json.decode(response.body);
         print("Response : ${jsonResponse['message']}");
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Succesfully Created Assignment")));
+        
       } else {
         final errorData = json.decode(response.body);
         print("Error Creating Assignment: $errorData");

@@ -114,8 +114,8 @@ class _GetAssignmentsState extends State<GetAssignments> {
               ), // Change text color here
             ),
             GestureDetector(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => CreateForm(
@@ -124,6 +124,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                     ),
                   ),
                 );
+                fetchAssignments();
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -151,8 +152,8 @@ class _GetAssignmentsState extends State<GetAssignments> {
                   child: ListView(
                 children: assignments.map((assignment) {
                   return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => EditForm(
@@ -162,6 +163,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                           ),
                         ),
                       );
+                      fetchAssignments();
                     },
                     child: Card(
                       child: Padding(
