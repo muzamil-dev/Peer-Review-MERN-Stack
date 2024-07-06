@@ -63,6 +63,8 @@ class _GetAssignmentsState extends State<GetAssignments> {
     }
   }
 
+  Future<void> deleteAssignment(BuildContext context) async {}
+
   String getDateString(String date) {
     // Parse the input date string
     DateTime dateTime = DateTime.parse(date);
@@ -137,20 +139,39 @@ class _GetAssignmentsState extends State<GetAssignments> {
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text("Start Date: "),
-                                Text(getDateString(assignment.startDate))
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text("Due Date: "),
-                                Text(getDateString(assignment.dueDate))
+                                Text(
+                                  assignment.name,
+                                  style: const TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        const Text("Start Date: "),
+                                        const SizedBox(width: 15),
+                                        Text(
+                                            getDateString(assignment.startDate))
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        const Text("Due Date: "),
+                                        const SizedBox(width: 15),
+                                        Text(getDateString(assignment.dueDate))
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             const SizedBox(height: 20),
-                            Container(
+                            SizedBox(
                               width: double.infinity,
                               child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -159,7 +180,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                     const Text("Questions: ",
                                         style: TextStyle(
                                           fontSize: 20,
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w500,
                                         )),
                                     Column(
                                       crossAxisAlignment:
@@ -190,12 +211,14 @@ class _GetAssignmentsState extends State<GetAssignments> {
 
 class Assignment {
   int id;
+  String name;
   String startDate;
   String dueDate;
   List<dynamic> questions;
 
   Assignment({
     required this.id,
+    required this.name,
     required this.startDate,
     required this.dueDate,
     required this.questions,
@@ -204,6 +227,7 @@ class Assignment {
   factory Assignment.fromJson(Map<String, dynamic> json) {
     return Assignment(
       id: json['assignmentId'],
+      name: json['name'],
       startDate: json['startDate'],
       dueDate: json['dueDate'],
       questions: json['questions'],
