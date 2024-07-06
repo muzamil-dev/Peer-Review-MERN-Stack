@@ -16,7 +16,8 @@ class _UserProfileState extends State<UserProfile> {
   List<int> assignmentIds = [];
   List<String> assignmentNames = [];
   Map<int, String> reviewersOfAssignment = {};
-  List<double> averageRatings = [];
+  List<double> averageRatingsForAssignment = [];
+  List<double> averageRatingsPerUser = [];
 
   @override
   void initState() {
@@ -59,9 +60,16 @@ class _UserProfileState extends State<UserProfile> {
         final jsonResponse = json.decode(response.body);
         final reviews = jsonResponse["reviews"];
         setState(() {
-          averageRatings.add(calculateAverageRating(reviews));
+          averageRatingsForAssignment.add(calculateAverageRating(reviews));
           for (var review in reviews) {
+
             reviewersOfAssignment[assignmentId] = review["firstName"] + review["lastName"];
+            double sum = 0;
+            for (var rating in review['ratings']) {
+              sum += rating;
+            }
+            double averageRating = sum / review['ratings'].length;
+            averageRatingsPerUser.add(averageRating);
           }
         });
       }
