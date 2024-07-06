@@ -178,15 +178,15 @@ export const edit = async(userId, assignmentId, settings) => {
             WHERE a.id = $2`,
             [userId, assignmentId]
         );
-        const data = res.rows[0];
+        const assignment = res.rows[0];
         // Check that the assignment exists
-        if (!data)
+        if (!assignment)
             return {
                 error: "The requested assignment was not found",
                 status: 404
             }
         // Check that the user is an instructor
-        if (data.user_role !== "Instructor")
+        if (assignment.user_role !== "Instructor")
             return { 
                 error: "User is not authorized to edit this assignment", 
                 status: 403
@@ -196,8 +196,14 @@ export const edit = async(userId, assignmentId, settings) => {
         const updates = {};
         if (settings.name)
             updates.name = settings.name;
-        if (settings.startDate)
+        if (settings.startDate){
+            if (assignment.started)
+                return {
+                    error: "Cannot modify start date because the assignment has already been started",
+                    status: 400
+                }
             updates.start_date = (new Date(settings.startDate)).toISOString();
+        }
         if (settings.dueDate)
             updates.due_date = (new Date(settings.dueDate)).toISOString();
         if (settings.description !== undefined) // description can be null or empty
