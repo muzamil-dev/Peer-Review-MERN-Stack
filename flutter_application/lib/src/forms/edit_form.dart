@@ -10,7 +10,7 @@ import "dart:convert";
 class EditForm extends StatefulWidget {
   static const routeName = '/editForm';
   final int userId;
-  final String assignmentId;
+  final int assignmentId;
   final int workspaceId;
 
   const EditForm(
@@ -54,7 +54,8 @@ class _EditFormState extends State<EditForm> {
         print("Succesfully Got Assignment!");
         final jsonResponse = json.decode(response.body);
         setState(() {
-          for (var question in jsonResponse['questions']) {
+          for (var questionObject in jsonResponse['questions']) {
+            String question = questionObject["question"];
             valueControllers.add(TextEditingController(text: question));
           }
           // Slices Strings to Not include Extraneous info other than date

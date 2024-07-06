@@ -39,7 +39,7 @@ void main() async {
           const GetAssignments(workspaceId: 14, userId: 3),
       // Manually Added Edit Forms Page for Debugging Purposes, User: Hashim DB
       EditForm.routeName: (context) =>
-          const EditForm(assignmentId: '1', workspaceId: 14, userId: 3),
+          const EditForm(assignmentId: 1, workspaceId: 14, userId: 3),
       // User Dashboard Page for Raheem Sterling
       UserDashboard.routeName: (context) => const UserDashboard(
             userId: 14,

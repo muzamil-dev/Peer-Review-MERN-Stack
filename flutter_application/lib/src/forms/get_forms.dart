@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/forms/create_form.dart';
+import 'package:flutter_application/src/forms/edit_form.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -150,7 +151,18 @@ class _GetAssignmentsState extends State<GetAssignments> {
                   child: ListView(
                 children: assignments.map((assignment) {
                   return GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditForm(
+                            assignmentId: assignment.id,
+                            workspaceId: widget.workspaceId,
+                            userId: widget.userId,
+                          ),
+                        ),
+                      );
+                    },
                     child: Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
