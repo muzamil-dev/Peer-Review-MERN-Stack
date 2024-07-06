@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/components/main_app_bar.dart';
 import 'package:flutter_application/src/reviews/student_review.dart';
+import 'package:intl/intl.dart';
 import "package:http/http.dart" as http;
 import "dart:convert";
 
@@ -23,6 +23,7 @@ class UserDashboard extends StatefulWidget {
 class _UserDashboardState extends State<UserDashboard> {
   String userName = '';
   List<Object> assignments = [];
+  List<String> deadlines = [];
   int _currentIndex = 0;
   Map<int, int> itemsLeft = {};
   Map<int, Object> incompleteReviews = {};
@@ -67,6 +68,7 @@ class _UserDashboardState extends State<UserDashboard> {
         setState(() {
           for (var response in jsonResponse) {
             assignments.add(response);
+            deadlines.add(getDateString(response["dueDate"]));
             getAssignmentProgress(context, response['assignmentId']);
           }
         });
@@ -96,6 +98,19 @@ class _UserDashboardState extends State<UserDashboard> {
     } catch (error) {
       print("Error Getting Assignment Progress: $error");
     }
+  }
+
+  String getDateString(String date) {
+    // Parse the input date string
+    DateTime dateTime = DateTime.parse(date);
+
+    // Define the desired date format
+    DateFormat dateFormat = DateFormat("MM/dd/yy");
+
+    // Format the DateTime object to the desired string format
+    String formattedDate = dateFormat.format(dateTime);
+
+    return formattedDate;
   }
 
   // Widget List Function to navigate between Bottom navigation bar items
@@ -154,6 +169,7 @@ class _UserDashboardState extends State<UserDashboard> {
           ExpansionTile(
             leading: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
               ],
@@ -162,9 +178,15 @@ class _UserDashboardState extends State<UserDashboard> {
               "${currentAssignment['name']}",
               style: const TextStyle(fontSize: 25),
             ),
-            subtitle: Text(
-              "Items Left To Complete: ${itemsLeft[currentAssignmentId]}",
-              style: const TextStyle(fontSize: 17),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Items To Do: ${itemsLeft[currentAssignmentId]}",
+                  style: const TextStyle(fontSize: 17),
+                ),
+                Text("Deadline: ${deadlines[index]}"),
+              ],
             ),
             children: [
               assignmentLinks(context, currentAssignmentId),
@@ -282,9 +304,22 @@ class _UserDashboardState extends State<UserDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: const MainAppBar(
-          title: "Dashboard",
-          backgroundColor: Color(0xFF9bc4bc),
+        appBar: AppBar(
+          title: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Dashboard"),
+              IconButton(
+                  onPressed: null,
+                  icon: Column(
+                    children: [
+                      Icon(Icons.group),
+                      Text("Groups"),
+                    ],
+                  ))
+            ],
+          ),
+          backgroundColor: const Color(0xFF9bc4bc),
         ),
         body: _widgetTabOptions(context).elementAt(_currentIndex),
         bottomNavigationBar: BottomNavigationBar(
