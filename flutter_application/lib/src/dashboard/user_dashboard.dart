@@ -25,6 +25,7 @@ class _UserDashboardState extends State<UserDashboard> {
   List<Object> assignments = [];
   List<String> deadlines = [];
   int _currentIndex = 0;
+  int totalItemsLeft = 0;
   Map<int, int> itemsLeft = {};
   Map<int, Object> incompleteReviews = {};
   Map<int, Object> completedReviews = {};
@@ -90,6 +91,7 @@ class _UserDashboardState extends State<UserDashboard> {
         if (mounted) {
           setState(() {
             itemsLeft[assignmentId] = jsonResponse["incompleteReviews"].length;
+            totalItemsLeft += (jsonResponse["incompleteReviews"].length as int);
             incompleteReviews[assignmentId] = jsonResponse["incompleteReviews"];
             completedReviews[assignmentId] = jsonResponse["completedReviews"];
           });
@@ -126,9 +128,14 @@ class _UserDashboardState extends State<UserDashboard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: Text(
-              "Welcome $userName!",
-              style: const TextStyle(fontSize: 25.0),
+            child: Column(
+              children: [
+                Text(
+                  "Welcome $userName!",
+                  style: const TextStyle(fontSize: 25.0),
+                ),
+                Text("You Have $totalItemsLeft reviews to complete!"),
+              ],
             ),
           ),
           const SizedBox(
@@ -181,11 +188,14 @@ class _UserDashboardState extends State<UserDashboard> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text("Deadline: ${deadlines[index]}"),
+                const SizedBox(
+                  height: 10,
+                ),
                 Text(
                   "Items To Do: ${itemsLeft[currentAssignmentId]}",
                   style: const TextStyle(fontSize: 17),
                 ),
-                Text("Deadline: ${deadlines[index]}"),
               ],
             ),
             children: [
@@ -258,6 +268,7 @@ class _UserDashboardState extends State<UserDashboard> {
     // Resets Assignments list upon returning back from review page
     setState(() {
       assignments = [];
+      totalItemsLeft = 0;
       getAllAssignments(context);
     });
   }
@@ -314,7 +325,7 @@ class _UserDashboardState extends State<UserDashboard> {
                   icon: Column(
                     children: [
                       Icon(Icons.group),
-                      Text("Groups"),
+                      Text("View Groups"),
                     ],
                   ))
             ],
