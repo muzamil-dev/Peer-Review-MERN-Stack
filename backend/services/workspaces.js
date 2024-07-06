@@ -171,7 +171,7 @@ export const create = async(userId, settings) => {
         );
         // Create groups
         if (numGroups)
-            await GroupService.createMany(userId, workspace.workspaceId, numGroups);
+            await GroupService.createMany(userId, res.rows[0].id, numGroups);
         // Return the workspace
         return { message: "Workspace created successfully", workspaceId: res.rows[0].id };
     }
@@ -353,7 +353,7 @@ export const setInvite = async(userId, workspaceId, code) => {
             `UPDATE workspaces SET invite_code = $1 WHERE id = $2`,
             [code, data.id]
         );
-        return { message: "Invite code set successfully" };
+        return { message: "Invite code set successfully", inviteCode: code };
     }
     catch(err){
         return { error: err.message, status: 500 };
