@@ -54,8 +54,7 @@ class _EditFormState extends State<EditForm> {
         print("Succesfully Got Assignment!");
         final jsonResponse = json.decode(response.body);
         setState(() {
-          for (var questionObject in jsonResponse['questions']) {
-            String question = questionObject["question"];
+          for (String question in jsonResponse['questions']) {
             valueControllers.add(TextEditingController(text: question));
           }
           // Slices Strings to Not include Extraneous info other than date
