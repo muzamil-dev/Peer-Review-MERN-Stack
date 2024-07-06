@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application/src/forms/create_form.dart';
@@ -144,7 +145,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                 Text(
                                   assignment.name,
                                   style: const TextStyle(
-                                      fontSize: 25,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Column(
@@ -170,7 +171,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 5),
                             SizedBox(
                               width: double.infinity,
                               child: Column(
@@ -194,6 +195,21 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                           style: const TextStyle(fontSize: 16),
                                         );
                                       }).toList(),
+                                    ),
+                                    const Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.red,
+                                          child: IconButton(
+                                              onPressed: null,
+                                              icon: Icon(
+                                                CupertinoIcons.trash,
+                                                color: Colors.white,
+                                              )),
+                                        ),
+                                      ],
                                     ),
                                   ]),
                             ),
