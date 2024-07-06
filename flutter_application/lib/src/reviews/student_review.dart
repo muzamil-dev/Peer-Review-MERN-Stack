@@ -113,8 +113,6 @@ class _StudentReviewState extends State<StudentReview> {
     }
   }
 
- 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -213,9 +211,8 @@ class _StudentReviewState extends State<StudentReview> {
               thumbColor: Colors.black,
               child: ListView.separated(
                   itemBuilder: (context, index) {
-                    Map currentReviewObject = (questions[index] as Map);
-                    String currentQuestion = currentReviewObject["question"];
-                    
+                    String currentQuestion = questions[index];
+
                     return Container(
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black, width: 1)),
