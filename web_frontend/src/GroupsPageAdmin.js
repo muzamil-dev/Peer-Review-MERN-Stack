@@ -183,6 +183,7 @@ const GroupsPageAdmin = () => {
         const response = await Api.Workspace.LeaveWorkspace(targetId, workspaceId);
         if (response.success) {
             setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
+            fetchUngroupedMembers(); // Refetch groups to update the UI
             console.log('Kicked user from workspace:', targetId); // Debugging information
         } else {
             console.error('Failed to kick from workspace:', response.message);
@@ -214,6 +215,7 @@ const GroupsPageAdmin = () => {
             const response = await Api.Groups.CreateGroup(currentUserId, workspaceId);
             if (response.status === 201) {
                 setGroups([...groups, response.data]);
+                fetchGroups(); // Refetch groups to update the UI
             } else {
                 console.error('Failed to create group:', response.message);
             }
@@ -490,7 +492,7 @@ const GroupsPageAdmin = () => {
                 <div className="container">
                     <div className="row">
                         {Array.isArray(groups) && groups.map((group) => (
-                            <div key={group.groupId} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                            <div key={group.groupId} className="col-12 col-sm-6 col-lg-4  mb-4">
                                 <div className={`card ${styles.groupCard}`}>
                                     <div className="card-body d-flex flex-column">
                                         <h2 className="card-title">{group.name}</h2>

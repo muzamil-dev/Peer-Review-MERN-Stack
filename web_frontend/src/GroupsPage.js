@@ -75,6 +75,7 @@ const GroupsPageUser = () => {
     return (
         <div className={styles.workspaceUser}>
             <div className={`row ${styles.headerContainer}`}>
+                <div className="col-xl-2 col-lg-2"></div>
                 <h1 className={`col-xl-8 col-lg-6 ${styles.headerLarge}`}>Groups</h1>
                 <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={handleDashboard}>Dashboard</button>
             </div>
