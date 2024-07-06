@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/forms/get_forms.dart';
 import 'package:flutter_application/src/groups/individualAdminGroupDisplay.dart';
+import 'package:flutter_application/src/profile/user_profile.dart';
 import 'package:http/http.dart' as http;
 
 class AdminGroup extends StatefulWidget {
@@ -319,8 +320,8 @@ class _AdminGroupState extends State<AdminGroup> {
     TextEditingController limitController = TextEditingController();
 
     // Load the current workspace details
-    final workspaceDetailsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
+    final workspaceDetailsUrl =
+        Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
     print('Fetching workspace details from: $workspaceDetailsUrl');
     http.get(workspaceDetailsUrl).then((response) {
       print('Workspace details response status: ${response.statusCode}');
@@ -412,15 +413,6 @@ class _AdminGroupState extends State<AdminGroup> {
           },
         );
       },
-    );
-  }
-
-  void navigateToIndividualGroupPage(int groupId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => IndividualAdminGroup(groupId: groupId),
-      ),
     );
   }
 
@@ -581,39 +573,45 @@ class _AdminGroupState extends State<AdminGroup> {
                       ),
                       // Rest of the groups
                       ...currentGroups.map((group) {
-                        return GestureDetector(
-                          onTap: () {
-                            navigateToIndividualGroupPage(group.groupId);
-                          },
-                          child: Card(
-                            margin: const EdgeInsets.all(10),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        group.name,
-                                        style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete),
-                                        onPressed: () {
-                                          deleteGroup(group.groupId);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Column(
-                                    children: group.members.map((member) {
-                                      return ListTile(
+                        return Card(
+                          margin: const EdgeInsets.all(10),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      group.name,
+                                      style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () {
+                                        deleteGroup(group.groupId);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Column(
+                                  children: group.members.map((member) {
+                                    return InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const UserProfile(),
+                                          ),
+                                        );
+                                      },
+                                      child: ListTile(
                                         title: Text(
                                             '${member.firstName} ${member.lastName}'),
                                         trailing: IconButton(
@@ -631,15 +629,15 @@ class _AdminGroupState extends State<AdminGroup> {
                                             );
                                           },
                                         ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
                             ),
                           ),
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),
