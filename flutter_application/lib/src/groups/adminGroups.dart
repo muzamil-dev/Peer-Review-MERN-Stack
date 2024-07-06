@@ -497,6 +497,7 @@ class _AdminGroupState extends State<AdminGroup> {
         ),
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),

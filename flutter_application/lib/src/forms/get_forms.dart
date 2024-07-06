@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_application/src/forms/create_form.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -78,16 +80,47 @@ class _GetAssignmentsState extends State<GetAssignments> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'View Assignments',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ), // Change text color here
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'View Assignments',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ), // Change text color here
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CreateForm(
+                      workspaceId: widget.workspaceId,
+                      userId: widget.userId,
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  border: Border.all(color: Colors.green, width: 1),
+                  color: Colors.green,
+                ),
+                padding: const EdgeInsets.all(6),
+                child: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+            ),
+          ],
         ),
         backgroundColor: const Color(0xFF004080),
-        centerTitle: true, // Center the title
+        iconTheme: const IconThemeData(color: Colors.white), // Center the title
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -105,14 +138,14 @@ class _GetAssignmentsState extends State<GetAssignments> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("Start Date: "),
+                                const Text("Start Date: "),
                                 Text(getDateString(assignment.startDate))
                               ],
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("Due Date: "),
+                                const Text("Due Date: "),
                                 Text(getDateString(assignment.dueDate))
                               ],
                             ),
