@@ -1,8 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_application/src/forms/create_form.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -64,7 +62,27 @@ class _GetAssignmentsState extends State<GetAssignments> {
     }
   }
 
-  Future<void> deleteAssignment(BuildContext context) async {}
+  Future<void> deleteAssignment(int assignmentId) async {
+    final url = Uri.parse('http://10.0.2.2:5000/assignments/${assignmentId}');
+    try {
+      final response = await http.delete(url,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            "userId": widget.userId,
+          }));
+
+      if (response.statusCode == 200) {
+        print("Deleted Assignment Successfully!");
+        setState(() {
+          fetchAssignments();
+        });
+      }
+    } catch (error) {
+      print("Error Deleting Assignment: $error");
+    }
+  }
 
   String getDateString(String date) {
     // Parse the input date string
@@ -196,15 +214,17 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                         );
                                       }).toList(),
                                     ),
-                                    const Row(
+                                    Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         CircleAvatar(
                                           radius: 20,
                                           backgroundColor: Colors.red,
                                           child: IconButton(
-                                              onPressed: null,
-                                              icon: Icon(
+                                              onPressed: () async {
+                                                deleteAssignment(assignment.id);
+                                              },
+                                              icon: const Icon(
                                                 CupertinoIcons.trash,
                                                 color: Colors.white,
                                               )),
