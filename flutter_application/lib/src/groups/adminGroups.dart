@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/forms/get_forms.dart';
-import 'package:flutter_application/src/groups/individualAdminGroupDisplay.dart';
 import 'package:flutter_application/src/profile/user_profile.dart';
 import 'package:http/http.dart' as http;
 
@@ -607,7 +606,7 @@ class _AdminGroupState extends State<AdminGroup> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                const UserProfile(),
+                                                UserProfile(userId: member.userId, workspaceId: widget.workspaceId,),
                                           ),
                                         );
                                       },
