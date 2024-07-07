@@ -17,7 +17,7 @@ class _UserProfileState extends State<UserProfile> {
   List<String> assignmentNames = [];
   List<double> averageRatingsForAssignment = [];
   Map<int, List<String>> reviewersOfAssignment = {};
-  List<double> averageRatingsPerUser = [];
+  Map<int, List<double>> averageRatingsPerUser = {};
   String nameOfProfile = '';
   bool isLoading = true;
 
@@ -64,13 +64,30 @@ class _UserProfileState extends State<UserProfile> {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
 
+        List<int> tempAssignmentIds = [];
+        List<String> tempAssignmentNames = [];
+        List<double> tempAverageRatingsForAssignment = [];
+        Map<int, List<String>> tempReviewersOfAssignment = {};
+        Map<int, List<double>> tempAverageRatingsPerUser = {};
+
+        for (var response in jsonResponse) {
+          int assignmentId = response["assignmentId"];
+          tempAssignmentIds.add(assignmentId);
+          tempAssignmentNames.add(response["name"]);
+          tempReviewersOfAssignment[assignmentId] = [];
+          tempAverageRatingsPerUser[assignmentId] = [];
+        }
+        for (var assignmentId in tempAssignmentIds) {
+          await getReviewsTowardUser(assignmentId, tempReviewersOfAssignment,
+              tempAverageRatingsPerUser, tempAverageRatingsForAssignment);
+        }
+
         setState(() {
-          for (var response in jsonResponse) {
-            assignmentIds.add(response["assignmentId"]);
-            assignmentNames.add(response["name"]);
-            reviewersOfAssignment[response["assignmentId"]] = [];
-            getReviewsTowardUser(context, response["assignmentId"]);
-          }
+          assignmentIds = tempAssignmentIds;
+          assignmentNames = tempAssignmentNames;
+          averageRatingsForAssignment = tempAverageRatingsForAssignment;
+          reviewersOfAssignment = tempReviewersOfAssignment;
+          averageRatingsPerUser = tempAverageRatingsPerUser;
         });
       }
     } catch (error) {
@@ -80,7 +97,10 @@ class _UserProfileState extends State<UserProfile> {
 
   // Gets all the Reviews Made on a User in the given assignment
   Future<void> getReviewsTowardUser(
-      BuildContext context, int assignmentId) async {
+      int assignmentId,
+      Map<int, List<String>> tempReviewersOfAssignment,
+      Map<int, List<double>> tempAverageRatingsPerUser,
+      List<double> tempAverageRatingsForAssignment) async {
     final url = Uri.parse(
         "http://10.0.2.2:5000/assignments/$assignmentId/target/${widget.userId}");
     try {
@@ -89,28 +109,36 @@ class _UserProfileState extends State<UserProfile> {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         final reviews = jsonResponse["reviews"];
-        setState(() {
-          averageRatingsForAssignment.add(calculateAverageRating(
-              reviews)); // Calculates total average rating
-          for (var review in reviews) {
-            reviewersOfAssignment[assignmentId]!.add(review["firstName"] + ' ' + review["lastName"]);
-            // double sum = 0;
-            // for (var rating in review['ratings']) {
-            //   sum += rating;
-            }
-          //   double averageRating = sum / review['ratings'].length;
-          //   averageRatingsPerUser.add(averageRating);
-          // }
-        });
+
+        // Calculates Total Average Rating Per Assignment
+        double avgRating = calculateTotalAverageRating(reviews);
+        tempAverageRatingsForAssignment.add(avgRating);
+
+        // Calculates Reviewers of Assignment and Their Individual Average Rating
+        for (var review in reviews) {
+          // Individual Reviewer
+          tempReviewersOfAssignment[assignmentId]!
+              .add(review["firstName"] + ' ' + review["lastName"]);
+
+          // Calculates Average Rating of Individual Reviewer
+          double sum = 0;
+          for (var rating in review['ratings']) {
+            sum += rating;
+          }
+          double averageRating = sum / review['ratings'].length;
+          tempAverageRatingsPerUser[assignmentId]!.add(averageRating);
+        }
       } else {
-        averageRatingsForAssignment.add(-2);
+        // Handles Case Where the Assignment Has Not Been Assigned to Individual
+        tempAverageRatingsForAssignment.add(-2);
       }
     } catch (error) {
       print("Error Getting Reviews on User: $error");
     }
   }
 
-  double calculateAverageRating(dynamic reviews) {
+  // Takes in a reviews and returns the total average rating of the Assignment
+  double calculateTotalAverageRating(dynamic reviews) {
     if (reviews.isEmpty) {
       print(reviews);
       return -1;
@@ -132,12 +160,10 @@ class _UserProfileState extends State<UserProfile> {
   Widget printAssignmentAverageRating(double averageRating) {
     if (averageRating == -1) {
       return const Text("Rating: N/A");
-    }
-    else if (averageRating == -2) {
+    } else if (averageRating == -2) {
       return const Text("Not Assigned");
-    }
-    else {
-      return Text("Rating: $averageRating");
+    } else {
+      return Text("Total Average Rating: $averageRating");
     }
   }
 
@@ -145,8 +171,17 @@ class _UserProfileState extends State<UserProfile> {
     int currentAssignmentId = assignmentIds[index];
     List<String> reviewers = reviewersOfAssignment[currentAssignmentId] ?? [];
     return Column(
-              children: reviewers.map((reviewer) => Text(reviewer)).toList(),
-            );
+      children: reviewers.map((reviewer) => Text(reviewer)).toList(),
+    );
+  }
+
+  Widget printRatingsOfReviewers(int index) {
+    int currentAssignmentId = assignmentIds[index];
+    List<double> ratings = averageRatingsPerUser[currentAssignmentId] ?? [];
+
+    return Column(
+      children: ratings.map((rating) => Text("$rating")).toList(),
+    );
   }
 
   Widget assignmentItem(BuildContext context, int index) {
@@ -160,11 +195,21 @@ class _UserProfileState extends State<UserProfile> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(assignmentNames[index]),
-                printAssignmentAverageRating(averageRatingsForAssignment[index]),
+                printAssignmentAverageRating(
+                    averageRatingsForAssignment[index]),
               ],
             ), // Assignment Name
-            const Text("Reviews: "),
-            printReviewersOfAssignment(index),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [Text("Reviewers: "), Text("Ratings:")],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                printReviewersOfAssignment(index),
+                printRatingsOfReviewers(index),
+              ],
+            ),
           ],
         ),
       ),
@@ -194,9 +239,10 @@ class _UserProfileState extends State<UserProfile> {
           : Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Profile for: $nameOfProfile",
+                    "Profile Name: $nameOfProfile",
                     style: const TextStyle(fontSize: 20),
                   ),
                   Expanded(
