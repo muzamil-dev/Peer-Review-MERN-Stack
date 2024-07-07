@@ -197,12 +197,16 @@ export const edit = async(userId, assignmentId, settings) => {
         if (settings.name)
             updates.name = settings.name;
         if (settings.startDate){
-            if (assignment.started)
-                return {
-                    error: "Cannot modify start date because the assignment has already been started",
-                    status: 400
-                }
-            updates.start_date = (new Date(settings.startDate)).toISOString();
+            const curDate = assignment.start_date;
+            const newDate = settings.startDate;
+            if (new Date(curDate).getTime() !== new Date(newDate).getTime()){
+                if (assignment.started)
+                    return {
+                        error: "Cannot modify start date because the assignment has already been started",
+                        status: 400
+                    }
+            }
+            updates.start_date = (new Date(newDate)).toISOString();
         }
         if (settings.dueDate)
             updates.due_date = (new Date(settings.dueDate)).toISOString();
