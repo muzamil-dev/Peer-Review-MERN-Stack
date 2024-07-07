@@ -116,7 +116,7 @@ class _UserProfileState extends State<UserProfile> {
 
         // Calculates Reviewers of Assignment and Their Individual Average Rating
         for (var review in reviews) {
-          // Individual Reviewer
+          // Individual Reviewer Name Stored
           tempReviewersOfAssignment[assignmentId]!
               .add(review["firstName"] + ' ' + review["lastName"]);
 
@@ -159,11 +159,17 @@ class _UserProfileState extends State<UserProfile> {
 
   Widget printAssignmentAverageRating(double averageRating) {
     if (averageRating == -1) {
-      return const Text("Rating: N/A");
+      return const Text(
+        "Rating: N/A",
+        style: TextStyle(fontSize: 15.0),
+      );
     } else if (averageRating == -2) {
       return const Text("Not Assigned");
     } else {
-      return Text("Total Average Rating: $averageRating");
+      return Text(
+        "Avg Rating: $averageRating",
+        style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
+      );
     }
   }
 
@@ -171,6 +177,7 @@ class _UserProfileState extends State<UserProfile> {
     int currentAssignmentId = assignmentIds[index];
     List<String> reviewers = reviewersOfAssignment[currentAssignmentId] ?? [];
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: reviewers.map((reviewer) => Text(reviewer)).toList(),
     );
   }
@@ -187,21 +194,34 @@ class _UserProfileState extends State<UserProfile> {
   Widget assignmentItem(BuildContext context, int index) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(14.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(assignmentNames[index]),
+                Text(
+                  assignmentNames[index],
+                  style: const TextStyle(
+                      fontSize: 23.0, fontWeight: FontWeight.bold),
+                ),
                 printAssignmentAverageRating(
                     averageRatingsForAssignment[index]),
               ],
+            ),
+            const SizedBox(
+              height: 20,
             ), // Assignment Name
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text("Reviewers: "), Text("Ratings:")],
+              children: [
+                Text(
+                  "Reviewers: ",
+                  style: TextStyle(fontSize: 17),
+                ),
+                Text("Ratings:", style: TextStyle(fontSize: 17))
+              ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -237,13 +257,19 @@ class _UserProfileState extends State<UserProfile> {
               child: CircularProgressIndicator(),
             )
           : Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Profile Name: $nameOfProfile",
                     style: const TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Assignments:",
+                    style:
+                        TextStyle(fontSize: 26, fontWeight: (FontWeight.bold)),
                   ),
                   Expanded(
                     child: RawScrollbar(
