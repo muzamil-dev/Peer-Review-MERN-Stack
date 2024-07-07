@@ -2,12 +2,10 @@ import axios from 'axios';
 
 const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
 const getUrl = (prefix, route) => {
-    if (process.env.NODE_ENV === 'production') 
-    {
-        return 'https://' + app_name +  '.herokuapp.com/' + prefix + route;
+    if (process.env.NODE_ENV === 'production') {
+        return 'https://' + app_name + '.herokuapp.com/' + prefix + route;
     }
-    else
-    {        
+    else {
         return 'http://localhost:5000/' + prefix + route;
     }
 };
@@ -213,7 +211,7 @@ export default {
             const payload = {
                 userId
             };
-            const response = await axios.delete(getUrl(GROUPS, groupId), { data: payload, ...config})
+            const response = await axios.delete(getUrl(GROUPS, groupId), { data: payload, ...config })
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -299,7 +297,7 @@ export default {
                 return err.response || Response503;
             }
         },
-        
+
         /**
          * Verify the token for the user
          * @param {string} email 
@@ -392,13 +390,11 @@ export default {
         },
         /**
          * Requests a password reset for the user
-         * @param {string} id
          * @param {string} email 
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
-
-        RequestPasswordReset: async (id, email) => {
-            const payload = { id, email };
+        RequestPasswordReset: async (email) => {
+            const payload = { email };
             const response = await axios.post(getUrl(USERS, 'requestPasswordReset'), payload)
                 .catch((err) => {
                     console.error(err);
@@ -406,8 +402,8 @@ export default {
                 });
             return {
                 status: response.status,
-                data: response.data,
-                message: response.message
+                success: response.status === 201,
+                message: response.data.message
             };
         },
 
@@ -416,7 +412,7 @@ export default {
          * @param {string} email 
          * @param {string} token 
          * @param {string} newPassword 
-         * @returns {Promise<{ status: number, data: {}, message: string }>}
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         ResetPassword: async (email, token, newPassword) => {
             const payload = { email, token, newPassword };
@@ -427,10 +423,11 @@ export default {
                 });
             return {
                 status: response.status,
-                data: response.data,
-                message: response.message
+                success: response.status === 201,
+                message: response.data.message
             };
         },
+
         /**/
 
         /**
@@ -473,7 +470,7 @@ export default {
                     'Authorization': `Bearer ${token}`
                 }
             };
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/assignments`),config)
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/assignments`), config)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -496,7 +493,7 @@ export default {
                     'Authorization': `Bearer ${token}`
                 }
             };
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/groups`) ,config)
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/groups`), config)
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -553,7 +550,7 @@ export default {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
-            };  
+            };
             const payload = {
                 userId,
                 inviteCode
@@ -705,7 +702,7 @@ export default {
             const payload = {
                 userId
             };
-            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}/removeInvite`), { data: payload, ...config})
+            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}/removeInvite`), { data: payload, ...config })
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;

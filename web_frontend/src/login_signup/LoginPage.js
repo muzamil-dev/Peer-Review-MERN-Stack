@@ -93,75 +93,68 @@ const LoginPage = () => {
         //setIsLoading(true);
         try {
             const response = await Api.Users.VerifyEmailCode(tempEmail, verificationToken);
-            if (response.status === 200) {
-                // alert('Verification successful. You can now log in.');
-                enqueueSnackbar('Verification successful. You can now log in.', { variance: 'success'});
+            console.log('Verification response:', response); // Log the response for debugging
+    
+            if (response.status === 201) {
+                // Successful verification
+                enqueueSnackbar('Verification successful. You can now log in.', { variant: 'success' });
                 setIsLoginActive(true);
                 setIsVerificationActive(false);
                 setSignupData({ firstName: '', middleName: '', lastName: '', email: '', password: '', confirmPassword: '' });
                 setVerificationToken('');
+                console.log('Verification successful, switched to login form.');
             } else {
+                // Verification failed
                 enqueueSnackbar('Verification Failed', { variant: 'error' });
-                // alert('Verification failed');
+                console.error('Verification failed:', response.message);
             }
         } catch (error) {
             console.error('Error verifying token:', error);
-            // alert('Verification failed');
             enqueueSnackbar('Verification failed', { variant: 'warning' });
         }
         //setIsLoading(false);
-    }; 
+    };
     
     const handleResetPasswordRequest = async (e) => {
         e.preventDefault();
-        //setIsLoading(true);
         try {
             const response = await Api.Users.RequestPasswordReset(resetPasswordData.email);
-            if (response.status === 200) {
-                // alert('Reset token sent. Please check your email.');
+            if (response.success) {
                 enqueueSnackbar('Reset token sent. Please check your email', { variant: 'success' });
                 setIsRequestResetPasswordActive(false);
                 setIsResetPasswordActive(true);
                 setResetPasswordData({ ...resetPasswordData, email: resetPasswordData.email });
             } else {
-                // alert('This email is not registered.');
-                enqueueSnackbar('This email is not registered.', { variant: 'error' });
+                enqueueSnackbar(response.message, { variant: 'error' });
             }
         } catch (error) {
             console.error('Error requesting reset password:', error);
-            // alert('Error requesting reset password');
             enqueueSnackbar('Error requesting reset password', { variant: 'warning' });
         }
-        //setIsLoading(false); // End loading
     };
-
+    
     const handleResetPassword = async (e) => {
         e.preventDefault();
         if (resetPasswordData.newPassword !== resetPasswordData.confirmNewPassword) {
-            // alert('Passwords do not match');
             enqueueSnackbar('Passwords do not match', { variant: 'error' });
             return;
         }
-        //setIsLoading(true); // Start loading
         try {
             const response = await Api.Users.ResetPassword(resetPasswordData.email, resetPasswordData.token, resetPasswordData.newPassword);
-            if (response.status === 200) {
-                // alert('Password reset successful. You can now log in with your new password.');
-                enqueueSnackbar('Password reset successful. You can now log in with your new password.', { variant:'success' });
+            if (response.success) {
+                enqueueSnackbar('Password reset successful. You can now log in with your new password.', { variant: 'success' });
                 setIsLoginActive(true);
                 setIsResetPasswordActive(false);
-                setResetPasswordData({ email: '', token: '', newPassword: '', confirmNewPassword: '' }); // Reset resetPasswordData
+                setResetPasswordData({ email: '', token: '', newPassword: '', confirmNewPassword: '' });
             } else {
-                // alert('Password reset failed. Please check the token and try again.');
-                enqueueSnackbar('Password reset failed. Please check the token and try again.', { variant: 'error' });
+                enqueueSnackbar(response.message, { variant: 'error' });
             }
         } catch (error) {
             console.error('Error resetting password:', error);
-            // alert('Error resetting password');
             enqueueSnackbar('Error resetting password', { variant: 'warning' });
         }
-        //setIsLoading(false);
     };
+    
     
     /**/
 
