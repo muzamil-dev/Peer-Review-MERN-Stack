@@ -15,14 +15,34 @@ class UserProfile extends StatefulWidget {
 class _UserProfileState extends State<UserProfile> {
   List<int> assignmentIds = [];
   List<String> assignmentNames = [];
-  Map<int, String> reviewersOfAssignment = {};
+  Map<int, List<String>> reviewersOfAssignment = {};
   List<double> averageRatingsForAssignment = [];
   List<double> averageRatingsPerUser = [];
+  String nameOfProfile = '';
 
   @override
   void initState() {
     super.initState();
     getAllAssignments(context);
+    getUser(context);
+  }
+
+  // Gets Current User Information
+  Future<void> getUser(BuildContext context) async {
+    final url = Uri.parse('http://10.0.2.2:5000/users/${widget.userId}');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        print("Got User Successfully!");
+        final jsonResponse = json.decode(response.body);
+        setState(() {
+          nameOfProfile = jsonResponse['firstName'] + ' ' + jsonResponse['lastName'];
+        });
+      }
+    } catch (error) {
+      print("Error Getting User: $error");
+    }
   }
 
   // Gets All Assignment Id's in the Given Workspace
@@ -60,10 +80,10 @@ class _UserProfileState extends State<UserProfile> {
         final jsonResponse = json.decode(response.body);
         final reviews = jsonResponse["reviews"];
         setState(() {
-          averageRatingsForAssignment.add(calculateAverageRating(reviews));
+          averageRatingsForAssignment.add(calculateAverageRating(reviews)); // Calculates total average rating
           for (var review in reviews) {
 
-            reviewersOfAssignment[assignmentId] = review["firstName"] + review["lastName"];
+            reviewersOfAssignment[assignmentId]!.add(review["firstName"] + ' ' + review["lastName"]);
             double sum = 0;
             for (var rating in review['ratings']) {
               sum += rating;
@@ -112,7 +132,12 @@ class _UserProfileState extends State<UserProfile> {
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Column(),
+      body: Column(
+        children: [
+          Text("Profile for: $nameOfProfile"),
+
+        ],
+      ),
     );
   }
 }
