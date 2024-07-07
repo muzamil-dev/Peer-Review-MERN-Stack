@@ -163,7 +163,9 @@ export const requestPasswordReset = async(email) => {
             <p>Your password reset token is: <strong>${resetToken}</strong></p>
             <p>Please use this token to reset your password. The token is valid for 1 hour.</p>
         `;
-        await sendEmail(user.email, 'Password Reset', message);
+        const emailSent = await sendEmail(user.email, 'Password Reset', message);
+        if (emailSent.error)
+            return emailSent;
         return { message: "Password reset email sent" };
     }
     catch(err){
