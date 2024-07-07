@@ -261,9 +261,40 @@ class _UserProfileState extends State<UserProfile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Profile Name: $nameOfProfile",
-                    style: const TextStyle(fontSize: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Profile Name: $nameOfProfile",
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      InkWell(
+                        onTap: () {},
+                        child: Column(
+                          children: [
+                            Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.black,
+                                      width: 1,
+                                    )),
+                                child: const IconButton(
+                                    onPressed: null,
+                                    icon: Icon(
+                                      Icons.bar_chart_rounded,
+                                      size: 30,
+                                      color: Colors.black,
+                                    ))),
+                            const Text(
+                              "Analytics",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   const Text(
