@@ -22,7 +22,7 @@ export const signup = async(firstName, lastName, email, password) => {
             };
 
         // Check that user doesn't already exist
-        const existingUser = await getUserByEmail(email);
+        const existingUser = await getByEmail(email);
         if (existingUser)
             return { 
                 error: "An account with this email already exists",

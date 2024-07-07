@@ -322,6 +322,50 @@ export const leave = async(userId, workspaceId) => {
     }
 }
 
+// Remove a user (target) from a workspace (instructors only)
+export const removeUser = async(userId, targetId, workspaceId) => {
+    try{
+        const res = await db.query(
+            `SELECT w.id as workspace_id, m.role AS user_role
+            FROM workspaces AS w
+            LEFT JOIN memberships as m
+            ON w.id = m.workspace_id AND m.user_id = $1
+            WHERE w.id = $2`,
+            [userId, workspaceId]
+        );
+        const data = res.rows[0];
+        // Check that the workspace exists
+        if (!data)
+            return { 
+                error: "The requested workspace was not found", 
+                status: 404 
+            };
+        // Check that the user is an instructor of the workspace
+        if (data.user_role !== "Instructor")
+            return { 
+                error: "User is not authorized to remove other users", 
+                status: 403
+            };
+        // Remove the specified target
+        const removal = await db.query(
+            `DELETE FROM memberships
+            WHERE user_id = $1 AND workspace_id = $2
+            RETURNING *`,
+            [targetId, workspaceId]
+        );
+        const removalData = removal.rows[0];
+        if (!removalData)
+            return {
+                error: "User is not in the specified workspace",
+                status: 400
+            }
+        return { message: "User removed from workspace successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
 // Set the invite code of the workspace
 // The code will be generated in the endpoint and passed to 'code'
 // Set code to null to removeInvite
