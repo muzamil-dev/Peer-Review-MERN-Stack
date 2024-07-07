@@ -122,7 +122,7 @@ function ApiExamples() {
                                 return response;
                             })
                         },
-                        { buttonId: "RequestPasswordReset", fn: () => Api.Users.RequestPasswordReset(userId, email) },
+                        { buttonId: "RequestPasswordReset", fn: () => Api.Users.RequestPasswordReset(email) },
                         { buttonId: "ResetPassword", fn: () => Api.Users.ResetPassword(email, emailVerificationCode, password) },
                         { buttonId: "DeleteAccount", fn: () => Api.Users.DeleteAccount(userId) },
                         { buttonId: "BulkCreateUsers", fn: () => console.error("TODO") },
