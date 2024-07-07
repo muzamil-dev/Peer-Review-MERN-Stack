@@ -265,8 +265,9 @@ class _UserProfileState extends State<UserProfile> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Profile Name: $nameOfProfile",
-                        style: const TextStyle(fontSize: 20),
+                        "$nameOfProfile's Profile",
+                        style: const TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
                       ),
                       InkWell(
                         onTap: () {},
