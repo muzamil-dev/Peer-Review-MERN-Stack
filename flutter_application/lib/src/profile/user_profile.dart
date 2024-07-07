@@ -19,12 +19,20 @@ class _UserProfileState extends State<UserProfile> {
   List<double> averageRatingsForAssignment = [];
   List<double> averageRatingsPerUser = [];
   String nameOfProfile = '';
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    getAllAssignments(context);
-    getUser(context);
+    getAllData();
+  }
+
+  Future<void> getAllData() async {
+    await getAllAssignments(context);
+    await getUser(context);
+    setState(() {
+      isLoading = false;
+    });
   }
 
   // Gets Current User Information
@@ -37,7 +45,8 @@ class _UserProfileState extends State<UserProfile> {
         print("Got User Successfully!");
         final jsonResponse = json.decode(response.body);
         setState(() {
-          nameOfProfile = jsonResponse['firstName'] + ' ' + jsonResponse['lastName'];
+          nameOfProfile =
+              jsonResponse['firstName'] + ' ' + jsonResponse['lastName'];
         });
       }
     } catch (error) {
@@ -80,40 +89,79 @@ class _UserProfileState extends State<UserProfile> {
         final jsonResponse = json.decode(response.body);
         final reviews = jsonResponse["reviews"];
         setState(() {
-          averageRatingsForAssignment.add(calculateAverageRating(reviews)); // Calculates total average rating
-          for (var review in reviews) {
-
-            reviewersOfAssignment[assignmentId]!.add(review["firstName"] + ' ' + review["lastName"]);
-            double sum = 0;
-            for (var rating in review['ratings']) {
-              sum += rating;
-            }
-            double averageRating = sum / review['ratings'].length;
-            averageRatingsPerUser.add(averageRating);
-          }
+          averageRatingsForAssignment.add(calculateAverageRating(
+              reviews)); // Calculates total average rating
+          // for (var review in reviews) {
+          //   reviewersOfAssignment[assignmentId]!
+          //       .add(review["firstName"] + ' ' + review["lastName"]);
+          //   double sum = 0;
+          //   for (var rating in review['ratings']) {
+          //     sum += rating;
+          //   }
+          //   double averageRating = sum / review['ratings'].length;
+          //   averageRatingsPerUser.add(averageRating);
+          // }
         });
+      } else if (response.statusCode == 404) {
+        averageRatingsForAssignment.add(-2);
       }
     } catch (error) {
       print("Error Getting Reviews on User: $error");
     }
   }
 
-  double calculateAverageRating(List<Map> reviews) {
+  double calculateAverageRating(dynamic reviews) {
     if (reviews.isEmpty) {
+      print(reviews);
       return -1;
     }
-    
+
     double sum = 0;
     double numRatings = 0;
 
     for (Map review in reviews) {
-      List<int> ratings = review["ratings"];
-      for (int rating in ratings) {
+      List<dynamic> ratings = review["ratings"];
+      for (var rating in ratings) {
         sum += rating;
         numRatings += 1;
       }
     }
+    print(sum);
+    print(numRatings);
     return sum / numRatings;
+  }
+
+  Widget printAssignmentAverageRating(double averageRating) {
+    if (averageRating == -1) {
+      return const Text("Rating: N/A");
+    }
+    else if (averageRating == -2) {
+      return const Text("Not Assigned");
+    }
+    else {
+      return Text("Rating: $averageRating");
+    }
+  }
+
+  Widget assignmentItem(BuildContext context, int index) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(assignmentNames[index]),
+                printAssignmentAverageRating(averageRatingsForAssignment[index]),
+              ],
+            ), // Assignment Name
+            const Text("Reviews: "),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -132,12 +180,35 @@ class _UserProfileState extends State<UserProfile> {
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Column(
-        children: [
-          Text("Profile for: $nameOfProfile"),
-
-        ],
-      ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: [
+                  Text(
+                    "Profile for: $nameOfProfile",
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  Expanded(
+                    child: RawScrollbar(
+                        child: ListView.separated(
+                            itemBuilder: (context, index) {
+                              return assignmentItem(context, index);
+                            },
+                            separatorBuilder: (context, index) {
+                              return const Divider(
+                                height: 10,
+                                thickness: 0,
+                              );
+                            },
+                            itemCount: assignmentIds.length)),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }
