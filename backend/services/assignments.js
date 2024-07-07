@@ -43,12 +43,8 @@ export const getById = async(assignmentId) => {
 export const getByWorkspace = async(workspaceId) => {
     try{
         const res = await db.query(
-            `SELECT a.*, jsonb_agg(
-                jsonb_build_object(
-                    'questionId', q.id,
-                    'question', q.question
-                ) ORDER BY q.id
-            ) AS questions
+            `SELECT a.*, 
+            array_agg(q.question ORDER BY q.id) AS questions
             FROM workspaces AS w
             LEFT JOIN assignments AS a
             ON w.id = a.workspace_id
