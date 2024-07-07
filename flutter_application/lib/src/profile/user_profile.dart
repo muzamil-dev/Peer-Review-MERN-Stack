@@ -15,8 +15,8 @@ class UserProfile extends StatefulWidget {
 class _UserProfileState extends State<UserProfile> {
   List<int> assignmentIds = [];
   List<String> assignmentNames = [];
-  Map<int, List<String>> reviewersOfAssignment = {};
   List<double> averageRatingsForAssignment = [];
+  Map<int, List<String>> reviewersOfAssignment = {};
   List<double> averageRatingsPerUser = [];
   String nameOfProfile = '';
   bool isLoading = true;
@@ -68,6 +68,7 @@ class _UserProfileState extends State<UserProfile> {
           for (var response in jsonResponse) {
             assignmentIds.add(response["assignmentId"]);
             assignmentNames.add(response["name"]);
+            reviewersOfAssignment[response["assignmentId"]] = [];
             getReviewsTowardUser(context, response["assignmentId"]);
           }
         });
@@ -91,18 +92,17 @@ class _UserProfileState extends State<UserProfile> {
         setState(() {
           averageRatingsForAssignment.add(calculateAverageRating(
               reviews)); // Calculates total average rating
-          // for (var review in reviews) {
-          //   reviewersOfAssignment[assignmentId]!
-          //       .add(review["firstName"] + ' ' + review["lastName"]);
-          //   double sum = 0;
-          //   for (var rating in review['ratings']) {
-          //     sum += rating;
-          //   }
+          for (var review in reviews) {
+            reviewersOfAssignment[assignmentId]!.add(review["firstName"] + ' ' + review["lastName"]);
+            // double sum = 0;
+            // for (var rating in review['ratings']) {
+            //   sum += rating;
+            }
           //   double averageRating = sum / review['ratings'].length;
           //   averageRatingsPerUser.add(averageRating);
           // }
         });
-      } else if (response.statusCode == 404) {
+      } else {
         averageRatingsForAssignment.add(-2);
       }
     } catch (error) {
@@ -126,8 +126,6 @@ class _UserProfileState extends State<UserProfile> {
         numRatings += 1;
       }
     }
-    print(sum);
-    print(numRatings);
     return sum / numRatings;
   }
 
@@ -141,6 +139,14 @@ class _UserProfileState extends State<UserProfile> {
     else {
       return Text("Rating: $averageRating");
     }
+  }
+
+  Widget printReviewersOfAssignment(int index) {
+    int currentAssignmentId = assignmentIds[index];
+    List<String> reviewers = reviewersOfAssignment[currentAssignmentId] ?? [];
+    return Column(
+              children: reviewers.map((reviewer) => Text(reviewer)).toList(),
+            );
   }
 
   Widget assignmentItem(BuildContext context, int index) {
@@ -158,6 +164,7 @@ class _UserProfileState extends State<UserProfile> {
               ],
             ), // Assignment Name
             const Text("Reviews: "),
+            printReviewersOfAssignment(index),
           ],
         ),
       ),
