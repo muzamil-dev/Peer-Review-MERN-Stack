@@ -1,22 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './GroupsPageAdmin.module.css'; // Import the CSS file as a module
-import Api from './Api.js';  // Adjust the path to where your Api.js file is located
+import Api from './Api.js'; 
+import { jwtDecode } from 'jwt-decode';
 
 const GroupsPageUser = () => {
     const [groups, setGroups] = useState([]);
     const { workspaceId } = useParams(); // Assuming you're using React Router v6
     const navigate = useNavigate();
     const [joinedGroupId, setJoinedGroupId] = useState(null); // Track the joined group
+    const [errorMessage, setErrorMessage] = useState(''); // State variable for error messages
+
+
+    const getCurrentUserId = () => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            return null;
+        }
+        const decodedToken = jwtDecode(token);
+        return decodedToken.userId;
+    }
 
     const fetchGroups = async () => {
         const response = await Api.Workspace.GetGroups(workspaceId);
         if (response.status === 200 && Array.isArray(response.data.groups)) {
-            setGroups(response.data.groups);
-
+            setGroups(response.data.groups.map(group => ({
+                ...group,
+                members: group.members.filter(member => member && member.userId)
+            })));
+            
             // Check if user is already in a group
+            const currentUserId = getCurrentUserId();
             const userInGroup = response.data.groups.find(group => {
-                return group.members.some(member => member.userId === '6671c8362ffea49f3018bf61');
+                return group.members.some(member => member.userId === currentUserId);
             });
             if (userInGroup) {
                 setJoinedGroupId(userInGroup.groupId); // Set joinedGroup if user is already in a group
@@ -34,37 +50,33 @@ const GroupsPageUser = () => {
     }, [workspaceId]);
 
     const handleJoinGroup = async (groupId) => {
-        if (joinedGroupId !== null) {
-            return; // Prevent joining another group if already in one
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId || joinedGroupId !== null) {
+            return; // Prevent joining another group if already in one or if user is not authenticated
         }
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
-        const response = await Api.Groups.AddUser(userId, groupId);
+        const response = await Api.Groups.JoinGroup(groupId, currentUserId);
         if (response.success) {
-            setGroups(groups.map(group => {
-                if (group.groupId === groupId) {
-                    return { ...group, members: [...group.members, { userId, firstName: 'Firstname', lastName: 'Lastname' }] };
-                }
-                return group;
-            }));
+            fetchGroups(); // Refetch groups to update the UI
             setJoinedGroupId(groupId); // Update joinedGroup state
         } else {
             console.error('Failed to join group:', response.message);
+            setErrorMessage('Failed to join group. Capacity reached.');
         }
     };
 
     const handleLeaveGroup = async (groupId) => {
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
-        const response = await Api.Groups.RemoveUser(userId, userId, groupId);
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return { success: false };
+        }
+        const response = await Api.Groups.LeaveGroup(groupId, currentUserId);
         if (response.success) {
-            setGroups(groups.map(group => {
-                if (group.groupId === groupId) {
-                    return { ...group, members: group.members.filter(member => member.userId !== userId) };
-                }
-                return group;
-            }));
+            fetchGroups(); // Refetch groups to update the UI
             setJoinedGroupId(null); // Clear joinedGroup state
         } else {
             console.error('Failed to leave group:', response.message);
+            setErrorMessage(response.message);
         }
     };
 
@@ -75,9 +87,16 @@ const GroupsPageUser = () => {
     return (
         <div className={styles.workspaceUser}>
             <div className={`row ${styles.headerContainer}`}>
+                <div className="col-xl-2 col-lg-2"></div>
                 <h1 className={`col-xl-8 col-lg-6 ${styles.headerLarge}`}>Groups</h1>
                 <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={handleDashboard}>Dashboard</button>
             </div>
+
+            {errorMessage && (
+                <div className="alert alert-danger" role="alert">
+                    {errorMessage}
+                </div>
+            )}
 
             <div className="container">
                 <div className="row">

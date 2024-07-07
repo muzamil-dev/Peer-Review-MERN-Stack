@@ -2,12 +2,10 @@ import axios from 'axios';
 
 const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
 const getUrl = (prefix, route) => {
-    if (process.env.NODE_ENV === 'production') 
-    {
-        return 'https://' + app_name +  '.herokuapp.com/' + prefix + route;
+    if (process.env.NODE_ENV === 'production') {
+        return 'https://' + app_name + '.herokuapp.com/' + prefix + route;
     }
-    else
-    {        
+    else {
         return 'http://localhost:5000/' + prefix + route;
     }
 };
@@ -474,7 +472,7 @@ export default {
                 message: response.data.message
             };
         },
-        
+
         /**
          * Verify the token for the user
          * @param {string} email 
@@ -534,13 +532,11 @@ export default {
         },
         /**
          * Requests a password reset for the user
-         * @param {string} id
          * @param {string} email 
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
-
-        RequestPasswordReset: async (id, email) => {
-            const payload = { id, email };
+        RequestPasswordReset: async (email) => {
+            const payload = { email };
             const response = await axios.post(getUrl(USERS, 'requestPasswordReset'), payload)
                 .catch((err) => {
                     console.error(err);
@@ -548,8 +544,8 @@ export default {
                 });
             return {
                 status: response.status,
-                data: response.data,
-                message: response.message
+                success: response.status === 201,
+                message: response.data.message
             };
         },
 
@@ -558,7 +554,7 @@ export default {
          * @param {string} email 
          * @param {string} token 
          * @param {string} newPassword 
-         * @returns {Promise<{ status: number, data: {}, message: string }>}
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         ResetPassword: async (email, token, newPassword) => {
             const payload = { email, token, newPassword };
@@ -569,10 +565,11 @@ export default {
                 });
             return {
                 status: response.status,
-                data: response.data,
-                message: response.message
+                success: response.status === 200,
+                message: response.data.message
             };
         },
+
         /**/
 
         /**
