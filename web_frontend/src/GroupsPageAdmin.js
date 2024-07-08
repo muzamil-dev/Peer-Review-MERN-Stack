@@ -179,12 +179,12 @@ const GroupsPageAdmin = () => {
             navigate('/login');
             return;
         }
-        console.log('Kicking user from workspace:', { targetId, workspaceId, currentUserId }); // Debugging information
-        const response = await Api.Workspace.LeaveWorkspace(targetId, workspaceId);
+        //console.log('Kicking user from workspace:', { targetId, workspaceId, currentUserId });
+        const response = await Api.Workspace.RemoveUser(currentUserId, targetId, workspaceId);
         if (response.success) {
             setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
-            fetchUngroupedMembers(); // Refetch groups to update the UI
-            console.log('Kicked user from workspace:', targetId); // Debugging information
+            fetchUngroupedMembers(); 
+            //console.log('Kicked user from workspace:', targetId);
         } else {
             console.error('Failed to kick from workspace:', response.message);
         }

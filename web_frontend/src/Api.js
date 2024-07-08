@@ -741,6 +741,30 @@ export default {
             };
         },
         /**
+         * Removes a user from the workspace specified by workspaceId
+         * @param {number} userId 
+         * @param {number} targetId
+         * @param {number} workspaceId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        RemoveUser: async (userId, targetId, workspaceId) => {
+            const payload = {
+                userId,
+                targetId,
+                workspaceId
+            };
+            const response = await axios.put(getUrl(WORKSPACES, 'removeUser'), payload, getConfig())
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
          * Sets the active invite code
          * @param {number} userId 
          * @param {number} workspaceId 
