@@ -43,12 +43,8 @@ export const getById = async(assignmentId) => {
 export const getByWorkspace = async(workspaceId) => {
     try{
         const res = await db.query(
-            `SELECT a.*, jsonb_agg(
-                jsonb_build_object(
-                    'questionId', q.id,
-                    'question', q.question
-                ) ORDER BY q.id
-            ) AS questions
+            `SELECT a.*, 
+            array_agg(q.question ORDER BY q.id) AS questions
             FROM workspaces AS w
             LEFT JOIN assignments AS a
             ON w.id = a.workspace_id
@@ -171,7 +167,7 @@ export const createQuestions = async(assignmentId, questions) => {
 export const edit = async(userId, assignmentId, settings) => {
     try{
         const res = await db.query(
-            `SELECT a.*, a.id AS assignment_id, m.role AS user_role
+            `SELECT a.*, m.role AS user_role
             FROM assignments AS a
             LEFT JOIN memberships as m
             ON a.workspace_id = m.workspace_id AND m.user_id = $1
@@ -217,9 +213,9 @@ export const edit = async(userId, assignmentId, settings) => {
         if (settings.questions){
             await Promise.all([
                 // Delete old questions
-                db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignmentId]),
+                db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignment.id]),
                 // Add new questions
-                createQuestions(assignmentId, settings.questions)
+                createQuestions(assignment.id, settings.questions)
             ]);
         }
 
@@ -233,7 +229,7 @@ export const edit = async(userId, assignmentId, settings) => {
         updateQuery += ` WHERE id = $${values.length+1}`;
         
         // Query the update
-        const updateRes = await db.query(updateQuery, [...values, data.assignment_id]);
+        const updateRes = await db.query(updateQuery, [...values, assignment.id]);
 
         return { message: "Assignment updated successfully" };
     }

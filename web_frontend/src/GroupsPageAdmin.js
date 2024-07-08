@@ -354,12 +354,17 @@ const GroupsPageAdmin = () => {
         setIsFormOpen(false);
     };
 
+    const createForm = () => {
+        navigate(`/formsAdmin/${workspaceId}`);
+    };
+
     return (
         <div className={styles.workspaceAdmin}>
             <div className={`row ${styles.headerContainer}`}>
-                <button className="open-button col-xl-2 col-lg-2 btn btn-primary" onClick={openForm}>Edit Workspace</button>
-                <h1 className={`col-xl-8 col-lg-6 ${styles.headerLarge}`}>Groups</h1>
-                <button className="col-xl-2 col-lg-2 btn btn-success" onClick={handleCreateGroup}>Add Group</button>
+                <button className={`open-button col-xl-3 col-lg-3 col-md-4 btn btn-primary ${styles.custom}`} onClick={createForm}>Create Forms</button>
+                <h1 className={`col-xl-6 col-lg-6 col-md-4 ${styles.headerLarge}`}>Groups</h1>
+                <button className="open-button col btn btn-primary" onClick={openForm}>Edit Workspace</button>
+                <button className="col btn btn-success" onClick={handleCreateGroup}>Add Group</button>
             </div>
 
             {isFormOpen && (

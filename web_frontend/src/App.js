@@ -8,7 +8,7 @@ import CustomGroupsPage from './GroupsPage';  // Import the CustomGroupsPage com
 import GroupsPageAdmin from './GroupsPageAdmin';  // Import the CustomGroupsPageAdmin component
 import ApiExamples from './ApiExamples';
 import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin component
-import CreateFormPage from './CreateFormPageAdmin'; // Import the CreateFormPage component
+import CreateFormPage from './CreateForm/CreateFormPageAdmin'; // Import the CreateFormPage component
 
 function App() {
     return (
@@ -21,8 +21,8 @@ function App() {
                     <Route path="/groups/:workspaceId" element={<CustomGroupsPage />} />
                     <Route path="/workspaces/:workspaceId/admin" element={<GroupsPageAdmin />} />
                     <Route path="/ApiExamples" element={<ApiExamples />} />
-                    <Route path="/formsAdmin" element={<FormsPageAdmin />} />
-                    <Route path="/createForm" element={<CreateFormPage />} />
+                    <Route path="/formsAdmin/:workspaceId" element={<FormsPageAdmin />} />
+                    <Route path="/createForm/:workspaceId" element={<CreateFormPage />} />
                 </Routes>
             </div>
         </Router>
