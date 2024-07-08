@@ -23,6 +23,39 @@ const Response503 = {
     message: 'Service temporarily unavailable'
 };
 
+const refreshAccessToken = async () => {
+    try {
+        const response = await axios.get(getUrl('', 'refresh'), { withCredentials: true });
+        if (response.status === 200) {
+            const { accessToken } = response.data;
+            localStorage.setItem('accessToken', accessToken); // Optionally update the local storage
+            return accessToken;
+        }
+        return null;
+    } catch (error) {
+        console.error('Failed to refresh access token:', error);
+        return null;
+    }
+};
+
+const apiRequest = async (method, url, data = null) => {
+    try {
+        const config = getConfig(localStorage.getItem('accessToken'));
+        const response = await axios({ method, url, data, ...config });
+        return response;
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            const newToken = await refreshAccessToken();
+            if (newToken) {
+                const config = getConfig(newToken);
+                const response = await axios({ method, url, data, ...config });
+                return response;
+            }
+        }
+        throw error;
+    }
+};
+
 const GROUPS = 'groups/';
 const ASSIGNMENTS = 'assignments/';
 const REVIEWS = 'reviews/';
