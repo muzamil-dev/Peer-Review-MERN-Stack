@@ -31,7 +31,8 @@ export const getById = async(assignmentId) => {
             dueDate: data.due_date,
             questions: data.questions,
             description: data.description,
-            started: data.started
+            started: data.started,
+            completed: data.completed
         };
     }
     catch(err){
@@ -43,12 +44,8 @@ export const getById = async(assignmentId) => {
 export const getByWorkspace = async(workspaceId) => {
     try{
         const res = await db.query(
-            `SELECT a.*, jsonb_agg(
-                jsonb_build_object(
-                    'questionId', q.id,
-                    'question', q.question
-                ) ORDER BY q.id
-            ) AS questions
+            `SELECT a.*, 
+            array_agg(q.question ORDER BY q.id) AS questions
             FROM workspaces AS w
             LEFT JOIN assignments AS a
             ON w.id = a.workspace_id
@@ -79,7 +76,8 @@ export const getByWorkspace = async(workspaceId) => {
             dueDate: row.due_date,
             questions: row.questions,
             description: row.description,
-            started: row.started
+            started: row.started,
+            completed: data.completed
         }));
     }
     catch(err){

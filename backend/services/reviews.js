@@ -5,33 +5,26 @@ export const getById = async(reviewId) => {
     try{
         const res = await db.query(
             `WITH rating_table AS
-            (SELECT r.user_id, r.target_id, q.question, q.id AS question_id, ra.rating
+            (SELECT r.user_id, r.target_id,
+            array_agg(q.question ORDER BY q.id) as questions,
+            array_agg(ra.rating ORDER BY ra.question_id) as ratings
             FROM reviews AS r
             LEFT JOIN ratings AS ra
             ON r.id = ra.review_id
-            LEFT JOIN questions AS q
+            JOIN questions AS q
             ON q.id = ra.question_id
-            WHERE r.id = $1),
+            WHERE r.id = $1
+            GROUP BY r.user_id, r.target_id)
             
-            grouped_table AS 
-            (SELECT user_id, target_id,
-            jsonb_agg(
-                jsonb_build_object(
-                    'question', question,
-                    'rating', rating
-                ) ORDER BY question_id
-            ) FILTER (WHERE rating IS NOT NULL) AS ratings
+            SELECT user_id AS "userId", target_id AS "targetId",
+            u1.first_name AS "firstName", u1.last_name AS "lastName",
+            u2.first_name AS "targetFirstName", u2.last_name AS "targetLastName",
+            questions, ratings
             FROM rating_table
-            GROUP BY user_id, target_id)
-            
-            SELECT g.ratings, u1.first_name, u1.last_name,
-            u2.first_name AS target_first_name,
-            u2.last_name AS target_last_name
-            FROM grouped_table AS g
             JOIN users AS u1
-            ON g.user_id = u1.id
+            ON u1.id = user_id
             JOIN users AS u2
-            ON g.target_id = u2.id`,
+            ON u2.id = target_id`,
             [reviewId]
         );
         // Check that the review exists
@@ -42,15 +35,7 @@ export const getById = async(reviewId) => {
                 status: 404 
             };
             
-        // Format the data
-        const formatted = {
-            firstName: data.first_name,
-            lastName: data.last_name,
-            targetFirstName: data.target_first_name,
-            targetLastName: data.target_last_name,
-            ratings: data.ratings
-        }
-        return formatted;
+        return data;
     }
     catch(err){
         return { error: err.message, status: 500 };

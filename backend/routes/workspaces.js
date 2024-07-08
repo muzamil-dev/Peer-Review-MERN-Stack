@@ -142,6 +142,21 @@ router.put("/leave", async(req, res) => {
     return res.status(200).json(data);
 });
 
+// Remove a user from a workspace
+router.put("/removeUser", async(req, res) => {
+    // Check for required fields
+    const { userId, targetId, workspaceId } = req.body;
+    if (!userId || !targetId || !workspaceId){
+        return res.status(400).json({ message: "One or more required fields is not present" });
+    }
+    // Call the service
+    const data = await WorkspaceService.removeUser(userId, targetId, workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+})
+
 // Sets the active invite code
 router.put("/setInvite", async(req, res) => {
     // Check for required fields

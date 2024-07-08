@@ -6,8 +6,9 @@ import cors from "cors";
 // Import database client
 import db from "./config.js";
 
-// Import service for cron job
+// Import services for cron jobs
 import * as ReviewService from './services/reviews.js';
+import * as AnalyticsService from './services/analytics.js';
 
 // Import routers
 import userRoutes from './routes/users.js';
@@ -15,6 +16,7 @@ import groupRoutes from './routes/groups.js';
 import workspaceRoutes from './routes/workspaces.js';
 import assignmentRoutes from './routes/assignments.js';
 import reviewRoutes from './routes/reviews.js';
+import analyticsRoutes from './routes/analytics.js';
 import jwtRoutes from './routes/jwt.js';
 
 // Access env variables
@@ -34,6 +36,7 @@ app.use("/groups", groupRoutes);
 app.use("/workspaces", workspaceRoutes);
 app.use("/assignments", assignmentRoutes);
 app.use("/reviews", reviewRoutes);
+app.use("/analytics", analyticsRoutes);
 app.use("/jwt", jwtRoutes);
 
 // Connect to the database
@@ -70,6 +73,25 @@ cron.schedule('0 * * * * *', async() => {
         ReviewService.createReviews(id);
     });
     console.log(`Started ${ids.length} new assignments`);
+});
+
+// Once per minute cron job
+// Computes analytics for assignments, sets to complete
+cron.schedule('0 * * * * *', async() => {
+    const res = await db.query(
+        `UPDATE assignments
+        SET completed = true
+        WHERE completed = false AND due_date <= $1
+        RETURNING id`,
+        [(new Date(Date.now())).toISOString()]
+    );
+    // Get all ids of review assignments
+    const ids = res.rows.map(obj => obj.id);
+    // Calculate analytics for each assignment
+    ids.forEach(id => {
+        AnalyticsService.calculateAnalytics(id);
+    });
+    console.log(`Calculated analytics for ${ids.length} completed assignments`);
 });
 
 app.listen(PORT, () => {

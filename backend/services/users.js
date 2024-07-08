@@ -6,6 +6,7 @@ import crypto from "crypto";
 
 // Function to send emails
 import { sendEmail } from './emailService.js';
+import generateCode from "./generateCode.js";
 
 dotenv.config();
 
@@ -21,7 +22,7 @@ export const signup = async(firstName, lastName, email, password) => {
             };
 
         // Check that user doesn't already exist
-        const existingUser = await getUserByEmail(email);
+        const existingUser = await getByEmail(email);
         if (existingUser)
             return { 
                 error: "An account with this email already exists",
@@ -135,15 +136,95 @@ export const verifyEmail = async(token) => {
 
 // Function to request a password reset
 export const requestPasswordReset = async(email) => {
-    
+    try{
+        // Find the user
+        const user = await getByEmail(email);
+        if (!user)
+            return {
+                error: "No user was found with this email",
+                status: 404
+            }
+        else if (user.error)
+            return user;
+
+        // Generate the password token
+        const resetToken = generateCode();
+        const resetTokenExpires = new Date(Date.now() + 60*60*1000).toISOString(); // 1 hour
+        // Insert the token into the password reset table
+        const resetQuery = await db.query(
+            `INSERT INTO password_reset VALUES ($1, $2, $3)
+            ON CONFLICT(email) DO UPDATE SET
+            email = EXCLUDED.email,
+            reset_token = EXCLUDED.reset_token,
+            reset_token_expiry = EXCLUDED.reset_token_expiry`,
+            [email, resetToken, resetTokenExpires]
+        );
+        const message = `
+            <p>Your password reset token is: <strong>${resetToken}</strong></p>
+            <p>Please use this token to reset your password. The token is valid for 1 hour.</p>
+        `;
+        const emailSent = await sendEmail(user.email, 'Password Reset', message);
+        if (emailSent.error)
+            return emailSent;
+        return { message: "Password reset email sent" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Reset the user's password based on their password reset token
+export const resetPassword = async(token, password) => {
+    try{
+        // Find the token in the password reset table
+        const res = await db.query(
+            `SELECT * FROM password_reset WHERE reset_token = $1`,
+            [token]
+        );
+        const data = res.rows[0];
+        if (!data)
+            return {
+                error: "No password reset with this token was found",
+                status: 404
+            };
+        // Check that the token hasn't expired
+        if ((new Date(data.reset_token_expiry)) < Date.now())
+            return {
+                error: "The reset token has already expired",
+                status: 400
+            };
+        // Delete the token from the password_reset table
+        db.query(`DELETE FROM password_reset WHERE reset_token = $1`, [token]);
+        // Insert the new password
+        const pwInsert = await db.query(
+            `UPDATE users SET password = $1 WHERE email = $2`,
+            [password, data.email]
+        );
+        return { message: "New password set successfully" };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
 }
 
 // Get a user by their id
-export const getUserById = async(userId) => {
+export const getById = async(userId) => {
     try{
         const res = await db.query
         (`SELECT * FROM users WHERE id = $1`, [userId]);
-        return res.rows[0];
+        // Return if not found
+        const data = res.rows[0];
+        if (!data)
+            return {
+                error: "No user was found with this id",
+                status: 404
+            }
+        return {
+            userId: data.id,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            email: data.email
+        };
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -151,7 +232,7 @@ export const getUserById = async(userId) => {
 }
 
 // Get user by their email
-export const getUserByEmail = async(email) => {
+export const getByEmail = async(email) => {
     try{
         const res = await db.query
         (`SELECT * FROM users WHERE email = $1`, [email]);
@@ -210,30 +291,6 @@ export const deleteUser = async(userId) => {
             [userId]
         );
         return res.rows[0];
-    }
-    catch(err){
-        return { error: err.message, status: 500 };
-    }
-}
-
-// Get a user by their id
-export const getById = async(userId) => {
-    try{
-        const res = await db.query
-        (`SELECT * FROM users WHERE id = $1`, [userId]);
-        // Return if not found
-        const data = res.rows[0];
-        if (!data)
-            return {
-                error: "No user was found with this id",
-                status: 404
-            }
-        return {
-            userId: data.id,
-            firstName: data.first_name,
-            lastName: data.last_name,
-            email: data.email
-        };
     }
     catch(err){
         return { error: err.message, status: 500 };
