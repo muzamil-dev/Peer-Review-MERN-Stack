@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import "package:flutter_application/src/profile/analytics.dart";
 import "package:http/http.dart" as http;
 import "dart:convert";
 
 class UserProfile extends StatefulWidget {
   final int workspaceId;
+  final int targetId;
   final int userId;
   const UserProfile(
-      {required this.userId, required this.workspaceId, super.key});
+      {required this.targetId, required this.workspaceId, required this.userId, super.key});
 
   @override
   State<UserProfile> createState() => _UserProfileState();
@@ -37,7 +39,7 @@ class _UserProfileState extends State<UserProfile> {
 
   // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/${widget.userId}');
+    final url = Uri.parse('http://10.0.2.2:5000/users/${widget.targetId}');
     try {
       final response = await http.get(url);
 
@@ -102,7 +104,7 @@ class _UserProfileState extends State<UserProfile> {
       Map<int, List<double>> tempAverageRatingsPerUser,
       List<double> tempAverageRatingsForAssignment) async {
     final url = Uri.parse(
-        "http://10.0.2.2:5000/assignments/$assignmentId/target/${widget.userId}");
+        "http://10.0.2.2:5000/assignments/$assignmentId/target/${widget.targetId}");
     try {
       final response = await http.get(url);
 
@@ -281,9 +283,16 @@ class _UserProfileState extends State<UserProfile> {
                                       color: Colors.black,
                                       width: 1,
                                     )),
-                                child: const IconButton(
-                                    onPressed: null,
-                                    icon: Icon(
+                                child: IconButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                AnalyticsPage(userId: widget.userId, targetId: widget.targetId, workspaceId: widget.workspaceId,),
+                                          )); // Adjust the route name as needed
+                                    },
+                                    icon: const Icon(
                                       Icons.bar_chart_rounded,
                                       size: 30,
                                       color: Colors.black,

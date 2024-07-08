@@ -606,7 +606,7 @@ class _AdminGroupState extends State<AdminGroup> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                UserProfile(userId: member.userId, workspaceId: widget.workspaceId,),
+                                                UserProfile(userId: widget.userId, workspaceId: widget.workspaceId, targetId: member.userId),
                                           ),
                                         );
                                       },
