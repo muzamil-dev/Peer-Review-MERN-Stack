@@ -10,6 +10,7 @@ const GroupsPageUser = () => {
     const navigate = useNavigate();
     const [joinedGroupId, setJoinedGroupId] = useState(null); // Track the joined group
     const [errorMessage, setErrorMessage] = useState(''); // State variable for error messages
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
 
     const getCurrentUserId = () => {
@@ -80,6 +81,22 @@ const GroupsPageUser = () => {
         }
     };
 
+    const handleLeaveWorkspace = async () => {
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/login');
+            return { success: false };
+        }
+        const response = await Api.Workspace.LeaveWorkspace(currentUserId, workspaceId);
+        if (response.success) {
+            fetchGroups();
+            handleDashboard();
+        } else {
+            console.error('Failed to leave workspace:', response.message);
+            setErrorMessage(response.message);
+        }
+    };
+
     const handleDashboard = () => {
         navigate('/DashboardPage'); // Navigate to dashboard page
     };
@@ -90,6 +107,7 @@ const GroupsPageUser = () => {
                 <div className="col-xl-2 col-lg-2"></div>
                 <h1 className={`col-xl-8 col-lg-6 ${styles.headerLarge}`}>Groups</h1>
                 <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={handleDashboard}>Dashboard</button>
+                <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={() => setShowConfirmModal(true)}>Leave Workspace</button>
             </div>
 
             {errorMessage && (
@@ -142,6 +160,28 @@ const GroupsPageUser = () => {
                     ))}
                 </div>
             </div>
+
+            {/* Confirmation form */}
+            <div className={`modal fade ${showConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Confirm Leave</h5>
+                            <button type="button" className="close" onClick={() => setShowConfirmModal(false)} aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Are you sure you want to leave this workspace?</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>Cancel</button>
+                            <button type="button" className="btn btn-primary" onClick={() => { setShowConfirmModal(false); handleLeaveWorkspace(); }}>Leave</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 };
