@@ -1,0 +1,35 @@
+.dashboard {
+    padding: 20px;
+}
+
+.header-large {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.workspace-selector {
+    margin-bottom: 20px;
+}
+
+.assignments-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.assignments-table th, .assignments-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.assignments-table th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+.assignments-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.assignments-table tr:hover {
+    background-color: #ddd;
+}
