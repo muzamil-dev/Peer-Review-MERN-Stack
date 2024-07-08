@@ -82,6 +82,30 @@ const ViewFormsAdminPage = () => {
         }));
     };
 
+    const handleQuestionChange = (index, value) => {
+        const updatedQuestions = [...editFormData.questions];
+        updatedQuestions[index] = value;
+        setEditFormData(prevState => ({
+            ...prevState,
+            questions: updatedQuestions
+        }));
+    };
+
+    const handleAddQuestion = () => {
+        setEditFormData(prevState => ({
+            ...prevState,
+            questions: [...prevState.questions, '']
+        }));
+    };
+
+    const handleRemoveQuestion = (index) => {
+        const updatedQuestions = editFormData.questions.filter((_, i) => i !== index);
+        setEditFormData(prevState => ({
+            ...prevState,
+            questions: updatedQuestions
+        }));
+    };
+
     const handleEditFormSubmit = async (e) => {
         e.preventDefault();
         const userId = getCurrentUserId();
@@ -95,7 +119,7 @@ const ViewFormsAdminPage = () => {
             name,
             new Date(startDate).getTime(),
             new Date(dueDate).getTime(),
-            questions,
+            questions.filter(q => q.trim() !== ''), // Ensure no empty questions
             description
         );
 
@@ -207,24 +231,32 @@ const ViewFormsAdminPage = () => {
                             </div>
                             <div className="form-groupz">
                                 <label>Questions</label>
-                                <input
-                                    type="text"
-                                    name="questions"
-                                    value={editFormData.questions}
-                                    onChange={handleEditFormChange}
-                                    className="form-control"
-                                />
+                                {editFormData.questions.map((question, index) => (
+                                    <div key={index} className="question-group">
+                                        <input
+                                            type="text"
+                                            value={question}
+                                            onChange={(e) => handleQuestionChange(index, e.target.value)}
+                                            className="form-control"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-danger mt-2 mb-2"
+                                            onClick={() => handleRemoveQuestion(index)}
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={handleAddQuestion}
+                                >
+                                    Add Question
+                                </button>
                             </div>
-                            <div className="form-groupz">
-                                <label>Description</label>
-                                <textarea
-                                    name="description"
-                                    value={editFormData.description}
-                                    onChange={handleEditFormChange}
-                                    className="form-control"
-                                />
-                            </div>
-                            <button type="submit" className="btn btn-success">Save Changes</button>
+                            <button type="submit" className="btn btn-success mt-0">Save Changes</button>
                             <button type="button" className="btn btn-danger mt-2" onClick={handleCloseEditModal}>Cancel</button>
                         </form>
                     </div>
