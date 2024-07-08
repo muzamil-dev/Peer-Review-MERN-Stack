@@ -74,7 +74,7 @@ export const getByUserAndWorkspace = async(userId, targetId, workspaceId) => {
         
         // Get the results
         const res = await db.query(
-            `SELECT a.user_id AS "userId",
+            `SELECT u.id AS "userId",
             u.first_name AS "firstName",
             u.last_name AS "lastName",
             jsonb_agg(
@@ -85,16 +85,22 @@ export const getByUserAndWorkspace = async(userId, targetId, workspaceId) => {
                     'averageRating', round(a.average_rating, 2)
                 ) ORDER BY b.due_date
             ) AS "assignments"
-            FROM analytics AS a
-            JOIN users AS u
+            FROM users AS u
+            JOIN analytics AS a
             ON u.id = a.user_id
             JOIN assignments AS b
             ON a.assignment_id = b.id
-            WHERE a.user_id = $1 AND b.workspace_id = $2
-            GROUP BY a.user_id, u.first_name, u.last_name`,
+            WHERE u.id = $1 AND b.workspace_id = $2
+            GROUP BY u.id, u.first_name, u.last_name`,
             [targetId, workspaceId]
         );
-        return res.rows[0];
+        const data = res.rows[0];
+        if (!data)
+            return {
+                error: "No analytics were found for this user and workspace",
+                status: 404
+            };
+        return data;
     }
     catch(err){
         return { error: err.message, status: 500 };
