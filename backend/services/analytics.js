@@ -1,7 +1,5 @@
 import db from "../config.js";
 
-import * as AssignmentService from './assignments.js';
-
 export const getByAssignment = async(userId, assignmentId, page, perPage) => {
     try{
         // Check that the user requesting is the instructor
@@ -40,7 +38,10 @@ export const getByAssignment = async(userId, assignmentId, page, perPage) => {
             LIMIT $2 OFFSET $3`,
             [assignmentId, perPage, startIndex]
         );
-        return res.rows;
+        return res.rows.map(row => ({
+            ...row,
+            averageRating: parseFloat(row.averageRating)
+        }));
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -84,7 +85,10 @@ export const getByUserAndWorkspace = async(userId, targetId, workspaceId) => {
             ORDER BY b.due_date`,
             [targetId, workspaceId]
         );
-        return res.rows;
+        return res.rows.map(row => ({
+            ...row,
+            averageRating: parseFloat(row.averageRating)
+        }));
     }
     catch(err){
         return { error: err.message, status: 500 };
