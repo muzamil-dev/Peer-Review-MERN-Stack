@@ -61,7 +61,6 @@ export const getByUserAndWorkspace = async(userId, targetId, workspaceId) => {
             [userId, workspaceId]
         );
         user = user.rows[0];
-        console.log(user);
         if (!user)
             return {
                 error: "The requested workspace does not exist",
@@ -75,20 +74,27 @@ export const getByUserAndWorkspace = async(userId, targetId, workspaceId) => {
         
         // Get the results
         const res = await db.query(
-            `SELECT a.user_id AS "userId", 
-            a.assignment_id AS "assignmentId", 
-            a.average_rating AS "averageRating"
+            `SELECT a.user_id AS "userId",
+            u.first_name AS "firstName",
+            u.last_name AS "lastName",
+            jsonb_agg(
+                jsonb_build_object(
+                    'assignmentId', a.assignment_id,
+                    'startDate', b.start_date,
+                    'dueDate', b.due_date,
+                    'averageRating', round(a.average_rating, 2)
+                ) ORDER BY b.due_date
+            ) AS "assignments"
             FROM analytics AS a
+            JOIN users AS u
+            ON u.id = a.user_id
             JOIN assignments AS b
             ON a.assignment_id = b.id
             WHERE a.user_id = $1 AND b.workspace_id = $2
-            ORDER BY b.due_date`,
+            GROUP BY a.user_id, u.first_name, u.last_name`,
             [targetId, workspaceId]
         );
-        return res.rows.map(row => ({
-            ...row,
-            averageRating: parseFloat(row.averageRating)
-        }));
+        return res.rows[0];
     }
     catch(err){
         return { error: err.message, status: 500 };
