@@ -8,7 +8,10 @@ class UserProfile extends StatefulWidget {
   final int targetId;
   final int userId;
   const UserProfile(
-      {required this.targetId, required this.workspaceId, required this.userId, super.key});
+      {required this.targetId,
+      required this.workspaceId,
+      required this.userId,
+      super.key});
 
   @override
   State<UserProfile> createState() => _UserProfileState();
@@ -162,7 +165,7 @@ class _UserProfileState extends State<UserProfile> {
   Widget printAssignmentAverageRating(double averageRating) {
     if (averageRating == -1) {
       return const Text(
-        "Rating: N/A",
+        "Ratings: None",
         style: TextStyle(fontSize: 15.0),
       );
     } else if (averageRating == -2) {
@@ -193,6 +196,23 @@ class _UserProfileState extends State<UserProfile> {
     );
   }
 
+  Widget printBodyOfCards(double averageRating) {
+    if (averageRating != -1 && averageRating != -2) {
+      return const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Reviewers: ",
+            style: TextStyle(fontSize: 17),
+          ),
+          Text("Ratings:", style: TextStyle(fontSize: 17))
+        ],
+      );
+    } else {
+      return const SizedBox();
+    }
+  }
+
   Widget assignmentItem(BuildContext context, int index) {
     return Card(
       child: Padding(
@@ -214,17 +234,9 @@ class _UserProfileState extends State<UserProfile> {
             ),
             const SizedBox(
               height: 20,
-            ), // Assignment Name
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Reviewers: ",
-                  style: TextStyle(fontSize: 17),
-                ),
-                Text("Ratings:", style: TextStyle(fontSize: 17))
-              ],
             ),
+            printBodyOfCards(
+                averageRatingsForAssignment[index]), // Assignment Name
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -288,8 +300,11 @@ class _UserProfileState extends State<UserProfile> {
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>
-                                                AnalyticsPage(userId: widget.userId, targetId: widget.targetId, workspaceId: widget.workspaceId,),
+                                            builder: (context) => AnalyticsPage(
+                                              userId: widget.userId,
+                                              targetId: widget.targetId,
+                                              workspaceId: widget.workspaceId,
+                                            ),
                                           )); // Adjust the route name as needed
                                     },
                                     icon: const Icon(
