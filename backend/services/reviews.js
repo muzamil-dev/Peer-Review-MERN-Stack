@@ -6,13 +6,13 @@ export const getById = async(reviewId) => {
         const res = await db.query(
             `WITH rating_table AS
             (SELECT r.user_id, r.target_id,
-            array_agg(q.question ORDER BY q.id) as questions,
-            array_agg(ra.rating ORDER BY ra.question_id) as ratings
+            array_agg(q.question ORDER BY q.id) FILTER(WHERE q.question IS NOT NULL) AS questions,
+            array_agg(ra.rating ORDER BY ra.question_id) FILTER(WHERE ra.rating IS NOT NULL) AS ratings
             FROM reviews AS r
+            LEFT JOIN questions AS q
+            ON q.assignment_id = r.assignment_id
             LEFT JOIN ratings AS ra
-            ON r.id = ra.review_id
-            JOIN questions AS q
-            ON q.id = ra.question_id
+            ON ra.question_id = q.id
             WHERE r.id = $1
             GROUP BY r.user_id, r.target_id)
             
