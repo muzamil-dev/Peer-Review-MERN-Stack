@@ -19,6 +19,7 @@ class UserProfile extends StatefulWidget {
 
 class _UserProfileState extends State<UserProfile> {
   List<int> assignmentIds = [];
+  List<DateTime> dueDates = [];
   List<String> assignmentNames = [];
   List<double> averageRatingsForAssignment = [];
   Map<int, List<String>> reviewersOfAssignment = {};
@@ -79,6 +80,8 @@ class _UserProfileState extends State<UserProfile> {
           int assignmentId = response["assignmentId"];
           tempAssignmentIds.add(assignmentId);
           tempAssignmentNames.add(response["name"]);
+          var parsedDate = DateTime.parse(response["dueDate"]);
+          dueDates.add(parsedDate);
           tempReviewersOfAssignment[assignmentId] = [];
           tempAverageRatingsPerUser[assignmentId] = [];
         }
@@ -213,6 +216,22 @@ class _UserProfileState extends State<UserProfile> {
     }
   }
 
+  Widget printPastDue(DateTime dueDate) {
+    var now  = DateTime.now();
+
+    if (dueDate.isBefore(now)) {
+      return const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Assigment Past Due", style: TextStyle(color: Colors.red),)
+        ],
+      );
+    }
+    else {
+      return const SizedBox();
+    }
+  }
+
   Widget assignmentItem(BuildContext context, int index) {
     return Card(
       child: Padding(
@@ -244,6 +263,7 @@ class _UserProfileState extends State<UserProfile> {
                 printRatingsOfReviewers(index),
               ],
             ),
+            printPastDue(dueDates[index]),
           ],
         ),
       ),
