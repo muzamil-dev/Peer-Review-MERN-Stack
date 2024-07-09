@@ -10,6 +10,7 @@ import ApiExamples from './ApiExamples';
 import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin component
 import CreateFormPage from './CreateForm/CreateFormPageAdmin'; // Import the CreateFormPage component
 import UserDashboard from './UserDashboard';
+import ReviewPage from './ReviewPage';
 
 function App() {
     return (
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/formsAdmin/:workspaceId" element={<FormsPageAdmin />} />
                     <Route path="/createForm/:workspaceId" element={<CreateFormPage />} />
                     <Route path="/UserDashboard" element={<UserDashboard />} />
+                    <Route path="/Review/:reviewId" element={<ReviewPage />} />
                 </Routes>
             </div>
         </Router>

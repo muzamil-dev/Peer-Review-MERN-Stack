@@ -31,7 +31,8 @@ export const getById = async(assignmentId) => {
             dueDate: data.due_date,
             questions: data.questions,
             description: data.description,
-            started: data.started
+            started: data.started,
+            completed: data.completed
         };
     }
     catch(err){
@@ -75,7 +76,8 @@ export const getByWorkspace = async(workspaceId) => {
             dueDate: row.due_date,
             questions: row.questions,
             description: row.description,
-            started: row.started
+            started: row.started,
+            completed: data.completed
         }));
     }
     catch(err){

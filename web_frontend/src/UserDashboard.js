@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Api from './Api';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import './UserDashboard.css';
-//import e from 'express';
 
 const UserDashboard = () => {
     const [assignments, setAssignments] = useState([]);
+    const [filteredAssignments, setFilteredAssignments] = useState([]);
     const [selectedWorkspace, setSelectedWorkspace] = useState('');
     const [workspaces, setWorkspaces] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
@@ -31,6 +31,7 @@ const UserDashboard = () => {
             const response = await Api.Users.getUserWorkspaces(currentUserId);
             if (response.status === 200) {
                 const studentWorkspaces = response.data.filter(workspace => workspace.role === 'Student');
+                studentWorkspaces.sort((a, b) => a.name.localeCompare(b.name));
                 setWorkspaces(studentWorkspaces);
                 if (studentWorkspaces.length > 0) {
                     setSelectedWorkspace(studentWorkspaces[0].workspaceId);
@@ -47,13 +48,11 @@ const UserDashboard = () => {
     const fetchAssignments = async (workspaceId) => {
         try {
             const response = await Api.Workspace.GetAssignments(workspaceId, localStorage.getItem('accessToken'));
-            console.log(response);
             if (response.status === 200) {
-                // print the name and id of the assignments to the 
-                console.log(response.data);
-                console.log(response.data[0].name);
-                console.log(response.data[0].id);
-                setAssignments(response.data);
+                const fetchedAssignments = response.data;
+                const reviewsData = await fetchAndFilterReviews(fetchedAssignments);
+                setAssignments(fetchedAssignments);
+                setFilteredAssignments(reviewsData);
             } else {
                 setErrorMessage(`Failed to fetch assignments: ${response.message}`);
             }
@@ -65,22 +64,37 @@ const UserDashboard = () => {
 
     const fetchReviews = async (assignmentId) => {
         const userId = getCurrentUserId();
-        if(!userId) return;
+        if (!userId) return;
 
         try {
             const response = await Api.Assignments.GetAllReviewsByUser(assignmentId, userId, localStorage.getItem('accessToken'));
             if (response.status === 200) {
-                setReviews(prevReviews => ({
-                    ...prevReviews,
-                    [assignmentId]: response.data
-                }));
-            }else{
+                if (response.data.completedReviews.length > 0 || response.data.incompleteReviews.length > 0) {
+                    setReviews(prevReviews => ({
+                        ...prevReviews,
+                        [assignmentId]: response.data
+                    }));
+                    return response.data;
+                }
+            } else {
                 setErrorMessage(`Failed to fetch reviews: ${response.message}`);
             }
         } catch (error) {
-            console.error('Error fetching reviews:', error);
-            setErrorMessage(`Failed to fetch reviews: ${error.response ? error.response.data.message : error.message}`);
+            console.log(`No reviews found for assignment ${assignmentId}`);
         }
+        return null;
+    };
+
+    const fetchAndFilterReviews = async (assignments) => {
+        const reviewsPromises = assignments.map(async assignment => {
+            const reviewData = await fetchReviews(assignment.assignmentId);
+            return { ...assignment, reviewData };
+        });
+        const reviewsData = await Promise.all(reviewsPromises);
+
+        const filtered = reviewsData.filter(assignment => assignment.reviewData);
+        console.log('filtered', filtered);
+        return filtered;
     };
 
     useEffect(() => {
@@ -93,39 +107,23 @@ const UserDashboard = () => {
         }
     }, [selectedWorkspace]);
 
-    useEffect(() => {
-        if (assignments.length > 0) {
-            assignments.forEach(assignment => {
-                fetchReviews(assignment.assignmentId);
-            });
-        }
-    }, [assignments]);
-
     const handleWorkspaceChange = (e) => {
         setSelectedWorkspace(e.target.value);
     };
 
     const handleReviewAction = (reviewId, isCompleted) => {
         if (isCompleted) {
-            // Navigate to edit review page
-            navigate(`/editReview/${reviewId}`);
+            navigate(`/Review/${reviewId}`);
         } else {
-            // Navigate to start review page
-            navigate(`/startReview/${reviewId}`);
+            navigate(`/Review/${reviewId}`);
         }
     };
 
     const renderReviewDropdown = (assignmentId) => {
         const assignmentReviews = reviews[assignmentId];
-        console.log(assignmentReviews);
-    
+
         if (!assignmentReviews) return null;
-        //if(assignmentReviews.)
-        if (assignmentReviews.incompleteReviews.length === 0 && assignmentReviews.completedReviews.length === 0) {
-            return <div>No reviews found</div>;
-        }
-            
-    
+
         return (
             <div className="review-dropdown">
                 <select>
@@ -156,7 +154,6 @@ const UserDashboard = () => {
         );
     };
 
-
     return (
         <div className="dashboardz">
             <h1 className="header-large">Assignments</h1>
@@ -183,7 +180,7 @@ const UserDashboard = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {assignments.map((assignment) => (
+                        {filteredAssignments.map((assignment) => (
                             <tr key={assignment.assignmentId}>
                                 <td>{assignment.name}</td>
                                 <td>{new Date(assignment.dueDate).toLocaleString()}</td>
