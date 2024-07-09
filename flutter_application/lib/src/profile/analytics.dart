@@ -19,29 +19,34 @@ class AnalyticsPage extends StatefulWidget {
 class _AnalyticsPageState extends State<AnalyticsPage> {
   String userName = '';
 
-  @override 
+  @override
   void initState() {
     super.initState();
-
+    // getAnalyticsForUser(context);
   }
 
-  Future<void> getAnalyticsForUser(BuildContext context) async {
-    final url = Uri.parse("http://10.0.2.2:5000/analytics/workspace/${widget.workspaceId}/user/${widget.targetId}");
+  // Future<void> getAnalyticsForUser(BuildContext context) async {
+  //   final url = Uri.parse(
+  //       "http://10.0.2.2:5000/analytics/workspace/${widget.workspaceId}/user/${widget.targetId}");
 
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        
-      );
-    }
-    catch (error) {
-      print("Error Getting Analytics for User: $error");
-    }
-  }
-
+  //   try {
+  //     final response = await http.get(
+  //       url,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: jsonEncode({
+  //         "userId": widget.userId,
+  //       }),
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final jsonResponse = json.decode(response.body);
+  //       print(jsonResponse);
+  //     }
+  //   } catch (error) {
+  //     print("Error Getting Analytics for User: $error");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

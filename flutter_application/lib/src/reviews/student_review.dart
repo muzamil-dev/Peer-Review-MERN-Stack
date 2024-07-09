@@ -108,6 +108,9 @@ class _StudentReviewState extends State<StudentReview> {
         print("Review Submitted Successfully!");
         Navigator.pop(context);
       }
+      else {
+        print("Error : ");
+      }
     } catch (error) {
       print("Error Submitting Review: $error");
     }

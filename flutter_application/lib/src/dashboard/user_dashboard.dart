@@ -66,12 +66,17 @@ class _UserDashboardState extends State<UserDashboard> {
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
+        var now = DateTime.now();
 
         setState(() {
           for (var response in jsonResponse) {
-            assignments.add(response);
-            deadlines.add(getDateString(response["dueDate"]));
-            getAssignmentProgress(context, response['assignmentId']);
+            var parsedDate = DateTime.parse(response["dueDate"]);
+            // Checks if the Current Assignment is Past the Due Date
+            if (parsedDate.isAfter(now)) {
+              assignments.add(response);
+              deadlines.add(getDateString(response["dueDate"]));
+              getAssignmentProgress(context, response['assignmentId']);
+            }
           }
         });
       }

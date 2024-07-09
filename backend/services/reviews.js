@@ -239,7 +239,6 @@ export const submit = async(userId, reviewId, ratings) => {
             [reviewId]
         );
         const data = res.rows[0];
-        console.log(data);
         // Check that the referenced review exists
         if (!data)
             return { 
