@@ -4,10 +4,17 @@
 }
 
 .headerLarge {
-    font-size: 1.5em;
+    font-size: 3.5em;
     margin-bottom: 20px;
     text-align: center;
     color: white;
+    font-weight: bold;
+}
+
+.headerContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .container {
@@ -17,8 +24,43 @@
     gap: 20px;
 }
 
+.headerContainer {
+    display: flex;
+    justify-content: center; /* Center content horizontally */
+    align-items: center;
+    position: relative; /* Allows absolute positioning of the button */
+    margin-bottom: 20px; /* Adjust as needed */
+}
+
+.centeredTitle {
+    text-align: center;
+    flex-grow: 1;
+}
+
+/* .dashboardButton {
+    position: absolute;
+    right: 200px;
+    top: 50%;
+    transform: translateY(-50%);
+} */
+
 .ungroupedCard {
     width: 100%;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.ungrouped{
+    background-color: rgba(0, 0, 0, 0);
+    border: none !important;
+}
+
+.ungrouped_body{
+    background-color: rgba(170, 79, 79, 0) !important;
+    border: none !important;
+}
+
+.ungrouped h2 {
+    color: white;
 }
 
 .groupCardWrapper {
@@ -36,12 +78,12 @@
     justify-content: space-between;
     box-sizing: border-box; /* Ensure padding is included in the height */
     overflow: hidden; /* Prevent content overflow */
+    border-radius: 10px;
 }
 
 .ungrouped{
     height: max-content;
 }
-
 
 .groupCard h2 {
     font-size: 1.5em;
@@ -73,14 +115,6 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
-}
-
-.headerLarge {
-    font-size: 75px;
-    font-weight: bold;
-    /* background-color: white; */
-    width: 100%;
-    text-align: center;
 }
 
 .mainContainer {
@@ -131,4 +165,99 @@
     width: 100%;
     margin: 0;
     padding: 0;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    max-width: 100%;
+}
+
+.formContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.formContainer h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.formContainer label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.formContainer input {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.formContainer .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.formContainer .btn.cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+.formContainer .btn:hover {
+    opacity: 0.8;
+}
+
+.mb-10{
+    margin-bottom: 15px !important;
+}
+
+.btn-width{
+    width: 100%;
+}
+
+.form-select{
+    width: 60px !important;
+}
+
+.dropdown {
+    width: 200px;
+}
+
+.temp {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.btnGroup{
+    display: block;
+    justify-content: center;
+}
+
+.custom{
+    
 }

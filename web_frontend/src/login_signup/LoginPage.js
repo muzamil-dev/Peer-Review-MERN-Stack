@@ -1,5 +1,5 @@
 // src/LoginPage.js
-import Api from "./Api.js";
+import Api from "../Api.js";
 import React, { useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -39,137 +39,122 @@ const LoginPage = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        console.log('Login button clicked'); // Debugging log
         try {
             const response = await Api.Users.DoLogin(loginData.email, loginData.password);
+            console.log('Response from API:', response); // Debugging log
             if (response.status === 200) {
-                // alert('Login successful');
+                localStorage.setItem('accessToken', response.data.accessToken); // Store JWT in local storage
                 enqueueSnackbar('Login successful', { variant: 'success' });
                 navigate('/DashboardPage');
-            // Redirect or perform additional actions after successful login
-            }
-            else {
+            } else {
                 enqueueSnackbar('Invalid email or password', { variant: 'error' });
-                // alert('Invalid email or password');
             }
         } catch (error) {
             enqueueSnackbar('Error: ' + error.message, { variant: 'warning' });
             console.error('Error logging in:', error);
-            //alert('Invalid email or password-2');
         }
     };
 
     const handleSignup = async (e) => {
         e.preventDefault();
+        console.log('Signup button clicked'); // Add this line for debugging
         if (signupData.password !== signupData.confirmPassword) {
-            // alert('Passwords do not match');
-            enqueueSnackbar('Passwords do not match', { variance: 'error' });
+            enqueueSnackbar('Passwords do not match', { variant: 'error' });
             return;
         }
-        //setIsLoading(true);
-
-        //console.log('Signup Data:', signupData); // Log the signup data
-
+    
+        console.log('Signup Data:', signupData); // Log the signup data for debugging
+    
         try {
             const response = await Api.Users.CreateAccount(
                 signupData.firstName,
-                signupData.middleName,
+                //signupData.middleName,
                 signupData.lastName,
                 signupData.email,
                 signupData.password
             );
+            console.log('Response from API:', response); // Add this line for debugging
             if (response.status === 201) {
-                // alert('Signup successful');
                 enqueueSnackbar('Signup successful', { variant: 'success' });
-                //navigate('/DashboardPage');
                 setTempEmail(signupData.email);
                 setIsVerificationActive(true);
             } else {
                 enqueueSnackbar('Signup failed', { variant: 'error' });
-                // alert('Signup failed');
             }
         } catch (error) {
             console.error('Error signing up:', error);
             enqueueSnackbar('Error signing up' + error.message, { variant: 'warning' });
-            // alert('Signup failed');
         }
-        //setIsLoading(false);
     };
-
     /**/
     const handleVerify = async (e) => {
         e.preventDefault();
         //setIsLoading(true);
         try {
             const response = await Api.Users.VerifyEmailCode(tempEmail, verificationToken);
-            if (response.status === 200) {
-                // alert('Verification successful. You can now log in.');
-                enqueueSnackbar('Verification successful. You can now log in.', { variance: 'success'});
+            console.log('Verification response:', response); // Log the response for debugging
+    
+            if (response.status === 201) {
+                // Successful verification
+                enqueueSnackbar('Verification successful. You can now log in.', { variant: 'success' });
                 setIsLoginActive(true);
                 setIsVerificationActive(false);
                 setSignupData({ firstName: '', middleName: '', lastName: '', email: '', password: '', confirmPassword: '' });
                 setVerificationToken('');
+                console.log('Verification successful, switched to login form.');
             } else {
+                // Verification failed
                 enqueueSnackbar('Verification Failed', { variant: 'error' });
-                // alert('Verification failed');
+                console.error('Verification failed:', response.message);
             }
         } catch (error) {
             console.error('Error verifying token:', error);
-            // alert('Verification failed');
             enqueueSnackbar('Verification failed', { variant: 'warning' });
         }
         //setIsLoading(false);
-    }; 
+    };
     
     const handleResetPasswordRequest = async (e) => {
         e.preventDefault();
-        //setIsLoading(true);
         try {
             const response = await Api.Users.RequestPasswordReset(resetPasswordData.email);
-            if (response.status === 200) {
-                // alert('Reset token sent. Please check your email.');
+            if (response.success) {
                 enqueueSnackbar('Reset token sent. Please check your email', { variant: 'success' });
                 setIsRequestResetPasswordActive(false);
                 setIsResetPasswordActive(true);
                 setResetPasswordData({ ...resetPasswordData, email: resetPasswordData.email });
             } else {
-                // alert('This email is not registered.');
-                enqueueSnackbar('This email is not registered.', { variant: 'error' });
+                enqueueSnackbar(response.message, { variant: 'error' });
             }
         } catch (error) {
             console.error('Error requesting reset password:', error);
-            // alert('Error requesting reset password');
             enqueueSnackbar('Error requesting reset password', { variant: 'warning' });
         }
-        //setIsLoading(false); // End loading
     };
-
+    
     const handleResetPassword = async (e) => {
         e.preventDefault();
         if (resetPasswordData.newPassword !== resetPasswordData.confirmNewPassword) {
-            // alert('Passwords do not match');
             enqueueSnackbar('Passwords do not match', { variant: 'error' });
             return;
         }
-        //setIsLoading(true); // Start loading
         try {
             const response = await Api.Users.ResetPassword(resetPasswordData.email, resetPasswordData.token, resetPasswordData.newPassword);
-            if (response.status === 200) {
-                // alert('Password reset successful. You can now log in with your new password.');
-                enqueueSnackbar('Password reset successful. You can now log in with your new password.', { variant:'success' });
+            if (response.success) {
+                enqueueSnackbar('Password reset successful. You can now log in with your new password.', { variant: 'success' });
                 setIsLoginActive(true);
                 setIsResetPasswordActive(false);
-                setResetPasswordData({ email: '', token: '', newPassword: '', confirmNewPassword: '' }); // Reset resetPasswordData
+                setResetPasswordData({ email: '', token: '', newPassword: '', confirmNewPassword: '' });
             } else {
-                // alert('Password reset failed. Please check the token and try again.');
-                enqueueSnackbar('Password reset failed. Please check the token and try again.', { variant: 'error' });
+                enqueueSnackbar(response.message, { variant: 'error' });
             }
         } catch (error) {
             console.error('Error resetting password:', error);
-            // alert('Error resetting password');
             enqueueSnackbar('Error resetting password', { variant: 'warning' });
         }
-        //setIsLoading(false);
     };
+    
     
     /**/
 

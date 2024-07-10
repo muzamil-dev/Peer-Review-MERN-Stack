@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {jwtDecode} from 'jwt-decode';
 import './DashboardPage.css';
-import Api from './Api.js'; 
+import Api from '../Api.js';
+
 const DashboardPage = () => {
     const [workspaces, setWorkspaces] = useState([]);
     const [newWorkspaceName, setNewWorkspaceName] = useState('');
@@ -12,74 +14,142 @@ const DashboardPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Replace 'userId' with the actual user ID
-        const userId = '6671c8362ffea49f3018bf61';
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+    
+        console.log('Token:', token); // Log the token
+        const decodedToken = jwtDecode(token);
+        console.log('Decoded Token:', decodedToken); // Log the decoded token
+        const userId = decodedToken.userId;
+        console.log('User ID:', userId); // Log the userId
+    
+        if (!userId) {
+            console.error('User ID not found in token');
+            navigate('/login');
+            return;
+        }
+    
         const fetchWorkspaces = async () => {
-            const response = await Api.Users.getUserWorkspaces(userId);
-            if (response.status === 200) {
-                setWorkspaces(response.data);
-            } else {
-                console.error('Failed to fetch workspaces:', response.message);
-            }
-        };
-
-        fetchWorkspaces();
-    }, []);
-
-    const handleJoinWorkspace = async () => {
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
-        const response = await Api.Workspace.JoinWorkspace(userId, inviteCode);
-
-        if (response.success) {
-            // Reload the workspaces after joining a new one
-            const fetchWorkspaces = async () => {
-                const response = await Api.Users.getUserWorkspaces(userId);
+            try {
+                const response = await Api.Users.getUserWorkspaces(token);
                 if (response.status === 200) {
                     setWorkspaces(response.data);
                 } else {
                     console.error('Failed to fetch workspaces:', response.message);
                 }
-            };
+            } catch (error) {
+                console.error('Error fetching workspaces:', error);
+            }
+        };
+    
+        fetchWorkspaces();
+    }, [navigate]);
+    
 
-            fetchWorkspaces();
-        } else {
-            console.error('Failed to join workspace:', response.message);
+    const handleJoinWorkspace = async () => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+    
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.userId;
+    
+        try {
+            const response = await Api.Workspaces.JoinWorkspace(userId, inviteCode);
+            if (response.success) {
+                const fetchWorkspaces = async () => {
+                    try {
+                        const response = await Api.Users.getUserWorkspaces(token);
+                        if (response.status === 200) {
+                            setWorkspaces(response.data);
+                        } else {
+                            console.error('Failed to fetch workspaces:', response.message);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching workspaces:', error);
+                    }
+                };
+    
+                fetchWorkspaces();
+            } else {
+                console.error('Failed to join workspace:', response.message);
+            }
+        } catch (error) {
+            console.error('Error joining workspace:', error);
         }
     };
+    
 
     const handleAddWorkspace = async () => {
-        const userId = '6671c8362ffea49f3018bf61'; // Replace with the actual user ID
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+    
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.userId;
+    
         const domainsArray = newWorkspaceDomains.split(',').map(domain => domain.trim()).filter(domain => domain);
-        const response = await Api.Workspace.CreateWorkspace(
-            newWorkspaceName,
-            userId,
-            domainsArray,
-            maxGroupSize ? parseInt(maxGroupSize, 10) : undefined,
-            numGroups ? parseInt(numGroups, 10) : undefined
-        );
-
-        if (response.status === 201) {
-            const newWorkspace = {
-                workspaceId: response.workspaceId,
-                name: newWorkspaceName,
-                role: 'Admin',
-                maxGroupSize: maxGroupSize,
-                numGroups: numGroups
-            };
-            setWorkspaces([...workspaces, newWorkspace]);
-            setNewWorkspaceName('');
-            setNewWorkspaceDomains('');
-            setInviteCode('');
-            setMaxGroupSize('');
-            setNumGroups('');
-        } else {
-            console.error('Failed to create workspace:', response.message);
+        try {
+            const response = await Api.Workspaces.CreateWorkspace(
+                newWorkspaceName,
+                userId,
+                domainsArray,
+                maxGroupSize ? parseInt(maxGroupSize, 10) : undefined,
+                numGroups ? parseInt(numGroups, 10) : undefined
+            );
+    
+            if (response.status === 201 || response.status === 200) {
+                const fetchWorkspaces = async () => {
+                    try {
+                        const response = await Api.Users.getUserWorkspaces(token);
+                        if (response.status === 200) {
+                            setWorkspaces(response.data);
+                        } else {
+                            console.error('Failed to fetch workspaces:', response.message);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching workspaces:', error);
+                    }
+                };
+                
+                const newWorkspace = {
+                    workspaceId: response.workspaceId,
+                    name: newWorkspaceName,
+                    role: 'Admin',
+                    maxGroupSize: maxGroupSize,
+                    numGroups: numGroups
+                };
+                setWorkspaces([...workspaces, newWorkspace]);
+                setNewWorkspaceName('');
+                setNewWorkspaceDomains('');
+                setInviteCode('');
+                setMaxGroupSize('');
+                setNumGroups('');
+            } else {
+                console.error('Failed to create workspace:', response.message);
+            }
+        } catch (error) {
+            console.error('Error creating workspace:', error);
         }
     };
+    
 
     const handleWorkspaceClick = (workspaceId) => {
         const workspace = workspaces.find(w => w.workspaceId === workspaceId);
-        navigate(`/groups/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
+        console.log('Workspace:', workspace); // Log the workspace object
+        console.log('Role:', workspace.role); // Log the role of the user in the workspace
+        if (workspace.role === 'Instructor') {
+            navigate(`/workspaces/${workspaceId}/admin`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
+        } else {
+            navigate(`/groups/${workspaceId}`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
+        }
     };
 
     return (
