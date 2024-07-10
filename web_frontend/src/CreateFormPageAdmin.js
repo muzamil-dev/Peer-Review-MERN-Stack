@@ -1,27 +1,11 @@
 import React, { useState } from 'react';
 import './CreateFormPage.module.css';
-import Api from '../Api.js';
-import { jwtDecode } from 'jwt-decode';
-import { useNavigate, useParams } from 'react-router-dom';
-
 
 const CreateFormPage = () => {
     const [formName, setFormName] = useState('');
     const [fields, setFields] = useState([{ name: '', value: '' }]);
     const [availableFrom, setAvailableFrom] = useState('');
     const [availableUntil, setAvailableUntil] = useState('');
-    const navigate = useNavigate();
-    const { workspaceId } = useParams(); // Assuming workspaceId is passed as a URL parameter
-
-    const getCurrentUserId = () => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            navigate('/login'); // Redirect to login if token is not available
-            return null;
-        }
-        const decodedToken = jwtDecode(token);
-        return decodedToken.userId;
-    }
 
     const handleFormNameChange = (e) => {
         setFormName(e.target.value);
@@ -52,36 +36,9 @@ const CreateFormPage = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        const userId = getCurrentUserId();
-        if (!userId) {
-            return;
-        }
-
-        const questions = fields.map(field => field.name);
-        const startDate = new Date(availableFrom).getTime(); // Convert to epoch time
-        const dueDate = new Date(availableUntil).getTime(); // Convert to epoch time
-
-        const response = await Api.Assignments.CreateAssignment(
-            userId,
-            workspaceId,
-            formName,
-            startDate,
-            dueDate,
-            questions,
-            'Description' // Replace with actual description if needed
-        );
-
-        if (response.success) {
-            // Handle success (e.g., show a success message, redirect to another page, etc.)
-            alert('Form created successfully!');
-            navigate(`/formsAdmin/${workspaceId}`); // Adjust the redirect URL as needed
-        } else {
-            // Handle error (e.g., show an error message)
-            console.error('Failed to create form:', response.message);
-            alert('Failed to create form.');
-        }
+        // form submission logic
     };
 
     return (
@@ -122,6 +79,14 @@ const CreateFormPage = () => {
                                 placeholder={`Name ${index + 1}`}
                                 name="name"
                                 value={field.name}
+                                onChange={event => handleFieldChange(index, event)}
+                                className="form-control"
+                            />
+                            <input
+                                type="text"
+                                placeholder={`Value ${index + 1}`}
+                                name="value"
+                                value={field.value}
                                 onChange={event => handleFieldChange(index, event)}
                                 className="form-control"
                             />
