@@ -60,7 +60,7 @@ const DashboardPage = () => {
         const userId = decodedToken.userId;
     
         try {
-            const response = await Api.Workspace.JoinWorkspace(userId, inviteCode);
+            const response = await Api.Workspaces.JoinWorkspace(userId, inviteCode);
             if (response.success) {
                 const fetchWorkspaces = async () => {
                     try {
@@ -97,7 +97,7 @@ const DashboardPage = () => {
     
         const domainsArray = newWorkspaceDomains.split(',').map(domain => domain.trim()).filter(domain => domain);
         try {
-            const response = await Api.Workspace.CreateWorkspace(
+            const response = await Api.Workspaces.CreateWorkspace(
                 newWorkspaceName,
                 userId,
                 domainsArray,

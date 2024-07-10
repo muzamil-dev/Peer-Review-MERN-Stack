@@ -35,7 +35,7 @@ const ViewFormsAdminPage = () => {
             const userId = getCurrentUserId();
             if (!userId) return;
 
-            const response = await Api.Workspace.GetAssignments(workspaceId);
+            const response = await Api.Workspaces.GetAssignments(workspaceId);
             if (response.status === 200) {
                 setForms(response.data); // Assuming response.data contains the list of assignments/forms
             } else {

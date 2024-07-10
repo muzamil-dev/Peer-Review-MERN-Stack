@@ -47,7 +47,7 @@ const UserDashboard = () => {
 
     const fetchAssignments = async (workspaceId) => {
         try {
-            const response = await Api.Workspace.GetAssignments(workspaceId, localStorage.getItem('accessToken'));
+            const response = await Api.Workspaces.GetAssignments(workspaceId, localStorage.getItem('accessToken'));
             if (response.status === 200) {
                 const fetchedAssignments = response.data;
                 const reviewsData = await fetchAndFilterReviews(fetchedAssignments);
