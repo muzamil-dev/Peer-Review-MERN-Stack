@@ -1,16 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';  // Import Bootstrap CSS
-import LoginPage from './login_signup/LoginPage';
-import DashboardPage from './Home/DashboardPage';
+import LoginPage from './LoginPage';
+import DashboardPage from './DashboardPage';
 import Example from './ApiExamples';
 import CustomGroupsPage from './GroupsPage';  // Import the CustomGroupsPage component
 import GroupsPageAdmin from './GroupsPageAdmin';  // Import the CustomGroupsPageAdmin component
 import ApiExamples from './ApiExamples';
 import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin component
-import CreateFormPage from './CreateForm/CreateFormPageAdmin'; // Import the CreateFormPage component
-import UserDashboard from './UserDashboard';
-import ReviewPage from './ReviewPage';
+import CreateFormPage from './CreateFormPageAdmin'; // Import the CreateFormPage component
 
 function App() {
     return (
@@ -23,10 +21,8 @@ function App() {
                     <Route path="/groups/:workspaceId" element={<CustomGroupsPage />} />
                     <Route path="/workspaces/:workspaceId/admin" element={<GroupsPageAdmin />} />
                     <Route path="/ApiExamples" element={<ApiExamples />} />
-                    <Route path="/formsAdmin/:workspaceId" element={<FormsPageAdmin />} />
-                    <Route path="/createForm/:workspaceId" element={<CreateFormPage />} />
-                    <Route path="/UserDashboard" element={<UserDashboard />} />
-                    <Route path="/Review/:reviewId" element={<ReviewPage />} />
+                    <Route path="/formsAdmin" element={<FormsPageAdmin />} />
+                    <Route path="/createForm" element={<CreateFormPage />} />
                 </Routes>
             </div>
         </Router>
