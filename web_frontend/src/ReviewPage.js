@@ -8,6 +8,7 @@ const ReviewPage = () => {
     const [review, setReview] = useState(null);
     const [ratings, setRatings] = useState([]);
     const navigate = useNavigate();
+    const isCompleted = ratings.length > 0 && !ratings.includes(0);
 
     useEffect(() => {
         fetchReview();
@@ -67,7 +68,7 @@ const ReviewPage = () => {
                 <div className="review-details">
                     <span>Due: {new Date(review.dueDate).toLocaleDateString()}</span>
                     <span>Questions: {review.questions.length}</span>
-                    <span>Status: <span className={review.completed ? "status-completed" : "status-pending"}>{review.completed ? "✔" : "✖"}</span></span>
+                    <span>Status: <span className={isCompleted ? "status-completed" : "status-pending"}>{isCompleted ? "✔" : "✖"}</span></span>
                 </div>
             </header>
             <div className="review-questions">

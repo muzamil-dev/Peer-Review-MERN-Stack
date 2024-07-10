@@ -7,10 +7,12 @@ import './UserDashboard.css';
 const UserDashboard = () => {
     const [assignments, setAssignments] = useState([]);
     const [filteredAssignments, setFilteredAssignments] = useState([]);
+    const [pastDueAssignments, setPastDueAssignments] = useState([]);
     const [selectedWorkspace, setSelectedWorkspace] = useState('');
     const [workspaces, setWorkspaces] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
     const [reviews, setReviews] = useState({});
+    const [selectedReview, setSelectedReview] = useState({});
     const navigate = useNavigate();
 
     const getCurrentUserId = () => {
@@ -51,8 +53,14 @@ const UserDashboard = () => {
             if (response.status === 200) {
                 const fetchedAssignments = response.data;
                 const reviewsData = await fetchAndFilterReviews(fetchedAssignments);
+                const now = new Date();
+
+                const currentAssignments = reviewsData.filter(assignment => new Date(assignment.dueDate) >= now);
+                const pastDueAssignments = reviewsData.filter(assignment => new Date(assignment.dueDate) < now);
+
                 setAssignments(fetchedAssignments);
-                setFilteredAssignments(reviewsData);
+                setFilteredAssignments(currentAssignments);
+                setPastDueAssignments(pastDueAssignments);
             } else {
                 setErrorMessage(`Failed to fetch assignments: ${response.message}`);
             }
@@ -111,11 +119,19 @@ const UserDashboard = () => {
         setSelectedWorkspace(e.target.value);
     };
 
-    const handleReviewAction = (reviewId, isCompleted) => {
-        if (isCompleted) {
+    const handleReviewChange = (assignmentId, reviewId) => {
+        setSelectedReview(prevSelectedReview => ({
+            ...prevSelectedReview,
+            [assignmentId]: reviewId
+        }));
+    };
+
+    const handleReviewAction = (assignmentId, isCompleted) => {
+        const reviewId = selectedReview[assignmentId];
+        if (reviewId) {
             navigate(`/Review/${reviewId}`);
         } else {
-            navigate(`/Review/${reviewId}`);
+            console.error('No review selected');
         }
     };
 
@@ -126,7 +142,11 @@ const UserDashboard = () => {
 
         return (
             <div className="review-dropdown">
-                <select>
+                <select
+                    value={selectedReview[assignmentId] || ''}
+                    onChange={(e) => handleReviewChange(assignmentId, e.target.value)}
+                >
+                    <option value="" disabled>Select a review</option>
                     {assignmentReviews.incompleteReviews.map((review) => (
                         <option key={review.reviewId} value={review.reviewId}>
                             {review.firstName} {review.lastName}
@@ -138,18 +158,13 @@ const UserDashboard = () => {
                         </option>
                     ))}
                 </select>
-                {assignmentReviews.incompleteReviews.length > 0 && (
-                    <button className='btn btn-primary'
-                        onClick={() => handleReviewAction(assignmentReviews.incompleteReviews[0].reviewId, false)}>
-                        Start
-                    </button>
-                )}
-                {assignmentReviews.completedReviews.length > 0 && (
-                    <button className='btn btn-primary'
-                        onClick={() => handleReviewAction(assignmentReviews.completedReviews[0].reviewId, true)}>
-                        Edit
-                    </button>
-                )}
+                <button
+                    className='btn btn-primary'
+                    onClick={() => handleReviewAction(assignmentId, false)}
+                    disabled={!selectedReview[assignmentId]}
+                >
+                    {assignmentReviews.incompleteReviews.length > 0 ? 'Start' : 'Edit'}
+                </button>
             </div>
         );
     };
@@ -168,13 +183,14 @@ const UserDashboard = () => {
                 </select>
             </div>
 
+            <h2>Current Assignments</h2>
             <div className="assignments-table">
                 <table className="table table-white">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Due Date</th>
-                            <th>Submitted</th>
+                            <th>Start Date</th>
                             <th>Status</th>
                             <th>Reviews</th>
                         </tr>
@@ -184,8 +200,34 @@ const UserDashboard = () => {
                             <tr key={assignment.assignmentId}>
                                 <td>{assignment.name}</td>
                                 <td>{new Date(assignment.dueDate).toLocaleString()}</td>
-                                <td>{assignment.submitted ? new Date(assignment.submitted).toLocaleString() : '-'}</td>
-                                <td>{assignment.completed ? 'Completed' : 'Incomplete'}</td>
+                                <td>{new Date(assignment.startDate).toLocaleString()}</td>
+                                <td>{(reviews[assignment.assignmentId]?.incompleteReviews.length === 0) ? 'Completed' : 'Incomplete'}</td>
+                                <td>{renderReviewDropdown(assignment.assignmentId)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>Past Due Assignments</h2>
+            <div className="assignments-table">
+                <table className="table table-white">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Due Date</th>
+                            <th>Start Date</th>
+                            <th>Status</th>
+                            <th>Reviews</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {pastDueAssignments.map((assignment) => (
+                            <tr key={assignment.assignmentId}>
+                                <td>{assignment.name}</td>
+                                <td>{new Date(assignment.dueDate).toLocaleString()}</td>
+                                <td>{new Date(assignment.startDate).toLocaleString()}</td>
+                                <td>{(reviews[assignment.assignmentId]?.incompleteReviews.length === 0) ? 'Completed' : 'Incomplete'}</td>
                                 <td>{renderReviewDropdown(assignment.assignmentId)}</td>
                             </tr>
                         ))}
