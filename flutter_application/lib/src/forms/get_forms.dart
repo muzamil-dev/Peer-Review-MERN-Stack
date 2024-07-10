@@ -9,9 +9,13 @@ import 'package:intl/intl.dart';
 class GetAssignments extends StatefulWidget {
   final int userId;
   final int workspaceId;
+  final dynamic token;
 
   const GetAssignments(
-      {super.key, required this.workspaceId, required this.userId});
+      {super.key,
+      required this.token,
+      required this.workspaceId,
+      required this.userId});
 
   static const routeName = "/getAssignments";
 
@@ -36,7 +40,10 @@ class _GetAssignmentsState extends State<GetAssignments> {
     try {
       final response = await http.get(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
+        },
       );
 
       print(response.body);
@@ -69,6 +76,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
       final response = await http.delete(url,
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${widget.token}',
           },
           body: jsonEncode({
             "userId": widget.userId,
@@ -119,6 +127,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => CreateForm(
+                      token: widget.token,
                       workspaceId: widget.workspaceId,
                       userId: widget.userId,
                     ),
@@ -157,6 +166,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => EditForm(
+                            token: widget.token,
                             assignmentId: assignment.id,
                             workspaceId: widget.workspaceId,
                             userId: widget.userId,

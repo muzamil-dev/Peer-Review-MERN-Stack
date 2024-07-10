@@ -31,24 +31,39 @@ void main() async {
             token: prefs.getString('token'),
           ),
       UserGroup.routeName: (context) => UserGroup(
-          token: prefs.getString('token'),
+            token: prefs.getString('token'),
             workspaceId: 14,
             userId: 14,
           ),
       // Manually Added Create Forms Page for Debugging purposes. H alkhateeb
-      CreateForm.routeName: (context) =>
-          const CreateForm(workspaceId: 14, userId: 3),
-      GetAssignments.routeName: (context) =>
-          const GetAssignments(workspaceId: 14, userId: 3),
+      CreateForm.routeName: (context) => CreateForm(
+            workspaceId: 14,
+            userId: 3,
+            token: prefs.getString('token'),
+          ),
+      GetAssignments.routeName: (context) => GetAssignments(
+            workspaceId: 14,
+            userId: 3,
+            token: prefs.getString('token'),
+          ),
       // Manually Added Edit Forms Page for Debugging Purposes, User: Hashim DB
-      EditForm.routeName: (context) =>
-          const EditForm(assignmentId: 1, workspaceId: 14, userId: 3),
+      EditForm.routeName: (context) => EditForm(
+            assignmentId: 1,
+            workspaceId: 14,
+            userId: 3,
+            token: prefs.getString('token'),
+          ),
       // User Dashboard Page for Raheem Sterling
       UserDashboard.routeName: (context) => UserDashboard(
             token: prefs.getString('token'),
             workspaceId: 14,
           ),
-      AnalyticsPage.routeName: (context) => const AnalyticsPage(targetId: 15, workspaceId: 14),
+      AnalyticsPage.routeName: (context) => AnalyticsPage(
+            targetId: 15,
+            workspaceId: 14,
+            token: prefs.getString('token'),
+            userId: 3,
+          ),
     },
   ));
 }

@@ -529,6 +529,7 @@ class _AdminGroupState extends State<AdminGroup> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => GetAssignments(
+                                token: widget.token,
                                 workspaceId: widget.workspaceId,
                                 userId: widget.userId,
                               ),
@@ -626,6 +627,7 @@ class _AdminGroupState extends State<AdminGroup> {
                                           MaterialPageRoute(
                                             builder: (context) => UserProfile(
                                                 userId: widget.userId,
+                                                token: widget.token,
                                                 workspaceId: widget.workspaceId,
                                                 targetId: member.userId),
                                           ),

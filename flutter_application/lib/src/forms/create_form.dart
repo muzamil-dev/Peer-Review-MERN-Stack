@@ -9,10 +9,14 @@ import "dart:convert";
 
 class CreateForm extends StatefulWidget {
   static const routeName = '/createForm';
+  final dynamic token;
   final int userId;
   final int workspaceId;
   const CreateForm(
-      {required this.userId, required this.workspaceId, super.key});
+      {required this.userId,
+      required this.token,
+      required this.workspaceId,
+      super.key});
 
   @override
   State<CreateForm> createState() => _CreateFormState();
@@ -39,7 +43,10 @@ class _CreateFormState extends State<CreateForm> {
     try {
       final response = await http.post(
         url,
-        headers: {'content-type': 'application/json'},
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
+        },
         body: jsonEncode({
           "name": formName.text,
           "userId": widget.userId,
@@ -56,7 +63,6 @@ class _CreateFormState extends State<CreateForm> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Succesfully Created Assignment")));
-        
       } else {
         final errorData = json.decode(response.body);
         print("Error Creating Assignment: $errorData");

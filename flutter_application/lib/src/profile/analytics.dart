@@ -7,10 +7,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AnalyticsPage extends StatefulWidget {
   final int targetId;
   final int workspaceId;
+  final int userId;
+  final dynamic token;
   static const routeName = "/analytics";
 
   const AnalyticsPage(
-      {required this.targetId, required this.workspaceId, super.key});
+      {required this.targetId,
+      required this.userId,
+      required this.workspaceId,
+      required this.token,
+      super.key});
 
   @override
   State<AnalyticsPage> createState() => _AnalyticsPageState();
@@ -18,18 +24,11 @@ class AnalyticsPage extends StatefulWidget {
 
 class _AnalyticsPageState extends State<AnalyticsPage> {
   String userName = '';
-  late int userId;
-  late dynamic token;
 
   @override
   void initState() {
     super.initState();
-  }
-
-  // Allows for Persistent Storage of JWT Token
-  Future<void> initSharedPref() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    token = prefs.getString('token');
+    getAnalyticsForUser();
   }
 
   Future<void> getAnalyticsForUser() async {
@@ -41,7 +40,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer ${widget.token}',
         },
       );
       if (response.statusCode == 200) {
@@ -56,38 +55,21 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     }
   }
 
-  Future<void> _initializeAndFetchData() async {
-    await initSharedPref();
-    print("Token: ${token}");
-    await getAnalyticsForUser();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "Analytics",
-            style: TextStyle(color: Colors.white),
-          ),
-          centerTitle: true,
-          backgroundColor: const Color(0xFF004080),
-          iconTheme: IconThemeData(color: Colors.white),
+      appBar: AppBar(
+        title: const Text(
+          "Analytics",
+          style: TextStyle(color: Colors.white),
         ),
-        body: FutureBuilder(
-            future: _initializeAndFetchData(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text("${snapshot.error}"),
-                );
-              } else {
-                return Column(
-                  children: [Text("Analytics for ")],
-                );
-              }
-            }));
+        centerTitle: true,
+        backgroundColor: const Color(0xFF004080),
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: const Column(
+        children: [Text("Analytics for ")],
+      ),
+    );
   }
 }

@@ -7,8 +7,10 @@ class UserProfile extends StatefulWidget {
   final int workspaceId;
   final int targetId;
   final int userId;
+  final dynamic token;
   const UserProfile(
       {required this.targetId,
+      required this.token,
       required this.workspaceId,
       required this.userId,
       super.key});
@@ -45,7 +47,9 @@ class _UserProfileState extends State<UserProfile> {
   Future<void> getUser(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/${widget.targetId}');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
 
       if (response.statusCode == 200) {
         print("Got User Successfully!");
@@ -65,7 +69,9 @@ class _UserProfileState extends State<UserProfile> {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/assignments');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -112,7 +118,9 @@ class _UserProfileState extends State<UserProfile> {
     final url = Uri.parse(
         "http://10.0.2.2:5000/assignments/$assignmentId/target/${widget.targetId}");
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -323,6 +331,8 @@ class _UserProfileState extends State<UserProfile> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) => AnalyticsPage(
+                                              userId: widget.userId,
+                                              token: widget.token,
                                               targetId: widget.targetId,
                                               workspaceId: widget.workspaceId,
                                             ),

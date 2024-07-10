@@ -68,7 +68,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CreateWorkspace(userId: userId),
+        builder: (context) => CreateWorkspace(userId: userId, token: widget.token,),
       ),
     );
     if (result == true) {

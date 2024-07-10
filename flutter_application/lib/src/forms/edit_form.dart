@@ -9,12 +9,14 @@ import "dart:convert";
 
 class EditForm extends StatefulWidget {
   static const routeName = '/editForm';
+  final dynamic token;
   final int userId;
   final int assignmentId;
   final int workspaceId;
 
   const EditForm(
       {required this.userId,
+      required this.token,
       required this.assignmentId,
       required this.workspaceId,
       super.key});
@@ -48,7 +50,9 @@ class _EditFormState extends State<EditForm> {
     final url =
         Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
 
       if (response.statusCode == 200) {
         print("Succesfully Got Assignment!");
@@ -85,6 +89,7 @@ class _EditFormState extends State<EditForm> {
         url,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           "userId": widget.userId,
@@ -105,8 +110,8 @@ class _EditFormState extends State<EditForm> {
         Navigator.pop(context);
       } else if (response.statusCode == 400) {
         final jsonResponse = jsonDecode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(jsonResponse["message"])));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(jsonResponse["message"])));
       }
     } catch (error) {
       print("Error Editing Assignment: $error");
