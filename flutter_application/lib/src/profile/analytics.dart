@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:http/http.dart" as http;
 import "dart:convert";
-import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AnalyticsPage extends StatefulWidget {
   final int targetId;
@@ -28,6 +26,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   @override
   void initState() {
     super.initState();
+    print("Token: ${widget.token}");
     getAnalyticsForUser();
   }
 
@@ -65,7 +64,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF004080),
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: const Column(
         children: [Text("Analytics for ")],
