@@ -94,6 +94,6 @@ cron.schedule('0 * * * * *', async() => {
     console.log(`Calculated analytics for ${ids.length} completed assignments`);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Listening on port ${PORT}.`);
 });
