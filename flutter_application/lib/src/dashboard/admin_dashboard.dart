@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/dashboard/user_dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
@@ -32,8 +33,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> fetchWorkspaces() async {
     final url = Uri.parse('http://10.0.2.2:5000/users/$userId/workspaces');
+
     try {
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
+        },
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -105,6 +113,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         url,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'userId': userId,
@@ -136,6 +145,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         context,
         MaterialPageRoute(
           builder: (context) => AdminGroup(
+            token: widget.token,
             workspaceId: workspaceId,
             userId: userId,
           ),
@@ -146,7 +156,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         context,
         MaterialPageRoute(
           builder: (context) =>
-              UserGroup(workspaceId: workspaceId, userId: userId),
+              UserDashboard(token: widget.token, workspaceId: workspaceId),
         ),
       );
     }
@@ -175,6 +185,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 itemCount: workspaces.length,
                 itemBuilder: (context, index) {
                   return WorkspaceCard(
+                    token: widget.token,
                     workspace: workspaces[index],
                     onTap: navigateToGroupPage,
                     userId: userId,
@@ -224,10 +235,12 @@ class Workspace {
 class WorkspaceCard extends StatefulWidget {
   final Workspace workspace;
   final Function(int, String) onTap;
+  final dynamic token;
   final int userId;
 
   const WorkspaceCard(
       {required this.workspace,
+      required this.token,
       required this.onTap,
       required this.userId,
       super.key});
@@ -244,6 +257,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
         url,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'userId': widget.userId,
@@ -251,7 +265,6 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
         }),
       );
       if (response.statusCode == 200) {
-      
       } else {
         print("Create Invite Code Unsuccessful");
       }
@@ -261,16 +274,18 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
   }
 
   Future<Object> getWorkspaceInfo(BuildContext context) async {
-    final url = Uri.parse("http://10.0.2.2:5000/workspaces/${widget.workspace.workspaceId}");
+    final url = Uri.parse(
+        "http://10.0.2.2:5000/workspaces/${widget.workspace.workspaceId}");
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         return jsonResponse;
       }
-    }
-    catch (error) {
+    } catch (error) {
       print("Error Getting Workspace Info: $error");
     }
     return {};
@@ -337,7 +352,8 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => widget.onTap(widget.workspace.workspaceId, widget.workspace.role),
+      onTap: () =>
+          widget.onTap(widget.workspace.workspaceId, widget.workspace.role),
       child: Card(
         margin: const EdgeInsets.all(10),
         child: Padding(

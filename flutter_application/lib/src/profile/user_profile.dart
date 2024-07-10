@@ -217,17 +217,19 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   Widget printPastDue(DateTime dueDate) {
-    var now  = DateTime.now();
+    var now = DateTime.now();
 
     if (dueDate.isBefore(now)) {
       return const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Assigment Past Due", style: TextStyle(color: Colors.red),)
+          Text(
+            "Assigment Past Due",
+            style: TextStyle(color: Colors.red),
+          )
         ],
       );
-    }
-    else {
+    } else {
       return const SizedBox();
     }
   }
@@ -321,7 +323,6 @@ class _UserProfileState extends State<UserProfile> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) => AnalyticsPage(
-                                              userId: widget.userId,
                                               targetId: widget.targetId,
                                               workspaceId: widget.workspaceId,
                                             ),

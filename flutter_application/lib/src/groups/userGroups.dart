@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -7,8 +6,13 @@ class UserGroup extends StatefulWidget {
   final int workspaceId;
   static const routeName = '/userGroups';
   final int userId;
+  final dynamic token;
 
-  const UserGroup({required this.workspaceId, required this.userId, super.key});
+  const UserGroup(
+      {required this.token,
+      required this.workspaceId,
+      required this.userId,
+      super.key});
 
   @override
   State<UserGroup> createState() => _UserGroupState();
@@ -26,11 +30,13 @@ class _UserGroupState extends State<UserGroup> {
   }
 
   Future<void> getLockedStatus(BuildContext context) async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
+    final url =
+        Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
 
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         setState(() {
@@ -46,7 +52,9 @@ class _UserGroupState extends State<UserGroup> {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         await getLockedStatus(context);
@@ -63,11 +71,11 @@ class _UserGroupState extends State<UserGroup> {
   Future<void> joinGroup(BuildContext context, int groupID, index) async {
     final url = Uri.parse('http://10.0.2.2:5000/groups/join');
     try {
-      
       final response = await http.put(
         url,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'groupId': groupID,
@@ -105,6 +113,7 @@ class _UserGroupState extends State<UserGroup> {
         url,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'groupId': groupID,
@@ -180,7 +189,8 @@ class _UserGroupState extends State<UserGroup> {
     var userInCurrenGroup = checkGroup(currentGroup['members']);
     var numMembers = currentGroup['members'].length;
 
-    if (isWorkspaceLocked || (maxGroupLimit == numMembers && !userInCurrenGroup)) {
+    if (isWorkspaceLocked ||
+        (maxGroupLimit == numMembers && !userInCurrenGroup)) {
       return const SizedBox();
     }
 

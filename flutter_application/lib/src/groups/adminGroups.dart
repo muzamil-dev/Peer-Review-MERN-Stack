@@ -6,11 +6,15 @@ import 'package:http/http.dart' as http;
 
 class AdminGroup extends StatefulWidget {
   final int workspaceId;
+  final dynamic token;
   static const routeName = '/adminGroups';
   final int userId; // User ID of Account User
 
   const AdminGroup(
-      {super.key, required this.workspaceId, required this.userId});
+      {super.key,
+      required this.token,
+      required this.workspaceId,
+      required this.userId});
 
   @override
   _AdminGroupState createState() => _AdminGroupState();
@@ -42,7 +46,9 @@ class _AdminGroupState extends State<AdminGroup> {
     final workspaceDetailsUrl =
         Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
     try {
-      final response = await http.get(workspaceDetailsUrl);
+      final response = await http.get(workspaceDetailsUrl, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         setState(() {
@@ -68,7 +74,9 @@ class _AdminGroupState extends State<AdminGroup> {
     final groupsUrl = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
     try {
-      final groupsResponse = await http.get(groupsUrl);
+      final groupsResponse = await http.get(groupsUrl, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
       if (groupsResponse.statusCode == 200) {
         final responseData = json.decode(groupsResponse.body);
         setState(() {
@@ -88,7 +96,9 @@ class _AdminGroupState extends State<AdminGroup> {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/ungrouped');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
@@ -110,6 +120,7 @@ class _AdminGroupState extends State<AdminGroup> {
         deleteUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'userId': widget.userId,
@@ -136,6 +147,7 @@ class _AdminGroupState extends State<AdminGroup> {
         addUserUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'userId': widget.userId,
@@ -170,6 +182,7 @@ class _AdminGroupState extends State<AdminGroup> {
         removeUserUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'userId': widget.userId,
@@ -257,6 +270,7 @@ class _AdminGroupState extends State<AdminGroup> {
         kickUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'userId': userId,
@@ -294,6 +308,7 @@ class _AdminGroupState extends State<AdminGroup> {
         url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'workspaceId': widget.workspaceId,
@@ -322,7 +337,9 @@ class _AdminGroupState extends State<AdminGroup> {
     final workspaceDetailsUrl =
         Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
     print('Fetching workspace details from: $workspaceDetailsUrl');
-    http.get(workspaceDetailsUrl).then((response) {
+    http.get(workspaceDetailsUrl, headers: {
+      'Authorization': 'Bearer ${widget.token}',
+    }).then((response) {
       print('Workspace details response status: ${response.statusCode}');
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -423,6 +440,7 @@ class _AdminGroupState extends State<AdminGroup> {
         url,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode({
           'userId': widget.userId,
@@ -444,6 +462,7 @@ class _AdminGroupState extends State<AdminGroup> {
         editUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: jsonEncode(<String, dynamic>{
           'userId': widget.userId, // Replace with actual admin user ID
@@ -605,8 +624,10 @@ class _AdminGroupState extends State<AdminGroup> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>
-                                                UserProfile(userId: widget.userId, workspaceId: widget.workspaceId, targetId: member.userId),
+                                            builder: (context) => UserProfile(
+                                                userId: widget.userId,
+                                                workspaceId: widget.workspaceId,
+                                                targetId: member.userId),
                                           ),
                                         );
                                       },

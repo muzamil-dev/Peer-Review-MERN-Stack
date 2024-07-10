@@ -1,18 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:flutter_application/src/reviews/student_review.dart';
 import 'package:intl/intl.dart';
 import "package:http/http.dart" as http;
 import "dart:convert";
 
 class UserDashboard extends StatefulWidget {
-  final int userId;
+  final dynamic token;
   final int workspaceId;
   static const routeName = "/userDashboard";
 
   const UserDashboard({
-    required this.userId,
+    required this.token,
     required this.workspaceId,
     super.key,
   });
@@ -22,6 +23,7 @@ class UserDashboard extends StatefulWidget {
 }
 
 class _UserDashboardState extends State<UserDashboard> {
+  late int userId;
   String userName = '';
   List<Object> assignments = [];
   List<String> deadlines = [];
@@ -35,15 +37,19 @@ class _UserDashboardState extends State<UserDashboard> {
   @override
   initState() {
     super.initState();
+    Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
+    userId = jwtDecodedToken['userId'];
     getUser(context);
     getAllAssignments(context);
   }
 
   // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/${widget.userId}');
+    final url = Uri.parse('http://10.0.2.2:5000/users/$userId');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
 
       if (response.statusCode == 200) {
         print("Got User Successfully!");
@@ -62,7 +68,9 @@ class _UserDashboardState extends State<UserDashboard> {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/assignments');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -88,9 +96,11 @@ class _UserDashboardState extends State<UserDashboard> {
   Future<void> getAssignmentProgress(
       BuildContext context, int assignmentId) async {
     final url = Uri.parse(
-        'http://10.0.2.2:5000/assignments/$assignmentId/user/${widget.userId}');
+        'http://10.0.2.2:5000/assignments/$assignmentId/user/$userId');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -237,7 +247,7 @@ class _UserDashboardState extends State<UserDashboard> {
             ),
             TextButton(
                 onPressed: () {
-                  navigateToStudentReview(widget.userId, review["targetId"],
+                  navigateToStudentReview(userId, review["targetId"],
                       currentAssignmentId, review["reviewId"]);
                 },
                 child: reviewText(context, review, currentAssignmentId)),
@@ -284,7 +294,8 @@ class _UserDashboardState extends State<UserDashboard> {
         context,
         MaterialPageRoute(
           builder: (context) => UserGroup(
-            userId: widget.userId,
+            token: widget.token,
+            userId: userId,
             workspaceId: widget.workspaceId,
           ),
         ));

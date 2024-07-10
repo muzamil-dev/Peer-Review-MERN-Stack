@@ -8,6 +8,7 @@ import 'package:flutter_application/src/groups/adminGroups.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
 import 'package:flutter_application/src/login-signup/loginsignup.dart';
 import 'package:flutter_application/src/login-signup/passwordReset.dart';
+import 'package:flutter_application/src/profile/analytics.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -24,11 +25,13 @@ void main() async {
 
       LoginSignup.routeName: (context) => const LoginSignup(),
       PasswordResetPage.routeName: (context) => PasswordResetPage(),
-      AdminGroup.routeName: (context) => const AdminGroup(
+      AdminGroup.routeName: (context) => AdminGroup(
             workspaceId: 14,
             userId: 3,
+            token: prefs.getString('token'),
           ),
-      UserGroup.routeName: (context) => const UserGroup(
+      UserGroup.routeName: (context) => UserGroup(
+          token: prefs.getString('token'),
             workspaceId: 14,
             userId: 14,
           ),
@@ -41,10 +44,11 @@ void main() async {
       EditForm.routeName: (context) =>
           const EditForm(assignmentId: 1, workspaceId: 14, userId: 3),
       // User Dashboard Page for Raheem Sterling
-      UserDashboard.routeName: (context) => const UserDashboard(
-            userId: 14,
+      UserDashboard.routeName: (context) => UserDashboard(
+            token: prefs.getString('token'),
             workspaceId: 14,
           ),
+      AnalyticsPage.routeName: (context) => const AnalyticsPage(targetId: 15, workspaceId: 14),
     },
   ));
 }
