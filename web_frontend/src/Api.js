@@ -23,6 +23,37 @@ const Response503 = {
     message: 'Service temporarily unavailable'
 };
 
+const refreshAccessToken = async () => {
+    try {
+        const response = await axios.get(getUrl('', 'refresh'), { withCredentials: true });
+        if (response.status === 200) {
+            const { accessToken } = response.data;
+            localStorage.setItem('accessToken', accessToken); // Optionally update the local storage
+            return accessToken;
+        }
+        return null;
+    } catch (error) {
+        console.error('Failed to refresh access token:', error);
+        return null;
+    }
+};
+
+const apiRequest = async (method, url, data = null) => {
+    try {
+        const response = await axios({ method, url, data, ...getConfig() });
+        return response;
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            const newToken = await refreshAccessToken();
+            if (newToken) {
+                const response = await axios({ method, url, data, ...getConfig() });
+                return response;
+            }
+        }
+        throw error;
+    }
+};
+
 const GROUPS = 'groups/';
 const ASSIGNMENTS = 'assignments/';
 const REVIEWS = 'reviews/';
@@ -41,11 +72,7 @@ export default {
          *  message: string }>} Returns the group info
          */
         GetGroupInfo: async (groupId) => {
-            const response = await axios.get(getUrl(GROUPS, groupId), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(GROUPS, groupId), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -64,11 +91,7 @@ export default {
                 userId,
                 workspaceId
             };
-            const response = await axios.post(getUrl(GROUPS, 'create'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('post', getUrl(GROUPS, 'create'), payload);
             return {
                 status: response.status,
                 data: response.data,
@@ -86,11 +109,7 @@ export default {
                 groupId,
                 userId
             };
-            const response = await axios.put(getUrl(GROUPS, 'join'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('put', getUrl(GROUPS, 'join'), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -108,11 +127,7 @@ export default {
                 groupId,
                 userId
             };
-            const response = await axios.put(getUrl(GROUPS, 'leave'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('put', getUrl(GROUPS, 'leave'), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -156,11 +171,7 @@ export default {
                 targetId,
                 groupId
             };
-            const response = await axios.put(getUrl(GROUPS, 'removeUser'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('put', getUrl(GROUPS, 'removeUser'), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -177,11 +188,7 @@ export default {
             const payload = {
                 userId
             };
-            const response = await axios.delete(getUrl(GROUPS, groupId), { data: payload, ...getConfig()})
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('delete', getUrl(GROUPS, groupId), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -196,11 +203,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}, message: string }>} Returns the assignment info
          */
         GetAssignmentInfo: async (assignmentId) => {
-            const response = await axios.get(getUrl(ASSIGNMENTS, assignmentId), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(ASSIGNMENTS, assignmentId), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -237,17 +240,9 @@ export default {
         GetAllReviewsByUser: async (assignmentId, userId) => {
             let response;
             if (!userId){
-                response = await axios.get(getUrl(ASSIGNMENTS, `${assignmentId}/user`), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+                response = await apiRequest('get', getUrl(ASSIGNMENTS, `${assignmentId}/user`), null);
             } else{
-                response = await axios.get(getUrl(ASSIGNMENTS, `${assignmentId}/user/${userId}`), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+                response = await apiRequest('get', getUrl(ASSIGNMENTS, `${assignmentId}/user/${userId}`), null);
             }
             return {
                 status: response.status,
@@ -276,11 +271,7 @@ export default {
          *  message: string }>} Returns an array of reviews about the target user
          */
         GetAllReviewsAboutTarget: async (assignmentId, targetId) => {
-            const response = await axios.get(getUrl(ASSIGNMENTS, `${assignmentId}/target/${targetId}`), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(ASSIGNMENTS, `${assignmentId}/target/${targetId}`), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -308,11 +299,7 @@ export default {
                 questions,
                 description
             };
-            const response = await axios.post(getUrl(ASSIGNMENTS, 'create'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('post', getUrl(ASSIGNMENTS, 'create'), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -341,11 +328,7 @@ export default {
                 questions,
                 description
             };
-            const response = await axios.put(getUrl(ASSIGNMENTS, 'edit'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('put', getUrl(ASSIGNMENTS, 'edit'), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -360,11 +343,7 @@ export default {
          */
         DeleteAssignment: async (assignmentId, userId) => {
             const payload = {userId};
-            const response = await axios.delete(getUrl(ASSIGNMENTS, assignmentId), { data: payload, ...getConfig()})
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('delete', getUrl(ASSIGNMENTS, assignmentId), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -388,11 +367,7 @@ export default {
          *  message: string }>}
          */
         GetReview: async (reviewId) => {
-            const response = await axios.get(getUrl(REVIEWS, reviewId), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(REVIEWS, reviewId), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -412,11 +387,7 @@ export default {
                 reviewId,
                 ratings
             };
-            const response = await axios.post(getUrl(REVIEWS, 'submit'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('post', getUrl(REVIEWS, 'submit'), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -495,15 +466,10 @@ export default {
 
         /**
          * Gets the workspace for the user
-         * @param {number} userId 
          * @returns {Promise<{ status: number, data: {}, message: string }>}
          */
         getUserWorkspaces: async () => {
-            const response = await axios.get(getUrl(USERS, `workspaces`), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(USERS, 'workspaces'), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -606,11 +572,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} The list of assignments
          */
         GetAssignments: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/assignments`), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(WORKSPACES, `${workspaceId}/assignments`), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -623,11 +585,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} The list of groups
          */
         GetGroups: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/groups`), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(WORKSPACES, `${workspaceId}/groups`), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -651,11 +609,7 @@ export default {
                 groupMemberLimit,
                 numGroups
             };
-            const response = await axios.post(getUrl(WORKSPACES, 'create'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('post', getUrl(WORKSPACES, 'create'), payload);
             return {
                 status: response.status,
                 workspaceId: response.data.workspaceId,
@@ -673,11 +627,7 @@ export default {
                 userId,
                 inviteCode
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'join'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('put', getUrl(WORKSPACES, 'join'), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -696,7 +646,27 @@ export default {
                 userId,
                 workspaceId
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'leave'), payload, getConfig())
+            const response = await apiRequest('put', getUrl(WORKSPACES, 'leave'), payload);
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
+         * Removes a user from the workspace specified by workspaceId
+         * @param {number} userId 
+         * @param {number} targetId
+         * @param {number} workspaceId 
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        RemoveUser: async (userId, targetId, workspaceId) => {
+            const payload = {
+                userId,
+                targetId,
+                workspaceId
+            };
+            const response = await axios.put(getUrl(WORKSPACES, 'removeUser'), payload, getConfig())
                 .catch((err) => {
                     console.error(err);
                     return err.response || Response503;
@@ -718,11 +688,7 @@ export default {
                 userId,
                 workspaceId
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'setInvite'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('put', getUrl(WORKSPACES, 'setInvite'), payload);
             return {
                 status: response.status,
                 message: response.data.message,
@@ -747,11 +713,7 @@ export default {
                 groupMemberLimit,
                 groupLock
             };
-            const response = await axios.put(getUrl(WORKSPACES, 'edit'), payload, getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('put', getUrl(WORKSPACES, 'edit'), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -769,11 +731,7 @@ export default {
                 userId,
                 workspaceId
             };
-            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}`), { data: payload, ...getConfig() })
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('delete', getUrl(WORKSPACES, `${workspaceId}`), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -790,11 +748,7 @@ export default {
             const payload = {
                 userId
             };
-            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}/removeInvite`), { data: payload, ...getConfig()})
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('delete', getUrl(WORKSPACES, `${workspaceId}/removeInvite`), payload);
             return {
                 status: response.status,
                 success: response.status === 200,
@@ -807,11 +761,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
          */
         GetAllStudents: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/students`), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(WORKSPACES, `${workspaceId}/students`), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -824,11 +774,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} Returns an array of students (users)
          */
         GetStudentsWithoutGroup: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/ungrouped`), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(WORKSPACES, `${workspaceId}/ungrouped`), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -841,11 +787,7 @@ export default {
          * @returns {Promise<{ status: number, data: { name: string, allowedDomains: string[], groupMemberLimit: number, groupLock: boolean }, message: string }>} The workspace details
          */
         GetWorkspaceDetails: async (workspaceId) => {
-            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}`), getConfig())
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
-                });
+            const response = await apiRequest('get', getUrl(WORKSPACES, `${workspaceId}`), null);
             return {
                 status: response.status,
                 data: response.data,

@@ -253,3 +253,11 @@
     height: 100%;
 }
 
+.btnGroup{
+    display: block;
+    justify-content: center;
+}
+
+.custom{
+    
+}

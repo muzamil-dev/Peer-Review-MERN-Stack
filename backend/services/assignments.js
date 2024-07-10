@@ -3,15 +3,11 @@ import db from '../config.js';
 import * as ReviewService from './reviews.js';
 
 // Get an assignment by its id
-export const getById = async (assignmentId) => {
-    try {
+export const getById = async(assignmentId) => {
+    try{
         const res = await db.query(
-            `SELECT a.*, jsonb_agg(
-                jsonb_build_object(
-                    'questionId', q.id,
-                    'question', q.question
-                ) ORDER BY q.id
-            ) AS questions
+            `SELECT a.*, 
+            array_agg(q.question ORDER BY q.id) AS questions
             FROM assignments AS a
             JOIN questions AS q
             ON a.id = q.assignment_id
@@ -35,24 +31,21 @@ export const getById = async (assignmentId) => {
             dueDate: data.due_date,
             questions: data.questions,
             description: data.description,
-            started: data.started
+            started: data.started,
+            completed: data.completed
         };
     }
-    catch (err) {
+    catch(err){
         return { error: err.message, status: 500 };
     }
 }
 
 // Get all assignments for a given workspace
-export const getByWorkspace = async (workspaceId) => {
-    try {
+export const getByWorkspace = async(workspaceId) => {
+    try{
         const res = await db.query(
-            `SELECT a.*, jsonb_agg(
-                jsonb_build_object(
-                    'questionId', q.id,
-                    'question', q.question
-                ) ORDER BY q.id
-            ) AS questions
+            `SELECT a.*, 
+            array_agg(q.question ORDER BY q.id) AS questions
             FROM workspaces AS w
             LEFT JOIN assignments AS a
             ON w.id = a.workspace_id
@@ -66,9 +59,9 @@ export const getByWorkspace = async (workspaceId) => {
         const data = res.rows;
         // Workspace does not exist if no rows are found
         if (data.length === 0)
-            return {
-                error: "The requested workspace was not found",
-                status: 404
+            return { 
+                error: "The requested workspace was not found", 
+                status: 404 
             };
         // Workspace exists, but no assignments were found
         if (data.length === 1 && data[0].id === null)
@@ -83,18 +76,19 @@ export const getByWorkspace = async (workspaceId) => {
             dueDate: row.due_date,
             questions: row.questions,
             description: row.description,
-            started: row.started
+            started: row.started,
+            completed: data.completed
         }));
     }
-    catch (err) {
+    catch(err){
         return { error: err.message, status: 500 };
     }
 }
 
 // Create a new assignment
 // Edit to phase out questions array in assignments
-export const create = async (userId, workspaceId, settings) => {
-    try {
+export const create = async(userId, workspaceId, settings) => {
+    try{
         const res = await db.query(
             `SELECT w.id AS workspace_id, m.role AS user_role
             FROM workspaces AS w
@@ -112,8 +106,8 @@ export const create = async (userId, workspaceId, settings) => {
             }
         // Check that the user is an instructor
         if (data.user_role !== "Instructor")
-            return {
-                error: "User is not authorized to create assignments",
+            return { 
+                error: "User is not authorized to create assignments", 
                 status: 403
             };
 
@@ -149,22 +143,22 @@ export const create = async (userId, workspaceId, settings) => {
             await ReviewService.createReviews(assignmentId);
         return { message: "Created assignment successfully" };
     }
-    catch (err) {
+    catch(err){
         return { error: err.message, status: 500 };
     }
 }
 
 // Helper function for adding review questions
-export const createQuestions = async (assignmentId, questions) => {
-    try {
+export const createQuestions = async(assignmentId, questions) => {
+    try{
         // Insert the questions
         let questionsQuery = `INSERT INTO questions (assignment_id, question) VALUES `
-        questionsQuery += questions.map((_, index) => `($1, $${index + 2})`).join(', ');
+        questionsQuery += questions.map((_, index) => `($1, $${index+2})`).join(', ');
         questionsQuery += `RETURNING id`;
         const questionRes = await db.query(questionsQuery, [assignmentId, ...questions]);
         return questionRes;
     }
-    catch (err) {
+    catch(err){
         return { error: err.message, status: 500 };
     }
 }
@@ -172,48 +166,58 @@ export const createQuestions = async (assignmentId, questions) => {
 // Edit an assignment
 // Change to work with new questions table
 // Change to create reviews if start date is reached
-export const edit = async (userId, assignmentId, settings) => {
-    try {
+export const edit = async(userId, assignmentId, settings) => {
+    try{
         const res = await db.query(
-            `SELECT a.*, a.id AS assignment_id, m.role AS user_role
+            `SELECT a.*, m.role AS user_role
             FROM assignments AS a
             LEFT JOIN memberships as m
             ON a.workspace_id = m.workspace_id AND m.user_id = $1
             WHERE a.id = $2`,
             [userId, assignmentId]
         );
-        const data = res.rows[0];
+        const assignment = res.rows[0];
         // Check that the assignment exists
-        if (!data)
+        if (!assignment)
             return {
                 error: "The requested assignment was not found",
                 status: 404
             }
         // Check that the user is an instructor
-        if (data.user_role !== "Instructor")
-            return {
-                error: "User is not authorized to edit this assignment",
+        if (assignment.user_role !== "Instructor")
+            return { 
+                error: "User is not authorized to edit this assignment", 
                 status: 403
             };
-
+        
         // Format settings to use the same columns as the database
         const updates = {};
         if (settings.name)
             updates.name = settings.name;
-        if (settings.startDate)
-            updates.start_date = (new Date(settings.startDate)).toISOString();
+        if (settings.startDate){
+            const curDate = assignment.start_date;
+            const newDate = settings.startDate;
+            if (new Date(curDate).getTime() !== new Date(newDate).getTime()){
+                if (assignment.started)
+                    return {
+                        error: "Cannot modify start date because the assignment has already been started",
+                        status: 400
+                    }
+            }
+            updates.start_date = (new Date(newDate)).toISOString();
+        }
         if (settings.dueDate)
             updates.due_date = (new Date(settings.dueDate)).toISOString();
         if (settings.description !== undefined) // description can be null or empty
             updates.description = settings.description;
 
         // Set the questions if provided
-        if (settings.questions) {
+        if (settings.questions){
             await Promise.all([
                 // Delete old questions
-                db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignmentId]),
+                db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignment.id]),
                 // Add new questions
-                createQuestions(assignmentId, settings.questions)
+                createQuestions(assignment.id, settings.questions)
             ]);
         }
 
@@ -222,23 +226,23 @@ export const edit = async (userId, assignmentId, settings) => {
         // Build the set clause
         const keys = Object.keys(updates);
         const values = Object.values(updates);
-        updateQuery += keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
+        updateQuery += keys.map((key, index) => `${key} = $${index+1}`).join(', ');
         // Complete the query with assignment id
-        updateQuery += ` WHERE id = $${values.length + 1}`;
-
+        updateQuery += ` WHERE id = $${values.length+1}`;
+        
         // Query the update
-        const updateRes = await db.query(updateQuery, [...values, data.assignment_id]);
+        const updateRes = await db.query(updateQuery, [...values, assignment.id]);
 
         return { message: "Assignment updated successfully" };
     }
-    catch (err) {
+    catch(err){
         return { error: err.message, status: 500 };
     }
 }
 
 // Delete an assignment
-export const deleteAssignment = async (userId, assignmentId) => {
-    try {
+export const deleteAssignment = async(userId, assignmentId) => {
+    try{
         const res = await db.query(
             `SELECT a.id as assignment_id, a.workspace_id, m.role AS user_role
             FROM assignments AS a
@@ -256,8 +260,8 @@ export const deleteAssignment = async (userId, assignmentId) => {
             }
         // Check that the user is an instructor
         if (data.user_role !== "Instructor")
-            return {
-                error: "User is not authorized to delete this assignment",
+            return { 
+                error: "User is not authorized to delete this assignment", 
                 status: 403
             };
         // Delete the assignment
@@ -267,7 +271,7 @@ export const deleteAssignment = async (userId, assignmentId) => {
         );
         return { message: "Assignment deleted successfully" };
     }
-    catch (err) {
+    catch(err){
         return { error: err.message, status: 500 };
     }
 }
