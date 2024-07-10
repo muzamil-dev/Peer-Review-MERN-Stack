@@ -6,7 +6,6 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
 import 'CreateWorkspace.dart';
 import 'package:flutter_application/src/groups/adminGroups.dart';
-import 'package:flutter_application/src/groups/userGroups.dart';
 
 class AdminDashboard extends StatefulWidget {
   static const routeName = "/adminDashboard";

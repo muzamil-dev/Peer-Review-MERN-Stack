@@ -363,36 +363,21 @@ class _UserGroupState extends State<UserGroup> {
           ],
         ),
       ),
-      body: ListView.separated(
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: groupCards(context, index),
-          );
-        },
-        separatorBuilder: (context, index) {
-          return const Divider(
-            height: 10,
-            thickness: 0,
-          );
-        },
-        itemCount: groups.length,
-      ),
-      floatingActionButton: const SizedBox(
-        height: 70,
-        width: 70,
-        child: FittedBox(
-          child: FloatingActionButton(
-            // shape: RoundedRectangleBorder(
-            //   borderRadius: BorderRadius.circular(8),
-            // ),
-            onPressed: null,
-            backgroundColor: Colors.green,
-            child: Icon(
-              Icons.list_alt,
-              color: Colors.white,
-            ),
-          ),
+      body: RawScrollbar(
+        child: ListView.separated(
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: groupCards(context, index),
+            );
+          },
+          separatorBuilder: (context, index) {
+            return const Divider(
+              height: 10,
+              thickness: 0,
+            );
+          },
+          itemCount: groups.length,
         ),
       ),
     );
