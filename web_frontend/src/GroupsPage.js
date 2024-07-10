@@ -23,7 +23,7 @@ const GroupsPageUser = () => {
     }
 
     const fetchGroups = async () => {
-        const response = await Api.Workspace.GetGroups(workspaceId);
+        const response = await Api.Workspaces.GetGroups(workspaceId);
         if (response.status === 200 && Array.isArray(response.data.groups)) {
             setGroups(response.data.groups.map(group => ({
                 ...group,
@@ -87,7 +87,7 @@ const GroupsPageUser = () => {
             navigate('/login');
             return { success: false };
         }
-        const response = await Api.Workspace.LeaveWorkspace(currentUserId, workspaceId);
+        const response = await Api.Workspaces.LeaveWorkspace(currentUserId, workspaceId);
         if (response.success) {
             fetchGroups();
             handleDashboard();

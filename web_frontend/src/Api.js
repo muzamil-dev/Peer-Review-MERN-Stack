@@ -59,6 +59,7 @@ const ASSIGNMENTS = 'assignments/';
 const REVIEWS = 'reviews/';
 const WORKSPACES = 'workspaces/';
 const USERS = 'users/';
+const ANALYTICS = 'analytics/';
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -565,7 +566,7 @@ export default {
             };
         }
     },
-    Workspace: {
+    Workspaces: {
         /**
          * Gets a list of assignments made in the specified workspace
          * @param {number} workspaceId
