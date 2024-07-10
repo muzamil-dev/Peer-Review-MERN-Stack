@@ -6,6 +6,7 @@ import 'dart:convert';
 
 class StudentReview extends StatefulWidget {
   static const routeName = '/studentReview';
+  final dynamic token;
   final int userId;
   final int targetUserId;
   final int assignmentId;
@@ -13,6 +14,7 @@ class StudentReview extends StatefulWidget {
 
   const StudentReview(
       {required this.userId,
+      required this.token,
       required this.targetUserId,
       required this.assignmentId,
       required this.reviewId,
@@ -56,7 +58,9 @@ class _StudentReviewState extends State<StudentReview> {
   Future<void> getUser(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/${widget.targetUserId}');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
 
       if (response.statusCode == 200) {
         print("Got User Successfully!");
@@ -75,7 +79,9 @@ class _StudentReviewState extends State<StudentReview> {
     final url =
         Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      });
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         setState(() {
@@ -98,7 +104,10 @@ class _StudentReviewState extends State<StudentReview> {
     final url = Uri.parse("http://10.0.2.2:5000/reviews/submit");
     try {
       final response = await http.post(url,
-          headers: {'content-type': 'application/json'},
+          headers: {
+            'content-type': 'application/json',
+            'Authorization': 'Bearer ${widget.token}',
+          },
           body: jsonEncode({
             "userId": widget.userId,
             "reviewId": widget.reviewId,
@@ -107,8 +116,7 @@ class _StudentReviewState extends State<StudentReview> {
       if (response.statusCode == 200) {
         print("Review Submitted Successfully!");
         Navigator.pop(context);
-      }
-      else {
+      } else {
         print("Error : ");
       }
     } catch (error) {

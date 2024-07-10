@@ -104,7 +104,7 @@ class _UserGroupState extends State<UserGroup> {
     final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
     int groupID = getGroupID();
 
-    if (groupID == '') {
+    if (groupID == -1) {
       return;
     }
 
