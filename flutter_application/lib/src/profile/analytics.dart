@@ -22,6 +22,8 @@ class AnalyticsPage extends StatefulWidget {
 
 class _AnalyticsPageState extends State<AnalyticsPage> {
   String userName = '';
+  List<double> averageRatings = [];
+  List<String> assignmentNames = [];
 
   @override
   void initState() {
@@ -44,13 +46,51 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       );
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        print(jsonResponse);
+        List<String> tempAssignmentNames = [];
+
+        for (var response in jsonResponse["assignments"]) {
+          await getAssignmentInfo(
+              response["assignmentId"], tempAssignmentNames);
+          setState(() {
+            if (response["averageRating"] != null) {
+              averageRatings.add(response["averageRating"]);
+            } else {
+              averageRatings.add(-1);
+            }
+            assignmentNames = tempAssignmentNames;
+          });
+        }
+        print(assignmentNames);
+        print(averageRatings);
       } else {
         final error = json.decode(response.body);
         print("Error: $error");
       }
     } catch (error) {
       print("Error Getting Analytics for User: $error");
+    }
+  }
+
+  Future<void> getAssignmentInfo(
+      int assignmentId, List<String> assignmentNames) async {
+    final url = Uri.parse('http://10.0.2.2:5000/assignments/$assignmentId');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${widget.token}',
+        },
+      );
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        assignmentNames.add(jsonResponse["name"]);
+      } else {
+        print("error: ");
+      }
+    } catch (error) {
+      print("Error Getting Assignment Info: $error");
     }
   }
 
