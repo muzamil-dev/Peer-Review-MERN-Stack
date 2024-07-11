@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Api from './Api';
 import './AnalyticsPage.css';
+import LineChart from './LineChart';
 
 const AnalyticsPage = () => {
     const { userId } = useParams();
@@ -20,11 +21,38 @@ const AnalyticsPage = () => {
         fetchAnalytics();
     }, [userId]);
 
+    const chartData = {
+        labels: analytics.dates, // Example: ['January', 'February', 'March', 'April']
+        datasets: [
+            {
+                label: 'Average Rating Over Time',
+                data: analytics.ratings, // Example: [3.5, 4.0, 4.5, 5.0]
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+            },
+        ],
+    };
+
+    const chartOptions = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Average Rating Over Time',
+            },
+        },
+    };
+
     return (
         <div className="analytics-page">
             <h1 className="header-large">User Analytics</h1>
             <div className="analytics-content">
                 <h2>{analytics.userName}'s Analytics</h2>
+                <LineChart data={chartData} options={chartOptions} />
                 <div className="analytics-section">
                     <h3>Total Assignments</h3>
                     <p>{analytics.totalAssignments}</p>

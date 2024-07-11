@@ -1,3 +1,5 @@
+/* In AnalyticsPage.css */
+
 .analytics-page {
     padding: 20px;
 }
@@ -33,9 +35,4 @@
 .analytics-section p {
     margin: 0;
     font-size: 1.2em;
-}
-
-.text-danger {
-    color: #e74c3c;
-    text-align: center;
 }
