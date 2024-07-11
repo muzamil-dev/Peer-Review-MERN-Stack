@@ -11,6 +11,7 @@ import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin com
 import CreateFormPage from './CreateForm/CreateFormPageAdmin'; // Import the CreateFormPage component
 import UserDashboard from './UserDashboard';
 import ReviewPage from './ReviewPage';
+import AnalyticsPage from './AnalyticsPage'; // Import the AnalyticsPage component
 
 function App() {
     return (
@@ -27,6 +28,7 @@ function App() {
                     <Route path="/createForm/:workspaceId" element={<CreateFormPage />} />
                     <Route path="/UserDashboard" element={<UserDashboard />} />
                     <Route path="/Review/:reviewId" element={<ReviewPage />} />
+                    <Route path="/Analytics/:userId" element={<AnalyticsPage />} />
                 </Routes>
             </div>
         </Router>
