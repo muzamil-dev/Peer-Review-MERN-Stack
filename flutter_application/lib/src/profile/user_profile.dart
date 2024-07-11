@@ -305,13 +305,19 @@ class _UserProfileState extends State<UserProfile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    "$nameOfProfile's Profile",
+                    style: const TextStyle(
+                        fontSize: 30, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "$nameOfProfile's Profile",
-                        style: const TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.bold),
+                      const Text(
+                        "Assignments:",
+                        style: TextStyle(
+                            fontSize: 26, fontWeight: (FontWeight.bold)),
                       ),
                       InkWell(
                         onTap: () {},
@@ -352,12 +358,7 @@ class _UserProfileState extends State<UserProfile> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Assignments:",
-                    style:
-                        TextStyle(fontSize: 26, fontWeight: (FontWeight.bold)),
-                  ),
+                  const SizedBox(height: 20),
                   Expanded(
                     child: RawScrollbar(
                         child: ListView.separated(
