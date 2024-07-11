@@ -53,9 +53,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               response["assignmentId"], tempAssignmentNames);
           setState(() {
             if (response["averageRating"] != null) {
-              averageRatings.add(response["averageRating"]);
+              averageRatings.add(response["averageRating"].toDouble());
             } else {
-              averageRatings.add(-1);
+              averageRatings.add(-1.0);
             }
             assignmentNames = tempAssignmentNames;
           });

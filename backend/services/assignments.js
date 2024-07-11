@@ -221,10 +221,12 @@ export const edit = async(userId, assignmentId, settings) => {
                 GROUP BY assignment_id`,
                 [assignment.id]
             )).rows[0].questions;
+
             // Check that the questions arrays aren't the same
             let flag = true; // true if the arrays are the same, false if not
-            if (curQuestions.length !== settings.questions.length)
+            if (curQuestions.length !== settings.questions.length) {
                 flag = false;
+            }
             if (flag){
                 for (let i = 0; i < curQuestions.length; i++){
                     if (curQuestions[i] !== settings.questions[i]){
