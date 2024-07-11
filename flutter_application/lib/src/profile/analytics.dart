@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:http/http.dart" as http;
 import "dart:convert";
+import 'package:flutter_application/src/profile/linechart.dart';
 
 class AnalyticsPage extends StatefulWidget {
   final int targetId;
@@ -143,7 +144,12 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   }
 
   Widget graphPage() {
-    return Container();
+    return Container(
+      color: Colors.black12,
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      child: const LineChartWidget(),
+    );
   }
 
   // Widget List Function to navigate between Bottom navigation bar items
