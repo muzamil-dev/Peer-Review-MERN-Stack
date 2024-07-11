@@ -43,7 +43,8 @@ class _LineChartWidgetState extends State<LineChartWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return LineChart(LineChartData(
+    return LineChart(
+      LineChartData(
         minX: 0,
         maxX: (filteredNames.length - 1).toDouble(),
         minY: 0,
@@ -74,7 +75,9 @@ class _LineChartWidgetState extends State<LineChartWidget> {
                   Colors.orangeAccent.withOpacity(.4),
                 ]),
               ))
-        ]));
+        ],
+      ),
+    );
   }
 }
 
@@ -82,34 +85,44 @@ class Titles {
   static getTitleData() => FlTitlesData(
       show: true,
       bottomTitles: AxisTitles(
+        axisNameWidget: const Text(
+          "Assignments Over Time",
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+        axisNameSize: 20,
         sideTitles: SideTitles(
           showTitles: true,
           reservedSize: 35,
           getTitlesWidget: (value, meta) {
-            return Text('$value');
+            return const Text('');
           },
         ),
       ),
       leftTitles: AxisTitles(
+          axisNameWidget: const Text(
+            "Ratings",
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          axisNameSize: 20,
           sideTitles: SideTitles(
-        showTitles: true,
-        getTitlesWidget: (value, meta) {
-          switch (value.toInt()) {
-            case 0:
-              return const Text('0');
-            case 1:
-              return const Text('1');
-            case 2:
-              return const Text('2');
-            case 3:
-              return const Text('3');
-            case 4:
-              return const Text('4');
-            case 5:
-              return const Text('5');
-          }
-          return const Text("");
-        },
-        reservedSize: 35,
-      )));
+            showTitles: true,
+            getTitlesWidget: (value, meta) {
+              switch (value.toInt()) {
+                case 0:
+                  return const Text('0');
+                case 1:
+                  return const Text('1');
+                case 2:
+                  return const Text('2');
+                case 3:
+                  return const Text('3');
+                case 4:
+                  return const Text('4');
+                case 5:
+                  return const Text('5');
+              }
+              return const Text("");
+            },
+            reservedSize: 35,
+          )));
 }

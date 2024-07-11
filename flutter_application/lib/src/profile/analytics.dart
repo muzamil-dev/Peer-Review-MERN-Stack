@@ -148,7 +148,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       color: Colors.black12,
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(20.0),
       child: LineChartWidget(
           assignmentNames: assignmentNames, assignmentRatings: averageRatings),
     );
