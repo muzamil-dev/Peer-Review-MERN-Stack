@@ -24,6 +24,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   String userName = '';
   List<double> averageRatings = [];
   List<String> assignmentNames = [];
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -85,6 +86,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       );
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
+        print(jsonResponse);
         assignmentNames.add(jsonResponse["name"]);
       } else {
         print("error: ");
@@ -102,6 +104,53 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     }
   }
 
+  Widget tablePage() {
+    return Container(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Assignments Vs Average Rating",
+                style: TextStyle(fontSize: 22.0),
+              ),
+            ],
+          ),
+          DataTable(
+            columns: const [
+              DataColumn(label: Text("")),
+              DataColumn(label: Text("Name")),
+              DataColumn(label: Text("Average Rating")),
+            ],
+            rows: assignmentNames.asMap().entries.map((entry) {
+              int idx = entry.key;
+              String name = entry.value;
+              double rating = averageRatings[idx];
+
+              return DataRow(cells: [
+                DataCell(Text("${idx + 1}")),
+                DataCell(Text(name)),
+                tableRatingDisplay(rating),
+              ]);
+            }).toList(),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget graphPage() {
+    return Container();
+  }
+
+  // Widget List Function to navigate between Bottom navigation bar items
+  List<Widget> _widgetTabOptions(BuildContext context) {
+    return <Widget>[tablePage(), graphPage()];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,42 +163,23 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         backgroundColor: const Color(0xFF004080),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    "Assignments Vs Average Rating",
-                    style: TextStyle(fontSize: 22.0),
-                  ),
-                ),
-              ],
-            ),
-            DataTable(
-              columns: const [
-                DataColumn(label: Text("")),
-                DataColumn(label: Text("Name")),
-                DataColumn(label: Text("Average Rating")),
-              ],
-              rows: assignmentNames.asMap().entries.map((entry) {
-                int idx = entry.key;
-                String name = entry.value;
-                double rating = averageRatings[idx];
-
-                return DataRow(cells: [
-                  DataCell(Text("${idx + 1}")),
-                  DataCell(Text(name)),
-                  tableRatingDisplay(rating),
-                ]);
-              }).toList(),
-            )
-          ],
-        ),
+      body: _widgetTabOptions(context).elementAt(_currentIndex),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.table_chart), label: 'Table'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.line_axis),
+            label: 'Graph',
+          ),
+        ],
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
       ),
     );
   }
