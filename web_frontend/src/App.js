@@ -11,7 +11,7 @@ import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin com
 import CreateFormPage from './CreateForm/CreateFormPageAdmin'; // Import the CreateFormPage component
 import UserDashboard from './UserDashboard';
 import ReviewPage from './ReviewPage';
-import AnalyticsPage from './AnalyticsPage'; // Import the AnalyticsPage component
+import AnalyticsPage from './AnalyticsPage/AnalyticsPage'; // Import the AnalyticsPage component
 
 function App() {
     return (
