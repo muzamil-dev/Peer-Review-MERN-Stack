@@ -28,8 +28,19 @@ const PORT = process.env.PORT || 5000;
 // Initialize the app
 const app = express();
 app.use(express.json());
-app.use(cors());
+//app.use(cors());
 
+// Define CORS options
+const corsOptions = {
+    // TODO update to our domain once deployed
+    //origin: process.env.NODE_ENV === 'production' ? 'https://ourdomainname.com' : 'http://localhost:3000',
+    origin: 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // Allow credentials
+};
+
+// Apply CORS middleware with options
+app.use(cors(corsOptions));
 // Define routes
 app.use("/users", userRoutes);
 app.use("/groups", groupRoutes);
