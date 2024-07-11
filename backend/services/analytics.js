@@ -61,9 +61,6 @@ export const getByUserAndWorkspace = async(userId, targetId, workspaceId) => {
             [userId, workspaceId]
         );
         user = user.rows[0];
-        console.log(user);
-        console.log(userId);
-
         if (!user)
             return {
                 error: "The requested workspace does not exist",

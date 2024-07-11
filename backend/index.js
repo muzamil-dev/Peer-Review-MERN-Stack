@@ -30,6 +30,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Test to ping the server
+app.get("/ping", (req, res) => {
+    const message = "If you're seeing this, the api is accessible";
+    return res.json({ message });
+});
+
 // Define routes
 app.use("/users", userRoutes);
 app.use("/groups", groupRoutes);
@@ -94,6 +100,6 @@ cron.schedule('0 * * * * *', async() => {
     console.log(`Calculated analytics for ${ids.length} completed assignments`);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Listening on port ${PORT}.`);
 });
