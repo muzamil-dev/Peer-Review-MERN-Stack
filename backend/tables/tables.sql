@@ -17,7 +17,7 @@ create table users(
 );
 
 create table password_reset(
-    email TEXT REFERENCES users (email) ON DELETE CASCADE,
+    email TEXT UNIQUE REFERENCES users (email) ON DELETE CASCADE,
     reset_token TEXT UNIQUE,
     reset_token_expiry TIMESTAMP WITH TIME ZONE
 );
@@ -53,7 +53,8 @@ CREATE TABLE assignments(
     start_date TIMESTAMP WITH TIME ZONE NOT NULL,
     due_date TIMESTAMP WITH TIME ZONE NOT NULL,
     description TEXT,
-    started BOOLEAN NOT NULL DEFAULT false
+    started BOOLEAN NOT NULL DEFAULT false,
+    completed BOOLEAN NOT NULL DEFAULT false
 );
 
 CREATE TABLE reviews(
@@ -76,4 +77,11 @@ CREATE TABLE ratings(
     question_id INT REFERENCES questions (id) ON DELETE CASCADE,
     rating INT NOT NULL,
     PRIMARY KEY (review_id, question_id)
+);
+
+CREATE TABLE analytics(
+    user_id INT REFERENCES users (id) ON DELETE CASCADE,
+    assignment_id INT REFERENCES assignments (id) ON DELETE CASCADE,
+    average_rating NUMERIC,
+    PRIMARY KEY (user_id, assignment_id)
 );

@@ -97,23 +97,6 @@ const CreateFormPage = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label>Options</label>
-                    <div className="options">
-                        <div>
-                            <input type="checkbox" />
-                            <label> Do not display in user dashboard until available</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" />
-                            <label> Do not display in user dashboard after deadline</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" />
-                            <label> Do not display comment text box at the end of the form</label>
-                        </div>
-                    </div>
-                </div>
-                <div className="form-group">
                     <label>Fields</label>
                     {fields.map((field, index) => (
                         <div key={index} className="field-group">

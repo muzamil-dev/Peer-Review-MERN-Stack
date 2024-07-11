@@ -146,25 +146,25 @@ function ApiExamples() {
                 <h3>Workspace Functions</h3>
                 <div style={buttonContainerStyle}>
                     {[
-                        { buttonId: "CreateWorkspace", fn: () => Api.Workspace.CreateWorkspace('MyWorkspace', userId, ['ucf\\.edu'], 5)
+                        { buttonId: "CreateWorkspace", fn: () => Api.Workspaces.CreateWorkspace('MyWorkspace', userId, ['ucf\\.edu'], 5)
                             .then((response) => {
                                 setWorkspaceId(response.workspaceId);
                                 return response;
                             }) },
-                        { buttonId: "GetGroups", fn: () => Api.Workspace.GetGroups(workspaceId) },
-                        { buttonId: "GetAssignments", fn: () => Api.Workspace.GetAssignments(workspaceId)},
-                        { buttonId: "SetInviteCode", fn: () => Api.Workspace.SetInviteCode(userId, workspaceId) 
+                        { buttonId: "GetGroups", fn: () => Api.Workspaces.GetGroups(workspaceId) },
+                        { buttonId: "GetAssignments", fn: () => Api.Workspaces.GetAssignments(workspaceId)},
+                        { buttonId: "SetInviteCode", fn: () => Api.Workspaces.SetInviteCode(userId, workspaceId) 
                             .then((response) => {
                                 setInviteCode(response.inviteCode);
                                 return response;
                             }) },
-                        { buttonId: "JoinWorkspace", fn: () => Api.Workspace.JoinWorkspace(userId, workspaceId, inviteCode) },
-                        { buttonId: "LeaveWorkspace", fn: () => Api.Workspace.LeaveWorkspace(userId, workspaceId) },
-                        { buttonId: "EditWorkspace", fn: () => Api.Workspace.EditWorkspace(userId, workspaceId, 'MyEditedWorkspace', ['ucf\\.edu'], 6) },
-                        { buttonId: "DeleteWorkspace", fn: () => Api.Workspace.DeleteWorkspace(userId, workspaceId) },
-                        { buttonId: "RemoveActiveInvite", fn: () => Api.Workspace.RemoveActiveInvite(userId, workspaceId) },
-                        { buttonId: "GetAllStudents", fn: () => Api.Workspace.GetAllStudents(workspaceId) },
-                        { buttonId: "GetStudentsWithoutGroup", fn: () => Api.Workspace.GetStudentsWithoutGroup(workspaceId) },
+                        { buttonId: "JoinWorkspace", fn: () => Api.Workspaces.JoinWorkspace(userId, workspaceId, inviteCode) },
+                        { buttonId: "LeaveWorkspace", fn: () => Api.Workspaces.LeaveWorkspace(userId, workspaceId) },
+                        { buttonId: "EditWorkspace", fn: () => Api.Workspaces.EditWorkspace(userId, workspaceId, 'MyEditedWorkspace', ['ucf\\.edu'], 6) },
+                        { buttonId: "DeleteWorkspace", fn: () => Api.Workspaces.DeleteWorkspace(userId, workspaceId) },
+                        { buttonId: "RemoveActiveInvite", fn: () => Api.Workspaces.RemoveActiveInvite(userId, workspaceId) },
+                        { buttonId: "GetAllStudents", fn: () => Api.Workspaces.GetAllStudents(workspaceId) },
+                        { buttonId: "GetStudentsWithoutGroup", fn: () => Api.Workspaces.GetStudentsWithoutGroup(workspaceId) },
                     ].map((endpoint, index) => (
                         <button
                         key={index}

@@ -23,7 +23,7 @@ const GroupsPageUser = () => {
     }
 
     const fetchGroups = async () => {
-        const response = await Api.Workspace.GetGroups(workspaceId);
+        const response = await Api.Workspaces.GetGroups(workspaceId);
         if (response.status === 200 && Array.isArray(response.data.groups)) {
             setGroups(response.data.groups.map(group => ({
                 ...group,
@@ -87,7 +87,7 @@ const GroupsPageUser = () => {
             navigate('/login');
             return { success: false };
         }
-        const response = await Api.Workspace.LeaveWorkspace(currentUserId, workspaceId);
+        const response = await Api.Workspaces.LeaveWorkspace(currentUserId, workspaceId);
         if (response.success) {
             fetchGroups();
             handleDashboard();
@@ -101,10 +101,14 @@ const GroupsPageUser = () => {
         navigate('/DashboardPage'); // Navigate to dashboard page
     };
 
+    const assignmentsPage = () => {
+        navigate('/userDashboard'); // Navigate to assignments page
+    };
+
     return (
         <div className={styles.workspaceUser}>
             <div className={`row ${styles.headerContainer}`}>
-                <div className="col-xl-2 col-lg-2"></div>
+                <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={assignmentsPage}>Assignments</button>
                 <h1 className={`col-xl-8 col-lg-6 ${styles.headerLarge}`}>Groups</h1>
                 <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={handleDashboard}>Dashboard</button>
                 <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={() => setShowConfirmModal(true)}>Leave Workspace</button>

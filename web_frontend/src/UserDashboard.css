@@ -1,35 +1,51 @@
-.dashboard {
-    padding: 20px;
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: larger;
+}
+
+select {
+    width: 17vw;
+    padding: 0.5rem;
+
+}
+
+.dashboardz {
+    text-align: center;
+    color: white;
+    width: 100vw;
 }
 
 .header-large {
-    font-size: 2em;
-    margin-bottom: 20px;
+    font-size: 3rem;
+    margin-bottom: 2rem;
 }
 
 .workspace-selector {
-    margin-bottom: 20px;
+    margin-bottom: 2rem;
 }
 
 .assignments-table {
-    width: 100%;
-    border-collapse: collapse;
+    margin: 0 auto;
+    width: 80%;
 }
 
-.assignments-table th, .assignments-table td {
+.table-white {
+    background-color: white;
+    color: black;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table-white th,
+.table-white td {
     border: 1px solid #ddd;
     padding: 8px;
 }
 
-.assignments-table th {
+.table-white th {
     background-color: #f2f2f2;
     text-align: left;
-}
-
-.assignments-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.assignments-table tr:hover {
-    background-color: #ddd;
+    padding-top: 12px;
+    padding-bottom: 12px;
 }
