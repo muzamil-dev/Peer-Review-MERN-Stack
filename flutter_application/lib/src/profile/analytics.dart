@@ -94,6 +94,14 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     }
   }
 
+  DataCell tableRatingDisplay(double rating) {
+    if (rating == -1) {
+      return const DataCell(Text("None"));
+    } else {
+      return DataCell(Text("$rating"));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,8 +114,42 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         backgroundColor: const Color(0xFF004080),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: const Column(
-        children: [Text("Analytics for ")],
+      body: Container(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    "Assignments Vs Average Rating",
+                    style: TextStyle(fontSize: 22.0),
+                  ),
+                ),
+              ],
+            ),
+            DataTable(
+              columns: const [
+                DataColumn(label: Text("")),
+                DataColumn(label: Text("Name")),
+                DataColumn(label: Text("Average Rating")),
+              ],
+              rows: assignmentNames.asMap().entries.map((entry) {
+                int idx = entry.key;
+                String name = entry.value;
+                double rating = averageRatings[idx];
+
+                return DataRow(cells: [
+                  DataCell(Text("${idx + 1}")),
+                  DataCell(Text(name)),
+                  tableRatingDisplay(rating),
+                ]);
+              }).toList(),
+            )
+          ],
+        ),
       ),
     );
   }
