@@ -4,7 +4,8 @@ import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'dart:ui'; // for BackdropFilter
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class LoginSignup extends StatefulWidget {
   const LoginSignup({super.key});
@@ -145,18 +146,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController resetEmailController = TextEditingController();
-  late SharedPreferences prefs;
+  final storage = new FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
-    initSharedPref();
   }
 
-// Allows for Persistent Storage of JWT Token
-  void initSharedPref() async {
-    prefs = await SharedPreferences.getInstance();
-  }
+
 
   Future<void> loginUser(
       BuildContext context, String email, String password) async {
@@ -176,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         var userToken = responseData['accessToken'];
-        prefs.setString('token', userToken);
+        await storage.write(key: 'token', value: userToken);
 
         // Navigate to dashboard
         Navigator.push(
