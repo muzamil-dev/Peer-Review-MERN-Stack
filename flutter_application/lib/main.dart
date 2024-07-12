@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_application/src/app.dart';
 import 'package:flutter_application/src/dashboard/user_dashboard.dart';
 import 'package:flutter_application/src/forms/create_form.dart';
@@ -10,7 +11,9 @@ import 'package:flutter_application/src/login-signup/loginsignup.dart';
 import 'package:flutter_application/src/login-signup/passwordReset.dart';
 import 'package:flutter_application/src/profile/analytics.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:riverpod/riverpod.dart';
 
+final apiProvider = Provider((ref) => Api());
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // ignore: prefer_const_constructors

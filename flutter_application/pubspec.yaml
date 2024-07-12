@@ -2,19 +2,18 @@ name: flutter_application
 description: "A new Flutter project."
 
 # Prevent accidental publishing to pub.dev.
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.4.3 <4.0.0'
+  sdk: ">=3.4.3 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   uni_links: ^0.5.1
   http: ^0.13.3
-  shared_preferences:
   jwt_decoder:
   cupertino_icons:
   intl:
@@ -23,6 +22,8 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   fl_chart: ^0.68.0
   flutter_secure_storage: ^9.2.2
+  dio: ^5.5.0+1
+  riverpod: ^2.5.1
 
 dev_dependencies:
   flutter_test:
