@@ -1,10 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'dart:ui'; // for BackdropFilter
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:flutter_application/core.services/api.dart';
 
 
 class LoginSignup extends StatefulWidget {
@@ -146,34 +147,36 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController resetEmailController = TextEditingController();
-  final storage = new FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
   }
 
-
+  final apiInstance = Api();
 
   Future<void> loginUser(
       BuildContext context, String email, String password) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/login');
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
+      final response = await apiInstance.api.post(
+        '/users/login',
+        options: Options(
+          headers: {
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
+        ),
+        data: jsonEncode({
           'email': email,
           'password': password,
         }),
       );
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = response.data;
         var userToken = responseData['accessToken'];
         await storage.write(key: 'token', value: userToken);
+        apiInstance.accessToken = userToken;
 
         // Navigate to dashboard
         Navigator.push(
@@ -183,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     token: userToken))); // Adjust the route name as needed
       } else {
         // Login failed
-        final errorData = json.decode(response.body);
+        final errorData = json.decode(response.data);
         print('Login failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login failed: ${errorData['message']}')),
@@ -198,14 +201,16 @@ class _LoginScreenState extends State<LoginScreen> {
     final url = Uri.parse('http://10.0.2.2:5000/users/requestPasswordReset');
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.post(
+        '/users/requestPasswordReset',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: jsonEncode({
           'email': email,
-        }),
+        })
       );
 
       if (response.statusCode == 200) {
@@ -215,7 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(content: Text('Password reset email sent')),
         );
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = json.decode(response.data);
         print(
             'Request failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -372,6 +377,8 @@ class SignUpScreen extends StatelessWidget {
       TextEditingController();
   final TextEditingController tokenController = TextEditingController();
 
+  final apiInstance = Api();
+
   Future<void> userSignUp(
       BuildContext context,
       String firstName,
@@ -392,12 +399,14 @@ class SignUpScreen extends StatelessWidget {
         return;
       }
 
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.post(
+        '/users/signup',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        ),
+        data: jsonEncode({
           'firstName': firstName,
           'lastName': lastName,
           'email': email,
@@ -409,7 +418,7 @@ class SignUpScreen extends StatelessWidget {
         print("Sign Up Successful. Please verify your email.");
         _showVerificationDialog(context);
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = json.decode(response.data);
         print("SignUp Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('SignUp Failed: \n${errorData['message']}')),
@@ -425,7 +434,7 @@ class SignUpScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Email Verification'),
+          title: const Text('Email Verification'),
           content: TextField(
             controller: tokenController,
             decoration: InputDecoration(labelText: 'Enter verification token'),
@@ -435,13 +444,13 @@ class SignUpScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 verifyEmail(context, tokenController.text);
               },
-              child: Text('Verify'),
+              child: const Text('Verify'),
             ),
           ],
         );
@@ -453,12 +462,14 @@ class SignUpScreen extends StatelessWidget {
     final url = Uri.parse('http://10.0.2.2:5000/users/verifyEmail');
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.post(
+        '/users/verifyEmail',
+        options: Options(
+          headers: {
+            'content-type': 'application/json',
+          }
+        ),
+        data: jsonEncode({
           'token': token,
         }),
       );
@@ -468,10 +479,10 @@ class SignUpScreen extends StatelessWidget {
         Navigator.pushNamed(
             context, '/adminDashboard'); // Navigate to dashboard
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Email verified successfully.')),
+          const SnackBar(content: Text('Email verified successfully.')),
         );
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = json.decode(response.data);
         print(
             "Verification Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -482,7 +493,7 @@ class SignUpScreen extends StatelessWidget {
     } catch (err) {
       print("Error: $err");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error verifying email.')),
+        const SnackBar(content: Text('Error verifying email.')),
       );
     }
   }
