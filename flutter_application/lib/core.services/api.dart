@@ -1,6 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import  'package:dio/dio.dart';
-
+import 'package:dio/dio.dart';
 
 class Api {
   Dio api = Dio();
@@ -10,45 +9,68 @@ class Api {
 
   Api() {
     api.interceptors
-      .add(InterceptorsWrapper(onRequest: (options, handler) async {
-        if (!options.path.contains('http')) {
-          options.path = 'http://10.0.2.2:5000${options.path}'; 
-        }
-        options.headers['Authorization'] = 'Bearer $accessToken';
-        return handler.next(options);
-      }, onError: (DioException error, handler) async {
-        if ((error.response?.statusCode == 403 && error.response?.data['message'] == "JWT Verification failed - Incorrect token")) {
-          if (await _storage.containsKey(key: 'token')) {
-            await refreshToken();
-            return handler.resolve(await _retry(error.requestOptions));
-          }
-        }
-        return handler.next(error);
+        .add(InterceptorsWrapper(onRequest: (options, handler) async {
+      if (!options.path.contains('http')) {
+        options.path = 'http://10.0.2.2:5000${options.path}';
       }
-      ));
+      options.headers['Authorization'] = 'Bearer $accessToken';
+      options.headers['Content-Type'] = 'application/json';
+      return handler.next(options);
+    }, onError: (DioException error, handler) async {
+      if ((error.response?.statusCode == 403 &&
+          error.response?.data['message'] ==
+              "JWT Verification failed - Incorrect token")) {
+        if (await _storage.containsKey(key: 'token')) {
+          await refreshToken();
+          return handler.resolve(await _retry(error.requestOptions));
+        }
+      }
+      return handler.next(error);
+    }));
   }
 
   Future<Response<dynamic>> _retry(RequestOptions requestOptions) async {
+    print("Retrying request to ${requestOptions.path}");
     final options = Options(
       method: requestOptions.method,
       headers: requestOptions.headers,
     );
-    return api.request(requestOptions.path, 
-    data: requestOptions.data,
-    queryParameters: requestOptions.queryParameters,
-    options: options);
+    return api.request<dynamic>(requestOptions.path,
+        data: requestOptions.data,
+        queryParameters: requestOptions.queryParameters,
+        options: options);
   }
- 
-  Future<void> refreshToken() async {
-    final response = await api.get('/jwt/refresh');
 
-    if (response.statusCode == 200) {
-      accessToken = response.data;
-    } else {
-      // Refresh Token is wrong
-      print("Wrong Refresh Token");
+  Future<void> refreshToken() async {
+    try {
+      print('Access Token: $accessToken');
+
+      final response = await api.get('/jwt/refresh',
+          options: Options(headers: {
+            'Authorization': 'Bearer $accessToken',
+          }));
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData.containsKey('accessToken')) {
+          accessToken = responseData['accessToken'];
+          await _storage.write(key: 'token', value: accessToken);
+        } else {
+          print("Error: Access Token Not Found in Response");
+          accessToken = null;
+          await _storage.deleteAll();
+        }
+      } else {
+        // Refresh Token is wrong
+        print(
+            "Refresh Token request failed with status code ${response.statusCode}");
+        accessToken = null;
+        _storage.deleteAll();
+      }
+    } catch (error) {
+      print("Exception during refresh token request: $error");
       accessToken = null;
-      _storage.deleteAll();
+      await _storage.deleteAll();
     }
   }
 }

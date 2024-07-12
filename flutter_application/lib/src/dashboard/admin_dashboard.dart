@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_application/src/dashboard/user_dashboard.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
@@ -21,6 +24,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
   bool isLoading = true;
   late int userId;
   final TextEditingController inviteCodeController = TextEditingController();
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -31,19 +36,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Future<void> fetchWorkspaces() async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/$userId/workspaces');
-
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
+      apiInstance.accessToken = await storage.read(key: 'token');
+
+      final response = await apiInstance.api.get(
+        '/users/$userId/workspaces',
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final List<dynamic> data = response.data;
 
         setState(() {
           workspaces =
@@ -67,7 +68,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CreateWorkspace(userId: userId, token: widget.token,),
+        builder: (context) => CreateWorkspace(
+          userId: userId,
+          token: widget.token,
+        ),
       ),
     );
     if (result == true) {
@@ -107,14 +111,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> joinWorkspace(String inviteCode) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/join');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.put(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.put(
+        '/workspaces/join',
+        data: jsonEncode({
           'userId': userId,
           'inviteCode': inviteCode,
         }),
@@ -125,7 +127,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         );
         fetchWorkspaces(); // Refresh workspaces after joining
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -249,16 +251,22 @@ class WorkspaceCard extends StatefulWidget {
 }
 
 class _WorkspaceCardState extends State<WorkspaceCard> {
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   Future<void> createInviteCode(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/setInvite');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.put(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.put(
+        '/workspaces/setInvite',
+        data: jsonEncode({
           'userId': widget.userId,
           'workspaceId': widget.workspace.workspaceId,
         }),
@@ -275,14 +283,14 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
   Future<Object> getWorkspaceInfo(BuildContext context) async {
     final url = Uri.parse(
         "http://10.0.2.2:5000/workspaces/${widget.workspace.workspaceId}");
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api
+          .get('/workspaces/${widget.workspace.workspaceId}');
 
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        return jsonResponse;
+        return response.data;
       }
     } catch (error) {
       print("Error Getting Workspace Info: $error");

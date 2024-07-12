@@ -1,12 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'dart:ui'; // for BackdropFilter
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
-
 
 class LoginSignup extends StatefulWidget {
   const LoginSignup({super.key});
@@ -148,25 +145,18 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController resetEmailController = TextEditingController();
   final storage = const FlutterSecureStorage();
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   final apiInstance = Api();
+
+  Future<String?> getAccessToken() async {
+    return await storage.read(key: 'token');
+  }
 
   Future<void> loginUser(
       BuildContext context, String email, String password) async {
-
     try {
+      apiInstance.accessToken = await storage.read(key: 'token');
       final response = await apiInstance.api.post(
         '/users/login',
-        options: Options(
-          headers: {
-          'Content-Type': 'application/json',
-        },
-        ),
         data: jsonEncode({
           'email': email,
           'password': password,
@@ -199,25 +189,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> requestPasswordReset(BuildContext context, String email) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/requestPasswordReset');
+    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
-      final response = await apiInstance.api.post(
-        '/users/requestPasswordReset',
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
-        data: jsonEncode({
-          'email': email,
-        })
-      );
+      final response = await apiInstance.api.post('/users/requestPasswordReset',
+          data: jsonEncode({
+            'email': email,
+          }));
 
       if (response.statusCode == 200) {
         print('Password reset email sent');
         Navigator.pushNamed(context, '/passwordReset');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset email sent')),
+          const SnackBar(content: Text('Password reset email sent')),
         );
       } else {
         final errorData = json.decode(response.data);
@@ -367,17 +351,28 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController firstNameController = TextEditingController();
+
   //final TextEditingController middleNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
+
   final TextEditingController emailController = TextEditingController();
+
   final TextEditingController passwordController = TextEditingController();
+
   final TextEditingController confirmPasswordController =
       TextEditingController();
-  final TextEditingController tokenController = TextEditingController();
 
+  final TextEditingController tokenController = TextEditingController();
   final apiInstance = Api();
+  String? accessToken;
+  final storage = const FlutterSecureStorage();
 
   Future<void> userSignUp(
       BuildContext context,
@@ -387,6 +382,7 @@ class SignUpScreen extends StatelessWidget {
       String password,
       String confirmPassword) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/signup');
+    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       // Validation Check for Password and Confirm Password
@@ -401,11 +397,6 @@ class SignUpScreen extends StatelessWidget {
 
       final response = await apiInstance.api.post(
         '/users/signup',
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        ),
         data: jsonEncode({
           'firstName': firstName,
           'lastName': lastName,
@@ -460,15 +451,11 @@ class SignUpScreen extends StatelessWidget {
 
   Future<void> verifyEmail(BuildContext context, String token) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/verifyEmail');
+    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.post(
         '/users/verifyEmail',
-        options: Options(
-          headers: {
-            'content-type': 'application/json',
-          }
-        ),
         data: jsonEncode({
           'token': token,
         }),
