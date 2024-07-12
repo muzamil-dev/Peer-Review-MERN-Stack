@@ -88,7 +88,7 @@ const CreateFormPage = () => {
         <div className={styles.createFormPage}>
             <form onSubmit={handleSubmit}>
                 <div className={styles.formGroup}>
-                    <label className='bold'>Assignment</label>
+                    <label className={styles.bold}>Assignment</label>
                     <input
                         type="text"
                         value={formName}
@@ -97,7 +97,7 @@ const CreateFormPage = () => {
                     />
                 </div>
                 <div className={styles.formGroup}>
-                    <label>Fields</label>
+                    <label className={styles.bold}>Fields</label>
                     {fields.map((field, index) => (
                         <div key={index} className={styles.fieldGroup}>
                             <input
@@ -123,8 +123,8 @@ const CreateFormPage = () => {
                 </div>
                 
                 <div className='row'> 
-                    <label className='col-6'>Available from</label>
-                    <label className='col-6'>Until</label>
+                    <label className={`col-6 ${styles.bold}`}>Available from</label>
+                    <label className={`col-6 ${styles.bold}`}>Until</label>
                 </div>
                 <div className='row'>
                     <div className={`col-6 ${styles.formGroup}`}>
