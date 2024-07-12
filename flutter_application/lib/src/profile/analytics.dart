@@ -116,27 +116,32 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
             children: [
               Text(
                 "Assignments Vs Average Rating",
-                style: TextStyle(fontSize: 22.0),
+                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
               ),
             ],
           ),
-          DataTable(
-            columns: const [
-              DataColumn(label: Text("")),
-              DataColumn(label: Text("Name")),
-              DataColumn(label: Text("Average Rating")),
-            ],
-            rows: assignmentNames.asMap().entries.map((entry) {
-              int idx = entry.key;
-              String name = entry.value;
-              double rating = averageRatings[idx];
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text("")),
+                  DataColumn(label: Text("Name")),
+                  DataColumn(label: Text("Average Rating")),
+                ],
+                rows: assignmentNames.asMap().entries.map((entry) {
+                  int idx = entry.key;
+                  String name = entry.value;
+                  double rating = averageRatings[idx];
 
-              return DataRow(cells: [
-                DataCell(Text("${idx + 1}")),
-                DataCell(Text(name)),
-                tableRatingDisplay(rating),
-              ]);
-            }).toList(),
+                  return DataRow(cells: [
+                    DataCell(Text("${idx + 1}")),
+                    DataCell(Text(name)),
+                    tableRatingDisplay(rating),
+                  ]);
+                }).toList(),
+              ),
+            ),
           )
         ],
       ),

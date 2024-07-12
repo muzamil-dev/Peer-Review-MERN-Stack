@@ -355,7 +355,7 @@ class _UserDashboardState extends State<UserDashboard> {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Dashboard"),
+              const Text("Dashboard"),
               IconButton(
                   onPressed: navigateToGroupsPage,
                   icon: const Column(
