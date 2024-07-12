@@ -11,9 +11,8 @@ import 'package:flutter_application/src/login-signup/loginsignup.dart';
 import 'package:flutter_application/src/login-signup/passwordReset.dart';
 import 'package:flutter_application/src/profile/analytics.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:riverpod/riverpod.dart';
 
-final apiProvider = Provider((ref) => Api());
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // ignore: prefer_const_constructors

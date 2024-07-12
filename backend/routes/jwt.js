@@ -36,7 +36,7 @@ router.get("/refresh", async(req, res) => {
                 const accessToken = jwt.sign(
                     user,
                     process.env.ACCESS_TOKEN_SECRET,
-                    { expiresIn: "15m" }
+                    { expiresIn: "1m" }
                 );
                 // Return access token
                 res.json({
