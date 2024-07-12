@@ -77,7 +77,7 @@ export const getByWorkspace = async(workspaceId) => {
             questions: row.questions,
             description: row.description,
             started: row.started,
-            completed: data.completed
+            completed: row.completed
         }));
     }
     catch(err){

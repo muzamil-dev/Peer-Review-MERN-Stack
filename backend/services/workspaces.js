@@ -125,14 +125,14 @@ export const getStudents = async(workspaceId) => {
 export const getUngrouped = async(workspaceId) => {
     try{
         const res = await db.query(
-            `select m.*, u.first_name, u.last_name, 
-            u.email, g.name as group_name
-            from memberships as m
-            left join users as u
-            on m.user_id = u.id
-            left join groups as g
-            on m.group_id = g.id
-            where m.workspace_id = $1 and m.role = 'Student' AND m.group_id IS NULL`,
+            `SELECT m.*, u.first_name, u.last_name, 
+            u.email, g.name AS group_name
+            FROM memberships AS m
+            LEFT JOIN users AS u
+            ON m.user_id = u.id
+            LEFT JOIN groups AS g
+            ON m.group_id = g.id
+            WHERE m.workspace_id = $1 and m.role = 'Student' AND m.group_id IS NULL`,
             [workspaceId]
         );
         // Format the above query
