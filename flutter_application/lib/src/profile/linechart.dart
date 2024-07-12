@@ -103,23 +103,12 @@ class Titles {
             "Ratings",
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
-          axisNameSize: 20,
+          axisNameSize: 35,
           sideTitles: SideTitles(
             showTitles: true,
             getTitlesWidget: (value, meta) {
-              switch (value.toInt()) {
-                case 0:
-                  return const Text('0');
-                case 1:
-                  return const Text('1');
-                case 2:
-                  return const Text('2');
-                case 3:
-                  return const Text('3');
-                case 4:
-                  return const Text('4');
-                case 5:
-                  return const Text('5');
+              if (value == value.roundToDouble()) {
+                return Text("$value");
               }
               return const Text("");
             },
