@@ -134,7 +134,7 @@ const CreateFormPage = () => {
                             name="availableFrom"
                             value={availableFrom}
                             onChange={handleDateChange}
-                            className={styles.formControl}
+                            className={`.text-dark ${styles.formControl}`}
                         />
                     </div>
                     <div className={`col-6 ${styles.formGroup}`}>

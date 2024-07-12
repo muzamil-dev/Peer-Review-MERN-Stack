@@ -17,6 +17,7 @@
 .formGroup {
     /* width: 100%; */
     margin-bottom: 20px;
+    color: black;
 }
 
 .formControl {
@@ -26,6 +27,7 @@
     border: 1px solid #ced4da;
     box-sizing: border-box;
     margin-bottom: 10px;
+    color: black !important;
 }
 
 .options {
