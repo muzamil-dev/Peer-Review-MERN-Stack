@@ -1,21 +1,25 @@
-.create-form-page {
-    width: 75vw;
+*{
+    color: white;
+}
+
+.createFormPage {
+    width: 40vw;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: white;
+    /* background-color: white; */
     padding: 50px;
     border-radius: 20px;
     position: relative;
 }
 
-.form-group {
-    width: 100%;
+.formGroup {
+    /* width: 100%; */
     margin-bottom: 20px;
 }
 
-.form-control {
+.formControl {
     width: 100%;
     padding: 10px;
     border-radius: 4px;
@@ -29,9 +33,9 @@
     flex-direction: column;
 }
 
-.field-group {
+.fieldGroup {
     display: flex;
-    flex-direction: column;
+
     margin-bottom: 10px;
 }
 
@@ -67,4 +71,35 @@
     width: fit-content;
     align-self: flex-end;
     margin-top: 20px;
+}
+
+.removeButton{
+    width: 20vh !important;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.addButton{
+    width: 20vh !important;
+    margin-left: 0px;
+}
+
+@media screen and (max-width: 485px) {
+    .fieldGroup {
+        display: block;
+        justify-content: center;
+        align-items: center;
+    }
+    .addButton {
+        width: 50%;
+        margin: 0%;
+        margin-top: 5px;
+    }
+    .removeButton {
+        width: 40%;
+        margin: 0%;
+    }
+    .createFormPage{
+        width: 90vw;
+    }
 }

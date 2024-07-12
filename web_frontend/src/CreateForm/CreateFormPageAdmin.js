@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './CreateFormPage.module.css';
+import styles from './CreateFormPage.module.css';
 import Api from '../Api.js';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -85,61 +85,68 @@ const CreateFormPage = () => {
     };
 
     return (
-        <div className="create-form-page">
+        <div className={styles.createFormPage}>
             <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Form Name</label>
+                <div className={styles.formGroup}>
+                    <label className='bold'>Assignment</label>
                     <input
                         type="text"
                         value={formName}
                         onChange={handleFormNameChange}
-                        className="form-control"
+                        className={styles.formControl}
                     />
                 </div>
-                <div className="form-group">
+                <div className={styles.formGroup}>
                     <label>Fields</label>
                     {fields.map((field, index) => (
-                        <div key={index} className="field-group">
+                        <div key={index} className={styles.fieldGroup}>
                             <input
                                 type="text"
-                                placeholder={`Name ${index + 1}`}
+                                placeholder={`Question ${index + 1}`}
                                 name="name"
                                 value={field.name}
                                 onChange={event => handleFieldChange(index, event)}
-                                className="form-control"
+                                className={styles.formControl}
                             />
                             <button
                                 type="button"
                                 onClick={() => handleRemoveField(index)}
-                                className="btn btn-danger"
+                                className={`btn btn-danger ${styles.removeButton}`}
                             >
-                                Delete item
+                                Delete
+                            </button>
+                            <button type="button" onClick={handleAddField} className={`btn btn-primary ${styles.addButton}`}>
+                                + Add Field
                             </button>
                         </div>
                     ))}
-                    <button type="button" onClick={handleAddField} className="btn btn-primary">
-                        + Add Field
-                    </button>
                 </div>
-                <div className="form-group">
-                    <label>Available from</label>
-                    <input
-                        type="date"
-                        name="availableFrom"
-                        value={availableFrom}
-                        onChange={handleDateChange}
-                        className="form-control"
-                    />
+                
+                <div className='row'> 
+                    <label className='col-6'>Available from</label>
+                    <label className='col-6'>Until</label>
                 </div>
-                <div className="form-group">
-                    <label>Until</label>
-                    <input
-                        type="date"
-                        name="availableUntil"
-                        value={availableUntil}
-                        onChange={handleDateChange}
-                        className="form-control"
-                    />
+                <div className='row'>
+                    <div className={`col-6 ${styles.formGroup}`}>
+                        {/* <label>Available from</label> */}
+                        <input
+                            type="date"
+                            name="availableFrom"
+                            value={availableFrom}
+                            onChange={handleDateChange}
+                            className={styles.formControl}
+                        />
+                    </div>
+                    <div className={`col-6 ${styles.formGroup}`}>
+                        {/* <label>Until</label> */}
+                        <input
+                            type="date"
+                            name="availableUntil"
+                            value={availableUntil}
+                            onChange={handleDateChange}
+                            className={styles.formControl}
+                        />
+                    </div>
                 </div>
                 <button type="submit" className="btn btn-success">Save Form</button>
             </form>
