@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:flutter_application/src/reviews/student_review.dart';
+import 'package:flutter_application/core.services/api.dart';
 import 'package:intl/intl.dart';
 import "package:http/http.dart" as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import "dart:convert";
 
 class UserDashboard extends StatefulWidget {
@@ -32,6 +34,8 @@ class _UserDashboardState extends State<UserDashboard> {
   Map<int, int> itemsLeft = {};
   Map<int, Object> incompleteReviews = {};
   Map<int, Object> completedReviews = {};
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   // Initializes User Name and assignments variables upon page load
   @override
@@ -46,6 +50,8 @@ class _UserDashboardState extends State<UserDashboard> {
   // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/$userId');
+        apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
       final response = await http.get(url, headers: {
         'Authorization': 'Bearer ${widget.token}',
@@ -67,6 +73,8 @@ class _UserDashboardState extends State<UserDashboard> {
   Future<void> getAllAssignments(BuildContext context) async {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/assignments');
+            apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
       final response = await http.get(url, headers: {
         'Authorization': 'Bearer ${widget.token}',
@@ -97,13 +105,14 @@ class _UserDashboardState extends State<UserDashboard> {
       BuildContext context, int assignmentId) async {
     final url = Uri.parse(
         'http://10.0.2.2:5000/assignments/$assignmentId/user/$userId');
+            apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get('/assignments/$assignmentId/user/$userId'
+);
 
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         if (mounted) {
           setState(() {
             itemsLeft[assignmentId] = jsonResponse["incompleteReviews"].length;

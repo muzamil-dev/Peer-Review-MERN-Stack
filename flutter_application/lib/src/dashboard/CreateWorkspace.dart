@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 
 class CreateWorkspace extends StatefulWidget {
@@ -18,9 +19,13 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   final TextEditingController domainController = TextEditingController();
   final TextEditingController numGroupsController = TextEditingController();
   final TextEditingController maxGroupSizeController = TextEditingController();
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   Future<void> createWorkspace(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/create');
+        apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
       final allowedDomains = domainController.text.isEmpty
           ? <String>[]
@@ -39,13 +44,10 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
         return;
       }
       print("User Id: ${widget.userId}");
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.post(
+        '/workspaces/create',
+      
+        data: jsonEncode({
           'name': nameController.text,
           'allowedDomains': domainController.text.isEmpty
               ? []
@@ -69,7 +71,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
           SnackBar(content: Text('Workspace created successfully')),
         );
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         print("Status Code: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),

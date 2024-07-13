@@ -2,10 +2,11 @@
 
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
-import "package:http/http.dart" as http;
 import 'package:intl/intl.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import "dart:convert";
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_application/core.services/api.dart';
+import 'dart:convert';
 
 class EditForm extends StatefulWidget {
   static const routeName = '/editForm';
@@ -35,6 +36,8 @@ class _EditFormState extends State<EditForm> {
   TextEditingController availableFromController = TextEditingController();
   TextEditingController dueUntillController = TextEditingController();
   TextEditingController formName = TextEditingController();
+  final storage = const FlutterSecureStorage();
+  final apiInstance = Api();
 
   @override
   void initState() {
@@ -48,15 +51,15 @@ class _EditFormState extends State<EditForm> {
 
   Future<void> getAssignmentData() async {
     final url =
-        Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
+        'assignments/${widget.assignmentId}';
+            apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
 
       if (response.statusCode == 200) {
         print("Succesfully Got Assignment!");
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         setState(() {
           for (String question in jsonResponse['questions']) {
             valueControllers.add(TextEditingController(text: question));
@@ -77,7 +80,9 @@ class _EditFormState extends State<EditForm> {
   }
 
   Future<void> editAssignment(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/assignments/edit');
+    const url = 'assignments/edit';
+        apiInstance.accessToken = await storage.read(key: 'token');
+
     List<String> questions = [];
 
     for (var controller in valueControllers) {
@@ -85,13 +90,9 @@ class _EditFormState extends State<EditForm> {
     }
 
     try {
-      final response = await http.put(
+      final response = await apiInstance.api.put(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           "userId": widget.userId,
           "workspaceId": widget.workspaceId,
           "assignmentId": widget.assignmentId,
@@ -109,7 +110,7 @@ class _EditFormState extends State<EditForm> {
         // Route Back To Admin Page
         Navigator.pop(context);
       } else if (response.statusCode == 400) {
-        final jsonResponse = jsonDecode(response.body);
+        final jsonResponse = response.data;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(jsonResponse["message"])));
       }

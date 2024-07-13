@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_application/core.services/api.dart';
 
 class PasswordResetPage extends StatelessWidget {
   static const routeName = '/passwordReset'; // Ensure you have this route defined
@@ -8,17 +10,18 @@ class PasswordResetPage extends StatelessWidget {
   final TextEditingController tokenController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final storage = const FlutterSecureStorage();
+  final apiInstance = Api();
 
   Future<void> resetPassword(BuildContext context, String token, String newPassword) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/resetPassword');
+    const url = '/users/resetPassword';
+        apiInstance.accessToken = await storage.read(key: 'token');
+
 
     try {
-      final response = await http.post(
+      final response = await apiInstance.api.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'token': token,
           'newPassword': newPassword,
         }),
@@ -31,7 +34,7 @@ class PasswordResetPage extends StatelessWidget {
           SnackBar(content: Text('Password reset successful. Please login with your new password.')),
         );
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         print('Password reset failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Password reset failed: ${errorData['message']}')),

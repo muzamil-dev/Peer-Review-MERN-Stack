@@ -1,10 +1,11 @@
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/forms/create_form.dart';
 import 'package:flutter_application/src/forms/edit_form.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_application/core.services/api.dart';
+import 'dart:convert';
 
 class GetAssignments extends StatefulWidget {
   final int userId;
@@ -26,6 +27,9 @@ class GetAssignments extends StatefulWidget {
 class _GetAssignmentsState extends State<GetAssignments> {
   List<Assignment> assignments = [];
   bool isLoading = true;
+  final storage = const FlutterSecureStorage();
+  final apiInstance = Api();
+
   @override
   void initState() {
     super.initState();
@@ -35,22 +39,16 @@ class _GetAssignmentsState extends State<GetAssignments> {
   }
 
   Future<void> fetchAssignments() async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/assignments');
+    final url = '/workspaces/${widget.workspaceId}/assignments';
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(
+      final response = await apiInstance.api.get(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
       );
 
-      print(response.body);
-      print("hello");
-
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final List<dynamic> data = response.data;
 
         setState(() {
           assignments =
@@ -71,14 +69,13 @@ class _GetAssignmentsState extends State<GetAssignments> {
   }
 
   Future<void> deleteAssignment(int assignmentId) async {
-    final url = Uri.parse('http://10.0.2.2:5000/assignments/${assignmentId}');
+    final url = 'assignments/$assignmentId';
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.delete(url,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${widget.token}',
-          },
-          body: jsonEncode({
+      final response = await apiInstance.api.delete(url,
+          
+          data: jsonEncode({
             "userId": widget.userId,
           }));
 

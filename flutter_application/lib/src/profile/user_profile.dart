@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:flutter_application/src/profile/analytics.dart";
-import "package:http/http.dart" as http;
-import "dart:convert";
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_application/core.services/api.dart';
 
 class UserProfile extends StatefulWidget {
   final int workspaceId;
@@ -28,6 +28,8 @@ class _UserProfileState extends State<UserProfile> {
   Map<int, List<double>> averageRatingsPerUser = {};
   String nameOfProfile = '';
   bool isLoading = true;
+  final storage = const FlutterSecureStorage();
+  final apiInstance = Api();
 
   @override
   void initState() {
@@ -45,15 +47,15 @@ class _UserProfileState extends State<UserProfile> {
 
   // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/${widget.targetId}');
+    final url = '/users/${widget.targetId}';
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
 
       if (response.statusCode == 200) {
         print("Got User Successfully!");
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         setState(() {
           nameOfProfile =
               jsonResponse['firstName'] + ' ' + jsonResponse['lastName'];
@@ -66,15 +68,14 @@ class _UserProfileState extends State<UserProfile> {
 
   // Gets All Assignment Id's in the Given Workspace
   Future<void> getAllAssignments(BuildContext context) async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/assignments');
+    final url = '/workspaces/${widget.workspaceId}/assignments';
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
 
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
 
         List<int> tempAssignmentIds = [];
         List<String> tempAssignmentNames = [];
@@ -115,15 +116,15 @@ class _UserProfileState extends State<UserProfile> {
       Map<int, List<String>> tempReviewersOfAssignment,
       Map<int, List<double>> tempAverageRatingsPerUser,
       List<double> tempAverageRatingsForAssignment) async {
-    final url = Uri.parse(
-        "http://10.0.2.2:5000/assignments/$assignmentId/target/${widget.targetId}");
+    final url = 
+        "/assignments/$assignmentId/target/${widget.targetId}";
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
 
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         final reviews = jsonResponse["reviews"];
 
         // Calculates Total Average Rating Per Assignment

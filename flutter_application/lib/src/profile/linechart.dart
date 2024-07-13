@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+
 class LineChartWidget extends StatefulWidget {
   final List<String> assignmentNames;
   final List<double> assignmentRatings;
@@ -22,6 +23,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
 
   List<String> filteredNames = [];
   List<double> filteredRatings = [];
+  
 
   @override
   void initState() {

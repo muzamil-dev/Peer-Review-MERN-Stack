@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import "package:http/http.dart" as http;
-import "dart:convert";
 import 'package:flutter_application/src/profile/linechart.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_application/core.services/api.dart';
 
 class AnalyticsPage extends StatefulWidget {
   final int targetId;
@@ -26,6 +26,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   List<double> averageRatings = [];
   List<String> assignmentNames = [];
   int _currentIndex = 0;
+  final storage = const FlutterSecureStorage();
+  final apiInstance = Api();
 
   @override
   void initState() {
@@ -35,19 +37,17 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   }
 
   Future<void> getAnalyticsForUser() async {
-    final url = Uri.parse(
-        "http://10.0.2.2:5000/analytics/workspace/${widget.workspaceId}/user/${widget.targetId}");
+    final url = 
+        "/workspace/${widget.workspaceId}/user/${widget.targetId}";
+        apiInstance.accessToken = await storage.read(key: 'token');
+
 
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
+      final response = await apiInstance.api.get(
+        url
       );
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         List<String> tempAssignmentNames = [];
 
         for (var response in jsonResponse["assignments"]) {
@@ -65,7 +65,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         print(assignmentNames);
         print(averageRatings);
       } else {
-        final error = json.decode(response.body);
+        final error = response.data;
         print("Error: $error");
       }
     } catch (error) {
@@ -75,18 +75,15 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
   Future<void> getAssignmentInfo(
       int assignmentId, List<String> assignmentNames) async {
-    final url = Uri.parse('http://10.0.2.2:5000/assignments/$assignmentId');
+    final url = '/assignments/$assignmentId';
+    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
-      final response = await http.get(
+      final response = await apiInstance.api.get(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
       );
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         print(jsonResponse);
         assignmentNames.add(jsonResponse["name"]);
       } else {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 
@@ -33,6 +35,8 @@ class _StudentReviewState extends State<StudentReview> {
   List<dynamic> questions = [];
   // Keeps Track of the Ratings Of Every Question
   List<double> ratings = [];
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -56,15 +60,15 @@ class _StudentReviewState extends State<StudentReview> {
 
   // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/${widget.targetUserId}');
+    final url = '/users/${widget.targetUserId}';
+        apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
 
       if (response.statusCode == 200) {
         print("Got User Successfully!");
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         setState(() {
           targetUserName =
               jsonResponse['firstName'] + ' ' + jsonResponse['lastName'];
@@ -76,14 +80,13 @@ class _StudentReviewState extends State<StudentReview> {
   }
 
   void getAssignmentDetails(BuildContext context) async {
-    final url =
-        Uri.parse('http://10.0.2.2:5000/assignments/${widget.assignmentId}');
+    final url = '/assignments/${widget.assignmentId}';
+            apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         setState(() {
           assignmentName = jsonResponse["name"];
           startDate = getDateString(jsonResponse["startDate"]);
@@ -101,14 +104,12 @@ class _StudentReviewState extends State<StudentReview> {
   }
 
   void submitReview(BuildContext context) async {
-    final url = Uri.parse("http://10.0.2.2:5000/reviews/submit");
+    final url = "/reviews/submit";
+        apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.post(url,
-          headers: {
-            'content-type': 'application/json',
-            'Authorization': 'Bearer ${widget.token}',
-          },
-          body: jsonEncode({
+      final response = await apiInstance.api.post(url,
+          data: jsonEncode({
             "userId": widget.userId,
             "reviewId": widget.reviewId,
             "ratings": ratings,

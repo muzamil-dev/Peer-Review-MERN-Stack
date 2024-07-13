@@ -2,10 +2,11 @@
 
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
-import "package:http/http.dart" as http;
 import 'package:intl/intl.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import "dart:convert";
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_application/core.services/api.dart';
 
 class CreateForm extends StatefulWidget {
   static const routeName = '/createForm';
@@ -32,6 +33,8 @@ class _CreateFormState extends State<CreateForm> {
   TextEditingController availableFromController = TextEditingController();
   TextEditingController dueUntillController = TextEditingController();
   TextEditingController formName = TextEditingController();
+  final storage = const FlutterSecureStorage();
+  final apiInstance = Api();
 
   List<Widget> _widgetTabOptions(BuildContext context) {
     return <Widget>[addFormsPage(context), studentViewPage(context)];
@@ -39,15 +42,13 @@ class _CreateFormState extends State<CreateForm> {
 
   Future<void> createAssignment(
       BuildContext context, List<String> questions) async {
-    final url = Uri.parse('http://10.0.2.2:5000/assignments/create');
+    const url = '/assignments/create';
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.post(
+      final response = await apiInstance.api.post(
         url,
-        headers: {
-          'content-type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           "name": formName.text,
           "userId": widget.userId,
           "workspaceId": widget.workspaceId,
@@ -58,13 +59,13 @@ class _CreateFormState extends State<CreateForm> {
       );
       if (response.statusCode == 200) {
         print("Assignment Created Successfully");
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         print("Response : ${jsonResponse['message']}");
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Succesfully Created Assignment")));
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         print("Error Creating Assignment: $errorData");
       }
     } catch (error) {

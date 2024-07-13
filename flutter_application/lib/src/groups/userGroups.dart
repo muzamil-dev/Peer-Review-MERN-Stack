@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UserGroup extends StatefulWidget {
   final int workspaceId;
@@ -22,6 +24,8 @@ class _UserGroupState extends State<UserGroup> {
   List<dynamic> groups = [];
   int maxGroupLimit = -1;
   bool isWorkspaceLocked = false;
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -31,14 +35,13 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> getLockedStatus(BuildContext context) async {
     final url =
-        Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
+        '/workspaces/${widget.workspaceId}';
+    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         setState(() {
           isWorkspaceLocked = jsonResponse['groupLock'];
         });
@@ -49,14 +52,13 @@ class _UserGroupState extends State<UserGroup> {
   }
 
   Future<void> getGroupsData(BuildContext context) async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
+    final url = '/workspaces/${widget.workspaceId}/groups';
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         await getLockedStatus(context);
         setState(() {
           groups = jsonResponse['groups'].toList();
@@ -69,15 +71,13 @@ class _UserGroupState extends State<UserGroup> {
   }
 
   Future<void> joinGroup(BuildContext context, int groupID, index) async {
-    final url = Uri.parse('http://10.0.2.2:5000/groups/join');
+    const String url = '/groups/join';
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.put(
+      final response = await apiInstance.api.put(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'groupId': groupID,
           'userId': widget.userId,
         }),
@@ -87,7 +87,7 @@ class _UserGroupState extends State<UserGroup> {
           getGroupsData(context);
         });
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         print(
             "JoinGroup Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,7 +101,9 @@ class _UserGroupState extends State<UserGroup> {
   }
 
   Future<void> leaveGroup(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
+    const url = '/groups/leave';
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     int groupID = getGroupID();
 
     if (groupID == -1) {
@@ -109,13 +111,9 @@ class _UserGroupState extends State<UserGroup> {
     }
 
     try {
-      final response = await http.put(
+      final response = await apiInstance.api.put(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'groupId': groupID,
           'userId': widget.userId,
         }),
@@ -126,7 +124,7 @@ class _UserGroupState extends State<UserGroup> {
           getGroupsData(context);
         });
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         print(
             "Leave Group Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
