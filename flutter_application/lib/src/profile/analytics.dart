@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/profile/linechart.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
+import 'dart:convert';
 
 class AnalyticsPage extends StatefulWidget {
   final int targetId;

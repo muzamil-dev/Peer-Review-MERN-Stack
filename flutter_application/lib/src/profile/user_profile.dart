@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_application/src/profile/analytics.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
+import 'dart:convert';
 
 class UserProfile extends StatefulWidget {
   final int workspaceId;
@@ -116,8 +118,7 @@ class _UserProfileState extends State<UserProfile> {
       Map<int, List<String>> tempReviewersOfAssignment,
       Map<int, List<double>> tempAverageRatingsPerUser,
       List<double> tempAverageRatingsForAssignment) async {
-    final url = 
-        "/assignments/$assignmentId/target/${widget.targetId}";
+    final url = "/assignments/$assignmentId/target/${widget.targetId}";
     apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
@@ -130,19 +131,26 @@ class _UserProfileState extends State<UserProfile> {
         // Calculates Total Average Rating Per Assignment
         double avgRating = calculateTotalAverageRating(reviews);
         tempAverageRatingsForAssignment.add(avgRating);
-
+        
+        // Exits if the current assignment has No Reviews
+        if (avgRating == -1) {
+          return;
+        }
         // Calculates Reviewers of Assignment and Their Individual Average Rating
         for (var review in reviews) {
           // Individual Reviewer Name Stored
-          tempReviewersOfAssignment[assignmentId]!
-              .add(review["firstName"] + ' ' + review["lastName"]);
+          String firstName = review['firstName'];
+          String lastName = review['lastName'];
+          tempReviewersOfAssignment[assignmentId]!.add('$firstName $lastName');
 
           // Calculates Average Rating of Individual Reviewer
           double sum = 0;
-          for (var rating in review['ratings']) {
+          final ratings = review['ratings'];
+          for (var rating in ratings) {
             sum += rating;
           }
-          double averageRating = sum / review['ratings'].length;
+
+          double averageRating = sum / ratings.length;
           tempAverageRatingsPerUser[assignmentId]!.add(averageRating);
         }
       } else {
@@ -151,12 +159,13 @@ class _UserProfileState extends State<UserProfile> {
       }
     } catch (error) {
       print("Error Getting Reviews on User: $error");
+      print(url);
     }
   }
 
   // Takes in a reviews and returns the total average rating of the Assignment
   double calculateTotalAverageRating(dynamic reviews) {
-    if (reviews.isEmpty) {
+    if (reviews == null || reviews.isEmpty) {
       print(reviews);
       return -1;
     }
