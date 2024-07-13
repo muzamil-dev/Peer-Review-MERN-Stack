@@ -49,16 +49,14 @@ class _UserDashboardState extends State<UserDashboard> {
 
   // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/$userId');
+    final url = ('/users/$userId');
 
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
 
       if (response.statusCode == 200) {
         print("Got User Successfully!");
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         setState(() {
           userName = jsonResponse['firstName'] + ' ' + jsonResponse['lastName'];
         });
@@ -70,16 +68,13 @@ class _UserDashboardState extends State<UserDashboard> {
 
   // Gets All Assignments in the Given Workspace
   Future<void> getAllAssignments(BuildContext context) async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/assignments');
+    final url = '/workspaces/${widget.workspaceId}/assignments';
 
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api.get(url);
 
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final jsonResponse = response.data;
         var now = DateTime.now();
 
         setState(() {
@@ -101,12 +96,10 @@ class _UserDashboardState extends State<UserDashboard> {
 
   Future<void> getAssignmentProgress(
       BuildContext context, int assignmentId) async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/assignments/$assignmentId/user/$userId');
+    final url = '/assignments/$assignmentId/user/$userId';
 
     try {
-      final response = await apiInstance.api.get('/assignments/$assignmentId/user/$userId'
-);
+      final response = await apiInstance.api.get(url);
 
       if (response.statusCode == 200) {
         final jsonResponse = response.data;

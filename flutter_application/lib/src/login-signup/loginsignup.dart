@@ -154,8 +154,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> loginUser(
       BuildContext context, String email, String password) async {
     try {
+      const url = "/users/login";
       final response = await apiInstance.api.post(
-        '/users/login',
+        url,
         data: jsonEncode({
           'email': email,
           'password': password,
@@ -166,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
         var userToken = responseData['accessToken'];
         await storage.write(key: 'accessToken', value: userToken);
 
-        // Retrieves refresh token 
+        // Retrieves refresh token
         String? jwtValue;
         final setCookieHeader = response.headers['set-cookie'];
         if (setCookieHeader != null) {
@@ -207,10 +208,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> requestPasswordReset(BuildContext context, String email) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/requestPasswordReset');
+    const url = '/users/requestPasswordReset';
 
     try {
-      final response = await apiInstance.api.post('/users/requestPasswordReset',
+      final response = await apiInstance.api.post(url,
           data: jsonEncode({
             'email': email,
           }));
@@ -399,7 +400,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       String email,
       String password,
       String confirmPassword) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/signup');
+    const url = '/users/signup';
 
     try {
       // Validation Check for Password and Confirm Password
@@ -413,7 +414,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
 
       final response = await apiInstance.api.post(
-        '/users/signup',
+        url,
         data: jsonEncode({
           'firstName': firstName,
           'lastName': lastName,
@@ -467,11 +468,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> verifyEmail(BuildContext context, String token) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/verifyEmail');
+    const url = 'users/verifyEmail';
 
     try {
       final response = await apiInstance.api.post(
-        '/users/verifyEmail',
+        url,
         data: jsonEncode({
           'token': token,
         }),

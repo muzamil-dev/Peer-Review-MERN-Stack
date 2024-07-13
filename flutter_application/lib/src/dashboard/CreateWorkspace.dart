@@ -23,7 +23,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   final storage = const FlutterSecureStorage();
 
   Future<void> createWorkspace(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/workspaces/create');
+    const url = '/workspaces/create';
 
     try {
       final allowedDomains = domainController.text.isEmpty
@@ -44,7 +44,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
       }
       print("User Id: ${widget.userId}");
       final response = await apiInstance.api.post(
-        '/workspaces/create',
+        url,
       
         data: jsonEncode({
           'name': nameController.text,

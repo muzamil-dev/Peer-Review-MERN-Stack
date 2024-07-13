@@ -47,11 +47,11 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchWorkspaceDetails() async {
-    final workspaceDetailsUrl =
-        Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
+    final url =
+        '/workspaces/${widget.workspaceId}';
     try {
       final response =
-          await apiInstance.api.get('/workspaces/${widget.workspaceId}');
+          await apiInstance.api.get(url);
       if (response.statusCode == 200) {
         final responseData = response.data;
         setState(() {
@@ -74,13 +74,13 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchGroups() async {
-    final groupsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
+    final url = 
+        '/workspaces/${widget.workspaceId}/groups';
 
 
     try {
       final groupsResponse =
-          await apiInstance.api.get('/workspaces/${widget.workspaceId}/groups');
+          await apiInstance.api.get(url);
       if (groupsResponse.statusCode == 200) {
         final responseData = groupsResponse.data;
         setState(() {
@@ -97,11 +97,11 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchUngroupedStudents() async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/ungrouped');
+    final url = 
+        '/workspaces/${widget.workspaceId}/ungrouped';
     try {
       final response = await apiInstance.api
-          .get('/workspaces/${widget.workspaceId}/ungrouped');
+          .get(url);
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         setState(() {
@@ -117,12 +117,12 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> deleteGroup(int groupId) async {
-    final deleteUrl = Uri.parse('http://10.0.2.2:5000/groups/$groupId');
+    final deleteUrl = '/groups/$groupId';
 
 
     try {
       final response = await apiInstance.api.delete(
-        '/groups/$groupId',
+        deleteUrl,
         data: jsonEncode({
           'userId': widget.userId,
         }),
@@ -142,11 +142,11 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> addStudentToGroup(int userId, int groupId) async {
-    final addUserUrl = Uri.parse('http://10.0.2.2:5000/groups/addUser');
+    const url = '/groups/addUser';
 
     try {
       final response = await apiInstance.api.put(
-        '/groups/addUser',
+        url,
         data: jsonEncode({
           'userId': widget.userId,
           'targetId': userId,
@@ -174,11 +174,11 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> removeStudentFromGroup(int userId, int groupId) async {
-    final removeUserUrl = Uri.parse('http://10.0.2.2:5000/groups/removeUser');
+    const url = '/groups/removeUser';
 
     try {
       final response = await apiInstance.api.put(
-        '/groups/removeUser',
+        url,
         data: jsonEncode({
           'userId': widget.userId,
           'targetId': userId,
@@ -259,11 +259,11 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> kickStudent(int userId) async {
-    final kickUrl = Uri.parse('http://10.0.2.2:5000/workspaces/leave');
+    const url = '/workspaces/leave';
 
     try {
       final response = await apiInstance.api.put(
-        '/workspaces/leave',
+        url,
         data: jsonEncode({
           'userId': userId,
           'workspaceId': widget.workspaceId,
@@ -294,11 +294,11 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> addGroup() async {
-    final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
+    const url = '/groups/create';
 
     try {
       final response = await apiInstance.api.post(
-        '/groups/create',
+        url,
         data: jsonEncode({
           'workspaceId': widget.workspaceId,
           'userId': widget.userId,
@@ -323,10 +323,10 @@ class _AdminGroupState extends State<AdminGroup> {
     TextEditingController limitController = TextEditingController();
 
     // Load the current workspace details
-    final workspaceDetailsUrl =
-        Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
-    print('Fetching workspace details from: $workspaceDetailsUrl');
-    apiInstance.api.get('/workspaces/${widget.workspaceId}').then((response) {
+    final url =
+        '/workspaces/${widget.workspaceId}';
+    print('Fetching workspace details from: $url');
+    apiInstance.api.get(url).then((response) {
       print('Workspace details response status: ${response.statusCode}');
       if (response.statusCode == 200) {
         final responseData = response.data;
@@ -420,12 +420,12 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> removeInviteCode(BuildContext context) async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/removeInvite');
+    final url = 
+        '/workspaces/${widget.workspaceId}/removeInvite';
 
     try {
       final response = await apiInstance.api.delete(
-        '/workspaces/${widget.workspaceId}/removeInvite',
+        url,
         data: jsonEncode({
           'userId': widget.userId,
         }),
@@ -440,11 +440,11 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> editWorkspace(String name, List<String> allowedDomains,
       int groupMemberLimit, bool groupLock) async {
-    final editUrl = Uri.parse('http://10.0.2.2:5000/workspaces/edit');
+    const url = '/workspaces/edit';
 
     try {
       final response = await apiInstance.api.put(
-        '/workspaces/edit',
+        url,
         data: jsonEncode(<String, dynamic>{
           'userId': widget.userId, // Replace with actual admin user ID
           'workspaceId': widget.workspaceId,
