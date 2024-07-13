@@ -43,11 +43,9 @@ class Api {
 
   Future<void> refreshToken() async {
     try {
-      print('Access Token: $accessToken');
-
       final response = await api.get('/jwt/refresh',
           options: Options(headers: {
-            'Authorization': 'Bearer $accessToken',
+            'Set-Cookie': 'jwt=$accessToken',
           }));
 
       if (response.statusCode == 200) {
