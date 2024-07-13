@@ -15,6 +15,8 @@ class Api {
       }
       options.headers['Authorization'] = 'Bearer $accessToken';
       options.headers['Content-Type'] = 'application/json';
+      String? refreshToken = await _storage.read(key: 'refreshToken');
+      options.headers['Cookie'] = 'jwt=$refreshToken';
       return handler.next(options);
     }, onError: (DioException error, handler) async {
       if ((error.response?.statusCode == 403 &&
@@ -43,10 +45,8 @@ class Api {
 
   Future<void> refreshToken() async {
     try {
-      final response = await api.get('/jwt/refresh',
-          options: Options(headers: {
-            'Set-Cookie': 'jwt=$accessToken',
-          }));
+      print("Token: $accessToken");
+      final response = await api.get('/jwt/refresh');
 
       if (response.statusCode == 200) {
         final responseData = response.data;

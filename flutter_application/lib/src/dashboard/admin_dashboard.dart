@@ -253,7 +253,7 @@ class WorkspaceCard extends StatefulWidget {
 class _WorkspaceCardState extends State<WorkspaceCard> {
   final apiInstance = Api();
   final storage = const FlutterSecureStorage();
-
+  String accessToken = '';
   @override
   void initState() {
     super.initState();

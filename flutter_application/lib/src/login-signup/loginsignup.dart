@@ -154,7 +154,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> loginUser(
       BuildContext context, String email, String password) async {
     try {
-      apiInstance.accessToken = await storage.read(key: 'token');
       final response = await apiInstance.api.post(
         '/users/login',
         data: jsonEncode({
@@ -167,6 +166,27 @@ class _LoginScreenState extends State<LoginScreen> {
         var userToken = responseData['accessToken'];
         await storage.write(key: 'token', value: userToken);
         apiInstance.accessToken = userToken;
+
+        // Retrieves refresh token 
+        String? jwtValue;
+        final setCookieHeader = response.headers['set-cookie'];
+        if (setCookieHeader != null) {
+          for (final cookie in setCookieHeader) {
+            final parts = cookie.split(';');
+            final cookieName = parts[0].split('=')[0];
+            if (cookieName == 'jwt') {
+              jwtValue = parts[0].split('=')[1];
+              break;
+            }
+          }
+        }
+
+        if (jwtValue != null) {
+          await storage.write(key: 'refreshToken', value: jwtValue);
+        } else {
+          // Handle case where jwt cookie is not found
+          print('jwt cookie not found');
+        }
 
         // Navigate to dashboard
         Navigator.push(
