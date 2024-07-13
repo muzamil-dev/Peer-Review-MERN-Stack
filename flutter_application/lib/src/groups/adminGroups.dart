@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_application/src/forms/get_forms.dart';
 import 'package:flutter_application/src/profile/user_profile.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class AdminGroup extends StatefulWidget {
   final int workspaceId;
@@ -26,6 +28,8 @@ class _AdminGroupState extends State<AdminGroup> {
   bool isLoading = true;
   String workspaceName = '';
   bool groupLock = false;
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -45,12 +49,12 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> fetchWorkspaceDetails() async {
     final workspaceDetailsUrl =
         Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
+    apiInstance.accessToken = await storage.read(key: 'token');
     try {
-      final response = await http.get(workspaceDetailsUrl, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response =
+          await apiInstance.api.get('/workspaces/${widget.workspaceId}');
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = response.data;
         setState(() {
           workspaceName = responseData['name'];
           groupLock = responseData['groupLock'];
@@ -73,12 +77,13 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> fetchGroups() async {
     final groupsUrl = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final groupsResponse = await http.get(groupsUrl, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final groupsResponse =
+          await apiInstance.api.get('/workspaces/${widget.workspaceId}/groups');
       if (groupsResponse.statusCode == 200) {
-        final responseData = json.decode(groupsResponse.body);
+        final responseData = groupsResponse.data;
         setState(() {
           currentGroups = (responseData['groups'] as List<dynamic>)
               .map((group) => Group.fromJson(group))
@@ -95,12 +100,12 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> fetchUngroupedStudents() async {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/ungrouped');
+    apiInstance.accessToken = await storage.read(key: 'token');
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer ${widget.token}',
-      });
+      final response = await apiInstance.api
+          .get('/workspaces/${widget.workspaceId}/ungrouped');
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final List<dynamic> data = response.data;
         setState(() {
           ungroupedStudents =
               data.map((student) => Student.fromJson(student)).toList();
@@ -115,14 +120,12 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> deleteGroup(int groupId) async {
     final deleteUrl = Uri.parse('http://10.0.2.2:5000/groups/$groupId');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.delete(
-        deleteUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.delete(
+        '/groups/$groupId',
+        data: jsonEncode({
           'userId': widget.userId,
         }),
       );
@@ -142,14 +145,12 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> addStudentToGroup(int userId, int groupId) async {
     final addUserUrl = Uri.parse('http://10.0.2.2:5000/groups/addUser');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.put(
-        addUserUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.put(
+        '/groups/addUser',
+        data: jsonEncode({
           'userId': widget.userId,
           'targetId': userId,
           'groupId': groupId,
@@ -162,7 +163,7 @@ class _AdminGroupState extends State<AdminGroup> {
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -177,14 +178,12 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> removeStudentFromGroup(int userId, int groupId) async {
     final removeUserUrl = Uri.parse('http://10.0.2.2:5000/groups/removeUser');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.put(
-        removeUserUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.put(
+        '/groups/removeUser',
+        data: jsonEncode({
           'userId': widget.userId,
           'targetId': userId,
           'groupId': groupId,
@@ -197,7 +196,7 @@ class _AdminGroupState extends State<AdminGroup> {
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -265,14 +264,12 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> kickStudent(int userId) async {
     final kickUrl = Uri.parse('http://10.0.2.2:5000/workspaces/leave');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.put(
-        kickUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.put(
+        '/workspaces/leave',
+        data: jsonEncode({
           'userId': userId,
           'workspaceId': widget.workspaceId,
         }),
@@ -284,7 +281,7 @@ class _AdminGroupState extends State<AdminGroup> {
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -303,14 +300,12 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> addGroup() async {
     final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.post(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.post(
+        '/groups/create',
+        data: jsonEncode({
           'workspaceId': widget.workspaceId,
           'userId': widget.userId,
         }),
@@ -337,12 +332,10 @@ class _AdminGroupState extends State<AdminGroup> {
     final workspaceDetailsUrl =
         Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
     print('Fetching workspace details from: $workspaceDetailsUrl');
-    http.get(workspaceDetailsUrl, headers: {
-      'Authorization': 'Bearer ${widget.token}',
-    }).then((response) {
+    apiInstance.api.get('/workspaces/${widget.workspaceId}').then((response) {
       print('Workspace details response status: ${response.statusCode}');
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = response.data;
         print('Workspace details: $responseData');
         setState(() {
           nameController.text = responseData['name'];
@@ -352,7 +345,7 @@ class _AdminGroupState extends State<AdminGroup> {
           groupLock = responseData['groupLock'];
         });
       } else {
-        print('Failed to load workspace details: ${response.body}');
+        print('Failed to load workspace details: ${response.data}');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to load workspace details')),
         );
@@ -435,14 +428,12 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> removeInviteCode(BuildContext context) async {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/removeInvite');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.delete(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode({
+      final response = await apiInstance.api.delete(
+        '/workspaces/${widget.workspaceId}/removeInvite',
+        data: jsonEncode({
           'userId': widget.userId,
         }),
       );
@@ -457,14 +448,12 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> editWorkspace(String name, List<String> allowedDomains,
       int groupMemberLimit, bool groupLock) async {
     final editUrl = Uri.parse('http://10.0.2.2:5000/workspaces/edit');
+    apiInstance.accessToken = await storage.read(key: 'token');
+
     try {
-      final response = await http.put(
-        editUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer ${widget.token}',
-        },
-        body: jsonEncode(<String, dynamic>{
+      final response = await apiInstance.api.put(
+        '/workspaces/edit',
+        data: jsonEncode(<String, dynamic>{
           'userId': widget.userId, // Replace with actual admin user ID
           'workspaceId': widget.workspaceId,
           'name': name,
@@ -479,7 +468,7 @@ class _AdminGroupState extends State<AdminGroup> {
         );
         fetchWorkspaceName(); // Refresh the workspace name
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
