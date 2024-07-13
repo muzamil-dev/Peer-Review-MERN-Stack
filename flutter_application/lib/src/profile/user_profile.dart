@@ -50,7 +50,6 @@ class _UserProfileState extends State<UserProfile> {
   // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
     final url = '/users/${widget.targetId}';
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.get(url);
@@ -71,7 +70,6 @@ class _UserProfileState extends State<UserProfile> {
   // Gets All Assignment Id's in the Given Workspace
   Future<void> getAllAssignments(BuildContext context) async {
     final url = '/workspaces/${widget.workspaceId}/assignments';
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.get(url);
@@ -119,7 +117,6 @@ class _UserProfileState extends State<UserProfile> {
       Map<int, List<double>> tempAverageRatingsPerUser,
       List<double> tempAverageRatingsForAssignment) async {
     final url = "/assignments/$assignmentId/target/${widget.targetId}";
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.get(url);

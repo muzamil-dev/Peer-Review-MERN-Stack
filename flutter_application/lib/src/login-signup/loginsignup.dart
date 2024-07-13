@@ -164,8 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final responseData = response.data;
         var userToken = responseData['accessToken'];
-        await storage.write(key: 'token', value: userToken);
-        apiInstance.accessToken = userToken;
+        await storage.write(key: 'accessToken', value: userToken);
 
         // Retrieves refresh token 
         String? jwtValue;
@@ -209,7 +208,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> requestPasswordReset(BuildContext context, String email) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/requestPasswordReset');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.post('/users/requestPasswordReset',
@@ -402,7 +400,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       String password,
       String confirmPassword) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/signup');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       // Validation Check for Password and Confirm Password
@@ -471,7 +468,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> verifyEmail(BuildContext context, String token) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/verifyEmail');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.post(

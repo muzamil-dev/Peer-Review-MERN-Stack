@@ -49,7 +49,6 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> fetchWorkspaceDetails() async {
     final workspaceDetailsUrl =
         Uri.parse('http://10.0.2.2:5000/workspaces/${widget.workspaceId}');
-    apiInstance.accessToken = await storage.read(key: 'token');
     try {
       final response =
           await apiInstance.api.get('/workspaces/${widget.workspaceId}');
@@ -77,7 +76,7 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> fetchGroups() async {
     final groupsUrl = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
-    apiInstance.accessToken = await storage.read(key: 'token');
+
 
     try {
       final groupsResponse =
@@ -100,7 +99,6 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> fetchUngroupedStudents() async {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/ungrouped');
-    apiInstance.accessToken = await storage.read(key: 'token');
     try {
       final response = await apiInstance.api
           .get('/workspaces/${widget.workspaceId}/ungrouped');
@@ -120,7 +118,7 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> deleteGroup(int groupId) async {
     final deleteUrl = Uri.parse('http://10.0.2.2:5000/groups/$groupId');
-    apiInstance.accessToken = await storage.read(key: 'token');
+
 
     try {
       final response = await apiInstance.api.delete(
@@ -145,7 +143,6 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> addStudentToGroup(int userId, int groupId) async {
     final addUserUrl = Uri.parse('http://10.0.2.2:5000/groups/addUser');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.put(
@@ -178,7 +175,6 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> removeStudentFromGroup(int userId, int groupId) async {
     final removeUserUrl = Uri.parse('http://10.0.2.2:5000/groups/removeUser');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.put(
@@ -264,7 +260,6 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> kickStudent(int userId) async {
     final kickUrl = Uri.parse('http://10.0.2.2:5000/workspaces/leave');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.put(
@@ -300,7 +295,6 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> addGroup() async {
     final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.post(
@@ -428,7 +422,6 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> removeInviteCode(BuildContext context) async {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/removeInvite');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.delete(
@@ -448,7 +441,6 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> editWorkspace(String name, List<String> allowedDomains,
       int groupMemberLimit, bool groupLock) async {
     final editUrl = Uri.parse('http://10.0.2.2:5000/workspaces/edit');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.put(

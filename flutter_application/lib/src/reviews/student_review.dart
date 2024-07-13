@@ -61,7 +61,6 @@ class _StudentReviewState extends State<StudentReview> {
   // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
     final url = '/users/${widget.targetUserId}';
-        apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.get(url);
@@ -81,7 +80,6 @@ class _StudentReviewState extends State<StudentReview> {
 
   void getAssignmentDetails(BuildContext context) async {
     final url = '/assignments/${widget.assignmentId}';
-            apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.get(url);
@@ -104,8 +102,7 @@ class _StudentReviewState extends State<StudentReview> {
   }
 
   void submitReview(BuildContext context) async {
-    final url = "/reviews/submit";
-        apiInstance.accessToken = await storage.read(key: 'token');
+    const url = "/reviews/submit";
 
     try {
       final response = await apiInstance.api.post(url,

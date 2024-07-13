@@ -50,7 +50,6 @@ class _UserDashboardState extends State<UserDashboard> {
   // Gets Current User Information
   Future<void> getUser(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/$userId');
-        apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await http.get(url, headers: {
@@ -73,7 +72,6 @@ class _UserDashboardState extends State<UserDashboard> {
   Future<void> getAllAssignments(BuildContext context) async {
     final url = Uri.parse(
         'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/assignments');
-            apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await http.get(url, headers: {
@@ -105,7 +103,6 @@ class _UserDashboardState extends State<UserDashboard> {
       BuildContext context, int assignmentId) async {
     final url = Uri.parse(
         'http://10.0.2.2:5000/assignments/$assignmentId/user/$userId');
-            apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.get('/assignments/$assignmentId/user/$userId'

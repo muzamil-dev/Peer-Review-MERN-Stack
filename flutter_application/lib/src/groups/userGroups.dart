@@ -36,7 +36,7 @@ class _UserGroupState extends State<UserGroup> {
   Future<void> getLockedStatus(BuildContext context) async {
     final url =
         '/workspaces/${widget.workspaceId}';
-    apiInstance.accessToken = await storage.read(key: 'token');
+
 
     try {
       final response = await apiInstance.api.get(url);
@@ -53,7 +53,7 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> getGroupsData(BuildContext context) async {
     final url = '/workspaces/${widget.workspaceId}/groups';
-    apiInstance.accessToken = await storage.read(key: 'token');
+
 
     try {
       final response = await apiInstance.api.get(url);
@@ -72,7 +72,6 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> joinGroup(BuildContext context, int groupID, index) async {
     const String url = '/groups/join';
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.put(
@@ -102,7 +101,7 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> leaveGroup(BuildContext context) async {
     const url = '/groups/leave';
-    apiInstance.accessToken = await storage.read(key: 'token');
+
 
     int groupID = getGroupID();
 

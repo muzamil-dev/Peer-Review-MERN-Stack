@@ -24,7 +24,6 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
 
   Future<void> createWorkspace(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/create');
-        apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final allowedDomains = domainController.text.isEmpty

@@ -52,7 +52,6 @@ class _EditFormState extends State<EditForm> {
   Future<void> getAssignmentData() async {
     final url =
         '/assignments/${widget.assignmentId}';
-            apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.get(url);
@@ -81,7 +80,6 @@ class _EditFormState extends State<EditForm> {
 
   Future<void> editAssignment(BuildContext context) async {
     const url = '/assignments/edit';
-        apiInstance.accessToken = await storage.read(key: 'token');
 
     List<String> questions = [];
 

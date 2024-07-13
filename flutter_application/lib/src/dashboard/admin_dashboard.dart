@@ -37,7 +37,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> fetchWorkspaces() async {
     try {
-      apiInstance.accessToken = await storage.read(key: 'token');
 
       final response = await apiInstance.api.get(
         '/users/$userId/workspaces',
@@ -111,7 +110,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> joinWorkspace(String inviteCode) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/join');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.put(
@@ -261,7 +259,6 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
 
   Future<void> createInviteCode(BuildContext context) async {
     final url = Uri.parse('http://10.0.2.2:5000/workspaces/setInvite');
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.put(
@@ -283,7 +280,6 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
   Future<Object> getWorkspaceInfo(BuildContext context) async {
     final url = Uri.parse(
         "http://10.0.2.2:5000/workspaces/${widget.workspace.workspaceId}");
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api

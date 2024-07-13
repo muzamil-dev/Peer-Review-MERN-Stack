@@ -43,7 +43,6 @@ class _CreateFormState extends State<CreateForm> {
   Future<void> createAssignment(
       BuildContext context, List<String> questions) async {
     const url = '/assignments/create';
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.post(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
@@ -15,7 +14,6 @@ class PasswordResetPage extends StatelessWidget {
 
   Future<void> resetPassword(BuildContext context, String token, String newPassword) async {
     const url = '/users/resetPassword';
-        apiInstance.accessToken = await storage.read(key: 'token');
 
 
     try {
@@ -31,7 +29,7 @@ class PasswordResetPage extends StatelessWidget {
         print('Password reset successful');
         Navigator.pushNamed(context, '/loginsignup');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset successful. Please login with your new password.')),
+          const SnackBar(content: Text('Password reset successful. Please login with your new password.')),
         );
       } else {
         final errorData = response.data;

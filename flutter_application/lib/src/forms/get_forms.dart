@@ -40,7 +40,6 @@ class _GetAssignmentsState extends State<GetAssignments> {
 
   Future<void> fetchAssignments() async {
     final url = '/workspaces/${widget.workspaceId}/assignments';
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.get(
@@ -70,7 +69,6 @@ class _GetAssignmentsState extends State<GetAssignments> {
 
   Future<void> deleteAssignment(int assignmentId) async {
     final url = 'assignments/$assignmentId';
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.delete(url,

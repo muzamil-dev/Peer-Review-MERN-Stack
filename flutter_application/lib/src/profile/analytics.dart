@@ -40,7 +40,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   Future<void> getAnalyticsForUser() async {
     final url = 
         "/analytics/workspace/${widget.workspaceId}/user/${widget.targetId}";
-        apiInstance.accessToken = await storage.read(key: 'token');
 
 
     try {
@@ -78,7 +77,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   Future<void> getAssignmentInfo(
       int assignmentId, List<String> assignmentNames) async {
     final url = '/assignments/$assignmentId';
-    apiInstance.accessToken = await storage.read(key: 'token');
 
     try {
       final response = await apiInstance.api.get(
