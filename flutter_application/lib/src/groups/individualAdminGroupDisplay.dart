@@ -31,7 +31,6 @@ class _IndividualAdminGroupState extends State<IndividualAdminGroup> {
     try {
       final response = await http.get(groupDetailsUrl);
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
         setState(() {});
 
         print(response.body);
