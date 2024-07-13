@@ -19,7 +19,6 @@ class Api {
 
         if (!options.path.contains('http')) {
           options.path = 'http://10.0.2.2:5000${options.path}';
-          print("New Path: ${options.path}");
         }
 
         String? accessToken = await _storage.read(key: 'accessToken');
@@ -48,7 +47,6 @@ class Api {
                 error.requestOptions.extra['retryCount']++;
                 return handler.resolve(await _retry(error.requestOptions));
               } else {
-                print("Max Retry Attempts Reached. Invalid Token");
                 await _storage.deleteAll();
                 return handler.reject(DioException(
                     requestOptions: error.requestOptions,
