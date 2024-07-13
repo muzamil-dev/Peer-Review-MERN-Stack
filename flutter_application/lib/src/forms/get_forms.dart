@@ -68,11 +68,10 @@ class _GetAssignmentsState extends State<GetAssignments> {
   }
 
   Future<void> deleteAssignment(int assignmentId) async {
-    final url = 'assignments/$assignmentId';
+    final url = '/assignments/$assignmentId';
 
     try {
       final response = await apiInstance.api.delete(url,
-          
           data: jsonEncode({
             "userId": widget.userId,
           }));
@@ -241,7 +240,76 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                           backgroundColor: Colors.red,
                                           child: IconButton(
                                               onPressed: () async {
-                                                deleteAssignment(assignment.id);
+                                                showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: const Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Text(
+                                                              'Delete Assignment?',
+                                                              style: TextStyle(
+                                                                  fontSize: 30,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        contentPadding:
+                                                            const EdgeInsets
+                                                                .all(15.0),
+                                                        content: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Flexible(
+                                                              child: Text(
+                                                                  assignment
+                                                                      .name,
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        25,
+                                                                  )),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        actions: [
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceAround,
+                                                            children: [
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  deleteAssignment(
+                                                                      assignment
+                                                                          .id);
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                },
+                                                                child: const Text(
+                                                                    'Delete'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                },
+                                                                child: const Text(
+                                                                    'Cancel'),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      );
+                                                    });
                                               },
                                               icon: const Icon(
                                                 CupertinoIcons.trash,
