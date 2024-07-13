@@ -14,9 +14,7 @@ class Api {
         // Cookie Implementation for JWT REFRESH TOKEN
         if (options.path == '/jwt/refresh') {
           String? refreshToken = await _storage.read(key: 'refreshToken');
-          print("Refresh Token: $refreshToken");
           options.headers['Cookie'] = 'jwt=$refreshToken';
-          print("path: ${options.path}");
         }
 
         if (!options.path.contains('http')) {
@@ -25,7 +23,6 @@ class Api {
         }
 
         String? accessToken = await _storage.read(key: 'accessToken');
-        print("Access Token: $accessToken");
         options.headers['Authorization'] = 'Bearer $accessToken';
         options.headers['Content-Type'] = 'application/json';
 
