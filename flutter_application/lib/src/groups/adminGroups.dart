@@ -8,13 +8,11 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AdminGroup extends StatefulWidget {
   final int workspaceId;
-  final dynamic token;
   static const routeName = '/adminGroups';
   final int userId; // User ID of Account User
 
   const AdminGroup(
       {super.key,
-      required this.token,
       required this.workspaceId,
       required this.userId});
 
@@ -510,7 +508,6 @@ class _AdminGroupState extends State<AdminGroup> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => GetAssignments(
-                                token: widget.token,
                                 workspaceId: widget.workspaceId,
                                 userId: widget.userId,
                               ),
@@ -608,7 +605,6 @@ class _AdminGroupState extends State<AdminGroup> {
                                           MaterialPageRoute(
                                             builder: (context) => UserProfile(
                                                 userId: widget.userId,
-                                                token: widget.token,
                                                 workspaceId: widget.workspaceId,
                                                 targetId: member.userId),
                                           ),

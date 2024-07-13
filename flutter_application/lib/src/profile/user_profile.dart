@@ -9,10 +9,9 @@ class UserProfile extends StatefulWidget {
   final int workspaceId;
   final int targetId;
   final int userId;
-  final dynamic token;
+
   const UserProfile(
       {required this.targetId,
-      required this.token,
       required this.workspaceId,
       required this.userId,
       super.key});
@@ -345,7 +344,6 @@ class _UserProfileState extends State<UserProfile> {
                                           MaterialPageRoute(
                                             builder: (context) => AnalyticsPage(
                                               userId: widget.userId,
-                                              token: widget.token,
                                               targetId: widget.targetId,
                                               workspaceId: widget.workspaceId,
                                             ),

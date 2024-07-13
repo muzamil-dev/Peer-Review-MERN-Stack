@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 
+// API REQUEST INTERCEPTORS
 class Api {
   Dio api = Dio();
   final _storage = const FlutterSecureStorage();
@@ -10,7 +11,7 @@ class Api {
     api.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
 
-
+        // Cookie Implementation for JWT REFRESH TOKEN
         if (options.path == '/jwt/refresh') {
           String? refreshToken = await _storage.read(key: 'refreshToken');
           print("Refresh Token: $refreshToken");

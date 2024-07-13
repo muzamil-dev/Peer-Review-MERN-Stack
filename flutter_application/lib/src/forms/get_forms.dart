@@ -10,11 +10,9 @@ import 'dart:convert';
 class GetAssignments extends StatefulWidget {
   final int userId;
   final int workspaceId;
-  final dynamic token;
 
   const GetAssignments(
       {super.key,
-      required this.token,
       required this.workspaceId,
       required this.userId});
 
@@ -121,7 +119,6 @@ class _GetAssignmentsState extends State<GetAssignments> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => CreateForm(
-                      token: widget.token,
                       workspaceId: widget.workspaceId,
                       userId: widget.userId,
                     ),
@@ -160,7 +157,6 @@ class _GetAssignmentsState extends State<GetAssignments> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => EditForm(
-                            token: widget.token,
                             assignmentId: assignment.id,
                             workspaceId: widget.workspaceId,
                             userId: widget.userId,

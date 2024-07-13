@@ -6,9 +6,8 @@ import 'dart:convert';
 class CreateWorkspace extends StatefulWidget {
   static const routeName = "/createWorkspace";
   final int userId;
-  final dynamic token;
 
-  CreateWorkspace({required this.userId, required this.token});
+  CreateWorkspace({required this.userId});
 
   @override
   _CreateWorkspaceState createState() => _CreateWorkspaceState();

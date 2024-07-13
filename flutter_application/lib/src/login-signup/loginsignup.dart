@@ -193,7 +193,8 @@ class _LoginScreenState extends State<LoginScreen> {
             context,
             MaterialPageRoute(
                 builder: (context) => AdminDashboard(
-                    token: userToken))); // Adjust the route name as needed
+                      token: userToken,
+                    ))); // Adjust the route name as needed
       } else {
         // Login failed
         final errorData = json.decode(response.data);
@@ -446,20 +447,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
           title: const Text('Email Verification'),
           content: TextField(
             controller: tokenController,
-            decoration: InputDecoration(labelText: 'Enter verification token'),
+            decoration:
+                const InputDecoration(labelText: 'Enter verification token'),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
             TextButton(
               onPressed: () {
                 verifyEmail(context, tokenController.text);
               },
               child: const Text('Verify'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
             ),
           ],
         );
@@ -468,7 +470,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> verifyEmail(BuildContext context, String token) async {
-    const url = 'users/verifyEmail';
+    const url = '/users/verifyEmail';
 
     try {
       final response = await apiInstance.api.post(
@@ -478,15 +480,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
+        print("Success");
         Navigator.pop(context); // Close the dialog
-        Navigator.pushNamed(
-            context, '/adminDashboard'); // Navigate to dashboard
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    // AdminDashboard(token: storage.read(key: "accessToken") as String)
+                    const LoginSignup())); // Navigate to dashboard
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email verified successfully.')),
+          const SnackBar(content: Text('Please Log In')),
         );
       } else {
-        final errorData = json.decode(response.data);
+        final errorData = response.data;
         print(
             "Verification Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(

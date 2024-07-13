@@ -10,14 +10,10 @@ import 'package:flutter_application/core.services/api.dart';
 
 class CreateForm extends StatefulWidget {
   static const routeName = '/createForm';
-  final dynamic token;
   final int userId;
   final int workspaceId;
   const CreateForm(
-      {required this.userId,
-      required this.token,
-      required this.workspaceId,
-      super.key});
+      {required this.userId, required this.workspaceId, super.key});
 
   @override
   State<CreateForm> createState() => _CreateFormState();

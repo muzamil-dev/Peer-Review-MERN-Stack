@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/app.dart';
+import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'package:flutter_application/src/dashboard/user_dashboard.dart';
 import 'package:flutter_application/src/forms/create_form.dart';
 import 'package:flutter_application/src/forms/get_forms.dart';
@@ -27,43 +28,32 @@ void main() async {
 
       LoginSignup.routeName: (context) => const LoginSignup(),
       PasswordResetPage.routeName: (context) => PasswordResetPage(),
-      AdminGroup.routeName: (context) => AdminGroup(
+      AdminGroup.routeName: (context) => const AdminGroup(
             workspaceId: 14,
             userId: 3,
-            token: storage.read(key: 'token'),
           ),
-      UserGroup.routeName: (context) => UserGroup(
-            token: storage.read(key: 'token'),
+      UserGroup.routeName: (context) => const UserGroup(
             workspaceId: 14,
             userId: 14,
           ),
       // Manually Added Create Forms Page for Debugging purposes. H alkhateeb
-      CreateForm.routeName: (context) => CreateForm(
+      CreateForm.routeName: (context) => const CreateForm(
             workspaceId: 14,
             userId: 3,
-            token: storage.read(key: 'token'),
           ),
-      GetAssignments.routeName: (context) => GetAssignments(
+      GetAssignments.routeName: (context) => const GetAssignments(
             workspaceId: 14,
             userId: 3,
-            token: storage.read(key: 'token'),
           ),
       // Manually Added Edit Forms Page for Debugging Purposes, User: Hashim DB
-      EditForm.routeName: (context) => EditForm(
+      EditForm.routeName: (context) => const EditForm(
             assignmentId: 1,
             workspaceId: 14,
             userId: 3,
-            token: storage.read(key: 'token'),
           ),
-      // User Dashboard Page for Raheem Sterling
-      UserDashboard.routeName: (context) => UserDashboard(
-            token: storage.read(key: 'token'),
-            workspaceId: 14,
-          ),
-      AnalyticsPage.routeName: (context) => AnalyticsPage(
+      AnalyticsPage.routeName: (context) => const AnalyticsPage(
             targetId: 15,
             workspaceId: 14,
-            token: storage.read(key: 'token'),
             userId: 3,
           ),
     },

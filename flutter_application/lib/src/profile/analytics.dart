@@ -8,14 +8,12 @@ class AnalyticsPage extends StatefulWidget {
   final int targetId;
   final int workspaceId;
   final int userId;
-  final dynamic token;
   static const routeName = "/analytics";
 
   const AnalyticsPage(
       {required this.targetId,
       required this.userId,
       required this.workspaceId,
-      required this.token,
       super.key});
 
   @override
@@ -33,19 +31,15 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   @override
   void initState() {
     super.initState();
-    print("Token: ${widget.token}");
     getAnalyticsForUser();
   }
 
   Future<void> getAnalyticsForUser() async {
-    final url = 
+    final url =
         "/analytics/workspace/${widget.workspaceId}/user/${widget.targetId}";
 
-
     try {
-      final response = await apiInstance.api.get(
-        url
-      );
+      final response = await apiInstance.api.get(url);
       if (response.statusCode == 200) {
         final jsonResponse = response.data;
         List<String> tempAssignmentNames = [];

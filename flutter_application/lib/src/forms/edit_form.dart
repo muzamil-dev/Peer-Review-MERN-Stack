@@ -10,14 +10,12 @@ import 'dart:convert';
 
 class EditForm extends StatefulWidget {
   static const routeName = '/editForm';
-  final dynamic token;
   final int userId;
   final int assignmentId;
   final int workspaceId;
 
   const EditForm(
       {required this.userId,
-      required this.token,
       required this.assignmentId,
       required this.workspaceId,
       super.key});
@@ -50,8 +48,7 @@ class _EditFormState extends State<EditForm> {
   }
 
   Future<void> getAssignmentData() async {
-    final url =
-        '/assignments/${widget.assignmentId}';
+    final url = '/assignments/${widget.assignmentId}';
 
     try {
       final response = await apiInstance.api.get(url);

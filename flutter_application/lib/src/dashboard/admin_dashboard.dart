@@ -1,19 +1,17 @@
 import 'dart:async';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_application/src/dashboard/user_dashboard.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
 import 'CreateWorkspace.dart';
 import 'package:flutter_application/src/groups/adminGroups.dart';
 
 class AdminDashboard extends StatefulWidget {
+  final String token;
   static const routeName = "/adminDashboard";
-  final dynamic token;
-  const AdminDashboard({@required this.token, super.key});
+  const AdminDashboard({required this.token, super.key});
 
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
@@ -37,7 +35,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> fetchWorkspaces() async {
     try {
-
       final response = await apiInstance.api.get(
         '/users/$userId/workspaces',
       );
@@ -69,7 +66,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
       MaterialPageRoute(
         builder: (context) => CreateWorkspace(
           userId: userId,
-          token: widget.token,
         ),
       ),
     );
@@ -144,7 +140,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         context,
         MaterialPageRoute(
           builder: (context) => AdminGroup(
-            token: widget.token,
             workspaceId: workspaceId,
             userId: userId,
           ),
@@ -154,8 +149,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              UserDashboard(token: widget.token, workspaceId: workspaceId),
+          builder: (context) => UserDashboard(
+            workspaceId: workspaceId,
+            token: widget.token,
+          ),
         ),
       );
     }
@@ -184,7 +181,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 itemCount: workspaces.length,
                 itemBuilder: (context, index) {
                   return WorkspaceCard(
-                    token: widget.token,
                     workspace: workspaces[index],
                     onTap: navigateToGroupPage,
                     userId: userId,
@@ -234,12 +230,10 @@ class Workspace {
 class WorkspaceCard extends StatefulWidget {
   final Workspace workspace;
   final Function(int, String) onTap;
-  final dynamic token;
   final int userId;
 
   const WorkspaceCard(
       {required this.workspace,
-      required this.token,
       required this.onTap,
       required this.userId,
       super.key});
@@ -258,11 +252,11 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
   }
 
   Future<void> createInviteCode(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/workspaces/setInvite');
+    const url = '/workspaces/setInvite';
 
     try {
       final response = await apiInstance.api.put(
-        '/workspaces/setInvite',
+        url,
         data: jsonEncode({
           'userId': widget.userId,
           'workspaceId': widget.workspace.workspaceId,
@@ -278,12 +272,10 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
   }
 
   Future<Object> getWorkspaceInfo(BuildContext context) async {
-    final url = Uri.parse(
-        "http://10.0.2.2:5000/workspaces/${widget.workspace.workspaceId}");
+    final url = "/workspaces/${widget.workspace.workspaceId}";
 
     try {
-      final response = await apiInstance.api
-          .get('/workspaces/${widget.workspace.workspaceId}');
+      final response = await apiInstance.api.get(url);
 
       if (response.statusCode == 200) {
         return response.data;

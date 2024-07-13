@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -8,13 +7,8 @@ class UserGroup extends StatefulWidget {
   final int workspaceId;
   static const routeName = '/userGroups';
   final int userId;
-  final dynamic token;
 
-  const UserGroup(
-      {required this.token,
-      required this.workspaceId,
-      required this.userId,
-      super.key});
+  const UserGroup({required this.workspaceId, required this.userId, super.key});
 
   @override
   State<UserGroup> createState() => _UserGroupState();
@@ -34,9 +28,7 @@ class _UserGroupState extends State<UserGroup> {
   }
 
   Future<void> getLockedStatus(BuildContext context) async {
-    final url =
-        '/workspaces/${widget.workspaceId}';
-
+    final url = '/workspaces/${widget.workspaceId}';
 
     try {
       final response = await apiInstance.api.get(url);
@@ -53,7 +45,6 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> getGroupsData(BuildContext context) async {
     final url = '/workspaces/${widget.workspaceId}/groups';
-
 
     try {
       final response = await apiInstance.api.get(url);
@@ -101,7 +92,6 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> leaveGroup(BuildContext context) async {
     const url = '/groups/leave';
-
 
     int groupID = getGroupID();
 

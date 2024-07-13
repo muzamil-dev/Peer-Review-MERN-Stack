@@ -8,7 +8,6 @@ import 'dart:convert';
 
 class StudentReview extends StatefulWidget {
   static const routeName = '/studentReview';
-  final dynamic token;
   final int userId;
   final int targetUserId;
   final int assignmentId;
@@ -16,7 +15,6 @@ class StudentReview extends StatefulWidget {
 
   const StudentReview(
       {required this.userId,
-      required this.token,
       required this.targetUserId,
       required this.assignmentId,
       required this.reviewId,

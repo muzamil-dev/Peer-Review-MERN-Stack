@@ -273,7 +273,6 @@ class _UserDashboardState extends State<UserDashboard> {
         context,
         MaterialPageRoute(
           builder: (context) => StudentReview(
-            token: widget.token,
             userId: userId,
             targetUserId: targetUserId,
             assignmentId: assignmentId,
@@ -294,7 +293,6 @@ class _UserDashboardState extends State<UserDashboard> {
         context,
         MaterialPageRoute(
           builder: (context) => UserGroup(
-            token: widget.token,
             userId: userId,
             workspaceId: widget.workspaceId,
           ),
