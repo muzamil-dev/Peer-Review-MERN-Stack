@@ -39,7 +39,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
   Future<void> getAnalyticsForUser() async {
     final url = 
-        "/workspace/${widget.workspaceId}/user/${widget.targetId}";
+        "/analytics/workspace/${widget.workspaceId}/user/${widget.targetId}";
         apiInstance.accessToken = await storage.read(key: 'token');
 
 
@@ -70,6 +70,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         print("Error: $error");
       }
     } catch (error) {
+      print(url);
       print("Error Getting Analytics for User: $error");
     }
   }
