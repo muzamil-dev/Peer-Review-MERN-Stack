@@ -29,6 +29,8 @@ class _UserDashboardState extends State<UserDashboard> {
   List<String> deadlines = [];
   int _currentIndex = 0;
   int totalItemsLeft = 0;
+  bool isWorkspaceLocked = false;
+  bool isLoading = true;
   Map<int, int> itemsLeft = {};
   Map<int, Object> incompleteReviews = {};
   Map<int, Object> completedReviews = {};
@@ -74,6 +76,7 @@ class _UserDashboardState extends State<UserDashboard> {
       if (response.statusCode == 200) {
         final jsonResponse = response.data;
         var now = DateTime.now();
+        await getLockedStatus(context);
 
         setState(() {
           for (var response in jsonResponse) {
@@ -85,6 +88,7 @@ class _UserDashboardState extends State<UserDashboard> {
               getAssignmentProgress(context, response['assignmentId']);
             }
           }
+          isLoading = false;
         });
       }
     } catch (error) {
@@ -115,6 +119,22 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
+  Future<void> getLockedStatus(BuildContext context) async {
+    final url = '/workspaces/${widget.workspaceId}';
+
+    try {
+      final response = await apiInstance.api.get(url);
+      if (response.statusCode == 200) {
+        final jsonResponse = response.data;
+        setState(() {
+          isWorkspaceLocked = jsonResponse['groupLock'];
+        });
+      }
+    } catch (error) {
+      print("Error Getting Locked Status: $error");
+    }
+  }
+
   String getDateString(String date) {
     // Parse the input date string
     DateTime dateTime = DateTime.parse(date);
@@ -129,52 +149,146 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   // Widget List Function to navigate between Bottom navigation bar items
-  List<Widget> _widgetTabOptions(BuildContext context) {
-    return <Widget>[toDoPage(context), profilePage(context)];
+  List<Widget> _widgetTabBodyOptions(BuildContext context) {
+    return <Widget>[toDoPage(context), groupPage(context)];
+  }
+
+  List<PreferredSizeWidget> _widgetTabAppBarOptions(BuildContext context) {
+    return <PreferredSizeWidget>[toDoAppBar(context), profileAppBar(context)];
+  }
+
+  Widget lockWidget(BuildContext context) {
+    if (isWorkspaceLocked) {
+      return TextButton(
+          onPressed: null,
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.redAccent,
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text(
+                'Workspace: Locked',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Icon(
+                Icons.lock,
+                color: Colors.white,
+              ),
+            ],
+          ));
+    }
+    return TextButton(
+        onPressed: null,
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.green,
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'Workspace: Unlocked',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Icon(
+              Icons.lock_open,
+              color: Colors.white,
+            ),
+          ],
+        ));
+  }
+
+  PreferredSizeWidget toDoAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: const Color(0xff004080),
+      iconTheme: const IconThemeData(
+        color: Colors.white,
+      ),
+      title: const Text(
+        "Dashboard",
+        style: TextStyle(color: Colors.white),
+      ),
+      centerTitle: true,
+    );
+  }
+
+  PreferredSizeWidget profileAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: const Color(0xff004080),
+      iconTheme: const IconThemeData(
+        color: Colors.white,
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Groups',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          lockWidget(context),
+        ],
+      ),
+    );
   }
 
   // Widget for To do List Page
   Widget toDoPage(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Column(
-              children: [
-                Text(
-                  "Welcome $userName!",
-                  style: const TextStyle(fontSize: 25.0),
-                ),
-                Text("You Have $totalItemsLeft reviews to complete!"),
-              ],
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    "Welcome $userName!",
+                    style: const TextStyle(fontSize: 25.0),
+                  ),
+                  Text("You Have $totalItemsLeft reviews to complete!"),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          const Text(
-            "Assignments",
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-          ),
-          Expanded(
-            child: RawScrollbar(
-                child: ListView.separated(
-                    itemBuilder: (context, index) {
-                      return assignmentItem(context, index);
-                    },
-                    separatorBuilder: (context, index) {
-                      return const Divider(
-                        height: 10,
-                        thickness: 0,
-                      );
-                    },
-                    itemCount: assignments.length)),
-          ),
-        ],
-      ),
-    );
+            const SizedBox(
+              height: 15,
+            ),
+            const Text(
+              "Assignments",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+            Expanded(
+              child: RawScrollbar(
+                  child: ListView.separated(
+                      itemBuilder: (context, index) {
+                        return assignmentItem(context, index);
+                      },
+                      separatorBuilder: (context, index) {
+                        return const Divider(
+                          height: 10,
+                          thickness: 0,
+                        );
+                      },
+                      itemCount: assignments.length)),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   Widget assignmentItem(BuildContext context, index) {
@@ -335,35 +449,15 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   // Widget for Profile Display Page
-  Widget profilePage(BuildContext context) {
-    return const Column(
-      children: [
-        Text("Student Profile Page"),
-      ],
-    );
+  Widget groupPage(BuildContext context) {
+    return UserGroup(workspaceId: widget.workspaceId, userId: userId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Dashboard"),
-              IconButton(
-                  onPressed: navigateToGroupsPage,
-                  icon: const Column(
-                    children: [
-                      Icon(Icons.group),
-                      Text("View Groups"),
-                    ],
-                  ))
-            ],
-          ),
-          backgroundColor: const Color(0xFF9bc4bc),
-        ),
-        body: _widgetTabOptions(context).elementAt(_currentIndex),
+        appBar: _widgetTabAppBarOptions(context).elementAt(_currentIndex),
+        body: _widgetTabBodyOptions(context).elementAt(_currentIndex),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           type: BottomNavigationBarType.fixed,
@@ -371,8 +465,8 @@ class _UserDashboardState extends State<UserDashboard> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.assignment), label: 'To Do'),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.profile_circled),
-              label: 'Profile',
+              icon: Icon(Icons.group),
+              label: 'Groups',
             ),
           ],
           onTap: (index) {

@@ -20,27 +20,12 @@ class _UserGroupState extends State<UserGroup> {
   bool isWorkspaceLocked = false;
   final apiInstance = Api();
   final storage = const FlutterSecureStorage();
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     getGroupsData(context);
-  }
-
-  Future<void> getLockedStatus(BuildContext context) async {
-    final url = '/workspaces/${widget.workspaceId}';
-
-    try {
-      final response = await apiInstance.api.get(url);
-      if (response.statusCode == 200) {
-        final jsonResponse = response.data;
-        setState(() {
-          isWorkspaceLocked = jsonResponse['groupLock'];
-        });
-      }
-    } catch (error) {
-      print("Error Getting Locked Status: $error");
-    }
   }
 
   Future<void> getGroupsData(BuildContext context) async {
@@ -54,6 +39,7 @@ class _UserGroupState extends State<UserGroup> {
         setState(() {
           groups = jsonResponse['groups'].toList();
           maxGroupLimit = jsonResponse['groupMemberLimit'];
+          isLoading = false;
         });
       }
     } catch (error) {
@@ -123,6 +109,22 @@ class _UserGroupState extends State<UserGroup> {
       }
     } catch (error) {
       print("Error Joining groups: $error");
+    }
+  }
+
+  Future<void> getLockedStatus(BuildContext context) async {
+    final url = '/workspaces/${widget.workspaceId}';
+
+    try {
+      final response = await apiInstance.api.get(url);
+      if (response.statusCode == 200) {
+        final jsonResponse = response.data;
+        setState(() {
+          isWorkspaceLocked = jsonResponse['groupLock'];
+        });
+      }
+    } catch (error) {
+      print("Error Getting Locked Status: $error");
     }
   }
 
@@ -214,57 +216,6 @@ class _UserGroupState extends State<UserGroup> {
         ));
   }
 
-  Widget lockWidget(BuildContext context) {
-    if (isWorkspaceLocked) {
-      return TextButton(
-          onPressed: null,
-          style: TextButton.styleFrom(
-            backgroundColor: Colors.redAccent,
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Text(
-                'Workspace: Locked',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Icon(
-                Icons.lock,
-                color: Colors.white,
-              ),
-            ],
-          ));
-    }
-    return TextButton(
-        onPressed: null,
-        style: TextButton.styleFrom(
-          backgroundColor: Colors.green,
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Text(
-              'Workspace: Unlocked',
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Icon(
-              Icons.lock_open,
-              color: Colors.white,
-            ),
-          ],
-        ));
-  }
-
   Widget groupCards(BuildContext context, index) {
     var currentGroup = groups[index];
     var numMembers = currentGroup['members'].length.toString();
@@ -332,41 +283,25 @@ class _UserGroupState extends State<UserGroup> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      appBar: AppBar(
-        backgroundColor: const Color(0xff004080),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Groups',
-              style: TextStyle(
-                color: Colors.white,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RawScrollbar(
+              child: ListView.separated(
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: groupCards(context, index),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider(
+                    height: 10,
+                    thickness: 0,
+                  );
+                },
+                itemCount: groups.length,
               ),
             ),
-            lockWidget(context),
-          ],
-        ),
-      ),
-      body: RawScrollbar(
-        child: ListView.separated(
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: groupCards(context, index),
-            );
-          },
-          separatorBuilder: (context, index) {
-            return const Divider(
-              height: 10,
-              thickness: 0,
-            );
-          },
-          itemCount: groups.length,
-        ),
-      ),
     );
   }
 }
