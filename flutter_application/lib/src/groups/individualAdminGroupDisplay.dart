@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class IndividualAdminGroup extends StatefulWidget {
-  final String groupId;
+  final int groupId;
 
   const IndividualAdminGroup({super.key, required this.groupId});
 
@@ -31,7 +31,6 @@ class _IndividualAdminGroupState extends State<IndividualAdminGroup> {
     try {
       final response = await http.get(groupDetailsUrl);
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
         setState(() {});
 
         print(response.body);

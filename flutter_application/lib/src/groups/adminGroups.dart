@@ -1,14 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/src/groups/individualAdminGroupDisplay.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_application/src/forms/get_forms.dart';
+import 'package:flutter_application/src/profile/user_profile.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class AdminGroup extends StatefulWidget {
-  final String workspaceId;
+  final int workspaceId;
   static const routeName = '/adminGroups';
-  final String userId; // User ID of Account User
+  final int userId; // User ID of Account User
 
-  const AdminGroup({super.key, required this.workspaceId, required this.userId});
+  const AdminGroup(
+      {super.key,
+      required this.workspaceId,
+      required this.userId});
 
   @override
   _AdminGroupState createState() => _AdminGroupState();
@@ -20,6 +26,8 @@ class _AdminGroupState extends State<AdminGroup> {
   bool isLoading = true;
   String workspaceName = '';
   bool groupLock = false;
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -37,12 +45,13 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchWorkspaceDetails() async {
-    final workspaceDetailsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+    final url =
+        '/workspaces/${widget.workspaceId}';
     try {
-      final response = await http.get(workspaceDetailsUrl);
+      final response =
+          await apiInstance.api.get(url);
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = response.data;
         setState(() {
           workspaceName = responseData['name'];
           groupLock = responseData['groupLock'];
@@ -63,12 +72,15 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchGroups() async {
-    final groupsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
+    final url = 
+        '/workspaces/${widget.workspaceId}/groups';
+
+
     try {
-      final groupsResponse = await http.get(groupsUrl);
+      final groupsResponse =
+          await apiInstance.api.get(url);
       if (groupsResponse.statusCode == 200) {
-        final responseData = json.decode(groupsResponse.body);
+        final responseData = groupsResponse.data;
         setState(() {
           currentGroups = (responseData['groups'] as List<dynamic>)
               .map((group) => Group.fromJson(group))
@@ -83,12 +95,13 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchUngroupedStudents() async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/ungrouped');
+    final url = 
+        '/workspaces/${widget.workspaceId}/ungrouped';
     try {
-      final response = await http.get(url);
+      final response = await apiInstance.api
+          .get(url);
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final List<dynamic> data = response.data;
         setState(() {
           ungroupedStudents =
               data.map((student) => Student.fromJson(student)).toList();
@@ -101,15 +114,14 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  Future<void> deleteGroup(String groupId) async {
-    final deleteUrl = Uri.parse('http://10.0.2.2:5000/groups/$groupId');
+  Future<void> deleteGroup(int groupId) async {
+    final deleteUrl = '/groups/$groupId';
+
+
     try {
-      final response = await http.delete(
+      final response = await apiInstance.api.delete(
         deleteUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
+        data: jsonEncode({
           'userId': widget.userId,
         }),
       );
@@ -127,15 +139,13 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  Future<void> addStudentToGroup(String userId, String groupId) async {
-    final addUserUrl = Uri.parse('http://10.0.2.2:5000/groups/addUser');
+  Future<void> addStudentToGroup(int userId, int groupId) async {
+    const url = '/groups/addUser';
+
     try {
-      final response = await http.put(
-        addUserUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
+      final response = await apiInstance.api.put(
+        url,
+        data: jsonEncode({
           'userId': widget.userId,
           'targetId': userId,
           'groupId': groupId,
@@ -143,11 +153,12 @@ class _AdminGroupState extends State<AdminGroup> {
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Student added to the group successfully')),
+          const SnackBar(
+              content: Text('Student added to the group successfully')),
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -160,15 +171,13 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  Future<void> removeStudentFromGroup(String userId, String groupId) async {
-    final removeUserUrl = Uri.parse('http://10.0.2.2:5000/groups/removeUser');
+  Future<void> removeStudentFromGroup(int userId, int groupId) async {
+    const url = '/groups/removeUser';
+
     try {
-      final response = await http.put(
-        removeUserUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
+      final response = await apiInstance.api.put(
+        url,
+        data: jsonEncode({
           'userId': widget.userId,
           'targetId': userId,
           'groupId': groupId,
@@ -181,7 +190,7 @@ class _AdminGroupState extends State<AdminGroup> {
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -194,7 +203,7 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
-  void showMoveStudentDialog(Student student, {String? currentGroupId}) {
+  void showMoveStudentDialog(Student student, {int? currentGroupId}) {
     showDialog(
       context: context,
       builder: (context) {
@@ -247,15 +256,13 @@ class _AdminGroupState extends State<AdminGroup> {
     );
   }
 
-  Future<void> kickStudent(String userId) async {
-    final kickUrl = Uri.parse('http://10.0.2.2:5000/workspaces/leave');
+  Future<void> kickStudent(int userId) async {
+    const url = '/workspaces/leave';
+
     try {
-      final response = await http.put(
-        kickUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
+      final response = await apiInstance.api.put(
+        url,
+        data: jsonEncode({
           'userId': userId,
           'workspaceId': widget.workspaceId,
         }),
@@ -267,7 +274,7 @@ class _AdminGroupState extends State<AdminGroup> {
         );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -285,14 +292,12 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> addGroup() async {
-    final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
+    const url = '/groups/create';
+
     try {
-      final response = await http.post(
+      final response = await apiInstance.api.post(
         url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
+        data: jsonEncode({
           'workspaceId': widget.workspaceId,
           'userId': widget.userId,
         }),
@@ -316,13 +321,13 @@ class _AdminGroupState extends State<AdminGroup> {
     TextEditingController limitController = TextEditingController();
 
     // Load the current workspace details
-    final workspaceDetailsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
-    print('Fetching workspace details from: $workspaceDetailsUrl');
-    http.get(workspaceDetailsUrl).then((response) {
+    final url =
+        '/workspaces/${widget.workspaceId}';
+    print('Fetching workspace details from: $url');
+    apiInstance.api.get(url).then((response) {
       print('Workspace details response status: ${response.statusCode}');
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = response.data;
         print('Workspace details: $responseData');
         setState(() {
           nameController.text = responseData['name'];
@@ -332,7 +337,7 @@ class _AdminGroupState extends State<AdminGroup> {
           groupLock = responseData['groupLock'];
         });
       } else {
-        print('Failed to load workspace details: ${response.body}');
+        print('Failed to load workspace details: ${response.data}');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to load workspace details')),
         );
@@ -354,7 +359,8 @@ class _AdminGroupState extends State<AdminGroup> {
                   children: [
                     TextField(
                       controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Workspace Name'),
+                      decoration:
+                          const InputDecoration(labelText: 'Workspace Name'),
                     ),
                     TextField(
                       controller: domainsController,
@@ -363,14 +369,14 @@ class _AdminGroupState extends State<AdminGroup> {
                     ),
                     TextField(
                       controller: limitController,
-                      decoration:
-                          const InputDecoration(labelText: 'Group Member Limit'),
+                      decoration: const InputDecoration(
+                          labelText: 'Group Member Limit'),
                       keyboardType: TextInputType.number,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Group Lock'),
+                        const Text('Lock Workspace: '),
                         Switch(
                           value: groupLock,
                           onChanged: (value) {
@@ -396,6 +402,9 @@ class _AdminGroupState extends State<AdminGroup> {
                       int.parse(limitController.text),
                       groupLock,
                     );
+                    if (groupLock) {
+                      await removeInviteCode(context);
+                    }
                     Navigator.of(context).pop();
                   },
                   child: const Text('Save'),
@@ -408,25 +417,33 @@ class _AdminGroupState extends State<AdminGroup> {
     );
   }
 
-  void navigateToIndividualGroupPage(String groupId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => IndividualAdminGroup(groupId: groupId),
-      ),
-    );
+  Future<void> removeInviteCode(BuildContext context) async {
+    final url = 
+        '/workspaces/${widget.workspaceId}/removeInvite';
+
+    try {
+      final response = await apiInstance.api.delete(
+        url,
+        data: jsonEncode({
+          'userId': widget.userId,
+        }),
+      );
+      if (response.statusCode == 200) {
+        print("Sucessfully Removed Invite Code.");
+      }
+    } catch (error) {
+      print("Error Removing Invite Code: $error");
+    }
   }
 
   Future<void> editWorkspace(String name, List<String> allowedDomains,
       int groupMemberLimit, bool groupLock) async {
-    final editUrl = Uri.parse('http://10.0.2.2:5000/workspaces/edit');
+    const url = '/workspaces/edit';
+
     try {
-      final response = await http.put(
-        editUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
+      final response = await apiInstance.api.put(
+        url,
+        data: jsonEncode(<String, dynamic>{
           'userId': widget.userId, // Replace with actual admin user ID
           'workspaceId': widget.workspaceId,
           'name': name,
@@ -441,7 +458,7 @@ class _AdminGroupState extends State<AdminGroup> {
         );
         fetchWorkspaceName(); // Refresh the workspace name
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -469,9 +486,10 @@ class _AdminGroupState extends State<AdminGroup> {
         ),
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: Colors.white),
+            icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: showEditWorkspaceDialog,
           ),
         ],
@@ -484,6 +502,37 @@ class _AdminGroupState extends State<AdminGroup> {
                 Expanded(
                   child: ListView(
                     children: [
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GetAssignments(
+                                workspaceId: widget.workspaceId,
+                                userId: widget.userId,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Card(
+                          margin: EdgeInsets.all(10),
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "View Assignments",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Icon(Icons.arrow_forward),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                       Card(
                         margin: const EdgeInsets.all(10),
                         child: Padding(
@@ -521,39 +570,47 @@ class _AdminGroupState extends State<AdminGroup> {
                       ),
                       // Rest of the groups
                       ...currentGroups.map((group) {
-                        return GestureDetector(
-                          onTap: () {
-                            navigateToIndividualGroupPage(group.groupId);
-                          },
-                          child: Card(
-                            margin: const EdgeInsets.all(10),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        group.name,
-                                        style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete),
-                                        onPressed: () {
-                                          deleteGroup(group.groupId);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Column(
-                                    children: group.members.map((member) {
-                                      return ListTile(
+                        return Card(
+                          margin: const EdgeInsets.all(10),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      group.name,
+                                      style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () {
+                                        deleteGroup(group.groupId);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Column(
+                                  children: group.members.map((member) {
+                                    return InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => UserProfile(
+                                                userId: widget.userId,
+                                                workspaceId: widget.workspaceId,
+                                                targetId: member.userId),
+                                          ),
+                                        );
+                                      },
+                                      child: ListTile(
                                         title: Text(
                                             '${member.firstName} ${member.lastName}'),
                                         trailing: IconButton(
@@ -571,15 +628,15 @@ class _AdminGroupState extends State<AdminGroup> {
                                             );
                                           },
                                         ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
                             ),
                           ),
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),
@@ -612,7 +669,7 @@ class Workspace {
 }
 
 class Member {
-  String userId;
+  int userId;
   String firstName;
   String lastName;
 
@@ -629,7 +686,7 @@ class Member {
 }
 
 class Group {
-  String groupId;
+  int groupId;
   String name;
   List<Member> members;
 
@@ -651,7 +708,7 @@ class Group {
 }
 
 class Student {
-  String userId;
+  int userId;
   String email;
   String firstName;
   String lastName;
