@@ -44,7 +44,6 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
       print("User Id: ${widget.userId}");
       final response = await apiInstance.api.post(
         url,
-      
         data: jsonEncode({
           'name': nameController.text,
           'allowedDomains': domainController.text.isEmpty
@@ -63,10 +62,10 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
         }),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         Navigator.pop(context, true); // Return true to indicate success
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Workspace created successfully')),
+          const SnackBar(content: Text('Workspace created successfully')),
         );
       } else {
         final errorData = response.data;
