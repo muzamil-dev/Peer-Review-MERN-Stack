@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

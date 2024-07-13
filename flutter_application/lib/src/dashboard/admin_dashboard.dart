@@ -53,7 +53,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         throw Exception('Failed to load workspaces');
       }
     } catch (error) {
-      print('Error fetching workspaces: $error');
       setState(() {
         isLoading = false;
       });
@@ -105,11 +104,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Future<void> joinWorkspace(String inviteCode) async {
-    final url = Uri.parse('http://10.0.2.2:5000/workspaces/join');
+    const url = '/workspaces/join';
 
     try {
       final response = await apiInstance.api.put(
-        '/workspaces/join',
+        url,
         data: jsonEncode({
           'userId': userId,
           'inviteCode': inviteCode,
@@ -127,7 +126,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         );
       }
     } catch (err) {
-      print('Error joining workspace: $err');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error joining workspace')),
       );
@@ -264,7 +262,6 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
       );
       if (response.statusCode == 200) {
       } else {
-        print("Create Invite Code Unsuccessful");
       }
     } catch (error) {
       print("Error Creating Invite Code: $error");
