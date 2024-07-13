@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 
 class CreateWorkspace extends StatefulWidget {
   static const routeName = "/createWorkspace";
-  final String userId;
+  final int userId;
 
   CreateWorkspace({required this.userId});
 
@@ -17,44 +18,58 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   final TextEditingController domainController = TextEditingController();
   final TextEditingController numGroupsController = TextEditingController();
   final TextEditingController maxGroupSizeController = TextEditingController();
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   Future<void> createWorkspace(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/workspaces/create');
-    try {
+    const url = '/workspaces/create';
 
+    try {
       final allowedDomains = domainController.text.isEmpty
-        ? <String>[]
-        : domainController.text.split(',').map((domain) => domain.trim()).toList().cast<String>();
+          ? <String>[]
+          : domainController.text
+              .split(',')
+              .map((domain) => domain.trim())
+              .toList()
+              .cast<String>();
 
       if (!validateDomains(allowedDomains)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid domain format. Only letters and periods are allowed.')),
+          const SnackBar(
+              content: Text(
+                  'Invalid domain format. Only letters and periods are allowed.')),
         );
         return;
       }
-
-      final response = await http.post(
+      print("User Id: ${widget.userId}");
+      final response = await apiInstance.api.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'name': nameController.text,
-          'allowedDomains': domainController.text.isEmpty ? [] 
-          : domainController.text.split(',').map((domain) => domain.trim()).toList(),
+          'allowedDomains': domainController.text.isEmpty
+              ? []
+              : domainController.text
+                  .split(',')
+                  .map((domain) => domain.trim())
+                  .toList(),
           'userId': widget.userId,
-          'numGroups': numGroupsController.text.isNotEmpty ? int.parse(numGroupsController.text) : null,
-          'groupMemberLimit': maxGroupSizeController.text.isNotEmpty ? int.parse(maxGroupSizeController.text) : null,
+          'numGroups': numGroupsController.text.isNotEmpty
+              ? int.parse(numGroupsController.text)
+              : null,
+          'groupMemberLimit': maxGroupSizeController.text.isNotEmpty
+              ? int.parse(maxGroupSizeController.text)
+              : null,
         }),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         Navigator.pop(context, true); // Return true to indicate success
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Workspace created successfully')),
+          const SnackBar(content: Text('Workspace created successfully')),
         );
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
+        print("Status Code: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -80,60 +95,61 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Create',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ), // Change text color here
+        appBar: AppBar(
+          title: const Text(
+            'Create',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ), // Change text color here
+          ),
+          backgroundColor: const Color(0xFF004080),
+          centerTitle: true, // Center the title
         ),
-        backgroundColor: const Color(0xFF004080),
-        centerTitle: true, // Center the title
-      ),
-      body: Container(
-        //color: Colors.white,
-        child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(labelText: 'Workspace Name'),
+        body: Container(
+          //color: Colors.white,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(labelText: 'Workspace Name'),
+                ),
+                TextField(
+                  //color
+                  controller: domainController,
+                  decoration: InputDecoration(
+                      labelText: 'Allowed Domains (comma separated)'),
+                ),
+                TextField(
+                  controller: numGroupsController,
+                  decoration: InputDecoration(labelText: 'Number of Groups'),
+                  keyboardType: TextInputType.number,
+                ),
+                TextField(
+                  controller: maxGroupSizeController,
+                  decoration: InputDecoration(labelText: 'Max Group Size'),
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    if (nameController.text.isNotEmpty) {
+                      createWorkspace(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text('Please fill in the workspace name')),
+                      );
+                    }
+                  },
+                  child: Text('Create Workspace'),
+                ),
+              ],
             ),
-            TextField(
-              //color
-              controller: domainController,
-              decoration: InputDecoration(labelText: 'Allowed Domains (comma separated)'),
-            ),
-            TextField(
-              controller: numGroupsController,
-              decoration: InputDecoration(labelText: 'Number of Groups'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: maxGroupSizeController,
-              decoration: InputDecoration(labelText: 'Max Group Size'),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty) {
-                  createWorkspace(context);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Please fill in the workspace name')),
-                  );
-                }
-              },
-              child: Text('Create Workspace'),
-            ),
-          ],
-        ),
-      ),)
-        
-      );
+          ),
+        ));
   }
 }

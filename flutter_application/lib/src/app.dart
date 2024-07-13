@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/main_app_bar.dart';
-import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'package:flutter_application/src/login-signup/loginsignup.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatelessWidget {
   final token;
-  
+
   const MyApp({
     super.key,
     required this.token,
@@ -22,9 +20,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: 
-      Scaffold(
-        appBar: MainAppBar(title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
+      home: Scaffold(
+        appBar: const MainAppBar(
+            title: "DEBUG PAGE VIEWER", backgroundColor: Color(0xFF9bc4bc)),
         body: Center(
           child: Column(
             children: [
@@ -45,12 +43,6 @@ class MyApp extends StatelessWidget {
                   Navigator.pushNamed(context, "/adminDashboard");
                 },
                 child: const Text("ADMIN DASHBOARD PAGE"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, "/userDashboard");
-                },
-                child: const Text("USER DASHBOARD PAGE"),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -76,18 +68,47 @@ class MyApp extends StatelessWidget {
                 },
                 child: const Text("ADMIN GROUPS PAGE"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/createForm");
+                },
+                child: const Text("CREATE FORMS PAGE"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/editForm");
+                },
+                child: const Text("EDIT FORMS PAGE"),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/getAssignments");
+                  },
+                  child: const Text("GET ASSIGNMENTS PAGE")),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/userDashboard");
+                },
+                child: const Text("USER DASHBOARD PAGE"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, "/analytics");
+                },
+                child: const Text("Analytics Page"),
+              ),
             ],
           ),
         ),
       ),
       // - - - Uncomment this line for Production
-      // (JwtDecoder.isExpired(token) == false)? AdminDashboard(token: token): const LoginSignup(), 
+      // (JwtDecoder.isExpired(token) == false)? AdminDashboard(token: token): const LoginSignup(),
       routes: {
         //'/login': (context) => LoginScreen(), // Add the LoginScreen route
         //'/signup': (context) => SignUpScreen(), // Add the SignUpScreen route
-        //'/userDashboard': (context) => UserDashboardScreen(), // Add the UserDashboardScreen route
-        // '/adminDashboard': (context) => AdminDashboardScreen(), // Uncomment and add AdminDashboardScreen route if necessary
-        '/loginsignup': (context) => const LoginSignup(), // Add the LoginSignupScreen route
+        //'/userDashboard': (context) => UserDashboardScreen(), // Add the UserDashboardScreen route// Uncomment and add AdminDashboardScreen route if necessary
+        '/loginsignup': (context) =>
+            const LoginSignup(), // Add the LoginSignupScreen route
       },
     );
     // Glue the SettingsController to the MaterialApp.
@@ -96,4 +117,3 @@ class MyApp extends StatelessWidget {
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
   }
 }
-

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'dart:ui'; // for BackdropFilter
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_application/core.services/api.dart';
 
 class LoginSignup extends StatefulWidget {
   const LoginSignup({super.key});
@@ -38,10 +36,10 @@ class _LoginSignupState extends State<LoginSignup> {
         title: const Text(
           'Welcome!',
           style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white, // Title color
-            ), // Change text color here
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // Title color
+          ), // Change text color here
         ),
         backgroundColor: Color(0xFF004080),
         centerTitle: true,
@@ -56,13 +54,14 @@ class _LoginSignupState extends State<LoginSignup> {
                 GestureDetector(
                   onTap: () => _togglePage(0),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
                           color: _selectedPage == 0
-                            ? Colors.white
-                            : Colors.transparent,
+                              ? Colors.white
+                              : Colors.transparent,
                           width: 2,
                         ),
                       ),
@@ -79,7 +78,8 @@ class _LoginSignupState extends State<LoginSignup> {
                 GestureDetector(
                   onTap: () => _togglePage(1),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
@@ -101,7 +101,7 @@ class _LoginSignupState extends State<LoginSignup> {
                 ),
               ],
             ),
-            SizedBox(height: 10),  // Add space between tabs and title
+            const SizedBox(height: 10), // Add space between tabs and title
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -136,7 +136,6 @@ class _LoginSignupState extends State<LoginSignup> {
 }
 
 class LoginScreen extends StatefulWidget {
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -145,82 +144,94 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController resetEmailController = TextEditingController();
-  late SharedPreferences prefs;
+  final storage = const FlutterSecureStorage();
+  final apiInstance = Api();
 
-  @override
-  void initState() {
-    super.initState();
-    initSharedPref();
+  Future<String?> getAccessToken() async {
+    return await storage.read(key: 'token');
   }
 
-// Allows for Persistent Storage of JWT Token
-  void initSharedPref() async {
-    prefs = await SharedPreferences.getInstance();
-  }
-
-  Future<void> loginUser(BuildContext context, String email, String password) async{
-    final url = Uri.parse('http://10.0.2.2:5000/users/login');
-
-    try{
-      final response = await http.post(
+  Future<void> loginUser(
+      BuildContext context, String email, String password) async {
+    try {
+      const url = "/users/login";
+      final response = await apiInstance.api.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'email': email,
           'password': password,
         }),
       );
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = response.data;
         var userToken = responseData['accessToken'];
-        prefs.setString('token', userToken);
+        await storage.write(key: 'accessToken', value: userToken);
+
+        // Retrieves refresh token
+        String? jwtValue;
+        final setCookieHeader = response.headers['set-cookie'];
+        if (setCookieHeader != null) {
+          for (final cookie in setCookieHeader) {
+            final parts = cookie.split(';');
+            final cookieName = parts[0].split('=')[0];
+            if (cookieName == 'jwt') {
+              jwtValue = parts[0].split('=')[1];
+              break;
+            }
+          }
+        }
+
+        if (jwtValue != null) {
+          await storage.write(key: 'refreshToken', value: jwtValue);
+        } else {
+          // Handle case where jwt cookie is not found
+          print('jwt cookie not found');
+        }
 
         // Navigate to dashboard
-        Navigator.push(context, MaterialPageRoute(builder: (context) => AdminDashboard(token: userToken))); // Adjust the route name as needed
-      } 
-      else {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => AdminDashboard(
+                      token: userToken,
+                    ))); // Adjust the route name as needed
+      } else {
         // Login failed
-        final errorData = json.decode(response.body);
+        final errorData = json.decode(response.data);
         print('Login failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login failed: ${errorData['message']}')),
         );
       }
-    }catch(err){
+    } catch (err) {
       print('Error: $err');
     }
   }
 
   Future<void> requestPasswordReset(BuildContext context, String email) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/requestPasswordReset');
+    const url = '/users/requestPasswordReset';
 
-    try{
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'email': email,
-        }),
-      );
+    try {
+      final response = await apiInstance.api.post(url,
+          data: jsonEncode({
+            'email': email,
+          }));
 
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         print('Password reset email sent');
-        Navigator.pushNamed(context, '/passwordReset'); 
+        Navigator.pushNamed(context, '/passwordReset');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset email sent')),
+          const SnackBar(content: Text('Password reset email sent')),
         );
-      }else{
-        final errorData = json.decode(response.body);
-        print('Request failed: ${response.statusCode}, ${errorData['message']}');
+      } else {
+        final errorData = json.decode(response.data);
+        print(
+            'Request failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Request failed: \n${errorData['message']}')),
         );
       }
-    }catch(err){
+    } catch (err) {
       print('Error: $err');
     }
   }
@@ -232,10 +243,13 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(margin: const EdgeInsets.only(bottom: 10.0), child: TextField(
-            controller: emailController,
-            decoration: InputDecoration(labelText: 'Email',
-            border: OutlineInputBorder(
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
@@ -244,10 +258,13 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          Container(margin: const EdgeInsets.only(bottom: 10.0), child: TextField(
-            controller: passwordController,
-            decoration: InputDecoration(labelText: 'Password',
-            border: OutlineInputBorder(
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              controller: passwordController,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
@@ -269,117 +286,137 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 10),
           TextButton(
-  onPressed: () {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-          child: Stack(
-            children: [
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    //color: Colors.black.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-              SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 160),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Reset Password',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller : resetEmailController,
-                        decoration: InputDecoration(
-                          labelText: 'Enter your email',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none,
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Stack(
+                        children: [
+                          BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                //color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
                           ),
-                          fillColor: Colors.grey[200],
-                          filled: true,
-                        ),
+                          SingleChildScrollView(
+                            child: Container(
+                              padding: const EdgeInsets.all(20),
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 160),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    'Reset Password',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  TextField(
+                                    controller: resetEmailController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Enter your email',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      fillColor: Colors.grey[200],
+                                      filled: true,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      // Handle password reset logic
+                                      // Send password reset email
+                                      final email = resetEmailController.text;
+                                      requestPasswordReset(context, email);
+                                    },
+                                    child: const Text('Submit'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
                       ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Handle password reset logic
-                          // Send password reset email
-                          final email = resetEmailController.text;
-                          requestPasswordReset(context, email);
-                        },
-                        child: const Text('Submit'),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ],
+                    ),
+                  );
+                },
+              );
+            },
+            child: const Text(
+              'Forgot Password?',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
-          ),
-        );
-      },
-    );
-  },
-  child: const Text(
-    'Forgot Password?',
-    style: TextStyle(color: Colors.white),
-  ),
-),
         ],
       ),
     );
   }
 }
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController firstNameController = TextEditingController();
+
   //final TextEditingController middleNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
-  final TextEditingController tokenController = TextEditingController();
 
-  Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password, String confirmPassword) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/signup');
+  final TextEditingController emailController = TextEditingController();
+
+  final TextEditingController passwordController = TextEditingController();
+
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
+  final TextEditingController tokenController = TextEditingController();
+  final apiInstance = Api();
+  String? accessToken;
+  final storage = const FlutterSecureStorage();
+
+  Future<void> userSignUp(
+      BuildContext context,
+      String firstName,
+      String lastName,
+      String email,
+      String password,
+      String confirmPassword) async {
+    const url = '/users/signup';
 
     try {
       // Validation Check for Password and Confirm Password
       if (password != confirmPassword) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('SignUp Failed: \nPassword and Confirm Password Do Not Match.')),
+          const SnackBar(
+              content: Text(
+                  'SignUp Failed: \nPassword and Confirm Password Do Not Match.')),
         );
         return;
       }
 
-      final response = await http.post(
+      final response = await apiInstance.api.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'firstName': firstName,
           'lastName': lastName,
           'email': email,
@@ -391,7 +428,7 @@ class SignUpScreen extends StatelessWidget {
         print("Sign Up Successful. Please verify your email.");
         _showVerificationDialog(context);
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = json.decode(response.data);
         print("SignUp Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('SignUp Failed: \n${errorData['message']}')),
@@ -407,23 +444,24 @@ class SignUpScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Email Verification'),
+          title: const Text('Email Verification'),
           content: TextField(
             controller: tokenController,
-            decoration: InputDecoration(labelText: 'Enter verification token'),
+            decoration:
+                const InputDecoration(labelText: 'Enter verification token'),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                verifyEmail(context, tokenController.text);
               },
-              child: Text('Cancel'),
+              child: const Text('Verify'),
             ),
             TextButton(
               onPressed: () {
-                verifyEmail(context, tokenController.text);
+                Navigator.pop(context);
               },
-              child: Text('Verify'),
+              child: const Text('Cancel'),
             ),
           ],
         );
@@ -432,36 +470,41 @@ class SignUpScreen extends StatelessWidget {
   }
 
   Future<void> verifyEmail(BuildContext context, String token) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/verifyEmail');
+    const url = '/users/verifyEmail';
 
     try {
-      final response = await http.post(
+      final response = await apiInstance.api.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'token': token,
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
+        print("Success");
         Navigator.pop(context); // Close the dialog
-        Navigator.pushNamed(context, '/adminDashboard'); // Navigate to dashboard
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    // AdminDashboard(token: storage.read(key: "accessToken") as String)
+                    const LoginSignup())); // Navigate to dashboard
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Email verified successfully.')),
+          const SnackBar(content: Text('Please Log In')),
         );
       } else {
-        final errorData = json.decode(response.body);
-        print("Verification Failed: ${response.statusCode}, ${errorData['message']}");
+        final errorData = response.data;
+        print(
+            "Verification Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Verification Failed: \n${errorData['message']}')),
+          SnackBar(
+              content: Text('Verification Failed: \n${errorData['message']}')),
         );
       }
     } catch (err) {
       print("Error: $err");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error verifying email.')),
+        const SnackBar(content: Text('Error verifying email.')),
       );
     }
   }
@@ -558,7 +601,8 @@ class SignUpScreen extends StatelessWidget {
               final email = emailController.text;
               final password = passwordController.text;
               final confirmPassword = confirmPasswordController.text;
-              userSignUp(context, firstName, lastName, email, password, confirmPassword);
+              userSignUp(context, firstName, lastName, email, password,
+                  confirmPassword);
             },
             child: const Text('Sign Up'),
           ),
