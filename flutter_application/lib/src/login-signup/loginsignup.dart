@@ -217,7 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
             'email': email,
           }));
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         print('Password reset email sent');
         Navigator.pushNamed(context, '/passwordReset');
         ScaffoldMessenger.of(context).showSnackBar(
