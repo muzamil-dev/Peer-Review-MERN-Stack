@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -249,7 +248,7 @@ class _UserDashboardState extends State<UserDashboard> {
       return const Center(child: CircularProgressIndicator());
     } else {
       return Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -258,34 +257,76 @@ class _UserDashboardState extends State<UserDashboard> {
                 children: [
                   Text(
                     "Welcome $userName!",
-                    style: const TextStyle(fontSize: 25.0),
+                    style: const TextStyle(fontSize: 28.0),
                   ),
-                  Text("You Have $totalItemsLeft reviews to complete!"),
+                  Text(
+                    "You Have $totalItemsLeft reviews to complete!",
+                    style: const TextStyle(fontSize: 18),
+                  ),
                 ],
               ),
             ),
             const SizedBox(
-              height: 15,
+              height: 30,
             ),
-            const Text(
-              "Assignments",
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            Container(
+              margin: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
+              child: const Text(
+                "Assignments",
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              ),
             ),
-            Expanded(
-              child: RawScrollbar(
-                  child: ListView.separated(
-                      itemBuilder: (context, index) {
-                        return assignmentItem(context, index);
-                      },
-                      separatorBuilder: (context, index) {
-                        return const Divider(
-                          height: 10,
-                          thickness: 0,
-                        );
-                      },
-                      itemCount: assignments.length)),
+            const SizedBox(
+              height: 10,
             ),
+            toDoPageBody(),
           ],
+        ),
+      );
+    }
+  }
+
+  Widget toDoPageBody() {
+    if (assignments.isEmpty) {
+      return Expanded(
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black, width: 2),
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "No Assignments To Display",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return Expanded(
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black, width: 1),
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: RawScrollbar(
+              child: ListView.separated(
+                  itemBuilder: (context, index) {
+                    return assignmentItem(context, index);
+                  },
+                  separatorBuilder: (context, index) {
+                    return const Divider();
+                  },
+                  itemCount: assignments.length)),
         ),
       );
     }
@@ -308,6 +349,7 @@ class _UserDashboardState extends State<UserDashboard> {
                 statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
               ],
             ),
+            
             title: Text(
               "${currentAssignment['name']}",
               style: const TextStyle(fontSize: 25),

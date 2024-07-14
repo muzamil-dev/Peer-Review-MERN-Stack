@@ -12,9 +12,7 @@ class GetAssignments extends StatefulWidget {
   final int workspaceId;
 
   const GetAssignments(
-      {super.key,
-      required this.workspaceId,
-      required this.userId});
+      {super.key, required this.workspaceId, required this.userId});
 
   static const routeName = "/getAssignments";
 
@@ -98,27 +96,27 @@ class _GetAssignmentsState extends State<GetAssignments> {
     return formattedDate;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'View Assignments',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ), // Change text color here
-            ),
-            GestureDetector(
+  Widget displayBody() {
+    if (assignments.isEmpty) {
+      return const Center(
+        child: Text(
+          "Create an Assignment Using the + Button",
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+        ),
+      );
+    } else {
+      return Column(children: [
+        Expanded(
+            child: ListView(
+          children: assignments.map((assignment) {
+            return GestureDetector(
               onTap: () async {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CreateForm(
+                    builder: (context) => EditForm(
+                      assignmentId: assignment.id,
                       workspaceId: widget.workspaceId,
                       userId: widget.userId,
                     ),
@@ -126,205 +124,199 @@ class _GetAssignmentsState extends State<GetAssignments> {
                 );
                 fetchAssignments();
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(12)),
-                  border: Border.all(color: Colors.green, width: 1),
-                  color: Colors.green,
-                ),
-                padding: const EdgeInsets.all(6),
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 30,
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            assignment.name,
+                            style: const TextStyle(
+                                fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                          Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const Text("Start Date: "),
+                                  const SizedBox(width: 15),
+                                  Text(getDateString(assignment.startDate))
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const Text("Due Date: "),
+                                  const SizedBox(width: 15),
+                                  Text(getDateString(assignment.dueDate))
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text("Questions: ",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: assignment.questions
+                                    .map<Widget>((question) {
+                                  return Text(
+                                    question,
+                                    style: const TextStyle(fontSize: 16),
+                                  );
+                                }).toList(),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: Colors.red,
+                                    child: IconButton(
+                                        onPressed: () async {
+                                          showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(
+                                                        'Delete Assignment?',
+                                                        style: TextStyle(
+                                                            fontSize: 30,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  contentPadding:
+                                                      const EdgeInsets.all(
+                                                          15.0),
+                                                  content: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Flexible(
+                                                        child: Text(
+                                                            assignment.name,
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 25,
+                                                            )),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  actions: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      children: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            deleteAssignment(
+                                                                assignment.id);
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: const Text(
+                                                              'Delete'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: const Text(
+                                                              'Cancel'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                );
+                                              });
+                                        },
+                                        icon: const Icon(
+                                          CupertinoIcons.trash,
+                                          color: Colors.white,
+                                        )),
+                                  ),
+                                ],
+                              ),
+                            ]),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            );
+          }).toList(),
+        ))
+      ]);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text(
+            'View Assignments',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ), // Change text color here
+          ),
+          backgroundColor: const Color(0xFF004080),
+          iconTheme:
+              const IconThemeData(color: Colors.white), // Center the title
         ),
-        backgroundColor: const Color(0xFF004080),
-        iconTheme: const IconThemeData(color: Colors.white), // Center the title
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(children: [
-              Expanded(
-                  child: ListView(
-                children: assignments.map((assignment) {
-                  return GestureDetector(
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditForm(
-                            assignmentId: assignment.id,
-                            workspaceId: widget.workspaceId,
-                            userId: widget.userId,
-                          ),
-                        ),
-                      );
-                      fetchAssignments();
-                    },
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  assignment.name,
-                                  style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        const Text("Start Date: "),
-                                        const SizedBox(width: 15),
-                                        Text(
-                                            getDateString(assignment.startDate))
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        const Text("Due Date: "),
-                                        const SizedBox(width: 15),
-                                        Text(getDateString(assignment.dueDate))
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 5),
-                            SizedBox(
-                              width: double.infinity,
-                              child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text("Questions: ",
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w500,
-                                        )),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: assignment.questions
-                                          .map<Widget>((question) {
-                                        return Text(
-                                          question,
-                                          style: const TextStyle(fontSize: 16),
-                                        );
-                                      }).toList(),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 20,
-                                          backgroundColor: Colors.red,
-                                          child: IconButton(
-                                              onPressed: () async {
-                                                showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return AlertDialog(
-                                                        title: const Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Text(
-                                                              'Delete Assignment?',
-                                                              style: TextStyle(
-                                                                  fontSize: 30,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        contentPadding:
-                                                            const EdgeInsets
-                                                                .all(15.0),
-                                                        content: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Flexible(
-                                                              child: Text(
-                                                                  assignment
-                                                                      .name,
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontSize:
-                                                                        25,
-                                                                  )),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        actions: [
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceAround,
-                                                            children: [
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  deleteAssignment(
-                                                                      assignment
-                                                                          .id);
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                },
-                                                                child: const Text(
-                                                                    'Delete'),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                },
-                                                                child: const Text(
-                                                                    'Cancel'),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      );
-                                                    });
-                                              },
-                                              icon: const Icon(
-                                                CupertinoIcons.trash,
-                                                color: Colors.white,
-                                              )),
-                                        ),
-                                      ],
-                                    ),
-                                  ]),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ))
-            ]),
-    );
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : displayBody(),
+        floatingActionButton: FloatingActionButton(
+            backgroundColor: Colors.green,
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateForm(
+                    workspaceId: widget.workspaceId,
+                    userId: widget.userId,
+                  ),
+                ),
+              );
+              fetchAssignments();
+            },
+            child: const Icon(
+              Icons.add,
+              color: Colors.white,
+              size: 30,
+            )));
   }
 }
 

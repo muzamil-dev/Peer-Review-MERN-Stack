@@ -90,7 +90,7 @@ router.post("/create", async(req, res) => {
     // Send the error if the service returned one
     if (data.error)
         return res.status(data.status).json({ message: data.error });
-    return res.status(200).json(data);
+    return res.status(201).json(data);
 });
 
 // Edit a workspace

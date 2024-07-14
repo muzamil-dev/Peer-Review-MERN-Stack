@@ -125,7 +125,7 @@ class _UserProfileState extends State<UserProfile> {
         // Calculates Total Average Rating Per Assignment
         double avgRating = calculateTotalAverageRating(reviews);
         tempAverageRatingsForAssignment.add(avgRating);
-        
+
         // Exits if the current assignment has No Reviews
         if (avgRating == -1) {
           return;
@@ -236,7 +236,7 @@ class _UserProfileState extends State<UserProfile> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Assigment Past Due",
+            "Assignment Past Due",
             style: TextStyle(color: Colors.red),
           )
         ],
@@ -277,6 +277,9 @@ class _UserProfileState extends State<UserProfile> {
                 printRatingsOfReviewers(index),
               ],
             ),
+            const SizedBox(
+              height: 10,
+            ),
             printPastDue(dueDates[index]),
           ],
         ),
@@ -312,16 +315,17 @@ class _UserProfileState extends State<UserProfile> {
                   Text(
                     "$nameOfProfile's Profile",
                     style: const TextStyle(
-                        fontSize: 30, fontWeight: FontWeight.bold),
+                        fontSize: 32, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       const Text(
                         "Assignments:",
                         style: TextStyle(
-                            fontSize: 26, fontWeight: (FontWeight.bold)),
+                            fontSize: 28, fontWeight: (FontWeight.bold)),
                       ),
                       InkWell(
                         onTap: () {},
@@ -361,20 +365,26 @@ class _UserProfileState extends State<UserProfile> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Expanded(
-                    child: RawScrollbar(
-                        child: ListView.separated(
-                            itemBuilder: (context, index) {
-                              return assignmentItem(context, index);
-                            },
-                            separatorBuilder: (context, index) {
-                              return const Divider(
-                                height: 10,
-                                thickness: 0,
-                              );
-                            },
-                            itemCount: assignmentIds.length)),
+                    child: Container(
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 1),
+                          borderRadius: BorderRadius.circular(10.0)),
+                      child: RawScrollbar(
+                          child: ListView.separated(
+                              itemBuilder: (context, index) {
+                                return assignmentItem(context, index);
+                              },
+                              separatorBuilder: (context, index) {
+                                return const Divider(
+                                  height: 10,
+                                  thickness: 0,
+                                );
+                              },
+                              itemCount: assignmentIds.length)),
+                    ),
                   ),
                 ],
               ),
