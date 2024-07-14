@@ -202,14 +202,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
           children: [
             SvgPicture.asset(
               'assets/images/RMP_Icon.svg',
-              width: 30,
-              height: 30,
+              width: 35,
+              height: 35,
             ),
             const SizedBox(width: 10),
             const Text(
               'Dashboard',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ), // Change text color here
@@ -407,6 +407,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
           icon: const Icon(
             Icons.person_add_alt_1,
             color: Colors.black,
+            size: 28,
           ));
     }
     return const SizedBox();
@@ -432,7 +433,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
                     child: Text(
                       widget.workspace.name,
                       style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                          fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ),
                   addMemberButton(context),
@@ -441,7 +442,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
               const SizedBox(height: 10),
               Text(
                 'Role: ${widget.workspace.role}',
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 20),
               ),
             ],
           ),
