@@ -138,7 +138,7 @@ const LoginPage = () => {
         }
         try {
             const response = await Api.Users.ResetPassword(resetPasswordData.email, resetPasswordData.token, resetPasswordData.newPassword);
-            if (response.success) {
+            if (response.status === 201) {
                 enqueueSnackbar('Password reset successful. You can now log in with your new password.', { variant: 'success' });
                 setIsLoginActive(true);
                 setIsResetPasswordActive(false);
