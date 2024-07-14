@@ -96,7 +96,7 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
         if (!data)
             return {
                 error: "The requested reviews were not found",
-                status: 404
+                status: 200
             };
 
         // Filter complete and incomplete reviews
@@ -167,7 +167,7 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
         if (!data)
             return {
                 error: "The requested reviews were not found",
-                status: 404
+                status: 200
             };
 
         // Filter complete reviews, incomplete reviews will be excluded
