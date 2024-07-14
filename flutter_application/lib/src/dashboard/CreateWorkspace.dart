@@ -62,7 +62,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         Navigator.pop(context, true); // Return true to indicate success
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Workspace created successfully')),
