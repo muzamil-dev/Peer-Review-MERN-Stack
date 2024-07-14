@@ -1,7 +1,9 @@
 // ignore_for_file: unnecessary_const
 
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:cupertino_icons/cupertino_icons.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_application/src/dashboard/user_dashboard.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -246,29 +248,23 @@ class _AdminDashboardState extends State<AdminDashboard> {
             borderRadius: BorderRadius.circular(12.0)), // Set background color
         height: 70,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             IconButton(
-              icon: const CircleAvatar(
-                  backgroundColor: Colors.green,
-                  radius: 25,
-                  child: Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 30,
-                  )),
+              icon: const Icon(
+                Icons.add_circle,
+                size: 57,
+                color: Colors.green,
+              ),
               onPressed: navigateToCreateWorkspacePage,
               tooltip: 'Add Workspace',
             ),
             IconButton(
-              icon: const CircleAvatar(
-                  backgroundColor: Colors.green,
-                  radius: 25,
-                  child: Icon(
-                    Icons.input_sharp,
-                    color: Colors.white,
-                    size: 24,
-                  )),
+              icon: const Icon(
+                CupertinoIcons.square_arrow_right,
+                size: 57,
+                color: Colors.green,
+              ),
               onPressed: showJoinWorkspaceDialog,
               tooltip: 'Join Workspace',
             ),
