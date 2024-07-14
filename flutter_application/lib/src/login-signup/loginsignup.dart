@@ -62,7 +62,7 @@ class _LoginSignupState extends State<LoginSignup> {
               width: 50,
               height: 50,
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
