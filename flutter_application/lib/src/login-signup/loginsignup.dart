@@ -4,6 +4,7 @@ import 'dart:ui'; // for BackdropFilter
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginSignup extends StatefulWidget {
   const LoginSignup({super.key});
@@ -36,14 +37,6 @@ class _LoginSignupState extends State<LoginSignup> {
         iconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        title: const Text(
-          'Welcome!',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white, // Title color
-          ), // Change text color here
-        ),
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
       ),
@@ -51,6 +44,25 @@ class _LoginSignupState extends State<LoginSignup> {
         color: const Color(0xFF004080), // Background color
         child: Column(
           children: [
+            const SizedBox(
+              height: 60,
+            ),
+            const Text(
+              'Welcome to',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // Title color
+              ), // Change text color here
+            ),
+            const SizedBox(height: 10),
+            // Rate My Peer Logo
+            SvgPicture.asset(
+              'assets/images/RateMyPeer.svg',
+              width: 50,
+              height: 50,
+            ),
+            const SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -70,10 +82,12 @@ class _LoginSignupState extends State<LoginSignup> {
                       ),
                     ),
                     child: Text(
-                      'Login',
+                      'Sign in',
                       style: TextStyle(
                         fontSize: 18,
-                        color: _selectedPage == 0 ? Colors.white : Colors.grey,
+                        color: _selectedPage == 0
+                            ? Colors.white
+                            : const Color.fromARGB(255, 234, 222, 222),
                       ),
                     ),
                   ),
@@ -97,7 +111,9 @@ class _LoginSignupState extends State<LoginSignup> {
                       'Sign Up',
                       style: TextStyle(
                         fontSize: 18,
-                        color: _selectedPage == 1 ? Colors.white : Colors.grey,
+                        color: _selectedPage == 1
+                            ? Colors.white
+                            : const Color.fromARGB(255, 234, 222, 222),
                       ),
                     ),
                   ),
@@ -251,12 +267,17 @@ class _LoginScreenState extends State<LoginScreen> {
             child: TextField(
               controller: emailController,
               decoration: InputDecoration(
-                labelText: 'Email',
+                hintText: 'Email',
+                hintStyle: const TextStyle(fontSize: 17),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
                 filled: true,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: const BorderSide(color: Colors.blue, width: 3),
+                ),
                 prefixIcon: const Icon(Icons.email),
               ),
             ),
@@ -266,12 +287,17 @@ class _LoginScreenState extends State<LoginScreen> {
             child: TextField(
               controller: passwordController,
               decoration: InputDecoration(
-                labelText: 'Password',
+                hintText: 'Password',
+                hintStyle: const TextStyle(fontSize: 17),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
                 filled: true,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: const BorderSide(color: Colors.blue, width: 3),
+                ),
                 prefixIcon: const Icon(Icons.password),
               ),
               obscureText: true,
@@ -279,15 +305,23 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
             onPressed: () {
               // Handle login logic
               final email = emailController.text;
               final password = passwordController.text;
               loginUser(context, email, password);
             },
-            child: const Text('Login'),
+            child: const SizedBox(
+              width: 110,
+              child: Center(
+                child: Text(
+                  'Sign in',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 10),
           TextButton(
             onPressed: () {
               showDialog(
@@ -365,7 +399,7 @@ class _LoginScreenState extends State<LoginScreen> {
             },
             child: const Text(
               'Forgot Password?',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white, fontSize: 15),
             ),
           ),
         ],
@@ -524,13 +558,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: TextField(
               controller: firstNameController,
               decoration: InputDecoration(
-                labelText: 'First Name',
-                border: OutlineInputBorder(
+                  hintText: 'First Name',
+                  hintStyle: const TextStyle(fontSize: 17),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none),
+                  fillColor: Colors.white,
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide.none),
-                fillColor: Colors.white,
-                filled: true,
-              ),
+                    borderSide: const BorderSide(color: Colors.blue, width: 3),
+                  )),
             ),
           ),
           Container(
@@ -538,12 +576,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: TextField(
               controller: lastNameController,
               decoration: InputDecoration(
-                labelText: 'Last Name',
+                hintText: 'Last Name',
+                hintStyle: const TextStyle(fontSize: 17),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
                 filled: true,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: const BorderSide(color: Colors.blue, width: 3),
+                ),
               ),
             ),
           ),
@@ -553,11 +596,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
               controller: emailController,
               decoration: InputDecoration(
                 hintText: "Email",
+                hintStyle: const TextStyle(fontSize: 17),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
                 filled: true,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: const BorderSide(color: Colors.blue, width: 3),
+                ),
                 prefixIcon: const Icon(Icons.email),
               ),
               maxLines: 1,
@@ -568,12 +616,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: TextField(
               controller: passwordController,
               decoration: InputDecoration(
-                labelText: 'Password',
+                hintText: 'Password',
+                hintStyle: const TextStyle(fontSize: 17),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
                 filled: true,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: const BorderSide(color: Colors.blue, width: 3),
+                ),
                 prefixIcon: const Icon(Icons.password),
               ),
               obscureText: true,
@@ -584,12 +637,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: TextField(
               controller: confirmPasswordController,
               decoration: InputDecoration(
-                labelText: 'Confirm Password',
+                hintText: 'Confirm Password',
+                hintStyle: const TextStyle(fontSize: 17),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
                 filled: true,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: const BorderSide(color: Colors.blue, width: 3),
+                ),
                 prefixIcon: const Icon(Icons.password),
               ),
               obscureText: true,
@@ -597,6 +655,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
             onPressed: () {
               // Handle signup logic
               final firstName = firstNameController.text;
@@ -607,7 +666,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               userSignUp(context, firstName, lastName, email, password,
                   confirmPassword);
             },
-            child: const Text('Sign Up'),
+            child: const SizedBox(
+              width: 110,
+              child: Center(
+                child: Text(
+                  'Sign Up',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+              ),
+            ),
           ),
         ],
       ),

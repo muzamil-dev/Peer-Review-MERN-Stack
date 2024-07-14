@@ -24,6 +24,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   dio: ^5.5.0+1
   http_interceptor: ^1.0.2
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:
@@ -39,4 +40,4 @@ flutter:
 
   assets:
     # Add assets from the images directory to the application.
-    - assets/images/
+    - assets/images/RateMyPeer.svg
