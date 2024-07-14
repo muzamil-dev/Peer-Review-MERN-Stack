@@ -5,16 +5,13 @@ import 'package:flutter_application/src/forms/get_forms.dart';
 import 'package:flutter_application/src/profile/user_profile.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-
 class AdminGroup extends StatefulWidget {
   final int workspaceId;
   static const routeName = '/adminGroups';
   final int userId; // User ID of Account User
 
   const AdminGroup(
-      {super.key,
-      required this.workspaceId,
-      required this.userId});
+      {super.key, required this.workspaceId, required this.userId});
 
   @override
   _AdminGroupState createState() => _AdminGroupState();
@@ -45,11 +42,9 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchWorkspaceDetails() async {
-    final url =
-        '/workspaces/${widget.workspaceId}';
+    final url = '/workspaces/${widget.workspaceId}';
     try {
-      final response =
-          await apiInstance.api.get(url);
+      final response = await apiInstance.api.get(url);
       if (response.statusCode == 200) {
         final responseData = response.data;
         setState(() {
@@ -72,13 +67,10 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchGroups() async {
-    final url = 
-        '/workspaces/${widget.workspaceId}/groups';
-
+    final url = '/workspaces/${widget.workspaceId}/groups';
 
     try {
-      final groupsResponse =
-          await apiInstance.api.get(url);
+      final groupsResponse = await apiInstance.api.get(url);
       if (groupsResponse.statusCode == 200) {
         final responseData = groupsResponse.data;
         setState(() {
@@ -95,11 +87,9 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchUngroupedStudents() async {
-    final url = 
-        '/workspaces/${widget.workspaceId}/ungrouped';
+    final url = '/workspaces/${widget.workspaceId}/ungrouped';
     try {
-      final response = await apiInstance.api
-          .get(url);
+      final response = await apiInstance.api.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         setState(() {
@@ -116,7 +106,6 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> deleteGroup(int groupId) async {
     final deleteUrl = '/groups/$groupId';
-
 
     try {
       final response = await apiInstance.api.delete(
@@ -321,8 +310,7 @@ class _AdminGroupState extends State<AdminGroup> {
     TextEditingController limitController = TextEditingController();
 
     // Load the current workspace details
-    final url =
-        '/workspaces/${widget.workspaceId}';
+    final url = '/workspaces/${widget.workspaceId}';
     print('Fetching workspace details from: $url');
     apiInstance.api.get(url).then((response) {
       print('Workspace details response status: ${response.statusCode}');
@@ -418,8 +406,7 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> removeInviteCode(BuildContext context) async {
-    final url = 
-        '/workspaces/${widget.workspaceId}/removeInvite';
+    final url = '/workspaces/${widget.workspaceId}/removeInvite';
 
     try {
       final response = await apiInstance.api.delete(

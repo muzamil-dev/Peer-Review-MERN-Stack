@@ -281,43 +281,43 @@ class _GetAssignmentsState extends State<GetAssignments> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          
-          centerTitle: true,
-          title: const Text(
-            'View Assignments',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ), // Change text color here
-          ),
-          backgroundColor: const Color(0xFF004080),
-          iconTheme:
-              const IconThemeData(color: Colors.white), // Center the title
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text(
+          'View Assignments',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ), // Change text color here
         ),
-        body: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : displayBody(),
-        floatingActionButton: FloatingActionButton(
-            backgroundColor: Colors.green,
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CreateForm(
-                    workspaceId: widget.workspaceId,
-                    userId: widget.userId,
-                  ),
+        backgroundColor: const Color(0xFF004080),
+        iconTheme: const IconThemeData(color: Colors.white), // Center the title
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : displayBody(),
+      floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.green,
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreateForm(
+                  workspaceId: widget.workspaceId,
+                  userId: widget.userId,
                 ),
-              );
-              fetchAssignments();
-            },
-            child: const Icon(
-              Icons.add,
-              color: Colors.white,
-              size: 30,
-            )));
+              ),
+            );
+            fetchAssignments();
+          },
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 30,
+          )),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
   }
 }
 
