@@ -26,6 +26,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   int _currentIndex = 0;
   final storage = const FlutterSecureStorage();
   final apiInstance = Api();
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -55,8 +56,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
             assignmentNames = tempAssignmentNames;
           });
         }
-        print(assignmentNames);
-        print(averageRatings);
+        setState(() {
+          isLoading = false;
+        });
       } else {
         final error = response.data;
         print("Error: $error");
@@ -132,7 +134,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 }).toList(),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -166,7 +168,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         backgroundColor: const Color(0xFF004080),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: _widgetTabOptions(context).elementAt(_currentIndex),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : _widgetTabOptions(context).elementAt(_currentIndex),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
