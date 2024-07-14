@@ -7,6 +7,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
 import 'CreateWorkspace.dart';
 import 'package:flutter_application/src/groups/adminGroups.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AdminDashboard extends StatefulWidget {
   final String token;
@@ -163,16 +164,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
         iconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        title: const Text(
-          'Home',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ), // Change text color here
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 30,
+              height: 30,
+            ),
+            const Text(
+              'Dashboard',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ), // Change text color here
+            ),
+            const SizedBox(),
+          ],
         ),
-        backgroundColor: const Color(0xFF004080),
-        centerTitle: true, // Center the title
+        backgroundColor: const Color(0xFF004080), // Center the title
       ),
       body: Container(
         color: const Color(0xFF004080), // Set background color
