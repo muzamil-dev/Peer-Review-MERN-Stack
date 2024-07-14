@@ -100,7 +100,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
     if (assignments.isEmpty) {
       return const Center(
         child: Text(
-          "Create an Assignment Using the + Button",
+          "Create a New Assignment Using the + Button",
           style: TextStyle(
               fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
         ),
@@ -282,6 +282,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          
           centerTitle: true,
           title: const Text(
             'View Assignments',

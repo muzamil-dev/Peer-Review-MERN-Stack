@@ -33,6 +33,9 @@ class _LoginSignupState extends State<LoginSignup> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
         title: const Text(
           'Welcome!',
           style: TextStyle(
@@ -41,11 +44,11 @@ class _LoginSignupState extends State<LoginSignup> {
             color: Colors.white, // Title color
           ), // Change text color here
         ),
-        backgroundColor: Color(0xFF004080),
+        backgroundColor: const Color(0xFF004080),
         centerTitle: true,
       ),
       body: Container(
-        color: Color(0xFF004080), // Background color
+        color: const Color(0xFF004080), // Background color
         child: Column(
           children: [
             Row(

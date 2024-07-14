@@ -34,6 +34,7 @@ class _EditFormState extends State<EditForm> {
   TextEditingController availableFromController = TextEditingController();
   TextEditingController dueUntillController = TextEditingController();
   TextEditingController formName = TextEditingController();
+  bool isLoading = true;
   final storage = const FlutterSecureStorage();
   final apiInstance = Api();
 
@@ -68,6 +69,7 @@ class _EditFormState extends State<EditForm> {
 
           formName.text = jsonResponse['name'];
           numFields = valueControllers.length;
+          isLoading = false;
         });
       }
     } catch (error) {
@@ -646,7 +648,11 @@ class _EditFormState extends State<EditForm> {
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: const Color(0xff004080),
         ),
-        body: _widgetTabOptions(context).elementAt(_currentIndex),
+        body: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : _widgetTabOptions(context).elementAt(_currentIndex),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           type: BottomNavigationBarType.fixed,

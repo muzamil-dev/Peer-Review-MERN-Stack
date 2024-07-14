@@ -160,6 +160,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
         title: const Text(
           'Home',
           style: TextStyle(
@@ -261,8 +264,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
         }),
       );
       if (response.statusCode == 200) {
-      } else {
-      }
+      } else {}
     } catch (error) {
       print("Error Creating Invite Code: $error");
     }
