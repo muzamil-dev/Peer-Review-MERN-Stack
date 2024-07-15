@@ -489,8 +489,8 @@ class _AdminGroupState extends State<AdminGroup> {
                             });
                           },
                           activeColor: Colors.white,
-                          activeTrackColor: Colors.green,
-                          inactiveTrackColor: Colors.red,
+                          activeTrackColor: Colors.red,
+                          inactiveTrackColor: Colors.green,
                           inactiveThumbColor: Colors.white,
                         ),
                       ],
