@@ -439,7 +439,7 @@ export default {
          * @returns {Promise<{ status: number, data: { accessToken: string }, message: string }>} The freshly logged in user's data
          */
         DoLogin: async (email, password) => {
-            const payload = { email, password };
+            const payload = { email: email.toLowerCase(), password };
             try {
                 const response = await axios.post(getUrl(USERS, '/login'), payload, {
                     withCredentials: true,
@@ -473,7 +473,7 @@ export default {
             const payload = {
                 firstName,
                 lastName,
-                email,
+                email: email.toLowerCase(),
                 password
             };
             const response = await apiRequest(POST, getUrl(USERS, 'signup'), payload)
@@ -495,7 +495,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}, message: string }>}
          */
         VerifyEmailCode: async (email, code) => {
-            const payload = { email, token: code };
+            const payload = { email: email.toLowerCase(), token: code };
             const response = await apiRequest(POST, getUrl(USERS, 'verifyEmail'), payload)
                 .catch((err) => {
                     console.error(err);
@@ -546,7 +546,7 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         RequestPasswordReset: async (email) => {
-            const payload = { email };
+            const payload = { email: email.toLowerCase() };
             const response = await apiRequest(POST, getUrl(USERS, 'requestPasswordReset'), payload)
                 .catch((err) => {
                     console.error(err);
@@ -567,7 +567,7 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         ResetPassword: async (email, token, newPassword) => {
-            const payload = { email, token, newPassword };
+            const payload = { email: email.toLowerCase(), token, newPassword };
             const response = await apiRequest(POST, getUrl(USERS, 'resetPassword'), payload)
                 .catch((err) => {
                     console.error(err);
