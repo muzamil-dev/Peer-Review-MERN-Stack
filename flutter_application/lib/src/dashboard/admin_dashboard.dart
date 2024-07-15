@@ -259,7 +259,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     color: Colors.green,
                   ),
                   Text(
-                    "Join Workspace",
+                    "Add Workspace",
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -276,7 +276,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     color: Colors.green,
                   ),
                   Text(
-                    "Add Workspace",
+                    "Join Workspace",
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ],
