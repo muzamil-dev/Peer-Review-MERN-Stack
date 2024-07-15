@@ -229,14 +229,14 @@ class _AdminGroupState extends State<AdminGroup> {
             children: [
               const Text(
                 'Edit Student',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal),
               ),
               IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(
                     CupertinoIcons.clear_circled_solid,
                     color: Colors.red,
-                    size: 28,
+                    size: 32,
                   )),
             ],
           )),
@@ -246,10 +246,12 @@ class _AdminGroupState extends State<AdminGroup> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(
-                    "Move ${student.firstName} to: ",
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w500),
+                  Flexible(
+                    child: Text(
+                      "Move ${student.firstName} to: ",
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
                   ),
                 ],
               ),
@@ -279,10 +281,12 @@ class _AdminGroupState extends State<AdminGroup> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(
-                    "Kick ${student.firstName} from:",
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w500),
+                  Flexible(
+                    child: Text(
+                      "Kick ${student.firstName} from:",
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
                   ),
                 ],
               ),
@@ -454,31 +458,38 @@ class _AdminGroupState extends State<AdminGroup> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Edit Workspace'),
+              title: const Text(
+                'Edit Workspace',
+                style: TextStyle(fontSize: 24),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: nameController,
-                      decoration:
-                          const InputDecoration(labelText: 'Workspace Name'),
+                      decoration: const InputDecoration(
+                          labelText: 'Workspace Name',
+                          labelStyle: TextStyle(fontSize: 18)),
                     ),
                     TextField(
                       controller: domainsController,
                       decoration: const InputDecoration(
-                          labelText: 'Allowed Domains (comma-separated)'),
+                          labelText: 'Allowed Domains',
+                          labelStyle: TextStyle(fontSize: 18)),
                     ),
                     TextField(
                       controller: limitController,
                       decoration: const InputDecoration(
-                          labelText: 'Group Member Limit'),
+                          labelText: 'Group Member Limit',
+                          labelStyle: TextStyle(fontSize: 18)),
                       keyboardType: TextInputType.number,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Lock Workspace: '),
+                        const Text('Lock Workspace: ',
+                            style: TextStyle(fontSize: 18)),
                         Switch(
                           value: groupLock,
                           onChanged: (value) {
