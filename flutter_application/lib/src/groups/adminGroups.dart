@@ -194,33 +194,72 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
+  // Shows the Groups
+  ListTile showMovableGroups(
+      Group currentGroup, Student student, int? currentGroupId) {
+    return ListTile(
+      title: Text(
+        currentGroup.name,
+        style: const TextStyle(fontSize: 18),
+        overflow: TextOverflow.ellipsis,
+      ),
+      onTap: () {
+        if (currentGroupId != null) {
+          // Remove from current group and add to the new group
+          removeStudentFromGroup(student.userId, currentGroupId).then((_) {
+            addStudentToGroup(student.userId, currentGroup.groupId);
+          });
+        } else {
+          // Just add to the new group
+          addStudentToGroup(student.userId, currentGroup.groupId);
+        }
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
   void showMoveStudentDialog(Student student, {int? currentGroupId}) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Center(
-              child: Text(
-            'Edit Student',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          title: Center(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              const Text(
+                'Edit Student',
+                style: TextStyle(fontSize: 34, fontWeight: FontWeight.w500),
+              ),
+              IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(
+                    CupertinoIcons.clear_circled_solid,
+                    color: Colors.red,
+                    size: 40,
+                  )),
+            ],
           )),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Move Student to: ",
-                    style: TextStyle(fontSize: 22),
+                    "Move ${student.firstName} to: ",
+                    style: const TextStyle(
+                        fontSize: 26, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
               ...currentGroups.map((group) => ListTile(
-                    title: Text(
-                      group.name,
-                      style: const TextStyle(fontSize: 18),
-                      overflow: TextOverflow.ellipsis,
+                    title: Center(
+                      child: Text(
+                        group.name,
+                        style: const TextStyle(fontSize: 22),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     onTap: () {
                       if (currentGroupId != null) {
@@ -236,33 +275,47 @@ class _AdminGroupState extends State<AdminGroup> {
                       Navigator.of(context).pop();
                     },
                   )),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+              const SizedBox(
+                height: 15,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Kick Student from: ",
-                    style: TextStyle(fontSize: 22),
+                    "Kick ${student.firstName} from:",
+                    style: const TextStyle(
+                        fontSize: 26, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
-              if (currentGroupId !=
-                  null) // Only show "Kick" if the student is in a group
-                ListTile(
-                  title:
-                      const Text('Group', style: TextStyle(color: Colors.red)),
-                  onTap: () {
-                    removeStudentFromGroup(student.userId, currentGroupId);
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ListTile(
-                title: const Text('Workspace',
-                    style: TextStyle(color: Colors.red)),
-                onTap: () {
-                  kickStudent(student.userId);
-                  Navigator.of(context).pop();
-                },
+              const SizedBox(
+                height: 10,
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  if (currentGroupId !=
+                      null) // Only show "Kick" if the student is in a group
+                    TextButton(
+                      onPressed: () {
+                        removeStudentFromGroup(student.userId, currentGroupId);
+                        Navigator.of(context).pop();
+                      },
+                      style: TextButton.styleFrom(backgroundColor: Colors.red),
+                      child: const Text('Group',
+                          style: TextStyle(color: Colors.white, fontSize: 18)),
+                    ),
+                  TextButton(
+                    onPressed: () {
+                      kickStudent(student.userId);
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('Workspace',
+                        style: TextStyle(color: Colors.white, fontSize: 18)),
+                  ),
+                ],
+              )
             ],
           ),
         );
@@ -286,6 +339,7 @@ class _AdminGroupState extends State<AdminGroup> {
                 TextButton(
                     onPressed: () {
                       deleteGroup(currentGroup.groupId);
+                      Navigator.pop(context);
                     },
                     style: TextButton.styleFrom(backgroundColor: Colors.red),
                     child: const Text(
@@ -601,7 +655,7 @@ class _AdminGroupState extends State<AdminGroup> {
                                 Text(
                                   "View Assignments",
                                   style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Icon(Icons.arrow_forward),
@@ -616,34 +670,60 @@ class _AdminGroupState extends State<AdminGroup> {
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Text(
                                 'Ungrouped Students',
                                 style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
+                                    fontSize: 22, fontWeight: FontWeight.bold),
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(
+                                height: 15,
+                              ),
                               ListView.builder(
                                 shrinkWrap: true,
                                 itemCount: ungroupedStudents.length,
                                 itemBuilder: (context, index) {
                                   final student = ungroupedStudents[index];
-                                  return ListTile(
-                                    title: Text(
-                                      '${student.firstName} ${student.lastName}',
-                                      style: const TextStyle(fontSize: 18),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    subtitle: Text(student.email),
-                                    trailing: IconButton(
-                                      icon: const Icon(
-                                        CupertinoIcons.square_pencil_fill,
-                                        size: 35,
-                                        color: Colors.black,
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white54,
+                                        border: Border.all(
+                                            color: Colors.black, width: 1),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0)),
+                                    margin:
+                                        const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                                    child: ListTile(
+                                      title: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${student.firstName} ${student.lastName}',
+                                            style:
+                                                const TextStyle(fontSize: 20),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
                                       ),
-                                      onPressed: () {
-                                        showMoveStudentDialog(student);
-                                      },
+                                      // subtitle: Text(student.email), Uncomment for Student Email Display
+                                      trailing: IconButton(
+                                        icon: const CircleAvatar(
+                                          backgroundColor: Colors.green,
+                                          radius: 20,
+                                          child: Icon(
+                                            CupertinoIcons.square_pencil_fill,
+                                            size: 27,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          showMoveStudentDialog(student);
+                                        },
+                                      ),
                                     ),
                                   );
                                 },
@@ -703,30 +783,46 @@ class _AdminGroupState extends State<AdminGroup> {
                                           ),
                                         );
                                       },
-                                      child: ListTile(
-                                        title: Text(
-                                          '${member.firstName} ${member.lastName}',
-                                          style: const TextStyle(fontSize: 18),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        trailing: IconButton(
-                                          icon: const Icon(
-                                            CupertinoIcons.square_pencil_fill,
-                                            size: 35,
-                                            color: Colors.black,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            color: Colors.white54,
+                                            border: Border.all(
+                                                color: Colors.black, width: 1),
+                                            borderRadius:
+                                                BorderRadius.circular(12.0)),
+                                        margin: const EdgeInsets.fromLTRB(
+                                            0, 0, 0, 10),
+                                        child: ListTile(
+                                          title: Text(
+                                            '${member.firstName} ${member.lastName}',
+                                            style:
+                                                const TextStyle(fontSize: 20),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                          onPressed: () {
-                                            showMoveStudentDialog(
-                                              Student(
-                                                userId: member.userId,
-                                                email:
-                                                    '', // Assuming email is not available in Member
-                                                firstName: member.firstName,
-                                                lastName: member.lastName,
+                                          trailing: IconButton(
+                                            icon: const CircleAvatar(
+                                              radius: 20,
+                                              backgroundColor: Colors.green,
+                                              child: Icon(
+                                                CupertinoIcons
+                                                    .square_pencil_fill,
+                                                size: 27,
+                                                color: Colors.white,
                                               ),
-                                              currentGroupId: group.groupId,
-                                            );
-                                          },
+                                            ),
+                                            onPressed: () {
+                                              showMoveStudentDialog(
+                                                Student(
+                                                  userId: member.userId,
+                                                  email:
+                                                      '', // Assuming email is not available in Member
+                                                  firstName: member.firstName,
+                                                  lastName: member.lastName,
+                                                ),
+                                                currentGroupId: group.groupId,
+                                              );
+                                            },
+                                          ),
                                         ),
                                       ),
                                     );
