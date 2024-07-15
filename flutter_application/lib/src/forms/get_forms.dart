@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'dart:convert';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class GetAssignments extends StatefulWidget {
   final int userId;
@@ -108,171 +109,187 @@ class _GetAssignmentsState extends State<GetAssignments> {
     } else {
       return Column(children: [
         Expanded(
-            child: ListView(
-          children: assignments.map((assignment) {
-            return GestureDetector(
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditForm(
-                      assignmentId: assignment.id,
-                      workspaceId: widget.workspaceId,
-                      userId: widget.userId,
+            child: RawScrollbar(
+          thumbColor: Colors.black38,
+          child: ListView(
+            children: assignments.map((assignment) {
+              return GestureDetector(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditForm(
+                        assignmentId: assignment.id,
+                        workspaceId: widget.workspaceId,
+                        userId: widget.userId,
+                      ),
                     ),
-                  ),
-                );
-                fetchAssignments();
-              },
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            assignment.name,
-                            style: const TextStyle(
-                                fontSize: 22, fontWeight: FontWeight.bold),
-                          ),
-                          Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  const Text("Start Date: "),
-                                  const SizedBox(width: 15),
-                                  Text(getDateString(assignment.startDate))
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  const Text("Due Date: "),
-                                  const SizedBox(width: 15),
-                                  Text(getDateString(assignment.dueDate))
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      SizedBox(
-                        width: double.infinity,
+                  );
+                  fetchAssignments();
+                },
+                child: Column(
+                  children: [
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
                         child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Questions: ",
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: assignment.questions
-                                    .map<Widget>((question) {
-                                  return Text(
-                                    question,
-                                    style: const TextStyle(fontSize: 16),
-                                  );
-                                }).toList(),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor: Colors.red,
-                                    child: IconButton(
-                                        onPressed: () async {
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: const Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Text(
-                                                        'Delete Assignment?',
-                                                        style: TextStyle(
-                                                            fontSize: 30,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  contentPadding:
-                                                      const EdgeInsets.all(
-                                                          15.0),
-                                                  content: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Flexible(
-                                                        child: Text(
-                                                            assignment.name,
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 25,
-                                                            )),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  actions: [
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceAround,
-                                                      children: [
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            deleteAssignment(
-                                                                assignment.id);
-                                                            Navigator.pop(
-                                                                context);
-                                                          },
-                                                          child: const Text(
-                                                              'Delete'),
-                                                        ),
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                          },
-                                                          child: const Text(
-                                                              'Cancel'),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                );
-                                              });
-                                        },
-                                        icon: const Icon(
-                                          CupertinoIcons.trash,
-                                          color: Colors.white,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  assignment.name,
+                                  style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        const Text("Start Date: "),
+                                        const SizedBox(width: 15),
+                                        Text(
+                                            getDateString(assignment.startDate))
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        const Text("Due Date: "),
+                                        const SizedBox(width: 15),
+                                        Text(getDateString(assignment.dueDate))
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            SizedBox(
+                              width: double.infinity,
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text("Questions: ",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w500,
                                         )),
-                                  ),
-                                ],
-                              ),
-                            ]),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: assignment.questions
+                                          .map<Widget>((question) {
+                                        return Text(
+                                          question,
+                                          style: const TextStyle(fontSize: 16),
+                                        );
+                                      }).toList(),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.red,
+                                          child: IconButton(
+                                              onPressed: () async {
+                                                showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: const Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Text(
+                                                              'Delete Assignment?',
+                                                              style: TextStyle(
+                                                                  fontSize: 30,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        contentPadding:
+                                                            const EdgeInsets
+                                                                .all(15.0),
+                                                        content: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Flexible(
+                                                              child: Text(
+                                                                  assignment
+                                                                      .name,
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        25,
+                                                                  )),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        actions: [
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceAround,
+                                                            children: [
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  deleteAssignment(
+                                                                      assignment
+                                                                          .id);
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                },
+                                                                child: const Text(
+                                                                    'Delete'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                },
+                                                                child: const Text(
+                                                                    'Cancel'),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      );
+                                                    });
+                                              },
+                                              icon: const Icon(
+                                                CupertinoIcons.trash,
+                                                color: Colors.white,
+                                              )),
+                                        ),
+                                      ],
+                                    ),
+                                  ]),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ))
       ]);
     }
@@ -281,22 +298,40 @@ class _GetAssignmentsState extends State<GetAssignments> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF004080),
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
-          'View Assignments',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ), // Change text color here
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            const Flexible(
+              child: Text(
+                "View Assignments",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
         backgroundColor: const Color(0xFF004080),
         iconTheme: const IconThemeData(color: Colors.white), // Center the title
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : displayBody(),
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: displayBody(),
+            ),
       floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.green,
           onPressed: () async {

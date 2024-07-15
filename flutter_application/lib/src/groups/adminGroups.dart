@@ -117,9 +117,9 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Group deleted successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Group deleted successfully')),
+        // );
         await fetchGroups(); // Refresh groups after deletion
         await fetchUngroupedStudents(); // Refresh ungrouped students after deletion
       } else {
@@ -143,10 +143,10 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Student added to the group successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //       content: Text('Student added to the group successfully')),
+        // );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
         final errorData = response.data;
@@ -175,10 +175,10 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Student removed from the group successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //       content: Text('Student removed from the group successfully')),
+        // );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
         final errorData = response.data;
@@ -223,23 +223,10 @@ class _AdminGroupState extends State<AdminGroup> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Center(
-              child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Edit Student',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal),
-              ),
-              IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    CupertinoIcons.clear_circled_solid,
-                    color: Colors.red,
-                    size: 32,
-                  )),
-            ],
-          )),
+          title: const Text(
+            'Edit Student',
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.normal),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -333,7 +320,8 @@ class _AdminGroupState extends State<AdminGroup> {
             title: Center(
                 child: Text(
               'Delete ${currentGroup.name}?',
-              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              style:
+                  const TextStyle(fontSize: 30, fontWeight: FontWeight.normal),
             )),
             content: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -410,9 +398,9 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Group added successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Group added successfully')),
+        // );
         await fetchGroupsAndStudents(); // Refresh groups and ungrouped students immediately after adding a group
       } else {
         print('Failed to add group. Status code: ${response.statusCode}');
@@ -579,9 +567,9 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Workspace updated successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Workspace updated successfully')),
+        // );
         fetchWorkspaceName(); // Refresh the workspace name
       } else {
         final errorData = response.data;
