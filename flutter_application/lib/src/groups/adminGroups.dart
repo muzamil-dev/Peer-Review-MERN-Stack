@@ -225,18 +225,18 @@ class _AdminGroupState extends State<AdminGroup> {
         return AlertDialog(
           title: Center(
               child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'Edit Student',
-                style: TextStyle(fontSize: 34, fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
               ),
               IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(
                     CupertinoIcons.clear_circled_solid,
                     color: Colors.red,
-                    size: 40,
+                    size: 28,
                   )),
             ],
           )),
@@ -244,22 +244,20 @@ class _AdminGroupState extends State<AdminGroup> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
                     "Move ${student.firstName} to: ",
                     style: const TextStyle(
-                        fontSize: 26, fontWeight: FontWeight.w500),
+                        fontSize: 20, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
               ...currentGroups.map((group) => ListTile(
-                    title: Center(
-                      child: Text(
-                        group.name,
-                        style: const TextStyle(fontSize: 22),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    title: Text(
+                      group.name,
+                      style: const TextStyle(fontSize: 20),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     onTap: () {
                       if (currentGroupId != null) {
@@ -279,12 +277,12 @@ class _AdminGroupState extends State<AdminGroup> {
                 height: 15,
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
                     "Kick ${student.firstName} from:",
                     style: const TextStyle(
-                        fontSize: 26, fontWeight: FontWeight.w500),
+                        fontSize: 20, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -303,7 +301,7 @@ class _AdminGroupState extends State<AdminGroup> {
                       },
                       style: TextButton.styleFrom(backgroundColor: Colors.red),
                       child: const Text('Group',
-                          style: TextStyle(color: Colors.white, fontSize: 18)),
+                          style: TextStyle(color: Colors.white, fontSize: 15)),
                     ),
                   TextButton(
                     onPressed: () {
@@ -312,7 +310,7 @@ class _AdminGroupState extends State<AdminGroup> {
                     },
                     style: TextButton.styleFrom(backgroundColor: Colors.red),
                     child: const Text('Workspace',
-                        style: TextStyle(color: Colors.white, fontSize: 18)),
+                        style: TextStyle(color: Colors.white, fontSize: 15)),
                   ),
                 ],
               )
@@ -747,11 +745,11 @@ class _AdminGroupState extends State<AdminGroup> {
                                   children: [
                                     Container(
                                       margin: const EdgeInsets.fromLTRB(
-                                          15.0, 0, 0, 0),
+                                          5.0, 0, 0, 0),
                                       child: Text(
                                         group.name,
                                         style: const TextStyle(
-                                            fontSize: 28,
+                                            fontSize: 32,
                                             fontWeight: FontWeight.bold),
                                         overflow: TextOverflow.ellipsis,
                                       ),
