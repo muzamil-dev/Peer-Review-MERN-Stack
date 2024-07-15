@@ -270,6 +270,43 @@ class _AdminGroupState extends State<AdminGroup> {
     );
   }
 
+  void showDeleteDialog(Group currentGroup) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Center(
+                child: Text(
+              'Delete ${currentGroup.name}?',
+              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            )),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      deleteGroup(currentGroup.groupId);
+                    },
+                    style: TextButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text(
+                      "Delete",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    )),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(backgroundColor: Colors.green),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    )),
+              ],
+            ),
+          );
+        });
+  }
+
   Future<void> kickStudent(int userId) async {
     const url = '/workspaces/leave';
 
@@ -646,7 +683,7 @@ class _AdminGroupState extends State<AdminGroup> {
                                         color: Colors.red,
                                       ),
                                       onPressed: () {
-                                        deleteGroup(group.groupId);
+                                        showDeleteDialog(group);
                                       },
                                     ),
                                   ],
