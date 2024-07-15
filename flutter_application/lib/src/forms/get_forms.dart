@@ -138,29 +138,43 @@ class _GetAssignmentsState extends State<GetAssignments> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  assignment.name,
-                                  style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold),
+                                Flexible(
+                                  child: Text(
+                                    assignment.name,
+                                    style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        overflow: TextOverflow.ellipsis),
+                                  ),
                                 ),
                                 Column(
                                   children: [
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        const Text("Start Date: "),
+                                        const Text(
+                                          "Start Date: ",
+                                          style: TextStyle(fontSize: 18),
+                                        ),
                                         const SizedBox(width: 15),
                                         Text(
-                                            getDateString(assignment.startDate))
+                                          getDateString(assignment.startDate),
+                                          style: const TextStyle(fontSize: 16),
+                                        )
                                       ],
                                     ),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        const Text("Due Date: "),
+                                        const Text(
+                                          "Due Date: ",
+                                          style: TextStyle(fontSize: 18),
+                                        ),
                                         const SizedBox(width: 15),
-                                        Text(getDateString(assignment.dueDate))
+                                        Text(
+                                          getDateString(assignment.dueDate),
+                                          style: const TextStyle(fontSize: 16),
+                                        )
                                       ],
                                     ),
                                   ],
@@ -176,7 +190,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                   children: [
                                     const Text("Questions: ",
                                         style: TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 24,
                                           fontWeight: FontWeight.w500,
                                         )),
                                     Column(
@@ -188,7 +202,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                           .map<Widget>((question) {
                                         return Text(
                                           question,
-                                          style: const TextStyle(fontSize: 16),
+                                          style: const TextStyle(fontSize: 18),
                                         );
                                       }).toList(),
                                     ),
