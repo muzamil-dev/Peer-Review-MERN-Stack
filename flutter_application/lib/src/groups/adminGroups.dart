@@ -217,11 +217,10 @@ class _AdminGroupState extends State<AdminGroup> {
                 ],
               ),
               ...currentGroups.map((group) => ListTile(
-                    title: Flexible(
-                      child: Text(
-                        group.name,
-                        style: const TextStyle(fontSize: 18),
-                      ),
+                    title: Text(
+                      group.name,
+                      style: const TextStyle(fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     onTap: () {
                       if (currentGroupId != null) {
@@ -402,7 +401,6 @@ class _AdminGroupState extends State<AdminGroup> {
                           activeTrackColor: Colors.green,
                           inactiveTrackColor: Colors.red,
                           inactiveThumbColor: Colors.white,
-
                         ),
                       ],
                     ),
@@ -521,6 +519,7 @@ class _AdminGroupState extends State<AdminGroup> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -593,11 +592,10 @@ class _AdminGroupState extends State<AdminGroup> {
                                 itemBuilder: (context, index) {
                                   final student = ungroupedStudents[index];
                                   return ListTile(
-                                    title: Flexible(
-                                      child: Text(
-                                        '${student.firstName} ${student.lastName}',
-                                        style: const TextStyle(fontSize: 18),
-                                      ),
+                                    title: Text(
+                                      '${student.firstName} ${student.lastName}',
+                                      style: const TextStyle(fontSize: 18),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     subtitle: Text(student.email),
                                     trailing: IconButton(
@@ -633,13 +631,12 @@ class _AdminGroupState extends State<AdminGroup> {
                                     Container(
                                       margin: const EdgeInsets.fromLTRB(
                                           15.0, 0, 0, 0),
-                                      child: Flexible(
-                                        child: Text(
-                                          group.name,
-                                          style: const TextStyle(
-                                              fontSize: 28,
-                                              fontWeight: FontWeight.bold),
-                                        ),
+                                      child: Text(
+                                        group.name,
+                                        style: const TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     IconButton(
@@ -669,32 +666,30 @@ class _AdminGroupState extends State<AdminGroup> {
                                           ),
                                         );
                                       },
-                                      child: Flexible(
-                                        child: ListTile(
-                                          title: Text(
-                                            '${member.firstName} ${member.lastName}',
-                                            style:
-                                                const TextStyle(fontSize: 18),
+                                      child: ListTile(
+                                        title: Text(
+                                          '${member.firstName} ${member.lastName}',
+                                          style: const TextStyle(fontSize: 18),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        trailing: IconButton(
+                                          icon: const Icon(
+                                            CupertinoIcons.square_pencil_fill,
+                                            size: 35,
+                                            color: Colors.black,
                                           ),
-                                          trailing: IconButton(
-                                            icon: const Icon(
-                                              CupertinoIcons.square_pencil_fill,
-                                              size: 35,
-                                              color: Colors.black,
-                                            ),
-                                            onPressed: () {
-                                              showMoveStudentDialog(
-                                                Student(
-                                                  userId: member.userId,
-                                                  email:
-                                                      '', // Assuming email is not available in Member
-                                                  firstName: member.firstName,
-                                                  lastName: member.lastName,
-                                                ),
-                                                currentGroupId: group.groupId,
-                                              );
-                                            },
-                                          ),
+                                          onPressed: () {
+                                            showMoveStudentDialog(
+                                              Student(
+                                                userId: member.userId,
+                                                email:
+                                                    '', // Assuming email is not available in Member
+                                                firstName: member.firstName,
+                                                lastName: member.lastName,
+                                              ),
+                                              currentGroupId: group.groupId,
+                                            );
+                                          },
                                         ),
                                       ),
                                     );
