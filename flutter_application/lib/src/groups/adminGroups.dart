@@ -4,6 +4,7 @@ import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_application/src/forms/get_forms.dart';
 import 'package:flutter_application/src/profile/user_profile.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AdminGroup extends StatefulWidget {
   final int workspaceId;
@@ -463,13 +464,26 @@ class _AdminGroupState extends State<AdminGroup> {
     return Scaffold(
       backgroundColor: const Color(0xFF004080),
       appBar: AppBar(
-        title: Text(
-          workspaceName.isEmpty ? 'Loading...' : workspaceName,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            Flexible(
+              child: Text(
+                workspaceName.isEmpty ? 'Loading...' : workspaceName,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
