@@ -210,9 +210,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
               width: 35,
               height: 35,
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 5),
             const Text(
-              'Dashboard',
+              'Workspaces',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,

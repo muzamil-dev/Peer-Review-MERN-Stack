@@ -117,24 +117,36 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
             ],
           ),
           backgroundColor: const Color(0xFF004080),
-          shape:
-              const Border(bottom: BorderSide(color: Colors.black, width: 1)),
-
           centerTitle: true,
           iconTheme:
               const IconThemeData(color: Colors.white), // Center the title
         ),
         body: Expanded(
           child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-              color: const Color(0xFF004080),
+            decoration: const BoxDecoration(
+              color: Color(0xFF004080),
             ),
-            padding: const EdgeInsets.all(15.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
+                      child: const Text(
+                        "Enter Workspace Details:",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
                 Container(
                   margin: const EdgeInsets.only(bottom: 10.0),
                   child: TextField(
