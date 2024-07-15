@@ -246,24 +246,40 @@ class _AdminDashboardState extends State<AdminDashboard> {
               // Set background color
             ),
             borderRadius: BorderRadius.circular(12.0)), // Set background color
-        height: 70,
+        height: 80,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             IconButton(
-              icon: const Icon(
-                Icons.add_circle,
-                size: 57,
-                color: Colors.green,
+              icon: const Column(
+                children: [
+                  Icon(
+                    Icons.add_circle,
+                    size: 42,
+                    color: Colors.green,
+                  ),
+                  Text(
+                    "Join Workspace",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
               ),
               onPressed: navigateToCreateWorkspacePage,
               tooltip: 'Add Workspace',
             ),
             IconButton(
-              icon: const Icon(
-                CupertinoIcons.square_arrow_right,
-                size: 57,
-                color: Colors.green,
+              icon: const Column(
+                children: [
+                  Icon(
+                    CupertinoIcons.square_arrow_right,
+                    size: 42,
+                    color: Colors.green,
+                  ),
+                  Text(
+                    "Add Workspace",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
               ),
               onPressed: showJoinWorkspaceDialog,
               tooltip: 'Join Workspace',
