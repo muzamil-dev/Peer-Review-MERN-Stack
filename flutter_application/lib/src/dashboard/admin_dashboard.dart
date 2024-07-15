@@ -96,7 +96,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
               controller: inviteCodeController,
               decoration: const InputDecoration(
                   labelText: 'Invite Code',
-                  labelStyle: TextStyle(fontSize: 17, color: Colors.black),
+                  labelStyle: TextStyle(
+                    fontSize: 20,
+                    color: Colors.black,
+                  ),
                   focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black, width: 2))),
             ),
@@ -375,23 +378,14 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            title: const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                const SizedBox(width: 28.0),
-                const Center(
+                Center(
                     child: Text(
                   "Invite Code",
-                  style: TextStyle(fontSize: 24.0),
+                  style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
                 )),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    Icons.close_sharp,
-                    color: Colors.black,
-                    size: 28.0,
-                  ),
-                )
               ],
             ),
             content: Row(
@@ -401,7 +395,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
                   inviteCode,
                   style: const TextStyle(
                     fontSize: 22.0,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -454,7 +448,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
               const SizedBox(height: 10),
               Text(
                 'Role: ${widget.workspace.role}',
-                style: const TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 18),
               ),
             ],
           ),
