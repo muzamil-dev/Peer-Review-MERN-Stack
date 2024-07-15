@@ -314,7 +314,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
           child: const Icon(
             Icons.add,
             color: Colors.white,
-            size: 30,
+            size: 35,
           )),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
