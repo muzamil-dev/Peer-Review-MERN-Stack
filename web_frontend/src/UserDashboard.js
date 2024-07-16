@@ -11,6 +11,7 @@ const UserDashboard = () => {
     const [pastDueAssignments, setPastDueAssignments] = useState([]);
     const [selectedWorkspace, setSelectedWorkspace] = useState('');
     const [workspaces, setWorkspaces] = useState([]);
+    const [workspaceCompletionStatus, setWorkspaceCompletionStatus] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
     const [reviews, setReviews] = useState({});
     const [selectedReview, setSelectedReview] = useState({});
@@ -40,6 +41,7 @@ const UserDashboard = () => {
                 if (studentWorkspaces.length > 0) {
                     setSelectedWorkspace(studentWorkspaces[0].workspaceId);
                 }
+                fetchAssignmentsCompletionStatus(studentWorkspaces);
             } else {
                 setErrorMessage(`Failed to fetch workspaces: ${response.message}`);
                 enqueueSnackbar(`Failed to fetch workspaces: ${response.message}`, { variant: 'error' });
@@ -49,6 +51,28 @@ const UserDashboard = () => {
             setErrorMessage(`Failed to fetch workspaces: ${error.response ? error.response.data.message : error.message}`);
             enqueueSnackbar(`Failed to fetch workspaces: ${error.response ? error.response.data.message : error.message}`, { variant: 'error' });
         }
+    };
+
+    const fetchAssignmentsCompletionStatus = async (workspaces) => {
+        const completionStatus = {};
+
+        for (const workspace of workspaces) {
+            try {
+                const response = await Api.Workspaces.GetAssignments(workspace.workspaceId, localStorage.getItem('accessToken'));
+                if (response.status === 200) {
+                    const assignments = response.data;
+                    const now = new Date();
+                    const currentAssignments = assignments.filter(assignment => new Date(assignment.dueDate) >= now);
+                    const reviewsData = await fetchAndFilterReviews(currentAssignments);
+                    const allCompleted = reviewsData.every(assignment => assignment.reviewData.incompleteReviews.length === 0);
+                    completionStatus[workspace.workspaceId] = allCompleted;
+                }
+            } catch (error) {
+                console.error(`Error fetching assignments for workspace ${workspace.workspaceId}:`, error);
+            }
+        }
+
+        setWorkspaceCompletionStatus(completionStatus);
     };
 
     const fetchAssignments = async (workspaceId) => {
@@ -152,9 +176,9 @@ const UserDashboard = () => {
 
     const renderReviewDropdown = (assignmentId, dueDate) => {
         const assignmentReviews = reviews[assignmentId];
-
+    
         if (!assignmentReviews) return null;
-
+    
         return (
             <div className="review-dropdown">
                 <select
@@ -164,12 +188,12 @@ const UserDashboard = () => {
                     <option value="" disabled>Select a review</option>
                     {assignmentReviews.incompleteReviews.map((review) => (
                         <option key={review.reviewId} value={review.reviewId}>
-                            {review.firstName} {review.lastName}
+                            {review.firstName} {review.lastName} ❌
                         </option>
                     ))}
                     {assignmentReviews.completedReviews.map((review) => (
                         <option key={review.reviewId} value={review.reviewId}>
-                            {review.firstName} {review.lastName}
+                            {review.firstName} {review.lastName} ✔️
                         </option>
                     ))}
                 </select>
@@ -192,7 +216,7 @@ const UserDashboard = () => {
                 <select id="workspace" value={selectedWorkspace} onChange={handleWorkspaceChange}>
                     {workspaces.map((workspace) => (
                         <option key={workspace.workspaceId} value={workspace.workspaceId}>
-                            {workspace.name}
+                            {workspace.name} {workspaceCompletionStatus[workspace.workspaceId] ? '✔️' : '❌'}
                         </option>
                     ))}
                 </select>
