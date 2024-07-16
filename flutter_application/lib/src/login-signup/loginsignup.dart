@@ -214,14 +214,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     ))); // Adjust the route name as needed
       } else {
         // Login failed
-        final errorData = json.decode(response.data);
+        final errorData = response.data;
         print('Login failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login failed: ${errorData['message']}')),
         );
       }
     } catch (err) {
-      print('Error: $err');
+      print(err);
     }
   }
 
