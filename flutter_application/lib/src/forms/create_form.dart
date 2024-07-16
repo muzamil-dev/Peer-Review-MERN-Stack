@@ -100,8 +100,8 @@ class _CreateFormState extends State<CreateForm> {
           return Theme(
             data: Theme.of(context).copyWith(
               colorScheme: const ColorScheme.light(
-                primary: Colors.white, // header background color
-                onPrimary: Color(0xff004080), // header text color
+                primary: Colors.blue, // header background color
+                onPrimary: Colors.white, // header text color
                 onSurface: Colors.black, // body text color
               ),
               textButtonTheme: TextButtonThemeData(
@@ -192,7 +192,7 @@ class _CreateFormState extends State<CreateForm> {
                                   Text(
                                     "Create Form",
                                     style: TextStyle(
-                                        color: Colors.white, fontSize: 17),
+                                        color: Colors.white, fontSize: 15),
                                   ),
                                 ],
                               ),
@@ -202,15 +202,21 @@ class _CreateFormState extends State<CreateForm> {
                         const SizedBox(height: 10),
                         TextFormField(
                           controller: formName,
-                          decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(18.0)),
                               hintText: "Assignment Name",
                               filled: true,
                               fillColor: Colors.white,
                               focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blue, width: 3),
-                              )),
+                                borderSide: const BorderSide(
+                                    color: Colors.blue, width: 3),
+                                borderRadius: BorderRadius.circular(18.0),
+                              ),
+                              errorStyle: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold)),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Please enter a non-empty field";
@@ -229,16 +235,21 @@ class _CreateFormState extends State<CreateForm> {
                             }
                             return null;
                           },
-                          decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(18.0)),
                               hintText: 'Available From',
                               filled: true,
                               fillColor: Colors.white,
-                              prefixIcon: Icon(Icons.calendar_today),
+                              prefixIcon: const Icon(Icons.calendar_today),
                               focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blue, width: 3),
-                              )),
+                                  borderSide: const BorderSide(
+                                      color: Colors.blue, width: 3),
+                                  borderRadius: BorderRadius.circular(18.0)),
+                              errorStyle: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold)),
                           readOnly: true,
                           onTap: () {
                             _selectDate(availableFromController);
@@ -255,16 +266,22 @@ class _CreateFormState extends State<CreateForm> {
                             }
                             return null;
                           },
-                          decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(18.0)),
                               hintText: 'Available Untill',
                               filled: true,
                               fillColor: Colors.white,
-                              prefixIcon: Icon(Icons.calendar_month_outlined),
+                              prefixIcon:
+                                  const Icon(Icons.calendar_month_outlined),
                               focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blue, width: 3),
-                              )),
+                                  borderSide: const BorderSide(
+                                      color: Colors.blue, width: 3),
+                                  borderRadius: BorderRadius.circular(18.0)),
+                              errorStyle: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold)),
                           readOnly: true,
                           onTap: () {
                             _selectDate(dueUntillController);
@@ -350,7 +367,7 @@ class _CreateFormState extends State<CreateForm> {
             width: 3,
             color: const Color(0xff004080),
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
         ),
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -367,14 +384,16 @@ class _CreateFormState extends State<CreateForm> {
             const SizedBox(height: 10),
             TextFormField(
                 controller: valueControllers[index],
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18.0)),
                     hintText: 'Value',
                     filled: true,
                     fillColor: Colors.white,
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black, width: 2),
-                    ))),
+                        borderSide:
+                            const BorderSide(color: Colors.black, width: 2),
+                        borderRadius: BorderRadius.circular(18.0)))),
             const SizedBox(
               height: 10,
             ),
