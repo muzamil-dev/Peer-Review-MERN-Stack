@@ -174,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final response = await apiInstance.api.post(
         url,
         data: jsonEncode({
-          'email': email,
+          'email': email.toLowerCase(),
           'password': password,
         }),
       );
@@ -447,7 +447,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         data: jsonEncode({
           'firstName': firstName,
           'lastName': lastName,
-          'email': email,
+          'email': email.toLowerCase(),
           'password': password,
         }),
       );
