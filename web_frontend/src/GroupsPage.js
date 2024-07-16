@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './GroupsPageAdmin.module.css'; // Import the CSS file as a module
-import Api from './Api.js'; 
+import Api from './Api.js';
 import { jwtDecode } from 'jwt-decode';
 
 const GroupsPageUser = () => {
@@ -38,7 +38,7 @@ const GroupsPageUser = () => {
                 ...group,
                 members: group.members.filter(member => member && member.userId)
             })));
-            
+
             // Check if user is already in a group
             const currentUserId = getCurrentUserId();
             const userInGroup = response.data.groups.find(group => {

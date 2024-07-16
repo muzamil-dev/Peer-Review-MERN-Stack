@@ -142,3 +142,19 @@ p {
     align-items: center;
     margin-bottom: 10px;
 }
+
+.logout-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    margin: 10px;
+    float: right;
+}
+
+.logout-button:hover {
+    background-color: #ff1a1a;
+}
