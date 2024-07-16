@@ -98,7 +98,7 @@ router.post("/resetPassword", async(req, res) => {
     // Send the error if the service returned one
     if (data.error)
         return res.status(data.status).json({ message: data.error });
-    return res.status(200).json(data);
+    return res.status(201).json(data);
 });
 
 // Require JWT
@@ -110,6 +110,17 @@ router.get(["/:userId/workspaces", "/workspaces"], async(req, res) => {
     const userId = req.params.userId || req.body.userId;
     // Call the service
     const data = await UserService.getWorkspaces(userId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+});
+
+// Get user by id
+router.get(["/", "/:userId"], async(req, res) => {
+    const userId = req.params.userId || req.body.userId;
+    // Call the service
+    const data = await UserService.getById(userId);
     // Send the error if the service returned one
     if (data.error)
         return res.status(data.status).json({ message: data.error });

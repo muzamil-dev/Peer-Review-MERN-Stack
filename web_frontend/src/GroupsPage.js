@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './GroupsPageAdmin.module.css'; // Import the CSS file as a module
-import Api from './Api.js'; 
+import Api from './Api.js';
 import { jwtDecode } from 'jwt-decode';
 
 const GroupsPageUser = () => {
     const [groups, setGroups] = useState([]);
+    const [workspaceDetails, setWorkspaceDetails] = useState({ name: '', groupLock: false });
     const { workspaceId } = useParams(); // Assuming you're using React Router v6
     const navigate = useNavigate();
     const [joinedGroupId, setJoinedGroupId] = useState(null); // Track the joined group
     const [errorMessage, setErrorMessage] = useState(''); // State variable for error messages
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
@@ -22,6 +22,15 @@ const GroupsPageUser = () => {
         return decodedToken.userId;
     }
 
+    const fetchWorkspaceDetails = async () => {
+        const response = await Api.Workspaces.GetWorkspaceDetails(workspaceId);
+        if (response.status === 200) {
+            setWorkspaceDetails(response.data);
+        } else {
+            console.error('Failed to fetch workspace details:', response.message);
+        }
+    };
+
     const fetchGroups = async () => {
         const response = await Api.Workspaces.GetGroups(workspaceId);
         if (response.status === 200 && Array.isArray(response.data.groups)) {
@@ -29,7 +38,7 @@ const GroupsPageUser = () => {
                 ...group,
                 members: group.members.filter(member => member && member.userId)
             })));
-            
+
             // Check if user is already in a group
             const currentUserId = getCurrentUserId();
             const userInGroup = response.data.groups.find(group => {
@@ -47,13 +56,14 @@ const GroupsPageUser = () => {
     };
 
     useEffect(() => {
+        fetchWorkspaceDetails();
         fetchGroups();
     }, [workspaceId]);
 
     const handleJoinGroup = async (groupId) => {
         const currentUserId = getCurrentUserId();
-        if (!currentUserId || joinedGroupId !== null) {
-            return; // Prevent joining another group if already in one or if user is not authenticated
+        if (!currentUserId || joinedGroupId !== null || workspaceDetails.groupLock) {
+            return; // Prevent joining another group if already in one, if user is not authenticated, or if the workspace is locked
         }
         const response = await Api.Groups.JoinGroup(groupId, currentUserId);
         if (response.success) {
@@ -67,7 +77,7 @@ const GroupsPageUser = () => {
 
     const handleLeaveGroup = async (groupId) => {
         const currentUserId = getCurrentUserId();
-        if (!currentUserId) {
+        if (!currentUserId || workspaceDetails.groupLock) {
             navigate('/login');
             return { success: false };
         }
@@ -83,7 +93,7 @@ const GroupsPageUser = () => {
 
     const handleLeaveWorkspace = async () => {
         const currentUserId = getCurrentUserId();
-        if (!currentUserId) {
+        if (!currentUserId || workspaceDetails.groupLock) {
             navigate('/login');
             return { success: false };
         }
@@ -108,10 +118,10 @@ const GroupsPageUser = () => {
     return (
         <div className={styles.workspaceUser}>
             <div className={`row ${styles.headerContainer}`}>
-                <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={assignmentsPage}>Assignments</button>
-                <h1 className={`col-xl-8 col-lg-6 ${styles.headerLarge}`}>Groups</h1>
-                <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={handleDashboard}>Dashboard</button>
-                <button className="col-xl-2 col-lg-2 btn btn-primary" onClick={() => setShowConfirmModal(true)}>Leave Workspace</button>
+                <button className="col-xl-3 col-lg-3 col-md-3 col-sm-4 btn btn-light mb-2 mb-md-0" onClick={assignmentsPage}>Assignments</button>
+                <h1 className={`col-xl-6 col-lg-6 col-md-6 col-sm-4 ${styles.headerLarge} text-center`}>{workspaceDetails.name}</h1>
+                <button className="col-xl-3 col-lg-3 col-md-3 col-sm-4 btn btn-light mb-2 mb-md-0" onClick={handleDashboard}>Dashboard</button>
+                <button className="col-xl-2 col-lg-2 col-md-3 col-sm-4 btn btn-danger mb-2 mb-md-0" onClick={() => setShowConfirmModal(true)} disabled={workspaceDetails.groupLock}>Leave Workspace</button>
             </div>
 
             {errorMessage && (
@@ -144,6 +154,7 @@ const GroupsPageUser = () => {
                                                 <button
                                                     className="btn btn-danger"
                                                     onClick={() => handleLeaveGroup(group.groupId)}
+                                                    disabled={workspaceDetails.groupLock}
                                                 >
                                                     Leave
                                                 </button>
@@ -152,7 +163,7 @@ const GroupsPageUser = () => {
                                             <button
                                                 className="btn btn-success"
                                                 onClick={() => handleJoinGroup(group.groupId)}
-                                                disabled={joinedGroupId !== null}
+                                                disabled={joinedGroupId !== null || workspaceDetails.groupLock}
                                             >
                                                 Join
                                             </button>

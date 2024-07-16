@@ -77,7 +77,7 @@ export const getByWorkspace = async(workspaceId) => {
             questions: row.questions,
             description: row.description,
             started: row.started,
-            completed: data.completed
+            completed: row.completed
         }));
     }
     catch(err){
@@ -206,19 +206,51 @@ export const edit = async(userId, assignmentId, settings) => {
             }
             updates.start_date = (new Date(newDate)).toISOString();
         }
-        if (settings.dueDate)
-            updates.due_date = (new Date(settings.dueDate)).toISOString();
+        if (settings.dueDate){
+            const curDate = assignment.due_date;
+            const newDate = settings.dueDate;
+            if (new Date(curDate).getTime() !== new Date(newDate).getTime()){
+                if (assignment.completed)
+                    return {
+                        error: "Cannot modify due date because analytics have already been computed",
+                        status: 400
+                    }
+            }
+            updates.due_date = (new Date(newDate)).toISOString();
+        }
         if (settings.description !== undefined) // description can be null or empty
             updates.description = settings.description;
 
         // Set the questions if provided
         if (settings.questions){
-            await Promise.all([
-                // Delete old questions
-                db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignment.id]),
-                // Add new questions
-                createQuestions(assignment.id, settings.questions)
-            ]);
+            // Get the current questions
+            const curQuestions = (await db.query(`
+                SELECT array_agg(question ORDER BY id) AS questions
+                FROM questions 
+                WHERE assignment_id = $1
+                GROUP BY assignment_id`,
+                [assignment.id]
+            )).rows[0].questions;
+            // Check that the questions arrays aren't the same
+            let flag = true; // true if the arrays are the same, false if not
+            if (curQuestions.length !== settings.questions.length)
+                flag = false;
+            if (flag){
+                for (let i = 0; i < curQuestions.length; i++){
+                    if (curQuestions[i] !== settings.questions[i]){
+                        flag = false;
+                        break;
+                    }
+                }
+            }
+            if (!flag){ // Questions are different, replace them
+                await Promise.all([
+                    // Delete old questions
+                    db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignment.id]),
+                    // Add new questions
+                    createQuestions(assignment.id, settings.questions)
+                ]);
+            }
         }
 
         // Build the update query
@@ -226,12 +258,13 @@ export const edit = async(userId, assignmentId, settings) => {
         // Build the set clause
         const keys = Object.keys(updates);
         const values = Object.values(updates);
-        updateQuery += keys.map((key, index) => `${key} = $${index+1}`).join(', ');
-        // Complete the query with assignment id
-        updateQuery += ` WHERE id = $${values.length+1}`;
-        
-        // Query the update
-        const updateRes = await db.query(updateQuery, [...values, assignment.id]);
+        if (keys.length > 0){
+            updateQuery += keys.map((key, index) => `${key} = $${index+1}`).join(', ');
+            // Complete the query with assignment id
+            updateQuery += ` WHERE id = $${values.length+1}`;
+            // Query the update
+            const updateRes = await db.query(updateQuery, [...values, assignment.id]);
+        }
 
         return { message: "Assignment updated successfully" };
     }

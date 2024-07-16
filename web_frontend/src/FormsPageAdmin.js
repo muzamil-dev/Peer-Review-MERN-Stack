@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import './FormsPageAdmin.css'; 
-import {jwtDecode} from 'jwt-decode';
+import './FormsPageAdmin.css';
+import { jwtDecode } from 'jwt-decode';
 import Api from './Api.js';
+import { useSnackbar } from 'notistack';
 
 const ViewFormsAdminPage = () => {
     const [forms, setForms] = useState([]);
@@ -16,6 +17,7 @@ const ViewFormsAdminPage = () => {
         questions: [],
         description: ''
     });
+    const { enqueueSnackbar } = useSnackbar();
 
     const navigate = useNavigate();
     const { workspaceId } = useParams(); // Assuming workspaceId is passed as a URL parameter
@@ -30,6 +32,11 @@ const ViewFormsAdminPage = () => {
         return decodedToken.userId;
     }
 
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        navigate('/login');
+    };
+
     useEffect(() => {
         const fetchForms = async () => {
             const userId = getCurrentUserId();
@@ -40,6 +47,7 @@ const ViewFormsAdminPage = () => {
                 setForms(response.data); // Assuming response.data contains the list of assignments/forms
             } else {
                 console.error('Failed to fetch forms:', response.message);
+                enqueueSnackbar(`Failed to fetch forms: ${response.message}`, { variant: 'error' });
             }
         };
 
@@ -124,12 +132,12 @@ const ViewFormsAdminPage = () => {
         );
 
         if (response.success) {
-            alert('Form updated successfully!');
+            enqueueSnackbar('Form updated successfully!', { variant: 'success' });
             setIsEditModalOpen(false);
             setForms(forms.map(form => form.assignmentId === currentForm.assignmentId ? { ...form, ...editFormData } : form));
         } else {
             console.error('Failed to update form:', response.message);
-            alert('Failed to update form.');
+            enqueueSnackbar(`Failed to update form: ${response.message}`, { variant: 'error' });
         }
     };
 
@@ -140,11 +148,11 @@ const ViewFormsAdminPage = () => {
         const response = await Api.Assignments.DeleteAssignment(assignmentId, userId);
 
         if (response.success) {
-            alert('Form deleted successfully!');
+            enqueueSnackbar('Form deleted successfully!', { variant: 'success' });
             setForms(forms.filter(form => form.assignmentId !== assignmentId));
         } else {
             console.error('Failed to delete form:', response.message);
-            alert('Failed to delete form.');
+            enqueueSnackbar(`Failed to delete form: ${response.message}`, { variant: 'error' });
         }
     };
 
@@ -165,6 +173,9 @@ const ViewFormsAdminPage = () => {
                 />
                 <button className="create-form-button" onClick={handleCreateForm}>
                     + Form
+                </button>
+                <button className="logout-button btn btn-danger" onClick={handleLogout}>
+                    Logout
                 </button>
             </div>
             <div className="forms-containerz">
@@ -229,10 +240,10 @@ const ViewFormsAdminPage = () => {
                                     className="form-control"
                                 />
                             </div>
-                            <div className="form-groupz">
+                            <div className="form-groupz mb-0">
                                 <label>Questions</label>
                                 {editFormData.questions.map((question, index) => (
-                                    <div key={index} className="question-group">
+                                    <div key={index} className="question-group mb-0">
                                         <input
                                             type="text"
                                             value={question}
@@ -241,23 +252,37 @@ const ViewFormsAdminPage = () => {
                                         />
                                         <button
                                             type="button"
-                                            className="btn btn-danger mt-2 mb-2"
+                                            className="btn btn-danger customBtn mt-2 mb-2"
                                             onClick={() => handleRemoveQuestion(index)}
                                         >
-                                            Remove
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="23"
+                                                height="23"
+                                                fill="currentColor"
+                                                className="bi bi-trash3-fill"
+                                                viewBox="0 0 16 16"
+                                                style={{ marginRight: '0px' }}
+                                            >
+                                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5" />
+                                            </svg>
                                         </button>
                                     </div>
                                 ))}
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    onClick={handleAddQuestion}
-                                >
-                                    Add Question
-                                </button>
+                                <div className="d-flex justify-content-center">
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary customBtns"
+                                        onClick={handleAddQuestion}
+                                    >
+                                        Add Question
+                                    </button>
+                                </div>
                             </div>
-                            <button type="submit" className="btn btn-success mt-0">Save Changes</button>
-                            <button type="button" className="btn btn-danger mt-2" onClick={handleCloseEditModal}>Cancel</button>
+                            <div className="d-flex justify-content-center mt-3">
+                                <button type="submit" className="btn btn-success customBtns mx-2">Save Changes</button>
+                                <button type="button" className="btn btn-danger customBtns mx-2" onClick={handleCloseEditModal}>Cancel</button>
+                            </div>
                         </form>
                     </div>
                 </div>

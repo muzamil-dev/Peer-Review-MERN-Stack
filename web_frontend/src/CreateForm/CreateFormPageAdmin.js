@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import './CreateFormPage.module.css';
+import styles from './CreateFormPage.module.css';
 import Api from '../Api.js';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from 'react-router-dom';
-
+import { useSnackbar } from 'notistack';
 
 const CreateFormPage = () => {
     const [formName, setFormName] = useState('');
@@ -12,6 +12,7 @@ const CreateFormPage = () => {
     const [availableUntil, setAvailableUntil] = useState('');
     const navigate = useNavigate();
     const { workspaceId } = useParams(); // Assuming workspaceId is passed as a URL parameter
+    const { enqueueSnackbar } = useSnackbar();
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
@@ -56,12 +57,19 @@ const CreateFormPage = () => {
         e.preventDefault();
         const userId = getCurrentUserId();
         if (!userId) {
+            enqueueSnackbar('User not authenticated', { variant: 'error' });
+            return;
+        }
+
+        const startDate = new Date(availableFrom).getTime(); // Convert to epoch time
+        const dueDate = new Date(availableUntil).getTime(); // Convert to epoch time
+
+        if (dueDate < startDate) {
+            enqueueSnackbar('Due date cannot be before the start date.', { variant: 'error' });
             return;
         }
 
         const questions = fields.map(field => field.name);
-        const startDate = new Date(availableFrom).getTime(); // Convert to epoch time
-        const dueDate = new Date(availableUntil).getTime(); // Convert to epoch time
 
         const response = await Api.Assignments.CreateAssignment(
             userId,
@@ -74,89 +82,75 @@ const CreateFormPage = () => {
         );
 
         if (response.success) {
-            // Handle success (e.g., show a success message, redirect to another page, etc.)
-            alert('Form created successfully!');
+            enqueueSnackbar('Form created successfully!', { variant: 'success' });
             navigate(`/formsAdmin/${workspaceId}`); // Adjust the redirect URL as needed
         } else {
-            // Handle error (e.g., show an error message)
             console.error('Failed to create form:', response.message);
-            alert('Failed to create form.');
+            enqueueSnackbar('Failed to create form.', { variant: 'error' });
         }
     };
 
     return (
-        <div className="create-form-page">
+        <div className={styles.createFormPage}>
             <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Form Name</label>
+                <div className={styles.formGroup}>
+                    <label className={styles.bold}>Assignment</label>
                     <input
                         type="text"
                         value={formName}
                         onChange={handleFormNameChange}
-                        className="form-control"
+                        className={styles.formControl}
                     />
                 </div>
-                <div className="form-group">
-                    <label>Options</label>
-                    <div className="options">
-                        <div>
-                            <input type="checkbox" />
-                            <label> Do not display in user dashboard until available</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" />
-                            <label> Do not display in user dashboard after deadline</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" />
-                            <label> Do not display comment text box at the end of the form</label>
-                        </div>
-                    </div>
-                </div>
-                <div className="form-group">
-                    <label>Fields</label>
+                <div className={styles.formGroup}>
+                    <label className={styles.bold}>Fields</label>
                     {fields.map((field, index) => (
-                        <div key={index} className="field-group">
+                        <div key={index} className={styles.fieldGroup}>
                             <input
                                 type="text"
-                                placeholder={`Name ${index + 1}`}
+                                placeholder={`Question ${index + 1}`}
                                 name="name"
                                 value={field.name}
                                 onChange={event => handleFieldChange(index, event)}
-                                className="form-control"
+                                className={styles.formControl}
                             />
                             <button
                                 type="button"
                                 onClick={() => handleRemoveField(index)}
-                                className="btn btn-danger"
+                                className={`btn btn-danger ${styles.removeButton}`}
                             >
-                                Delete item
+                                Delete
+                            </button>
+                            <button type="button" onClick={handleAddField} className={`btn btn-primary ${styles.addButton}`}>
+                                + Add Field
                             </button>
                         </div>
                     ))}
-                    <button type="button" onClick={handleAddField} className="btn btn-primary">
-                        + Add Field
-                    </button>
                 </div>
-                <div className="form-group">
-                    <label>Available from</label>
-                    <input
-                        type="date"
-                        name="availableFrom"
-                        value={availableFrom}
-                        onChange={handleDateChange}
-                        className="form-control"
-                    />
+                
+                <div className='row'> 
+                    <label className={`col-6 ${styles.bold}`}>Available from</label>
+                    <label className={`col-6 ${styles.bold}`}>Until</label>
                 </div>
-                <div className="form-group">
-                    <label>Until</label>
-                    <input
-                        type="date"
-                        name="availableUntil"
-                        value={availableUntil}
-                        onChange={handleDateChange}
-                        className="form-control"
-                    />
+                <div className='row'>
+                    <div className={`col-6 ${styles.formGroup}`}>
+                        <input
+                            type="date"
+                            name="availableFrom"
+                            value={availableFrom}
+                            onChange={handleDateChange}
+                            className={`.text-dark ${styles.formControl}`}
+                        />
+                    </div>
+                    <div className={`col-6 ${styles.formGroup}`}>
+                        <input
+                            type="date"
+                            name="availableUntil"
+                            value={availableUntil}
+                            onChange={handleDateChange}
+                            className={styles.formControl}
+                        />
+                    </div>
                 </div>
                 <button type="submit" className="btn btn-success">Save Form</button>
             </form>

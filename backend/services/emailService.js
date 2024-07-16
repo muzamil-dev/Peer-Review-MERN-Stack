@@ -16,10 +16,15 @@ export const sendEmail = async (to, subject, message) => {
         html: message,
     };
     try {
-        await transporter.sendMail(mailOptions);
+        const emailSent = await transporter.sendMail(mailOptions);
         console.log('Email sent successfully');
+        return emailSent;
     } catch (error) {
         console.error('Error sending email: ', error);
+        return {
+            error: error.message,
+            status: 500
+        }
         return {
             error: error.message,
             status: 500

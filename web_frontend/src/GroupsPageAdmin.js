@@ -8,6 +8,8 @@ const GroupsPageAdmin = () => {
     const [ungroupedMembers, setUngroupedMembers] = useState([]);
     const [groups, setGroups] = useState([]);
     const [workspaceDetails, setWorkspaceDetails] = useState({});
+    //variable for workspace name
+    const [workspaceName, setWorkspaceName] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -37,6 +39,9 @@ const GroupsPageAdmin = () => {
         if (response.status === 200) {
             const allowedDomains = response.data.allowedDomains || [];
             setWorkspaceDetails(response.data);
+            console.log('Workspace details:', response.data); // Debugging information
+            //set workspace name
+            setWorkspaceName(response.data.name);
             setInviteCode(response.data.inviteCode); // Update inviteCode state
             setFormData({
                 name: response.data.name,
@@ -65,7 +70,7 @@ const GroupsPageAdmin = () => {
 
     const fetchUngroupedMembers = async () => {
         const token = localStorage.getItem('accessToken');
-        const response = await Api.Workspaces.GetStudentsWithoutGroup(workspaceId, token);
+        const response = await Api.Workspace.GetStudentsWithoutGroup(workspaceId, token);
         if (response.status === 200 && Array.isArray(response.data)) {
             setUngroupedMembers(response.data.filter(member => member && member.userId));
         } else {
@@ -101,23 +106,23 @@ const GroupsPageAdmin = () => {
         }));
     };
 
-    const handleAssignToGroup = async (userId, groupId) => {
-        const token = localStorage.getItem('accessToken');
-        const currentUserId = getCurrentUserId();
-        if (!currentUserId) {
-            navigate('/login');
-            return { success: false };
-        }
-        const response = await Api.Groups.AddUser(currentUserId, userId, groupId, token);
-        if (response.success) {
-            setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== userId));
-            fetchGroups(); // Refetch groups to update the UI
-            return { success: true };
-        } else {
-            console.error('Failed to assign user to group:', response.message);
-            return { success: false };
-        }
-    };
+    // const handleAssignToGroup = async (userId, groupId) => {
+    //     const token = localStorage.getItem('accessToken');
+    //     const currentUserId = getCurrentUserId();
+    //     if (!currentUserId) {
+    //         navigate('/login');
+    //         return { success: false };
+    //     }
+    //     const response = await Api.Groups.AddUser(currentUserId, userId, groupId, token);
+    //     if (response.success) {
+    //         setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== userId));
+    //         fetchGroups(); // Refetch groups to update the UI
+    //         return { success: true };
+    //     } else {
+    //         console.error('Failed to assign user to group:', response.message);
+    //         return { success: false };
+    //     }
+    // };
 
     const handleAddUserToGroup = async (targetId, groupId) => {
         const currentUserId = getCurrentUserId();
@@ -164,6 +169,8 @@ const GroupsPageAdmin = () => {
                 return group;
             }));
             // Update ungroupedMembers state
+            //i need to update the emails of the ungrouped members and that is only done with fecthhungroupedmembers
+            fetchUngroupedMembers();
             setUngroupedMembers(prevMembers => [...prevMembers, selectedGroupMembers.find(member => member.userId === targetId)]);
             // Also update selectedMemberGroup to reflect the kicked member
             setSelectedMemberGroup(prevState => {
@@ -188,7 +195,7 @@ const GroupsPageAdmin = () => {
         const response = await Api.Workspaces.RemoveUser(currentUserId, targetId, workspaceId, token);
         if (response.success) {
             setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
-            fetchUngroupedMembers(); 
+            fetchUngroupedMembers();
         } else {
             console.error('Failed to kick from workspace:', response.message);
         }
@@ -202,6 +209,7 @@ const GroupsPageAdmin = () => {
             return;
         }
         const response = await Api.Groups.DeleteGroup(currentUserId, groupId, token);
+        fetchUngroupedMembers();
         if (response.success) {
             setGroups(groups.filter(group => group.groupId !== groupId));
         } else {
@@ -324,7 +332,7 @@ const GroupsPageAdmin = () => {
             return;
         }
         const response = await Api.Workspaces.SetInviteCode(currentUserId, workspaceId, token);
-        if (response.success) {
+        if (response.status === 200) {
             setInviteCode(response.inviteCode); // Update inviteCode state
             setWorkspaceDetails(prevDetails => ({
                 ...prevDetails,
@@ -371,10 +379,10 @@ const GroupsPageAdmin = () => {
     return (
         <div className={styles.workspaceAdmin}>
             <div className={`row ${styles.headerContainer}`}>
-                <button className={`open-button col-xl-3 col-lg-3 col-md-4 btn btn-primary ${styles.custom}`} onClick={createForm}>Create Forms</button>
-                <h1 className={`col-xl-6 col-lg-6 col-md-4 ${styles.headerLarge}`}>Groups</h1>
-                <button className="open-button col btn btn-primary" onClick={openForm}>Edit Workspace</button>
-                <button className="col btn btn-success" onClick={handleCreateGroup}>Add Group</button>
+                <button className={`open-button ol-xl-3 col-lg-3 col-md-3 col-sm-3 btn btn-light mb-2 mb-md-0 ${styles.fixedWidthSm} ${styles.custom}`} onClick={createForm}>Create Forms</button>
+                <h1 className={`col-xl-6 col-lg-6 col-md-6 col-sm-6 ${styles.headerLarge} text-center`}>{workspaceName}</h1>
+                <button className={`open-button col-xl-3 col-lg-3 col-md-3 col-sm-3 btn btn-light mb-2 mb-md-0 ${styles.fixedWidthSm}`} onClick={openForm}>Edit Workspace</button>
+                <button className={`col-xl-2 col-lg-2 col-md-3 btn btn-success col-sm-4 mb-2 mb-md-0 ${styles.fixedWidthSm}`} onClick={handleCreateGroup}>Add Group</button>
             </div>
 
             {isFormOpen && (

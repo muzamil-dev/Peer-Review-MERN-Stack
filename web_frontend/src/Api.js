@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';
 
 const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
 const getUrl = (prefix, route) => {
@@ -25,31 +26,60 @@ const Response503 = {
 
 const refreshAccessToken = async () => {
     try {
-        const response = await axios.get(getUrl('', 'refresh'), { withCredentials: true });
-        if (response.status === 200) {
+        //console.log('Api.js: now will call refresh token endpoint');
+        const response = await axios.get(getUrl('jwt', '/refresh'), {
+            withCredentials: true,
+            headers: { 'Skip-Interceptor': 'true' } // Custom header to skip interceptor
+        });
+        //console.log('Api.js: endpoint called and returned response');
+        if (response && response.status && response.status === 200) {
             const { accessToken } = response.data;
-            localStorage.setItem('accessToken', accessToken); // Optionally update the local storage
+            localStorage.setItem('accessToken', accessToken);
             return accessToken;
         }
         return null;
     } catch (error) {
-        console.error('Failed to refresh access token:', error);
+        console.error('Api.js: Error Caught: Failed to refresh access token:', error);
         return null;
     }
 };
 
+// Request Interceptor to Check and Refresh Token
+axios.interceptors.request.use(async config => {
+    // Skip the interceptor for the refresh token request
+    if (config.headers['Skip-Interceptor']) {
+        return config;
+    }
+
+    let token = localStorage.getItem('accessToken');
+    if (token) {
+        const { exp } = jwtDecode(token);
+        const now = Date.now() / 1000;
+        console.log('Api.js: Token expiration:', exp, 'now:', now);
+
+        // Check if token is expired or about to expire
+        if (exp < now) {
+            token = await refreshAccessToken();
+            if (token) {
+                config.headers['Authorization'] = `Bearer ${token}`;
+            } else {
+                // Handle case where refresh token failed
+                return Promise.reject(new Error('Failed to refresh access token'));
+            }
+        }
+    }
+    return config;
+}, error => {
+    return Promise.reject(error);
+});
+
 const apiRequest = async (method, url, data = null) => {
+    
     try {
         const response = await axios({ method, url, data, ...getConfig() });
         return response;
     } catch (error) {
-        if (error.response && error.response.status === 401) {
-            const newToken = await refreshAccessToken();
-            if (newToken) {
-                const response = await axios({ method, url, data, ...getConfig() });
-                return response;
-            }
-        }
+        console.error('Api.js: Error Caught:', error);
         throw error;
     }
 };
@@ -66,8 +96,14 @@ const POST = 'post';
 const DELETE = 'delete';
 const PUT = 'put';
 
+const logout = () => {
+    localStorage.removeItem('accessToken');
+    window.location.href = '/'; // Redirect to the login page
+};
+
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
+    logout, // Export the logout function
     Groups: {
         /**
          * Gets the group info for a group specified by groupId
@@ -409,17 +445,25 @@ export default {
          * @returns {Promise<{ status: number, data: { accessToken: string }, message: string }>} The freshly logged in user's data
          */
         DoLogin: async (email, password) => {
-            const payload = { email, password };
-            const response = await apiRequest(POST, getUrl(USERS, 'login'), payload)
-                .catch((err) => {
-                    console.error(err);
-                    return err.response || Response503;
+            const payload = { email: email.toLowerCase(), password };
+            try {
+                const response = await axios.post(getUrl(USERS, '/login'), payload, {
+                    withCredentials: true,
+                    headers: { 'Skip-Interceptor': 'true' } // skip the interceptor
                 });
-            return {
-                status: response.status,
-                data: response.data,
-                message: response.data.message
-            };
+                if (response && response.status && response.status === 200) {
+                    const { accessToken } = response.data;
+                    localStorage.setItem('accessToken', accessToken);
+                }
+                return {
+                    status: response.status,
+                    data: response.data,
+                    message: response.data.message
+                };
+            } catch (err) {
+                console.error(err);
+                return err.response || Response503;
+            }
         },
 
         /**
@@ -435,7 +479,7 @@ export default {
             const payload = {
                 firstName,
                 lastName,
-                email,
+                email: email.toLowerCase(),
                 password
             };
             const response = await apiRequest(POST, getUrl(USERS, 'signup'), payload)
@@ -457,7 +501,7 @@ export default {
          * @returns {Promise<{ status: number, data: {}, message: string }>}
          */
         VerifyEmailCode: async (email, code) => {
-            const payload = { email, token: code };
+            const payload = { email: email.toLowerCase(), token: code };
             const response = await apiRequest(POST, getUrl(USERS, 'verifyEmail'), payload)
                 .catch((err) => {
                     console.error(err);
@@ -508,7 +552,7 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         RequestPasswordReset: async (email) => {
-            const payload = { email };
+            const payload = { email: email.toLowerCase() };
             const response = await apiRequest(POST, getUrl(USERS, 'requestPasswordReset'), payload)
                 .catch((err) => {
                     console.error(err);
@@ -529,7 +573,7 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         ResetPassword: async (email, token, newPassword) => {
-            const payload = { email, token, newPassword };
+            const payload = { email: email.toLowerCase(), token, newPassword };
             const response = await apiRequest(POST, getUrl(USERS, 'resetPassword'), payload)
                 .catch((err) => {
                     console.error(err);

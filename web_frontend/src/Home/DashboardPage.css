@@ -30,7 +30,7 @@
 h2{
     font-size: 2.5vh;
     font-weight: bold;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .main-container {
@@ -111,6 +111,27 @@ h2{
         /* Add scroll to parent container */
         /*padding: 5px; NO NEED FOR THIS */ 
     }
+
+    .btn-center{
+        width: 40% !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .workspace-cards,
+    .workspace-actions {
+        width: 150%;
+        /* overflow-y: visible; */
+        /* Remove individual scroll */
+    }
+
+    .customContainer{
+        width: 100% !important;
+        padding: 0 0px 0px 0px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 }
 
 .workspace-actions h2 {
@@ -162,4 +183,20 @@ button:hover {
 .domain-input input {
     /* flex: 1; */
     margin-right: 5px;
+}
+
+.logout-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    margin: 10px;
+    float: right;
+}
+
+.logout-button:hover {
+    background-color: #ff1a1a;
 }

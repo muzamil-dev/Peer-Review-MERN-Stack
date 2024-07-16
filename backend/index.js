@@ -28,7 +28,34 @@ const PORT = process.env.PORT || 5000;
 // Initialize the app
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// Set allowed origins
+const allowedOrigins = [
+    'http://45.55.194.65',
+    'http://ratemypeer.site',
+    'http://www.ratemypeer.site',
+    'http://localhost:3000'
+];
+// Configure CORS options
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1)
+            callback(null, true);
+        else
+            callback(new Error('CORS error'));
+    },
+    credentials: true, // Enable cookies and other credentials
+};
+
+app.use(cors(corsOptions));
+
+// Test to ping the server
+app.get("/ping", (req, res) => {
+    const message = "If you're seeing this, the api is accessible";
+    return res.json({ message });
+});
 
 // Define routes
 app.use("/users", userRoutes);
@@ -94,6 +121,6 @@ cron.schedule('0 * * * * *', async() => {
     console.log(`Calculated analytics for ${ids.length} completed assignments`);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Listening on port ${PORT}.`);
 });

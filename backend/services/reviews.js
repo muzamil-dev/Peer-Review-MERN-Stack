@@ -14,7 +14,7 @@ export const getById = async(reviewId) => {
             LEFT JOIN questions AS q
             ON q.assignment_id = r.assignment_id
             LEFT JOIN ratings AS ra
-            ON ra.question_id = q.id
+            ON ra.question_id = q.id AND ra.review_id = r.id
             WHERE r.id = $1
             GROUP BY r.user_id, r.target_id, a.start_date, a.due_date)
             
@@ -96,7 +96,7 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
         if (!data)
             return {
                 error: "The requested reviews were not found",
-                status: 404
+                status: 200
             };
 
         // Filter complete and incomplete reviews
@@ -167,7 +167,7 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
         if (!data)
             return {
                 error: "The requested reviews were not found",
-                status: 404
+                status: 200
             };
 
         // Filter complete reviews, incomplete reviews will be excluded
@@ -242,7 +242,6 @@ export const submit = async(userId, reviewId, ratings) => {
             [reviewId]
         );
         const data = res.rows[0];
-        console.log(data);
         // Check that the referenced review exists
         if (!data)
             return { 

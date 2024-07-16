@@ -11,25 +11,30 @@ import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin com
 import CreateFormPage from './CreateForm/CreateFormPageAdmin'; // Import the CreateFormPage component
 import UserDashboard from './UserDashboard';
 import ReviewPage from './ReviewPage';
+import AnalyticsPage from './AnalyticsPage/AnalyticsPage'; // Import the AnalyticsPage component
+import { SnackbarProvider } from 'notistack';
 
 function App() {
     return (
-        <Router>
-            <div className="App">
-                <Routes>
-                    <Route path="/" element={<LoginPage />} />
-                    <Route path="/DashboardPage" element={<DashboardPage />} />
-                    <Route path="/ApiExamples" element={<Example />} />
-                    <Route path="/groups/:workspaceId" element={<CustomGroupsPage />} />
-                    <Route path="/workspaces/:workspaceId/admin" element={<GroupsPageAdmin />} />
-                    <Route path="/ApiExamples" element={<ApiExamples />} />
-                    <Route path="/formsAdmin/:workspaceId" element={<FormsPageAdmin />} />
-                    <Route path="/createForm/:workspaceId" element={<CreateFormPage />} />
-                    <Route path="/UserDashboard" element={<UserDashboard />} />
-                    <Route path="/Review/:reviewId" element={<ReviewPage />} />
-                </Routes>
-            </div>
-        </Router>
+        <SnackbarProvider maxSnack={3}> {/* Wrap the entire app in SnackbarProvider */}
+            <Router>
+                <div className="App">
+                    <Routes>
+                        <Route path="/" element={<LoginPage />} />
+                        <Route path="/DashboardPage" element={<DashboardPage />} />
+                        <Route path="/ApiExamples" element={<Example />} />
+                        <Route path="/groups/:workspaceId" element={<CustomGroupsPage />} />
+                        <Route path="/workspaces/:workspaceId/admin" element={<GroupsPageAdmin />} />
+                        <Route path="/ApiExamples" element={<ApiExamples />} />
+                        <Route path="/formsAdmin/:workspaceId" element={<FormsPageAdmin />} />
+                        <Route path="/createForm/:workspaceId" element={<CreateFormPage />} />
+                        <Route path="/UserDashboard" element={<UserDashboard />} />
+                        <Route path="/Review/:reviewId" element={<ReviewPage />} />
+                        <Route path="/Analytics/:userId" element={<AnalyticsPage />} />
+                    </Routes>
+                </div>
+            </Router>
+        </SnackbarProvider>
     );
 }
 
