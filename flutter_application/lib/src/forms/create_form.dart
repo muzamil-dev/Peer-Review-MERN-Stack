@@ -204,7 +204,7 @@ class _CreateFormState extends State<CreateForm> {
                           controller: formName,
                           decoration: const InputDecoration(
                               border: OutlineInputBorder(),
-                              hintText: "Form Name",
+                              hintText: "Assignment Name",
                               filled: true,
                               fillColor: Colors.white,
                               focusedBorder: OutlineInputBorder(

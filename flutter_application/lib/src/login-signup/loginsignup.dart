@@ -354,29 +354,30 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Column(
-                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Text(
                                     'Reset Password',
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
+                                  const SizedBox(height: 15),
                                   TextField(
                                     controller: resetEmailController,
                                     decoration: InputDecoration(
-                                      labelText: 'Enter your email',
+                                      labelText: 'Enter Your Email',
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(18),
                                         borderSide: BorderSide.none,
                                       ),
+                                      labelStyle:
+                                          const TextStyle(color: Colors.black),
                                       fillColor: Colors.grey[200],
                                       filled: true,
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
+                                  const SizedBox(height: 15),
                                   ElevatedButton(
                                     onPressed: () {
                                       // Handle password reset logic
@@ -384,7 +385,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       final email = resetEmailController.text;
                                       requestPasswordReset(context, email);
                                     },
-                                    child: const Text('Submit'),
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green),
+                                    child: const Text(
+                                      'Submit',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -550,15 +556,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(bottom: 10.0),
-            child: TextField(
-              controller: firstNameController,
-              decoration: InputDecoration(
-                  hintText: 'First Name',
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(bottom: 10.0),
+              child: TextField(
+                controller: firstNameController,
+                decoration: InputDecoration(
+                    hintText: 'First Name',
+                    hintStyle: const TextStyle(fontSize: 17),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide.none),
+                    fillColor: Colors.white,
+                    filled: true,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 3),
+                    )),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(bottom: 10.0),
+              child: TextField(
+                controller: lastNameController,
+                decoration: InputDecoration(
+                  hintText: 'Last Name',
                   hintStyle: const TextStyle(fontSize: 17),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -568,115 +594,98 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: const BorderSide(color: Colors.blue, width: 3),
-                  )),
+                  ),
+                ),
+              ),
             ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 10.0),
-            child: TextField(
-              controller: lastNameController,
-              decoration: InputDecoration(
-                hintText: 'Last Name',
-                hintStyle: const TextStyle(fontSize: 17),
-                border: OutlineInputBorder(
+            Container(
+              margin: const EdgeInsets.only(bottom: 10.0),
+              child: TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  hintText: "Email",
+                  hintStyle: const TextStyle(fontSize: 17),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none),
+                  fillColor: Colors.white,
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide.none),
-                fillColor: Colors.white,
-                filled: true,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: const BorderSide(color: Colors.blue, width: 3),
+                    borderSide: const BorderSide(color: Colors.blue, width: 3),
+                  ),
+                  prefixIcon: const Icon(Icons.email),
                 ),
+                maxLines: 1,
               ),
             ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 10.0),
-            child: TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                hintText: "Email",
-                hintStyle: const TextStyle(fontSize: 17),
-                border: OutlineInputBorder(
+            Container(
+              margin: const EdgeInsets.only(bottom: 10.0),
+              child: TextField(
+                controller: passwordController,
+                decoration: InputDecoration(
+                  hintText: 'Password',
+                  hintStyle: const TextStyle(fontSize: 17),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none),
+                  fillColor: Colors.white,
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide.none),
-                fillColor: Colors.white,
-                filled: true,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: const BorderSide(color: Colors.blue, width: 3),
+                    borderSide: const BorderSide(color: Colors.blue, width: 3),
+                  ),
+                  prefixIcon: const Icon(Icons.password),
                 ),
-                prefixIcon: const Icon(Icons.email),
+                obscureText: true,
               ),
-              maxLines: 1,
             ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 10.0),
-            child: TextField(
-              controller: passwordController,
-              decoration: InputDecoration(
-                hintText: 'Password',
-                hintStyle: const TextStyle(fontSize: 17),
-                border: OutlineInputBorder(
+            Container(
+              margin: const EdgeInsets.only(bottom: 10.0),
+              child: TextField(
+                controller: confirmPasswordController,
+                decoration: InputDecoration(
+                  hintText: 'Confirm Password',
+                  hintStyle: const TextStyle(fontSize: 17),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none),
+                  fillColor: Colors.white,
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide.none),
-                fillColor: Colors.white,
-                filled: true,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: const BorderSide(color: Colors.blue, width: 3),
+                    borderSide: const BorderSide(color: Colors.blue, width: 3),
+                  ),
+                  prefixIcon: const Icon(Icons.password),
                 ),
-                prefixIcon: const Icon(Icons.password),
+                obscureText: true,
               ),
-              obscureText: true,
             ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 10.0),
-            child: TextField(
-              controller: confirmPasswordController,
-              decoration: InputDecoration(
-                hintText: 'Confirm Password',
-                hintStyle: const TextStyle(fontSize: 17),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide.none),
-                fillColor: Colors.white,
-                filled: true,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: const BorderSide(color: Colors.blue, width: 3),
-                ),
-                prefixIcon: const Icon(Icons.password),
-              ),
-              obscureText: true,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            onPressed: () {
-              // Handle signup logic
-              final firstName = firstNameController.text;
-              final lastName = lastNameController.text;
-              final email = emailController.text;
-              final password = passwordController.text;
-              final confirmPassword = confirmPasswordController.text;
-              userSignUp(context, firstName, lastName, email, password,
-                  confirmPassword);
-            },
-            child: const SizedBox(
-              width: 110,
-              child: Center(
-                child: Text(
-                  'Sign Up',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              onPressed: () {
+                // Handle signup logic
+                final firstName = firstNameController.text;
+                final lastName = lastNameController.text;
+                final email = emailController.text;
+                final password = passwordController.text;
+                final confirmPassword = confirmPasswordController.text;
+                userSignUp(context, firstName, lastName, email, password,
+                    confirmPassword);
+              },
+              child: const SizedBox(
+                width: 110,
+                child: Center(
+                  child: Text(
+                    'Sign Up',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
