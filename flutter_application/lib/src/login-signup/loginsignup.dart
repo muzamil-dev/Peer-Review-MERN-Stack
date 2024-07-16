@@ -481,19 +481,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
             controller: tokenController,
             decoration:
                 const InputDecoration(labelText: 'Enter verification token'),
+            style: const TextStyle(color: Colors.black),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                verifyEmail(context, tokenController.text);
-              },
-              child: const Text('Verify'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                  style: TextButton.styleFrom(backgroundColor: Colors.green),
+                  onPressed: () {
+                    verifyEmail(context, tokenController.text);
+                  },
+                  child: const Text(
+                    'Verify',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
             ),
           ],
         );
