@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/dashboard/admin_dashboard.dart';
 import 'dart:ui'; // for BackdropFilter
@@ -430,7 +431,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String invalidPasswordMessage = '';
   bool showInvalidWidget = false;
   final _formKey = GlobalKey<FormState>();
-  FocusNode _focus = FocusNode();
+  bool showPassword = false;
+  bool showConfirmPassword = false;
+  bool obscurePassword = true;
+  bool obscureConfirmPassword = true;
 
   Future<void> userSignUp(
       BuildContext context,
@@ -589,80 +593,89 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget showPasswordRequirements() {
     if (showInvalidWidget) {
-      return Container(
-        padding: EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFF004080), width: 1),
-            borderRadius: BorderRadius.circular(8.0)),
-        child: Column(
-          children: [
-            const Text(
-              "Password Requirements:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Row(
+      return Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFF004080), width: 1),
+                borderRadius: BorderRadius.circular(8.0)),
+            child: Column(
               children: [
-                validationIcon("upper-case"),
-                const SizedBox(
-                  width: 10,
+                const Text(
+                  "Password Requirements:",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                const Text("Must Contain One Uppercase Letter"),
+                Row(
+                  children: [
+                    validationIcon("upper-case"),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    const Text("Must Contain One Uppercase Letter"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    validationIcon("lower-case"),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    const Text("Must Contain One Lowercase Letter"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    validationIcon("special"),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    const Text("Must Contain One Special Character"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    validationIcon("number"),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    const Text("Must Contain One Number"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    validationIcon("character-length"),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    const Text("Must Contain Atleast 8 Characters"),
+                  ],
+                ),
               ],
             ),
-            Row(
-              children: [
-                validationIcon("lower-case"),
-                const SizedBox(
-                  width: 10,
-                ),
-                const Text("Must Contain One Lowercase Letter"),
-              ],
-            ),
-            Row(
-              children: [
-                validationIcon("special"),
-                const SizedBox(
-                  width: 10,
-                ),
-                const Text("Must Contain One Special Character"),
-              ],
-            ),
-            Row(
-              children: [
-                validationIcon("number"),
-                const SizedBox(
-                  width: 10,
-                ),
-                const Text("Must Contain One Number"),
-              ],
-            ),
-            Row(
-              children: [
-                validationIcon("character-length"),
-                const SizedBox(
-                  width: 10,
-                ),
-                const Text("Must Contain Atleast 8 Characters"),
-              ],
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(
+            height: 15,
+          ),
+        ],
       );
     } else {
       return const SizedBox();
     }
   }
 
-  Widget displayRequirements() {
-    if (showInvalidWidget) {
-      return Drawer(
-        child: Center(
-          child: showPasswordRequirements(),
-        ),
+  Widget showEyeIcon() {
+    if (showPassword) {
+      return const Icon(
+        CupertinoIcons.eye_slash,
+        color: Colors.black,
       );
     }
-    return const SizedBox();
+    return const Icon(
+      CupertinoIcons.eye,
+      color: Colors.black,
+    );
   }
 
   @override
@@ -785,12 +798,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const BorderSide(color: Colors.blue, width: 3),
                     ),
                     prefixIcon: const Icon(Icons.password),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          showPassword = !showPassword;
+                          obscurePassword = !obscurePassword;
+                        });
+                      },
+                      icon: showEyeIcon(),
+                    ),
                     errorStyle: const TextStyle(
                         color: Colors.red,
                         fontSize: 14,
                         fontWeight: FontWeight.bold),
                   ),
-                  obscureText: true,
+                  obscureText: obscurePassword,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Please Enter a Non-Empty Field";
@@ -808,9 +830,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               showPasswordRequirements(),
-              const SizedBox(
-                height: 15,
-              ),
               Container(
                 margin: const EdgeInsets.only(bottom: 10.0),
                 child: TextFormField(
@@ -829,12 +848,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const BorderSide(color: Colors.blue, width: 3),
                     ),
                     prefixIcon: const Icon(Icons.password),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          showConfirmPassword = !showConfirmPassword;
+                          obscureConfirmPassword = !obscureConfirmPassword;
+                        });
+                      },
+                      icon: showEyeIcon(),
+                    ),
                     errorStyle: const TextStyle(
                         color: Colors.red,
                         fontSize: 14,
                         fontWeight: FontWeight.bold),
                   ),
-                  obscureText: true,
+                  obscureText: obscureConfirmPassword,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Please Enter a Non-Empty Field";
