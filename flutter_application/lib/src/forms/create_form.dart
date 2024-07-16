@@ -1,6 +1,4 @@
-// TODO: ADD DESIGN and ADD SETTINGS OPTION
-
-import 'dart:ffi';
+// TODO: ADD SETTINGS OPTION
 
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
@@ -94,11 +92,27 @@ class _CreateFormState extends State<CreateForm> {
 
   Future<void> _selectDate(TextEditingController controller) async {
     DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2024),
-      lastDate: DateTime(2100),
-    );
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2024),
+        lastDate: DateTime(2100),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: Colors.white, // header background color
+                onPrimary: Color(0xff004080), // header text color
+                onSurface: Colors.black, // body text color
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.black, // button text color
+                ),
+              ),
+            ),
+            child: child!,
+          );
+        });
 
     if (picked != null) {
       setState(() {
