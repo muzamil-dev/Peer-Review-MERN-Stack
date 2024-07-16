@@ -430,15 +430,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String invalidPasswordMessage = '';
   bool showInvalidWidget = false;
   final _formKey = GlobalKey<FormState>();
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  void _openEndDrawer() {
-    _scaffoldKey.currentState!.openEndDrawer();
-  }
-
-  void _closeEndDrawer() {
-    Navigator.of(context).pop();
-  }
+  FocusNode _focus = FocusNode();
 
   Future<void> userSignUp(
       BuildContext context,
@@ -598,40 +590,59 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget showPasswordRequirements() {
     if (showInvalidWidget) {
       return Container(
+        padding: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: const Color(0xFF004080), width: 1),
             borderRadius: BorderRadius.circular(8.0)),
         child: Column(
           children: [
-            const Text("Password Requirements:"),
+            const Text(
+              "Password Requirements:",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             Row(
               children: [
                 validationIcon("upper-case"),
+                const SizedBox(
+                  width: 10,
+                ),
                 const Text("Must Contain One Uppercase Letter"),
               ],
             ),
             Row(
               children: [
                 validationIcon("lower-case"),
+                const SizedBox(
+                  width: 10,
+                ),
                 const Text("Must Contain One Lowercase Letter"),
               ],
             ),
             Row(
               children: [
                 validationIcon("special"),
+                const SizedBox(
+                  width: 10,
+                ),
                 const Text("Must Contain One Special Character"),
               ],
             ),
             Row(
               children: [
                 validationIcon("number"),
+                const SizedBox(
+                  width: 10,
+                ),
                 const Text("Must Contain One Number"),
               ],
             ),
             Row(
               children: [
                 validationIcon("character-length"),
+                const SizedBox(
+                  width: 10,
+                ),
                 const Text("Must Contain Atleast 8 Characters"),
               ],
             ),
@@ -789,9 +800,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       });
                       return "Invalid Password Format";
                     }
+                    setState(() {
+                      showInvalidWidget = false;
+                    });
                     return null;
                   },
                 ),
+              ),
+              showPasswordRequirements(),
+              const SizedBox(
+                height: 15,
               ),
               Container(
                 margin: const EdgeInsets.only(bottom: 10.0),
@@ -820,6 +838,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Please Enter a Non-Empty Field";
+                    }
+                    if (value != passwordController.text) {
+                      return "Password and Confirm Password Do Not Match";
                     }
                     return null;
                   },
@@ -854,7 +875,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
               ),
-              showPasswordRequirements(),
             ],
           ),
         ),
