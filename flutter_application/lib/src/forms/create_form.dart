@@ -167,7 +167,7 @@ class _CreateFormState extends State<CreateForm> {
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(const SnackBar(
                                     content: Text(
-                                        'Create Form Failed: Look at Student View Page for Errors'),
+                                        'Create Form Failed: Form Needs Atleast One Field'),
                                   ));
                                   return;
                                 }
@@ -219,7 +219,7 @@ class _CreateFormState extends State<CreateForm> {
                                   fontWeight: FontWeight.bold)),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return "Please enter a non-empty field";
+                              return "Please Enter a Non-Empty Field";
                             }
                             return null;
                           },
@@ -231,7 +231,7 @@ class _CreateFormState extends State<CreateForm> {
                           controller: availableFromController,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return "Please enter a non-empty field";
+                              return "Please Enter a Non-Empty Field";
                             }
                             return null;
                           },
@@ -262,7 +262,7 @@ class _CreateFormState extends State<CreateForm> {
                           controller: dueUntillController,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return "Please enter a non-empty field";
+                              return "Please Enter a Non-Empty Field";
                             }
                             return null;
                           },

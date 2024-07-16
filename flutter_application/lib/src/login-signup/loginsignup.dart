@@ -44,9 +44,6 @@ class _LoginSignupState extends State<LoginSignup> {
         color: const Color(0xFF004080), // Background color
         child: Column(
           children: [
-            const SizedBox(
-              height: 60,
-            ),
             const Text(
               'Welcome to',
               style: TextStyle(
@@ -62,7 +59,7 @@ class _LoginSignupState extends State<LoginSignup> {
               width: 50,
               height: 50,
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -120,7 +117,7 @@ class _LoginSignupState extends State<LoginSignup> {
                 ),
               ],
             ),
-            const SizedBox(height: 10), // Add space between tabs and title
+            const SizedBox(height: 5), // Add space between tabs and title
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -421,21 +418,27 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController firstNameController = TextEditingController();
-
-  //final TextEditingController middleNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
-
   final TextEditingController emailController = TextEditingController();
-
   final TextEditingController passwordController = TextEditingController();
-
   final TextEditingController confirmPasswordController =
       TextEditingController();
-
   final TextEditingController tokenController = TextEditingController();
   final apiInstance = Api();
   String? accessToken;
   final storage = const FlutterSecureStorage();
+  String invalidPasswordMessage = '';
+  bool showInvalidWidget = false;
+  final _formKey = GlobalKey<FormState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _openEndDrawer() {
+    _scaffoldKey.currentState!.openEndDrawer();
+  }
+
+  void _closeEndDrawer() {
+    Navigator.of(context).pop();
+  }
 
   Future<void> userSignUp(
       BuildContext context,
@@ -447,16 +450,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     const url = '/users/signup';
 
     try {
-      // Validation Check for Password and Confirm Password
-      if (password != confirmPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text(
-                  'SignUp Failed: \nPassword and Confirm Password Do Not Match.')),
-        );
-        return;
-      }
-
       final response = await apiInstance.api.post(
         url,
         data: jsonEncode({
@@ -552,19 +545,130 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  bool isValidForm(GlobalKey key) {
+    if (_formKey.currentState!.validate() == false) {
+      print("Sign Up Validation Failed!");
+      return false;
+    }
+    return true;
+  }
+
+  bool invalidPasswordFormat(TextEditingController passwordController) {
+    String password = passwordController.text;
+
+    // Regex Pattern Must Contain One Uppercase, Lowercase, Special, Number, 8 Chars
+    String pattern =
+        r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+
+    RegExp regExp = RegExp(pattern);
+    return (regExp.hasMatch(password)) ? false : true;
+  }
+
+  Widget validationIcon(String validationKey) {
+    String pattern;
+    RegExp regExp;
+    String password = passwordController.text;
+
+    if (validationKey == "upper-case") {
+      pattern = r'^(?=.*?[A-Z])';
+    } else if (validationKey == "lower-case") {
+      pattern = r'^(?=.*?[a-z])';
+    } else if (validationKey == "special") {
+      pattern = r'^(?=.*?[!@#\$&*~])';
+    } else if (validationKey == "number") {
+      pattern = r'^(?=.*?[0-9])';
+    } else {
+      pattern = r'^.{8,}$';
+    }
+
+    regExp = RegExp(pattern);
+    if (regExp.hasMatch(password)) {
+      return const Icon(
+        Icons.check_circle,
+        color: Colors.green,
+      );
+    } else {
+      return const Icon(
+        Icons.cancel,
+        color: Colors.red,
+      );
+    }
+  }
+
+  Widget showPasswordRequirements() {
+    if (showInvalidWidget) {
+      return Container(
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: const Color(0xFF004080), width: 1),
+            borderRadius: BorderRadius.circular(8.0)),
+        child: Column(
+          children: [
+            const Text("Password Requirements:"),
+            Row(
+              children: [
+                validationIcon("upper-case"),
+                const Text("Must Contain One Uppercase Letter"),
+              ],
+            ),
+            Row(
+              children: [
+                validationIcon("lower-case"),
+                const Text("Must Contain One Lowercase Letter"),
+              ],
+            ),
+            Row(
+              children: [
+                validationIcon("special"),
+                const Text("Must Contain One Special Character"),
+              ],
+            ),
+            Row(
+              children: [
+                validationIcon("number"),
+                const Text("Must Contain One Number"),
+              ],
+            ),
+            Row(
+              children: [
+                validationIcon("character-length"),
+                const Text("Must Contain Atleast 8 Characters"),
+              ],
+            ),
+          ],
+        ),
+      );
+    } else {
+      return const SizedBox();
+    }
+  }
+
+  Widget displayRequirements() {
+    if (showInvalidWidget) {
+      return Drawer(
+        child: Center(
+          child: showPasswordRequirements(),
+        ),
+      );
+    }
+    return const SizedBox();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              margin: const EdgeInsets.only(bottom: 10.0),
-              child: TextField(
-                controller: firstNameController,
-                decoration: InputDecoration(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextFormField(
+                  controller: firstNameController,
+                  decoration: InputDecoration(
                     hintText: 'First Name',
                     hintStyle: const TextStyle(fontSize: 17),
                     border: OutlineInputBorder(
@@ -576,115 +680,183 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       borderRadius: BorderRadius.circular(18),
                       borderSide:
                           const BorderSide(color: Colors.blue, width: 3),
-                    )),
+                    ),
+                    errorStyle: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please Enter a Non-Empty Field";
+                    }
+                    return null;
+                  },
+                ),
               ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 10.0),
-              child: TextField(
-                controller: lastNameController,
-                decoration: InputDecoration(
-                  hintText: 'Last Name',
-                  hintStyle: const TextStyle(fontSize: 17),
-                  border: OutlineInputBorder(
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextFormField(
+                  controller: lastNameController,
+                  decoration: InputDecoration(
+                    hintText: 'Last Name',
+                    hintStyle: const TextStyle(fontSize: 17),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide.none),
+                    fillColor: Colors.white,
+                    filled: true,
+                    focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
-                      borderSide: BorderSide.none),
-                  fillColor: Colors.white,
-                  filled: true,
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: const BorderSide(color: Colors.blue, width: 3),
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 3),
+                    ),
+                    errorStyle: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please Enter a Non-Empty Field";
+                    }
+                    return null;
+                  },
                 ),
               ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 10.0),
-              child: TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  hintText: "Email",
-                  hintStyle: const TextStyle(fontSize: 17),
-                  border: OutlineInputBorder(
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextFormField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    hintText: "Email",
+                    hintStyle: const TextStyle(fontSize: 17),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide.none),
+                    fillColor: Colors.white,
+                    filled: true,
+                    focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
-                      borderSide: BorderSide.none),
-                  fillColor: Colors.white,
-                  filled: true,
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: const BorderSide(color: Colors.blue, width: 3),
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 3),
+                    ),
+                    prefixIcon: const Icon(Icons.email),
+                    errorStyle: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
                   ),
-                  prefixIcon: const Icon(Icons.email),
+                  maxLines: 1,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please Enter a Non-Empty Field";
+                    }
+                    return null;
+                  },
                 ),
-                maxLines: 1,
               ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 10.0),
-              child: TextField(
-                controller: passwordController,
-                decoration: InputDecoration(
-                  hintText: 'Password',
-                  hintStyle: const TextStyle(fontSize: 17),
-                  border: OutlineInputBorder(
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextFormField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    hintText: 'Password',
+                    hintStyle: const TextStyle(fontSize: 17),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide.none),
+                    fillColor: Colors.white,
+                    filled: true,
+                    focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
-                      borderSide: BorderSide.none),
-                  fillColor: Colors.white,
-                  filled: true,
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: const BorderSide(color: Colors.blue, width: 3),
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 3),
+                    ),
+                    prefixIcon: const Icon(Icons.password),
+                    errorStyle: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
                   ),
-                  prefixIcon: const Icon(Icons.password),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please Enter a Non-Empty Field";
+                    } else if (invalidPasswordFormat(passwordController)) {
+                      setState(() {
+                        showInvalidWidget = true;
+                      });
+                      return "Invalid Password Format";
+                    }
+                    return null;
+                  },
                 ),
-                obscureText: true,
               ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 10.0),
-              child: TextField(
-                controller: confirmPasswordController,
-                decoration: InputDecoration(
-                  hintText: 'Confirm Password',
-                  hintStyle: const TextStyle(fontSize: 17),
-                  border: OutlineInputBorder(
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextFormField(
+                  controller: confirmPasswordController,
+                  decoration: InputDecoration(
+                    hintText: 'Confirm Password',
+                    hintStyle: const TextStyle(fontSize: 17),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide.none),
+                    fillColor: Colors.white,
+                    filled: true,
+                    focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
-                      borderSide: BorderSide.none),
-                  fillColor: Colors.white,
-                  filled: true,
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: const BorderSide(color: Colors.blue, width: 3),
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 3),
+                    ),
+                    prefixIcon: const Icon(Icons.password),
+                    errorStyle: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
                   ),
-                  prefixIcon: const Icon(Icons.password),
-                ),
-                obscureText: true,
-              ),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              onPressed: () {
-                // Handle signup logic
-                final firstName = firstNameController.text;
-                final lastName = lastNameController.text;
-                final email = emailController.text;
-                final password = passwordController.text;
-                final confirmPassword = confirmPasswordController.text;
-                userSignUp(context, firstName, lastName, email, password,
-                    confirmPassword);
-              },
-              child: const SizedBox(
-                width: 110,
-                child: Center(
-                  child: Text(
-                    'Sign Up',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please Enter a Non-Empty Field";
+                    }
+                    return null;
+                  },
                 ),
               ),
-            ),
-          ],
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                onPressed: () {
+                  // Handle Validation Logic
+                  if (!isValidForm(_formKey)) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Sign Up Failed!"),
+                    ));
+                    return;
+                  }
+                  // Handle signup logic
+                  final firstName = firstNameController.text;
+                  final lastName = lastNameController.text;
+                  final email = emailController.text;
+                  final password = passwordController.text;
+                  final confirmPassword = confirmPasswordController.text;
+                  userSignUp(context, firstName, lastName, email, password,
+                      confirmPassword);
+                },
+                child: const SizedBox(
+                  width: 110,
+                  child: Center(
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  ),
+                ),
+              ),
+              showPasswordRequirements(),
+            ],
+          ),
         ),
       ),
     );
