@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
 import './DashboardPage.css';
 import Api from '../Api.js';
-import Navbar from '../Navbar.js';
 
 const DashboardPage = () => {
     const [workspaces, setWorkspaces] = useState([]);
