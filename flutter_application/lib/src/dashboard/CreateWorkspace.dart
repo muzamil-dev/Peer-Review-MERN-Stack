@@ -121,129 +121,126 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
           iconTheme:
               const IconThemeData(color: Colors.white), // Center the title
         ),
-        body: Expanded(
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFF004080),
-            ),
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
-                      child: const Text(
-                        "Enter Workspace Details:",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold),
-                      ),
+        body: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF004080),
+          ),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
+                    child: const Text(
+                      "Enter Workspace Details:",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  margin: const EdgeInsets.only(bottom: 10.0),
-                  child: TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                        hintText: 'Workspace Name',
-                        hintStyle: const TextStyle(fontSize: 17),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none),
-                        fillColor: Colors.white,
-                        filled: true,
-                        focusedBorder: OutlineInputBorder(
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                      hintText: 'Workspace Name',
+                      hintStyle: const TextStyle(fontSize: 17),
+                      border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18),
-                          borderSide:
-                              const BorderSide(color: Colors.blue, width: 3),
-                        )),
-                  ),
+                          borderSide: BorderSide.none),
+                      fillColor: Colors.white,
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 3),
+                      )),
                 ),
-                Container(
-                  margin: const EdgeInsets.only(bottom: 10.0),
-                  child: TextField(
-                    controller: domainController,
-                    decoration: InputDecoration(
-                        hintText: 'Allowed Domains',
-                        hintStyle: const TextStyle(fontSize: 17),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none),
-                        fillColor: Colors.white,
-                        filled: true,
-                        focusedBorder: OutlineInputBorder(
+              ),
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextField(
+                  controller: domainController,
+                  decoration: InputDecoration(
+                      hintText: 'Allowed Domains',
+                      hintStyle: const TextStyle(fontSize: 17),
+                      border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18),
-                          borderSide:
-                              const BorderSide(color: Colors.blue, width: 3),
-                        )),
-                  ),
+                          borderSide: BorderSide.none),
+                      fillColor: Colors.white,
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 3),
+                      )),
                 ),
-                Container(
-                  margin: const EdgeInsets.only(bottom: 10.0),
-                  child: TextField(
-                    controller: numGroupsController,
-                    decoration: InputDecoration(
-                        hintText: 'Number of Groups',
-                        hintStyle: const TextStyle(fontSize: 17),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none),
-                        fillColor: Colors.white,
-                        filled: true,
-                        focusedBorder: OutlineInputBorder(
+              ),
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextField(
+                  controller: numGroupsController,
+                  decoration: InputDecoration(
+                      hintText: 'Number of Groups',
+                      hintStyle: const TextStyle(fontSize: 17),
+                      border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18),
-                          borderSide:
-                              const BorderSide(color: Colors.blue, width: 3),
-                        )),
-                  ),
+                          borderSide: BorderSide.none),
+                      fillColor: Colors.white,
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 3),
+                      )),
                 ),
-                Container(
-                  margin: const EdgeInsets.only(bottom: 10.0),
-                  child: TextField(
-                    controller: maxGroupSizeController,
-                    decoration: InputDecoration(
-                        hintText: 'Max Group Size',
-                        hintStyle: const TextStyle(fontSize: 17),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none),
-                        fillColor: Colors.white,
-                        filled: true,
-                        focusedBorder: OutlineInputBorder(
+              ),
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextField(
+                  controller: maxGroupSizeController,
+                  decoration: InputDecoration(
+                      hintText: 'Max Group Size',
+                      hintStyle: const TextStyle(fontSize: 17),
+                      border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18),
-                          borderSide:
-                              const BorderSide(color: Colors.blue, width: 3),
-                        )),
-                  ),
+                          borderSide: BorderSide.none),
+                      fillColor: Colors.white,
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 3),
+                      )),
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    if (nameController.text.isNotEmpty) {
-                      createWorkspace(context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Please fill in the workspace name')),
-                      );
-                    }
-                  },
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  child: const Text(
-                    'Create Workspace',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.isNotEmpty) {
+                    createWorkspace(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Please fill in the workspace name')),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                child: const Text(
+                  'Create Workspace',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ));
   }

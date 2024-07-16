@@ -1,5 +1,7 @@
 // TODO: ADD DESIGN and ADD SETTINGS OPTION
 
+import 'dart:ffi';
+
 import "package:flutter/material.dart";
 import "package:flutter/cupertino.dart";
 import 'package:intl/intl.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import "dart:convert";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CreateForm extends StatefulWidget {
   static const routeName = '/createForm';
@@ -24,6 +27,7 @@ class _CreateFormState extends State<CreateForm> {
   int numFields = 0;
   List<TextEditingController> valueControllers = [];
   List<String> addFormPageErrors = [];
+  List<int> ratings = [];
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController availableFromController = TextEditingController();
@@ -118,6 +122,7 @@ class _CreateFormState extends State<CreateForm> {
   Widget addFormsPage(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      backgroundColor: const Color(0xff004080),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -136,9 +141,11 @@ class _CreateFormState extends State<CreateForm> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              "Form Info",
+                              "Assignment Info",
                               style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold),
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                             ),
                             TextButton(
                               onPressed: () async {
@@ -171,22 +178,25 @@ class _CreateFormState extends State<CreateForm> {
                                   Text(
                                     "Create Form",
                                     style: TextStyle(
-                                        color: Colors.white, fontSize: 14),
+                                        color: Colors.white, fontSize: 17),
                                   ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: formName,
                           decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: "Enter Your Form Name",
-                            labelText: "Form Name",
-                            filled: true,
-                          ),
+                              border: OutlineInputBorder(),
+                              hintText: "Form Name",
+                              filled: true,
+                              fillColor: Colors.white,
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.blue, width: 3),
+                              )),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Please enter a non-empty field";
@@ -206,11 +216,15 @@ class _CreateFormState extends State<CreateForm> {
                             return null;
                           },
                           decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Available From',
-                            filled: true,
-                            prefixIcon: Icon(Icons.calendar_today),
-                          ),
+                              border: OutlineInputBorder(),
+                              hintText: 'Available From',
+                              filled: true,
+                              fillColor: Colors.white,
+                              prefixIcon: Icon(Icons.calendar_today),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.blue, width: 3),
+                              )),
                           readOnly: true,
                           onTap: () {
                             _selectDate(availableFromController);
@@ -228,11 +242,15 @@ class _CreateFormState extends State<CreateForm> {
                             return null;
                           },
                           decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Available Untill',
-                            filled: true,
-                            prefixIcon: Icon(Icons.calendar_month_outlined),
-                          ),
+                              border: OutlineInputBorder(),
+                              hintText: 'Available Untill',
+                              filled: true,
+                              fillColor: Colors.white,
+                              prefixIcon: Icon(Icons.calendar_month_outlined),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.blue, width: 3),
+                              )),
                           readOnly: true,
                           onTap: () {
                             _selectDate(dueUntillController);
@@ -245,26 +263,35 @@ class _CreateFormState extends State<CreateForm> {
 
                         // Form Fields (Li
                         // Builder)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Fields',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold),
-                            ),
-                            IconButton(
-                              onPressed: createForm,
-                              icon: const Icon(
-                                Icons.add,
-                                color: Colors.white,
+                        Container(
+                          padding: const EdgeInsets.all(2.0),
+                          decoration: const BoxDecoration(
+                              border: BorderDirectional(
+                                  bottom: BorderSide(
+                                      color: Colors.white, width: 2))),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Fields',
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
                               ),
-                              style: IconButton.styleFrom(
-                                  backgroundColor: Colors.green),
-                            ),
-                          ],
+                              IconButton(
+                                onPressed: createForm,
+                                icon: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                ),
+                                style: IconButton.styleFrom(
+                                    backgroundColor: Colors.green),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 10),
                         formFields(context),
                       ],
                     ),
@@ -306,28 +333,34 @@ class _CreateFormState extends State<CreateForm> {
         decoration: BoxDecoration(
           color: const Color.fromARGB(255, 255, 255, 255),
           border: Border.all(
-            width: 2,
-            color: Colors.black,
+            width: 3,
+            color: const Color(0xff004080),
           ),
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(10),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Question ${index + 1}",
-              style: const TextStyle(fontSize: 25),
+            Container(
+              margin: const EdgeInsets.fromLTRB(7.0, 0, 0, 0),
+              child: Text(
+                "Question ${index + 1}",
+                style:
+                    const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
+              ),
             ),
             const SizedBox(height: 10),
             TextFormField(
-              controller: valueControllers[index],
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Value',
-                filled: true,
-              ),
-            ),
+                controller: valueControllers[index],
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Value',
+                    filled: true,
+                    fillColor: Colors.white,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 2),
+                    ))),
             const SizedBox(
               height: 10,
             ),
@@ -346,7 +379,7 @@ class _CreateFormState extends State<CreateForm> {
                       color: Colors.white,
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: Colors.red,
                     )),
               ],
             ),
@@ -357,6 +390,10 @@ class _CreateFormState extends State<CreateForm> {
   Widget invalidFormPage(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: Colors.white70,
+        border: Border.all(color: Colors.black12, width: 2),
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -413,7 +450,12 @@ class _CreateFormState extends State<CreateForm> {
     if (invalidFormFields()) {
       return invalidFormPage(context);
     } else {
-      return Padding(
+      // Initializes Ratings Array For Number of Total Forms that Exists
+      for (int i = 0; i < valueControllers.length; i++) {
+        ratings.add(3); // Initalized to 3 because Stars start at 3
+      }
+      return Container(
+        color: const Color(0xff004080),
         padding: const EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,7 +466,9 @@ class _CreateFormState extends State<CreateForm> {
               child: Text(
                 formName.text,
                 style: const TextStyle(
-                    fontSize: 35.0, fontWeight: FontWeight.bold),
+                    fontSize: 35.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
             const SizedBox(
@@ -432,8 +476,9 @@ class _CreateFormState extends State<CreateForm> {
             ),
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 3),
+                border: Border.all(color: const Color(0xff004080), width: 1),
                 borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
               ),
               padding: const EdgeInsets.all(10.0),
               child: Row(
@@ -497,30 +542,43 @@ class _CreateFormState extends State<CreateForm> {
                   itemBuilder: (context, index) {
                     return Container(
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 1)),
+                        border: Border.all(
+                            color: const Color(0xff004080), width: 1),
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white,
+                      ),
                       padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Question ${index + 1}",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Question ${index + 1}:",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 27,
+                                ),
+                              ),
+                              Text(
+                                "Rating: ${ratings[index]}",
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ],
                           ),
                           const SizedBox(
                             height: 7,
                           ),
                           Text(
                             valueControllers[index].text,
-                            style: const TextStyle(fontSize: 20),
+                            style: const TextStyle(fontSize: 22),
                           ),
                           const SizedBox(
                             height: 15,
                           ),
                           RatingBar.builder(
-                            initialRating: 0,
+                            initialRating: 3,
                             minRating: 0,
                             direction: Axis.horizontal,
                             allowHalfRating: false,
@@ -532,7 +590,9 @@ class _CreateFormState extends State<CreateForm> {
                               color: Colors.amber,
                             ),
                             onRatingUpdate: (rating) {
-                              print(rating);
+                              setState(() {
+                                ratings[index] = rating.toInt();
+                              });
                             },
                           ),
                         ],
@@ -575,17 +635,27 @@ class _CreateFormState extends State<CreateForm> {
   }
 
   Widget displayEmptyWidget(BuildContext context) {
-    return const Center(
-      child: Column(
-        children: [
-          SizedBox(height: 150),
-          Text(
-            "Press The + Button to Create Fields",
-            style: TextStyle(
-                color: Color.fromARGB(255, 110, 103, 103), fontSize: 16),
+    return Column(
+      children: [
+        const SizedBox(
+          height: 60,
+        ),
+        TextButton(
+          onPressed: () {},
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.white,
           ),
-        ],
-      ),
+          child: const Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Center(
+              child: Text(
+                "Press The + Button to Create Fields",
+                style: TextStyle(color: Colors.black, fontSize: 18),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -593,14 +663,26 @@ class _CreateFormState extends State<CreateForm> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Create Form Page',
-                style: TextStyle(color: Colors.white),
+              SvgPicture.asset(
+                'assets/images/RMP_Icon.svg',
+                width: 35,
+                height: 35,
               ),
-              // Submits and Resets Form
+              const Flexible(
+                child: Text(
+                  "Create Assignment",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
           iconTheme: const IconThemeData(color: Colors.white),
@@ -608,11 +690,21 @@ class _CreateFormState extends State<CreateForm> {
         ),
         body: _widgetTabOptions(context).elementAt(_currentIndex),
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          elevation: 8.0,
+          fixedColor: const Color(0xff004080),
+          selectedIconTheme: const IconThemeData(
+            color: Color(0xff004080),
+          ),
+          unselectedItemColor: Colors.black87,
           currentIndex: _currentIndex,
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_today_rounded), label: 'Add Form'),
+                icon: Icon(
+                  Icons.calendar_today_rounded,
+                ),
+                label: 'Add Assignment'),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.eyeglasses),
               label: 'Student View',

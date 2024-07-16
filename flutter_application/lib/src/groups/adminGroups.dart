@@ -748,7 +748,7 @@ class _AdminGroupState extends State<AdminGroup> {
                                       child: Text(
                                         group.name,
                                         style: const TextStyle(
-                                            fontSize: 32,
+                                            fontSize: 28,
                                             fontWeight: FontWeight.bold),
                                         overflow: TextOverflow.ellipsis,
                                       ),

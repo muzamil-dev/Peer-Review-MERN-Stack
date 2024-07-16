@@ -326,7 +326,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
             ),
             const Flexible(
               child: Text(
-                "View Assignments",
+                "Assignments",
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
