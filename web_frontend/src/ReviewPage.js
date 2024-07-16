@@ -18,7 +18,7 @@ const ReviewPage = () => {
         try {
             const response = await Api.Reviews.GetReview(reviewId, localStorage.getItem('accessToken'));
             if (response.status === 200) {
-                console.log('API Response:', response.data); // Log the API response
+                console.log('API Response:', response.data);
                 setReview(response.data);
                 setRatings(response.data.ratings || new Array(response.data.questions.length).fill(0));
             } else {
@@ -36,10 +36,9 @@ const ReviewPage = () => {
     };
 
     const handleSubmit = async () => {
-        const userId = localStorage.getItem('userId'); // Adjust this to get the current user ID correctly
+        const userId = localStorage.getItem('userId');
         try {
             console.log('Submitting review:', userId, reviewId, ratings);
-            //print targetId
             console.log('Target ID:', review.targetId);
             const response = await Api.Reviews.SubmitReview(userId, reviewId, ratings, localStorage.getItem('accessToken'));
             if (response.success) {
@@ -90,7 +89,7 @@ const ReviewPage = () => {
                     </div>
                 ))}
             </div>
-            <button onClick={handleSubmit} className="submit-button">Submit</button>
+            <button onClick={handleSubmit} className="btn btn-primary submit-button">Submit</button>
         </div>
     );
 };

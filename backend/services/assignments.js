@@ -206,8 +206,18 @@ export const edit = async(userId, assignmentId, settings) => {
             }
             updates.start_date = (new Date(newDate)).toISOString();
         }
-        if (settings.dueDate)
-            updates.due_date = (new Date(settings.dueDate)).toISOString();
+        if (settings.dueDate){
+            const curDate = assignment.due_date;
+            const newDate = settings.dueDate;
+            if (new Date(curDate).getTime() !== new Date(newDate).getTime()){
+                if (assignment.completed)
+                    return {
+                        error: "Cannot modify due date because analytics have already been computed",
+                        status: 400
+                    }
+            }
+            updates.due_date = (new Date(newDate)).toISOString();
+        }
         if (settings.description !== undefined) // description can be null or empty
             updates.description = settings.description;
 
