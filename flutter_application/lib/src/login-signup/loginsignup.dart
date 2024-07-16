@@ -665,8 +665,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  Widget showEyeIcon() {
-    if (showPassword) {
+  Widget showEyeIcon(bool password) {
+    if (password) {
       return const Icon(
         CupertinoIcons.eye_slash,
         color: Colors.black,
@@ -805,7 +805,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           obscurePassword = !obscurePassword;
                         });
                       },
-                      icon: showEyeIcon(),
+                      icon: showEyeIcon(showPassword),
                     ),
                     errorStyle: const TextStyle(
                         color: Colors.red,
@@ -855,7 +855,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           obscureConfirmPassword = !obscureConfirmPassword;
                         });
                       },
-                      icon: showEyeIcon(),
+                      icon: showEyeIcon(showConfirmPassword),
                     ),
                     errorStyle: const TextStyle(
                         color: Colors.red,
