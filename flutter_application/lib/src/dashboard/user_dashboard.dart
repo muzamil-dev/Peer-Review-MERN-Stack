@@ -5,6 +5,7 @@ import 'package:flutter_application/src/reviews/student_review.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class UserDashboard extends StatefulWidget {
   final dynamic token;
@@ -107,7 +108,8 @@ class _UserDashboardState extends State<UserDashboard> {
         if (mounted) {
           setState(() {
             itemsLeft[assignmentId] = jsonResponse["incompleteReviews"].length;
-            totalItemsLeft += (jsonResponse["incompleteReviews"].length as int);
+            totalItemsLeft +=
+                ((jsonResponse["incompleteReviews"]).length as int);
             incompleteReviews[assignmentId] = jsonResponse["incompleteReviews"];
             completedReviews[assignmentId] = jsonResponse["completedReviews"];
           });
@@ -213,9 +215,27 @@ class _UserDashboardState extends State<UserDashboard> {
       iconTheme: const IconThemeData(
         color: Colors.white,
       ),
-      title: const Text(
-        "Dashboard",
-        style: TextStyle(color: Colors.white),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SvgPicture.asset(
+            'assets/images/RMP_Icon.svg',
+            width: 35,
+            height: 35,
+          ),
+          const Flexible(
+            child: Text(
+              "Dashboard",
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
       centerTitle: true,
     );
@@ -257,11 +277,15 @@ class _UserDashboardState extends State<UserDashboard> {
                 children: [
                   Text(
                     "Welcome $userName!",
-                    style: const TextStyle(fontSize: 28.0),
+                    style: const TextStyle(
+                        fontSize: 28.0,
+                        overflow: TextOverflow.ellipsis,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
                   ),
                   Text(
                     "You Have $totalItemsLeft reviews to complete!",
-                    style: const TextStyle(fontSize: 18),
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ],
               ),
@@ -273,11 +297,11 @@ class _UserDashboardState extends State<UserDashboard> {
               margin: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
               child: const Text(
                 "Assignments",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 35,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
-            ),
-            const SizedBox(
-              height: 10,
             ),
             toDoPageBody(),
           ],
@@ -291,7 +315,7 @@ class _UserDashboardState extends State<UserDashboard> {
       return Expanded(
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black, width: 2),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12.0),
           ),
           child: const Column(
@@ -313,21 +337,22 @@ class _UserDashboardState extends State<UserDashboard> {
       );
     } else {
       return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.black, width: 1),
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: RawScrollbar(
-              child: ListView.separated(
-                  itemBuilder: (context, index) {
-                    return assignmentItem(context, index);
-                  },
-                  separatorBuilder: (context, index) {
-                    return const Divider();
-                  },
-                  itemCount: assignments.length)),
-        ),
+        child: RawScrollbar(
+            thumbColor: Colors.black,
+            child: ListView.separated(
+                itemBuilder: (context, index) {
+                  return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: assignmentItem(context, index));
+                },
+                separatorBuilder: (context, index) => const Divider(
+                      height: 20,
+                      color: Colors.transparent,
+                    ),
+                itemCount: assignments.length)),
       );
     }
   }
@@ -341,35 +366,40 @@ class _UserDashboardState extends State<UserDashboard> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ExpansionTile(
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
+                ],
+              ),
+              title: Text(
+                "${currentAssignment['name']}",
+                style: const TextStyle(fontSize: 25),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Deadline: ${deadlines[index]}"),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Items To Do: ${itemsLeft[currentAssignmentId]}",
+                    style: const TextStyle(fontSize: 17),
+                  ),
+                ],
+              ),
               children: [
-                statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
+                assignmentLinks(context, currentAssignmentId),
               ],
             ),
-            
-            title: Text(
-              "${currentAssignment['name']}",
-              style: const TextStyle(fontSize: 25),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Deadline: ${deadlines[index]}"),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Items To Do: ${itemsLeft[currentAssignmentId]}",
-                  style: const TextStyle(fontSize: 17),
-                ),
-              ],
-            ),
-            children: [
-              assignmentLinks(context, currentAssignmentId),
-            ],
+          ),
+          const SizedBox(
+            height: 10,
           ),
         ],
       );
@@ -414,10 +444,14 @@ class _UserDashboardState extends State<UserDashboard> {
       BuildContext context, dynamic review, int currentAssignmentId) {
     if (itemsLeft[currentAssignmentId] == 0) {
       return Text(
-          "Edit Review for ${review["firstName"]} ${review["lastName"]}");
+        "Edit Review for ${review["firstName"]} ${review["lastName"]}",
+        style: const TextStyle(color: Colors.black87),
+      );
     } else {
       return Text(
-          "Complete Review for ${review["firstName"]} ${review["lastName"]}");
+        "Complete Review for ${review["firstName"]} ${review["lastName"]}",
+        style: const TextStyle(color: Colors.black),
+      );
     }
   }
 
@@ -500,7 +534,15 @@ class _UserDashboardState extends State<UserDashboard> {
     return Scaffold(
         appBar: _widgetTabAppBarOptions(context).elementAt(_currentIndex),
         body: _widgetTabBodyOptions(context).elementAt(_currentIndex),
+        backgroundColor: const Color(0xFF004080),
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          elevation: 8.0,
+          fixedColor: const Color(0xff004080),
+          selectedIconTheme: const IconThemeData(
+            color: Color(0xff004080),
+          ),
+          unselectedItemColor: Colors.black54,
           currentIndex: _currentIndex,
           type: BottomNavigationBarType.fixed,
           items: const [
