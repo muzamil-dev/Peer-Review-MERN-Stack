@@ -181,47 +181,33 @@ const ViewFormsAdminPage = () => {
 
     return (
         <div className="view-forms-admin-page">
+            <nav className="navbar">
+                <a href="/dashboard" className="navbar-brand">Forms Page</a>
+                <ul className="navbar-links">
+                    <li><a href="/DashboardPage">Workspaces</a></li>
+                    <li><button onClick={handleLogout} className="btn-danger btn">Logout</button></li>
+                </ul>
+            </nav>
             <div className="header-container">
                 <input
                     type="text"
-                    placeholder="Search for Form"
+                    placeholder="Search forms..."
                     value={searchTerm}
                     onChange={handleSearchChange}
                     className="search-input"
                 />
-                <button className="create-form-button" onClick={handleCreateForm}>
-                    + Form
-                </button>
-                <button className="logout-button btn btn-danger" onClick={handleLogout}>
-                    Logout
-                </button>
+                <button className="create-form-button" onClick={handleCreateForm}>Create Form</button>
             </div>
             <div className="forms-containerz">
-                <h2>Forms</h2>
                 {filteredForms.length > 0 ? (
-                    filteredForms.map(form => (
+                    filteredForms.map((form) => (
                         <div key={form.assignmentId} className="form-item-container">
                             <div className="form-item" onClick={() => handleFormClick(form.assignmentId)}>
-                                {form.name} <br/>
-                                <small>Start Date: {new Date(form.startDate).toLocaleDateString()}</small><br/>
-                                <small>Due Date: {new Date(form.dueDate).toLocaleDateString()}</small><br/>
-                                {form.averageRating !== undefined && (
-                                    //if averageRating is available (not an empty array), display it
-                                    <small>Average Rating: {form.averageRating}</small>
-                                )}
+                                <h3>{form.name}</h3>
+                                <p>Average Rating: {form.averageRating || 'N/A'}</p>
                             </div>
-                            <button
-                                className="edit-form-button btn btn-success mt-0"
-                                onClick={() => handleEditForm(form)}
-                            >
-                                Edit
-                            </button>
-                            <button
-                                className="delete-form-button btn btn-danger mt-0 ml-2"
-                                onClick={() => handleDeleteForm(form.assignmentId)}
-                            >
-                                Delete
-                            </button>
+                            <button className="edit-form-button btn btn-primary" onClick={() => handleEditForm(form)}>Edit</button>
+                            <button className="delete-form-button btn btn-danger" onClick={() => handleDeleteForm(form.assignmentId)}>Delete</button>
                         </div>
                     ))
                 ) : (
