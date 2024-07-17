@@ -26,15 +26,6 @@
     box-sizing: border-box;
 }
 
-.create-form-button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
 .create-form-button:hover {
     background-color: #0056b3;
 }
@@ -55,6 +46,10 @@
     margin-bottom: 10px;
     cursor: pointer;
     transition: background-color 0.3s;
+}
+
+.form-item:hover {
+    background-color: #e9ecef;
 }
 
 p {
@@ -137,4 +132,173 @@ p {
     justify-content: space-between !important;
     align-items: center;
     margin-bottom: 10px;
+}
+
+.logout-button {
+    background-color: #ff0000;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background-color: #ff1a1a;
+}
+.create-form-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+/* Navigation Bar Styles */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* background-color: #007df9; */
+    padding: 10px 20px;
+    color: #fff;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar .navbar-brand {
+    font-size: 1.5em;
+    color: #fff;
+    text-decoration: none;
+}
+
+.navbar .navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    font-size: 1.5em;
+}
+
+.navbar .navbar-links li {
+    display: inline;
+}
+
+.navbar .navbar-links a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.navbar .navbar-links a:hover {
+    text-decoration: underline;
+}
+
+.view-forms-admin-page {
+    margin-top: 60px; /* Adjust this based on the height of your navbar */
+}
+
+/* Existing styles */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+.search-input {
+    width: 300px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.create-form-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.create-form-button:hover {
+    background-color: #218838;
+}
+
+.forms-containerz {
+    padding: 20px;
+}
+
+.form-item-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.form-item {
+    cursor: pointer;
+    flex-grow: 1;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.edit-form-button,
+.delete-form-button {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+}
+
+.edit-form-button:hover {
+    background-color: #218838;
+}
+
+.delete-form-button:hover {
+    background-color: #c82333;
+}
+
+.edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.edit-modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 4px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.form-groupz {
+    margin-bottom: 15px;
+}
+
+.question-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.customBtns {
+    width: 30%;
+}
+
+button.btn.btn-secondary {
+    color: rgb(255, 255, 255);
+    background: red;
 }
