@@ -312,7 +312,7 @@ export default {
          *  message: string }>} Returns an array of reviews about the target user
          */
         GetAllReviewsAboutTarget: async (assignmentId, targetId) => {
-            const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/target/${targetId}`), null);
+            const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `/averages/${assignmentId}/target/${targetId}`), null);
             return {
                 status: response.status,
                 data: response.data,

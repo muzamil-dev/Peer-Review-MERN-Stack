@@ -313,3 +313,11 @@
     border-radius: 4px;
     cursor: pointer;
 }
+
+.hoverEffect {
+    transition: color 0.3s ease;
+}
+
+.hoverEffect:hover {
+    color: #007bff; /* Change to your desired hover color */
+}

@@ -21,7 +21,7 @@ const GroupsPageAdmin = () => {
     const [selectedGroupMembers, setSelectedGroupMembers] = useState([]);
     const [selectedMemberGroup, setSelectedMemberGroup] = useState({});
     const [inviteCode, setInviteCode] = useState('');
-    const { workspaceId } = useParams(); // Assuming you're using React Router v6
+    const { workspaceId } = useParams(); 
     const navigate = useNavigate();
 
     const getCurrentUserId = () => {
@@ -105,6 +105,11 @@ const GroupsPageAdmin = () => {
             [userId]: newGroupId
         }));
     };
+
+    const goToUserAnalytics = (userId) => {
+        navigate(`/workspace/${workspaceId}/user/${userId}/analytics`);
+    };
+    
 
     // const handleAssignToGroup = async (userId, groupId) => {
     //     const token = localStorage.getItem('accessToken');
@@ -456,7 +461,7 @@ const GroupsPageAdmin = () => {
                                 member && (
                                     <div key={member.userId} className={styles.memberEditRow}>
                                         <div className="d-flex justify-content-between">
-                                            <span className="mt-2">{member.firstName} {member.lastName}</span>
+                                            <span className="mt-2" onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }}>{member.firstName} {member.lastName}</span>
                                             <select
                                                 value={selectedMemberGroup[member.userId]}
                                                 onChange={(e) => handleMemberGroupChange(member.userId, e.target.value)}
@@ -503,8 +508,8 @@ const GroupsPageAdmin = () => {
                                             {ungroupedMembers.map(member => (
                                                 member && (
                                                     <tr key={member.userId}>
-                                                        <td>{member.firstName}</td>
-                                                        <td>{member.lastName}</td>
+                                                        <td onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }}>{member.firstName}</td>
+                                                        <td onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }}>{member.lastName}</td>
                                                         <td>{member.email}</td>
                                                         <td className={styles.temp}>
                                                             <select
@@ -547,7 +552,9 @@ const GroupsPageAdmin = () => {
                                         <ul className="list-unstyled flex-grow-1">
                                             {Array.isArray(group.members) && group.members.map(member => (
                                                 member && (
-                                                    <li key={member.userId}>{member.firstName} {member.lastName}</li>
+                                                    <li 
+                                                    key={member.userId} onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }}className={`${styles.hoverEffect}`}> {member.firstName} {member.lastName}
+                                                    </li>
                                                 )
                                             ))}
                                         </ul>
