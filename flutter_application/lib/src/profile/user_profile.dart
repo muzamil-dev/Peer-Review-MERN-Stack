@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import "package:flutter_application/src/profile/analytics.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class UserProfile extends StatefulWidget {
   final int workspaceId;
@@ -218,9 +219,10 @@ class _UserProfileState extends State<UserProfile> {
         children: [
           Text(
             "Reviewers: ",
-            style: TextStyle(fontSize: 17),
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
           ),
-          Text("Ratings:", style: TextStyle(fontSize: 17))
+          Text("Ratings:",
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600))
         ],
       );
     } else {
@@ -256,10 +258,13 @@ class _UserProfileState extends State<UserProfile> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  assignmentNames[index],
-                  style: const TextStyle(
-                      fontSize: 23.0, fontWeight: FontWeight.bold),
+                Flexible(
+                  child: Text(
+                    assignmentNames[index],
+                    style: const TextStyle(
+                        fontSize: 23.0, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 printAssignmentAverageRating(
                     averageRatingsForAssignment[index]),
@@ -291,13 +296,27 @@ class _UserProfileState extends State<UserProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "User Profile Page",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            const Flexible(
+              child: Text(
+                "User Profile Page",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
@@ -315,7 +334,9 @@ class _UserProfileState extends State<UserProfile> {
                   Text(
                     "$nameOfProfile's Profile",
                     style: const TextStyle(
-                        fontSize: 32, fontWeight: FontWeight.bold),
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -325,7 +346,9 @@ class _UserProfileState extends State<UserProfile> {
                       const Text(
                         "Assignments:",
                         style: TextStyle(
-                            fontSize: 28, fontWeight: (FontWeight.bold)),
+                            fontSize: 28,
+                            fontWeight: (FontWeight.bold),
+                            color: Colors.white),
                       ),
                       InkWell(
                         onTap: () {},
@@ -336,7 +359,7 @@ class _UserProfileState extends State<UserProfile> {
                                     color: Colors.green,
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
-                                      color: Colors.black,
+                                      color: Colors.green,
                                       width: 1,
                                     )),
                                 child: IconButton(
@@ -358,7 +381,9 @@ class _UserProfileState extends State<UserProfile> {
                                     ))),
                             const Text(
                               "Analytics",
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                             ),
                           ],
                         ),
@@ -367,28 +392,24 @@ class _UserProfileState extends State<UserProfile> {
                   ),
                   const SizedBox(height: 10),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 1),
-                          borderRadius: BorderRadius.circular(10.0)),
-                      child: RawScrollbar(
-                          child: ListView.separated(
-                              itemBuilder: (context, index) {
-                                return assignmentItem(context, index);
-                              },
-                              separatorBuilder: (context, index) {
-                                return const Divider(
-                                  height: 10,
-                                  thickness: 0,
-                                );
-                              },
-                              itemCount: assignmentIds.length)),
-                    ),
+                    child: RawScrollbar(
+                        thumbColor: Colors.black,
+                        child: ListView.separated(
+                            itemBuilder: (context, index) {
+                              return assignmentItem(context, index);
+                            },
+                            separatorBuilder: (context, index) {
+                              return const Divider(
+                                height: 10,
+                                thickness: 0,
+                              );
+                            },
+                            itemCount: assignmentIds.length)),
                   ),
                 ],
               ),
             ),
+      backgroundColor: const Color(0xFF004080),
     );
   }
 }
