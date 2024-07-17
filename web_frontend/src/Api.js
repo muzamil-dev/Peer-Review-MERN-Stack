@@ -74,7 +74,6 @@ axios.interceptors.request.use(async config => {
 });
 
 const apiRequest = async (method, url, data = null) => {
-    
     try {
         const response = await axios({ method, url, data, ...getConfig() });
         return response;
