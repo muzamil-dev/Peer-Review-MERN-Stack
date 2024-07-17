@@ -610,7 +610,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return Column(
         children: [
           Container(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(color: const Color(0xFF004080), width: 1),
@@ -797,6 +797,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Container(
                 margin: const EdgeInsets.only(bottom: 10.0),
                 child: TextFormField(
+                  onChanged: (value) {
+                    setState(() {
+                      showPasswordRequirements();
+                    });
+                  },
                   controller: passwordController,
                   decoration: InputDecoration(
                     hintText: 'Password',
