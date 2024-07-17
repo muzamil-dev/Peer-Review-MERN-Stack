@@ -170,8 +170,23 @@ const ViewFormsAdminPage = () => {
         setCurrentForm(null);
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        navigate('/login');
+    }
+
     return (
         <div className="view-forms-admin-page">
+
+            <nav className="navbar">
+                <a href="/dashboard" className="navbar-brand">Dashboard</a>
+                <ul className="navbar-links">
+                    <li><a href="/DashboardPage">Workspaces</a></li>
+                    <li><button onClick={handleLogout} className="btn-danger btn">Logout</button></li>
+                </ul>
+
+            </nav>
+            
             <div className="header-container">
                 <input
                     type="text"
