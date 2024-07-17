@@ -89,7 +89,7 @@ class _LineChartWidgetState extends State<LineChartWidget> {
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((touchedSpot) {
                 return LineTooltipItem(
-                  '${touchedSpot.y}',
+                  '${filteredNames[touchedSpot.x.toInt()]}\nRating: ${touchedSpot.y}',
                   const TextStyle(
                     color: Colors.white,
                   ),

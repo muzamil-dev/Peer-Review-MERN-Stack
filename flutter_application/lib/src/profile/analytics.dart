@@ -120,7 +120,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               Container(
                 margin: const EdgeInsets.fromLTRB(12.0, 0, 0, 0),
                 child: const Text(
-                  "Assignment Ratings",
+                  "Completed Assignments",
                   style: TextStyle(
                       fontSize: 32.0,
                       fontWeight: FontWeight.bold,
@@ -243,6 +243,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           : _widgetTabOptions(context).elementAt(_currentIndex),
       backgroundColor: const Color(0xFF004080),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        elevation: 8.0,
+        fixedColor: const Color(0xff004080),
+        selectedIconTheme: const IconThemeData(
+          color: Color(0xff004080),
+        ),
+        unselectedItemColor: Colors.black54,
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
         items: const [
