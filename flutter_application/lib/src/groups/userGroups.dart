@@ -165,8 +165,8 @@ class _UserGroupState extends State<UserGroup> {
         return Text(
           fullName,
           style: const TextStyle(
-            fontSize: 17.0,
-            color: Color.fromARGB(204, 255, 255, 255),
+            fontSize: 20.0,
+            color: Colors.black,
           ),
         );
       }).toList(),
@@ -222,85 +222,138 @@ class _UserGroupState extends State<UserGroup> {
     var groupID = currentGroup['groupId'];
     var groupName = currentGroup['name'];
 
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xff004080),
-        border: Border.all(
-          width: 2,
-          color: Colors.black,
+    return Card(
+      color: Colors.white,
+      child: Container(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  groupName,
+                  style: const TextStyle(
+                      fontSize: 32.0,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  "$numMembers/$maxGroupLimit",
+                  style: const TextStyle(
+                      fontSize: 18.0,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            loadStudentsInGroup(context, index),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                displayGroupButtons(context, index, groupID),
+              ],
+            ),
+          ],
         ),
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            blurRadius: 4,
-            offset: const Offset(0, 8), // changes position of shadow
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(18.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                groupName,
-                style: const TextStyle(
-                  fontSize: 30.0,
-                  color: Color.fromARGB(204, 255, 255, 255),
-                ),
-              ),
-              Text(
-                "$numMembers/$maxGroupLimit",
-                style: const TextStyle(
-                  fontSize: 17.0,
-                  color: Color.fromARGB(204, 255, 255, 255),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          loadStudentsInGroup(context, index),
-          const SizedBox(
-            height: 20,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              displayGroupButtons(context, index, groupID),
-            ],
-          ),
-        ],
       ),
     );
+  }
+
+  Widget lockWidget(BuildContext context) {
+    if (isWorkspaceLocked) {
+      return TextButton(
+          onPressed: null,
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.redAccent,
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text(
+                'Workspace: Locked',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Icon(
+                Icons.lock,
+                color: Colors.white,
+              ),
+            ],
+          ));
+    }
+    return TextButton(
+        onPressed: null,
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.green,
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'Workspace: Unlocked',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Icon(
+              Icons.lock_open,
+              color: Colors.white,
+            ),
+          ],
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: const Color(0xff004080),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : RawScrollbar(
-              child: ListView.separated(
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: groupCards(context, index),
-                  );
-                },
-                separatorBuilder: (context, index) {
-                  return const Divider(
-                    height: 10,
-                    thickness: 0,
-                  );
-                },
-                itemCount: groups.length,
-              ),
+          : Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                        margin: const EdgeInsets.fromLTRB(0.0, 8.0, 12.0, 0),
+                        child: lockWidget(context)),
+                  ],
+                ),
+                Expanded(
+                  child: RawScrollbar(
+                    child: ListView.separated(
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: groupCards(context, index),
+                        );
+                      },
+                      separatorBuilder: (context, index) {
+                        return const Divider(
+                          height: 10,
+                          thickness: 0,
+                        );
+                      },
+                      itemCount: groups.length,
+                    ),
+                  ),
+                ),
+              ],
             ),
     );
   }

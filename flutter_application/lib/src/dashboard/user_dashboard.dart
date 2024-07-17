@@ -248,17 +248,28 @@ class _UserDashboardState extends State<UserDashboard> {
         color: Colors.white,
       ),
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(
+            width: 60,
+          ),
+          SvgPicture.asset(
+            'assets/images/RMP_Icon.svg',
+            width: 30,
+            height: 35,
+          ),
           const Text(
-            'Groups',
+            "Groups",
             style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          lockWidget(context),
         ],
       ),
+      centerTitle: true,
     );
   }
 
@@ -424,10 +435,6 @@ class _UserDashboardState extends State<UserDashboard> {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircleAvatar(
-              radius: 3,
-              backgroundColor: Colors.black,
-            ),
             TextButton(
                 onPressed: () {
                   navigateToStudentReview(userId, review["targetId"],
@@ -443,9 +450,19 @@ class _UserDashboardState extends State<UserDashboard> {
   Widget reviewText(
       BuildContext context, dynamic review, int currentAssignmentId) {
     if (itemsLeft[currentAssignmentId] == 0) {
-      return Text(
-        "Edit Review for ${review["firstName"]} ${review["lastName"]}",
-        style: const TextStyle(color: Colors.black87),
+      return Card(
+        child: Container(
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 1),
+              borderRadius: BorderRadius.circular(12.0)),
+          child: Text(
+            "Edit Review for ${review["firstName"]} ${review["lastName"]}",
+            style: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w400),
+          ),
+        ),
       );
     } else {
       return Text(
