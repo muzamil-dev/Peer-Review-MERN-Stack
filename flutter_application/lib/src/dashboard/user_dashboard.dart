@@ -106,13 +106,17 @@ class _UserDashboardState extends State<UserDashboard> {
       if (response.statusCode == 200) {
         final jsonResponse = response.data;
         if (mounted) {
-          setState(() {
-            itemsLeft[assignmentId] = jsonResponse["incompleteReviews"].length;
-            totalItemsLeft +=
-                ((jsonResponse["incompleteReviews"]).length as int);
-            incompleteReviews[assignmentId] = jsonResponse["incompleteReviews"];
-            completedReviews[assignmentId] = jsonResponse["completedReviews"];
-          });
+          if (jsonResponse["incompleteReviews"] != null) {
+            setState(() {
+              itemsLeft[assignmentId] =
+                  jsonResponse["incompleteReviews"].length;
+              totalItemsLeft +=
+                  ((jsonResponse["incompleteReviews"]).length as int);
+              incompleteReviews[assignmentId] =
+                  jsonResponse["incompleteReviews"];
+              completedReviews[assignmentId] = jsonResponse["completedReviews"];
+            });
+          }
         }
       }
     } catch (error) {
