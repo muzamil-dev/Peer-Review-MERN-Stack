@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/src/profile/linechart.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AnalyticsPage extends StatefulWidget {
   final int targetId;
@@ -91,49 +92,95 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
   DataCell tableRatingDisplay(double rating) {
     if (rating == -1) {
-      return const DataCell(Text("None"));
+      return const DataCell(Text(
+        "None",
+        style: TextStyle(fontSize: 18),
+      ));
     } else {
-      return DataCell(Text("$rating"));
+      return DataCell(Text(
+        "$rating",
+        style: const TextStyle(fontSize: 18),
+      ));
     }
   }
 
   Widget tablePage() {
     return Container(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(10),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          const SizedBox(
+            height: 40,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(
-                "Assignments Vs Average Rating",
-                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+              Container(
+                margin: const EdgeInsets.fromLTRB(12.0, 0, 0, 0),
+                child: const Text(
+                  "Assignment Ratings",
+                  style: TextStyle(
+                      fontSize: 32.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
               ),
             ],
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text("")),
-                  DataColumn(label: Text("Name")),
-                  DataColumn(label: Text("Average Rating")),
-                ],
-                rows: assignmentNames.asMap().entries.map((entry) {
-                  int idx = entry.key;
-                  String name = entry.value;
-                  double rating = averageRatings[idx];
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.black, width: 1)),
+                  child: RawScrollbar(
+                    thumbColor: Colors.black,
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(
+                            label: Text(
+                          "Name",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w600),
+                        )),
+                        DataColumn(
+                            label: Text(
+                          "Average Rating",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w600),
+                        )),
+                      ],
+                      rows: assignmentNames.asMap().entries.map((entry) {
+                        int idx = entry.key;
+                        String name = entry.value;
+                        double rating = averageRatings[idx];
 
-                  return DataRow(cells: [
-                    DataCell(Text("${idx + 1}")),
-                    DataCell(Text(name)),
-                    tableRatingDisplay(rating),
-                  ]);
-                }).toList(),
+                        return DataRow(cells: [
+                          DataCell(Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          )),
+                          tableRatingDisplay(rating),
+                        ]);
+                      }).toList(),
+                    ),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -142,12 +189,15 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
   Widget graphPage() {
     return Container(
-      color: Colors.black12,
+      color: const Color(0xFF004080),
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.all(20.0),
-      child: LineChartWidget(
-          assignmentNames: assignmentNames, assignmentRatings: averageRatings),
+      child: Center(
+        child: LineChartWidget(
+            assignmentNames: assignmentNames,
+            assignmentRatings: averageRatings),
+      ),
     );
   }
 
@@ -160,9 +210,27 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Analytics",
-          style: TextStyle(color: Colors.white),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            const Flexible(
+              child: Text(
+                "Analytics Page",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF004080),
@@ -173,6 +241,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               child: CircularProgressIndicator(),
             )
           : _widgetTabOptions(context).elementAt(_currentIndex),
+      backgroundColor: const Color(0xFF004080),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,

@@ -1,7 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-
 class LineChartWidget extends StatefulWidget {
   final List<String> assignmentNames;
   final List<double> assignmentRatings;
@@ -23,7 +22,6 @@ class _LineChartWidgetState extends State<LineChartWidget> {
 
   List<String> filteredNames = [];
   List<double> filteredRatings = [];
-  
 
   @override
   void initState() {
@@ -59,25 +57,52 @@ class _LineChartWidgetState extends State<LineChartWidget> {
           },
         ),
         borderData: FlBorderData(
-            show: true, border: Border.all(color: Colors.grey, width: 2)),
+            show: true, border: Border.all(color: Colors.white70, width: 2)),
         lineBarsData: [
           LineChartBarData(
-              spots: filteredRatings.indexed.map(((int, double) item) {
-                final (index, rating) = item;
-
-                return FlSpot(index.toDouble(), rating);
-              }).toList(),
-              isCurved: false,
-              gradient: gradiantColors,
-              barWidth: 3,
-              belowBarData: BarAreaData(
-                show: true,
-                gradient: LinearGradient(colors: [
-                  Colors.redAccent.withOpacity(.4),
-                  Colors.orangeAccent.withOpacity(.4),
-                ]),
-              ))
+            spots: filteredRatings.indexed.map(((int, double) item) {
+              final (index, rating) = item;
+              return FlSpot(index.toDouble(), rating);
+            }).toList(),
+            isCurved: true,
+            gradient: gradiantColors,
+            barWidth: 3,
+            belowBarData: BarAreaData(
+              show: true,
+              gradient: LinearGradient(colors: [
+                Colors.redAccent.withOpacity(.4),
+                Colors.orangeAccent.withOpacity(.4),
+              ]),
+            ),
+          )
         ],
+        lineTouchData: LineTouchData(
+          getTouchedSpotIndicator: (barData, spotIndexes) {
+            return spotIndexes.map((index) {
+              return const TouchedSpotIndicatorData(
+                FlLine(color: Colors.green, strokeWidth: 4),
+                FlDotData(show: true),
+              );
+            }).toList();
+          },
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipItems: (touchedSpots) {
+              return touchedSpots.map((touchedSpot) {
+                return LineTooltipItem(
+                  '${touchedSpot.y}',
+                  const TextStyle(
+                    color: Colors.white,
+                  ),
+                );
+              }).toList();
+            },
+            tooltipPadding: const EdgeInsets.all(8),
+            tooltipMargin: 8,
+            fitInsideVertically: true,
+            fitInsideHorizontally: true,
+            tooltipHorizontalAlignment: FLHorizontalAlignment.right,
+          ),
+        ),
       ),
     );
   }
@@ -85,35 +110,39 @@ class _LineChartWidgetState extends State<LineChartWidget> {
 
 class Titles {
   static getTitleData() => FlTitlesData(
-      show: true,
-      bottomTitles: AxisTitles(
-        axisNameWidget: const Text(
-          "Assignments Over Time",
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        axisNameSize: 20,
-        sideTitles: SideTitles(
-          showTitles: true,
-          reservedSize: 35,
-          getTitlesWidget: (value, meta) {
-            return const Text('');
-          },
-        ),
-      ),
-      leftTitles: AxisTitles(
-          axisNameWidget: const Text(
-            "Ratings",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        show: true,
+        bottomTitles: const AxisTitles(
+          axisNameWidget: Text(
+            "Assignments Over Time",
+            style: TextStyle(
+                fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           axisNameSize: 35,
-          sideTitles: SideTitles(
-            showTitles: true,
-            getTitlesWidget: (value, meta) {
-              if (value == value.roundToDouble()) {
-                return Text("$value");
-              }
-              return const Text("");
-            },
-            reservedSize: 35,
-          )));
+        ),
+        leftTitles: AxisTitles(
+            axisNameWidget: const Text(
+              "Ratings",
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+            ),
+            axisNameSize: 35,
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                if (value == value.roundToDouble()) {
+                  return Text(
+                    "$value",
+                    style: const TextStyle(color: Colors.white),
+                  );
+                }
+                return const Text("");
+              },
+              reservedSize: 35,
+            )),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles:
+            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      );
 }
