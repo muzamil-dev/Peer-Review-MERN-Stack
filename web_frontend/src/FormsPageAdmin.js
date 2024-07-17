@@ -7,7 +7,6 @@ import { useSnackbar } from 'notistack';
 
 const ViewFormsAdminPage = () => {
     const [forms, setForms] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [currentForm, setCurrentForm] = useState(null);
     const [editFormData, setEditFormData] = useState({
@@ -67,14 +66,6 @@ const ViewFormsAdminPage = () => {
         setForms(assignmentsWithRatings);
     };
 
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-    };
-
-    const filteredForms = forms.filter(form =>
-        form.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     const handleCreateForm = () => {
         navigate(`/createForm/${workspaceId}`);
     };
@@ -127,19 +118,30 @@ const ViewFormsAdminPage = () => {
         e.preventDefault();
         const userId = getCurrentUserId();
         if (!userId) return;
-
+    
         const { name, startDate, dueDate, questions, description } = editFormData;
+    
+        // Check if the old due date is in the past
+        const now = new Date();
+        const oldDueDate = new Date(currentForm.dueDate);
+        const newDueDate = new Date(dueDate);
+    
+        if (oldDueDate < now && newDueDate > now) {
+            enqueueSnackbar('You cannot extend the due date for an assignment that has already passed.', { variant: 'error' });
+            return;
+        }
+    
         const response = await Api.Assignments.EditAssignment(
             userId,
             currentForm.assignmentId,
             workspaceId,
             name,
             new Date(startDate).getTime(),
-            new Date(dueDate).getTime(),
+            newDueDate.getTime(),
             questions.filter(q => q.trim() !== ''), // Ensure no empty questions
             description
         );
-
+    
         if (response.success) {
             enqueueSnackbar('Form updated successfully!', { variant: 'success' });
             setIsEditModalOpen(false);
@@ -188,21 +190,14 @@ const ViewFormsAdminPage = () => {
             </nav>
 
             <div className="header-container">
-                <input
-                    type="text"
-                    placeholder="Search for Form"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    className="search-input"
-                />
                 <button className="create-form-button" onClick={handleCreateForm}>
                     + Assign Form
                 </button>
             </div>
             <div className="forms-containerz">
                 <h2>Assignments</h2>
-                {filteredForms.length > 0 ? (
-                    filteredForms.map(form => (
+                {forms.length > 0 ? (
+                    forms.map(form => (
                         <div key={form.assignmentId} className="form-item-container">
                             <div className="form-item">
                                 {form.name} <br />
