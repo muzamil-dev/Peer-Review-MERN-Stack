@@ -32,6 +32,11 @@ const ViewFormsAdminPage = () => {
         return decodedToken.userId;
     }
 
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        navigate('/login');
+    };
+
     useEffect(() => {
         const fetchForms = async () => {
             const userId = getCurrentUserId();
@@ -186,6 +191,9 @@ const ViewFormsAdminPage = () => {
                 />
                 <button className="create-form-button" onClick={handleCreateForm}>
                     + Form
+                </button>
+                <button className="logout-button btn btn-danger" onClick={handleLogout}>
+                    Logout
                 </button>
             </div>
             <div className="forms-containerz">

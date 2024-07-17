@@ -70,8 +70,7 @@ const GroupsPageAdmin = () => {
 
     const fetchUngroupedMembers = async () => {
         const token = localStorage.getItem('accessToken');
-        const response = await Api.Workspaces.GetStudentsWithoutGroup(workspaceId, token);
-        console.log('Ungrouped members response:', response); // Debugging information
+        const response = await Api.Workspace.GetStudentsWithoutGroup(workspaceId, token);
         if (response.status === 200 && Array.isArray(response.data)) {
             setUngroupedMembers(response.data.filter(member => member && member.userId));
         } else {
@@ -333,7 +332,6 @@ const GroupsPageAdmin = () => {
             return;
         }
         const response = await Api.Workspaces.SetInviteCode(currentUserId, workspaceId, token);
-        console.log('Create invite code response:', response); // Debugging information
         if (response.status === 200) {
             setInviteCode(response.inviteCode); // Update inviteCode state
             setWorkspaceDetails(prevDetails => ({
