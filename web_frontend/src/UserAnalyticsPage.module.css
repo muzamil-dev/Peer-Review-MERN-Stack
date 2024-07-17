@@ -1,0 +1,56 @@
+.analyticsContainer {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.chartContainer {
+    width: 100%;
+    height: 400px;
+    margin: 0 auto;
+    padding: 10px;
+    background-color: #ffffff; /* Light blue background color for the chart container */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.table-responsive {
+    margin-top: 20px;
+}
+
+h1 {
+    color: white;
+}
+
+.table th, .table td {
+    text-align: center; /* Center align the text */
+}
+
+/* New styles for table background */
+.table {
+    background-color: #e0f7fa; /* Light blue background color */
+}
+
+.table th {
+    background-color: #00838f; /* Darker blue for header */
+    color: white; /* White text color for header */
+}
+
+.table tbody tr:hover {
+    background-color: #b2ebf2; /* Light blue hover color for rows */
+}
+
+.button-custom {
+    background-color: #00acc1; /* Custom button color */
+    border-color: #00acc1;
+    color: white;
+}
+
+.button-custom:hover {
+    background-color: #007c91; /* Darker hover color */
+    border-color: #007c91;
+}
+
+.container{
+    width: 60vw !important;
+}

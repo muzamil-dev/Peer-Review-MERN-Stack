@@ -16,7 +16,7 @@ import generateCode from '../services/generateCode.js';
 const router = express.Router();
 
 // Require JWT
-if (process.env.JWT_ENABLED === "true")
+ if (process.env.JWT_ENABLED === "true")
      router.use(verifyJWT);
 
 // Get details about a specific workspace
