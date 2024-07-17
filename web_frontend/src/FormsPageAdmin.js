@@ -34,7 +34,7 @@ const ViewFormsAdminPage = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
-        navigate('/login');
+        navigate('/');
     };
 
     useEffect(() => {
