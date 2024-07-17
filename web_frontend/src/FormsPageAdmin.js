@@ -172,7 +172,7 @@ const ViewFormsAdminPage = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
-        navigate('/login');
+        navigate('/');
     }
 
     return (
@@ -186,7 +186,7 @@ const ViewFormsAdminPage = () => {
                 </ul>
 
             </nav>
-            
+
             <div className="header-container">
                 <input
                     type="text"
