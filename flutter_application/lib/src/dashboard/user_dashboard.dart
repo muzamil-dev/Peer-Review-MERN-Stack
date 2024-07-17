@@ -353,7 +353,7 @@ class _UserDashboardState extends State<UserDashboard> {
     } else {
       return Expanded(
         child: RawScrollbar(
-            thumbColor: Colors.black,
+            thumbColor: Colors.black45,
             child: ListView.separated(
                 itemBuilder: (context, index) {
                   return Container(
@@ -363,10 +363,9 @@ class _UserDashboardState extends State<UserDashboard> {
                       ),
                       child: assignmentItem(context, index));
                 },
-                separatorBuilder: (context, index) => const Divider(
-                      height: 20,
-                      color: Colors.transparent,
-                    ),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 10.0), // Space between items
+
                 itemCount: assignments.length)),
       );
     }
