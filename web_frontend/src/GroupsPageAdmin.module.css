@@ -267,3 +267,49 @@
          max-width: 30% !important;
     }
 }
+
+/* GroupsPageAdmin.module.css */
+
+.navbarContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* padding: 1rem; */
+    background-color: #0000;
+    padding: 0; /* Remove padding to ensure full width */
+
+}
+
+.navbarBrand {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #faf8f8; /* Example color */
+    text-decoration: none;
+}
+
+.navbarToggler {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.navbarCollapse {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.navLink {
+    margin-right: 1rem;
+    text-decoration: none;
+    color: #000; /* Example color */
+}
+
+.logoutButton {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
