@@ -99,11 +99,35 @@ class _GetAssignmentsState extends State<GetAssignments> {
 
   Widget displayBody() {
     if (assignments.isEmpty) {
-      return const Center(
-        child: Text(
-          "Create a New Assignment Using the + Button",
-          style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+      return Center(
+        child: SizedBox(
+          height: 100,
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Press The + Button",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87),
+                ),
+                Text(
+                  "To Create An Assignment",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87),
+                )
+              ],
+            ),
+          ),
         ),
       );
     } else {
