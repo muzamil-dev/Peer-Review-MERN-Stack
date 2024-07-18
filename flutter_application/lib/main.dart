@@ -10,7 +10,6 @@ import 'package:flutter_application/src/login-signup/passwordReset.dart';
 import 'package:flutter_application/src/profile/analytics.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // ignore: prefer_const_constructors
@@ -18,7 +17,7 @@ void main() async {
 
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    initialRoute: MyApp.routeName,
+    initialRoute: LoginSignup.routeName,
     routes: {
       MyApp.routeName: (context) => MyApp(
             token: storage.read(key: 'token'),

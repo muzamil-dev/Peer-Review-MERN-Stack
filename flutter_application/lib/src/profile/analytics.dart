@@ -121,12 +121,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           "No Assignments Completed",
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 28,
+                            fontSize: 25,
                           ),
                         )
                       ],
@@ -135,7 +136,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       "No Data To Display",
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
-                        fontSize: 28,
+                        fontSize: 22,
                       ),
                     ),
                   ],
@@ -163,7 +164,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                   child: const Text(
                     "Completed Assignments",
                     style: TextStyle(
-                        fontSize: 32.0,
+                        fontSize: 28.0,
                         fontWeight: FontWeight.bold,
                         color: Colors.white),
                   ),
