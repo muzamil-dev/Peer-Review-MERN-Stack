@@ -268,16 +268,34 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                                                   Navigator.pop(
                                                                       context);
                                                                 },
-                                                                child: const Text(
-                                                                    'Delete'),
+                                                                style: TextButton
+                                                                    .styleFrom(
+                                                                        backgroundColor:
+                                                                            Colors.red),
+                                                                child:
+                                                                    const Text(
+                                                                  'Delete',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white),
+                                                                ),
                                                               ),
                                                               TextButton(
                                                                 onPressed: () {
                                                                   Navigator.pop(
                                                                       context);
                                                                 },
-                                                                child: const Text(
-                                                                    'Cancel'),
+                                                                style: TextButton
+                                                                    .styleFrom(
+                                                                        backgroundColor:
+                                                                            Colors.green),
+                                                                child:
+                                                                    const Text(
+                                                                  'Cancel',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white),
+                                                                ),
                                                               ),
                                                             ],
                                                           ),
