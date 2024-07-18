@@ -62,7 +62,7 @@ const UserAnalyticsPage = () => {
                     setError('Failed to fetch user analytics');
                 }
             } catch (err) {
-                setError('An error occurred while fetching user analytics');
+                setError('No analytics found: The user has not recieved any reviews yet.');
             } finally {
                 setLoading(false);
             }
