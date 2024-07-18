@@ -10,7 +10,6 @@ class Api {
   Api() {
     api.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-
         // Cookie Implementation for JWT REFRESH TOKEN
         if (options.path == '/jwt/refresh') {
           String? refreshToken = await _storage.read(key: 'refreshToken');
@@ -55,8 +54,11 @@ class Api {
               }
             }
           }
+        } else if (error.response?.statusCode == 401 &&
+            error.response?.data['message'] ==
+                "The email/password combination was incorrect") {
+          return handler.resolve(error.response!);
         }
-        return handler.next(error);
       },
     ));
   }

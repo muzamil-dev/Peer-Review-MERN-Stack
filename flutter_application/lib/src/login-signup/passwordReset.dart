@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/src/login-signup/loginsignup.dart';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
 
 class PasswordResetPage extends StatelessWidget {
-  static const routeName = '/passwordReset'; // Ensure you have this route defined
+  static const routeName =
+      '/passwordReset'; // Ensure you have this route defined
 
   final TextEditingController tokenController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final storage = const FlutterSecureStorage();
   final apiInstance = Api();
 
-  Future<void> resetPassword(BuildContext context, String token, String newPassword) async {
+  Future<void> resetPassword(
+      BuildContext context, String token, String newPassword) async {
     const url = '/users/resetPassword';
-
 
     try {
       final response = await apiInstance.api.post(
@@ -25,17 +28,25 @@ class PasswordResetPage extends StatelessWidget {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         print('Password reset successful');
-        Navigator.pushNamed(context, '/loginsignup');
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginSignup(),
+            ));
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset successful. Please login with your new password.')),
+          const SnackBar(
+              content: Text(
+                  'Password reset successful. Please login with your new password.')),
         );
       } else {
         final errorData = response.data;
-        print('Password reset failed: ${response.statusCode}, ${errorData['message']}');
+        print(
+            'Password reset failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset failed: ${errorData['message']}')),
+          SnackBar(
+              content: Text('Password reset failed: ${errorData['message']}')),
         );
       }
     } catch (err) {
@@ -50,18 +61,17 @@ class PasswordResetPage extends StatelessWidget {
         title: const Text(
           'Reset Password',
           style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white, // Title color
-            ), // Change text color here
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // Title color
+          ), // Change text color here
         ),
         backgroundColor: Color(0xFF004080),
         centerTitle: true,
       ),
-      body: 
-        Container(
-          color: Color(0xFF004080),
-          child: Padding(
+      body: Container(
+        color: Color(0xFF004080),
+        child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -115,7 +125,8 @@ class PasswordResetPage extends StatelessWidget {
 
                   if (newPassword.isEmpty || confirmPassword.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please fill in all fields')),
+                      const SnackBar(
+                          content: Text('Please fill in all fields')),
                     );
                     return;
                   }
@@ -133,7 +144,7 @@ class PasswordResetPage extends StatelessWidget {
             ],
           ),
         ),
-      ), 
+      ),
     );
   }
 }

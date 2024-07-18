@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/src/groups/userGroups.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -6,6 +5,7 @@ import 'package:flutter_application/src/reviews/student_review.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class UserDashboard extends StatefulWidget {
   final dynamic token;
@@ -29,6 +29,8 @@ class _UserDashboardState extends State<UserDashboard> {
   List<String> deadlines = [];
   int _currentIndex = 0;
   int totalItemsLeft = 0;
+  bool isWorkspaceLocked = false;
+  bool isLoading = true;
   Map<int, int> itemsLeft = {};
   Map<int, Object> incompleteReviews = {};
   Map<int, Object> completedReviews = {};
@@ -74,17 +76,19 @@ class _UserDashboardState extends State<UserDashboard> {
       if (response.statusCode == 200) {
         final jsonResponse = response.data;
         var now = DateTime.now();
+        await getLockedStatus(context);
 
-        setState(() {
-          for (var response in jsonResponse) {
-            var parsedDate = DateTime.parse(response["dueDate"]);
-            // Checks if the Current Assignment is Past the Due Date
-            if (parsedDate.isAfter(now)) {
-              assignments.add(response);
-              deadlines.add(getDateString(response["dueDate"]));
-              getAssignmentProgress(context, response['assignmentId']);
-            }
+        for (var response in jsonResponse) {
+          var parsedDate = DateTime.parse(response["dueDate"]);
+          // Checks if the Current Assignment is Past the Due Date
+          if (parsedDate.isAfter(now)) {
+            assignments.add(response);
+            deadlines.add(getDateString(response["dueDate"]));
+            await getAssignmentProgress(context, response['assignmentId']);
           }
+        }
+        setState(() {
+          isLoading = false;
         });
       }
     } catch (error) {
@@ -102,16 +106,37 @@ class _UserDashboardState extends State<UserDashboard> {
       if (response.statusCode == 200) {
         final jsonResponse = response.data;
         if (mounted) {
-          setState(() {
-            itemsLeft[assignmentId] = jsonResponse["incompleteReviews"].length;
-            totalItemsLeft += (jsonResponse["incompleteReviews"].length as int);
-            incompleteReviews[assignmentId] = jsonResponse["incompleteReviews"];
-            completedReviews[assignmentId] = jsonResponse["completedReviews"];
-          });
+          if (jsonResponse["incompleteReviews"] != null) {
+            setState(() {
+              itemsLeft[assignmentId] =
+                  jsonResponse["incompleteReviews"].length;
+              totalItemsLeft +=
+                  ((jsonResponse["incompleteReviews"]).length as int);
+              incompleteReviews[assignmentId] =
+                  jsonResponse["incompleteReviews"];
+              completedReviews[assignmentId] = jsonResponse["completedReviews"];
+            });
+          }
         }
       }
     } catch (error) {
       print("Error Getting Assignment Progress: $error");
+    }
+  }
+
+  Future<void> getLockedStatus(BuildContext context) async {
+    final url = '/workspaces/${widget.workspaceId}';
+
+    try {
+      final response = await apiInstance.api.get(url);
+      if (response.statusCode == 200) {
+        final jsonResponse = response.data;
+        setState(() {
+          isWorkspaceLocked = jsonResponse['groupLock'];
+        });
+      }
+    } catch (error) {
+      print("Error Getting Locked Status: $error");
     }
   }
 
@@ -129,52 +154,225 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   // Widget List Function to navigate between Bottom navigation bar items
-  List<Widget> _widgetTabOptions(BuildContext context) {
-    return <Widget>[toDoPage(context), profilePage(context)];
+  List<Widget> _widgetTabBodyOptions(BuildContext context) {
+    return <Widget>[toDoPage(context), groupPage(context)];
+  }
+
+  List<PreferredSizeWidget> _widgetTabAppBarOptions(BuildContext context) {
+    return <PreferredSizeWidget>[toDoAppBar(context), profileAppBar(context)];
+  }
+
+  Widget lockWidget(BuildContext context) {
+    if (isWorkspaceLocked) {
+      return TextButton(
+          onPressed: null,
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.redAccent,
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text(
+                'Workspace: Locked',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Icon(
+                Icons.lock,
+                color: Colors.white,
+              ),
+            ],
+          ));
+    }
+    return TextButton(
+        onPressed: null,
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.green,
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'Workspace: Unlocked',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Icon(
+              Icons.lock_open,
+              color: Colors.white,
+            ),
+          ],
+        ));
+  }
+
+  PreferredSizeWidget toDoAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: const Color(0xff004080),
+      iconTheme: const IconThemeData(
+        color: Colors.white,
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SvgPicture.asset(
+            'assets/images/RMP_Icon.svg',
+            width: 35,
+            height: 35,
+          ),
+          const Flexible(
+            child: Text(
+              "Dashboard",
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      centerTitle: true,
+    );
+  }
+
+  PreferredSizeWidget profileAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: const Color(0xff004080),
+      iconTheme: const IconThemeData(
+        color: Colors.white,
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(
+            width: 60,
+          ),
+          SvgPicture.asset(
+            'assets/images/RMP_Icon.svg',
+            width: 30,
+            height: 35,
+          ),
+          const Text(
+            "Groups",
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+      centerTitle: true,
+    );
   }
 
   // Widget for To do List Page
   Widget toDoPage(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Column(
-              children: [
-                Text(
-                  "Welcome $userName!",
-                  style: const TextStyle(fontSize: 25.0),
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    "Welcome $userName!",
+                    style: const TextStyle(
+                        fontSize: 28.0,
+                        overflow: TextOverflow.ellipsis,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "You Have $totalItemsLeft reviews to complete!",
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
+              child: const Text(
+                "Assignments",
+                style: TextStyle(
+                  fontSize: 35,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-                Text("You Have $totalItemsLeft reviews to complete!"),
+              ),
+            ),
+            toDoPageBody(),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget toDoPageBody() {
+    if (assignments.isEmpty) {
+      return Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: const Text(
+                    "No Assignments To Display",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
               ],
             ),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          const Text(
-            "Assignments",
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-          ),
-          Expanded(
-            child: RawScrollbar(
-                child: ListView.separated(
-                    itemBuilder: (context, index) {
-                      return assignmentItem(context, index);
-                    },
-                    separatorBuilder: (context, index) {
-                      return const Divider(
-                        height: 10,
-                        thickness: 0,
-                      );
-                    },
-                    itemCount: assignments.length)),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    } else {
+      return Expanded(
+        child: RawScrollbar(
+            thumbColor: Colors.black45,
+            child: ListView.separated(
+                itemBuilder: (context, index) {
+                  return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: assignmentItem(context, index));
+                },
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 10.0), // Space between items
+
+                itemCount: assignments.length)),
+      );
+    }
   }
 
   Widget assignmentItem(BuildContext context, index) {
@@ -186,34 +384,40 @@ class _UserDashboardState extends State<UserDashboard> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ExpansionTile(
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
+                ],
+              ),
+              title: Text(
+                "${currentAssignment['name']}",
+                style: const TextStyle(fontSize: 25),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Deadline: ${deadlines[index]}"),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Items To Do: ${itemsLeft[currentAssignmentId]}",
+                    style: const TextStyle(fontSize: 17),
+                  ),
+                ],
+              ),
               children: [
-                statusIcon(context, (itemsLeft[currentAssignmentId] ?? -1)),
+                assignmentLinks(context, currentAssignmentId),
               ],
             ),
-            title: Text(
-              "${currentAssignment['name']}",
-              style: const TextStyle(fontSize: 25),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Deadline: ${deadlines[index]}"),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Items To Do: ${itemsLeft[currentAssignmentId]}",
-                  style: const TextStyle(fontSize: 17),
-                ),
-              ],
-            ),
-            children: [
-              assignmentLinks(context, currentAssignmentId),
-            ],
+          ),
+          const SizedBox(
+            height: 10,
           ),
         ],
       );
@@ -238,10 +442,6 @@ class _UserDashboardState extends State<UserDashboard> {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircleAvatar(
-              radius: 3,
-              backgroundColor: Colors.black,
-            ),
             TextButton(
                 onPressed: () {
                   navigateToStudentReview(userId, review["targetId"],
@@ -257,11 +457,32 @@ class _UserDashboardState extends State<UserDashboard> {
   Widget reviewText(
       BuildContext context, dynamic review, int currentAssignmentId) {
     if (itemsLeft[currentAssignmentId] == 0) {
-      return Text(
-          "Edit Review for ${review["firstName"]} ${review["lastName"]}");
+      return Card(
+        child: Container(
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 1),
+              borderRadius: BorderRadius.circular(12.0)),
+          child: Text(
+            "Edit Review for ${review["firstName"]} ${review["lastName"]}",
+            style: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w400),
+          ),
+        ),
+      );
     } else {
-      return Text(
-          "Complete Review for ${review["firstName"]} ${review["lastName"]}");
+      return Container(
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.black, width: 1),
+            borderRadius: BorderRadius.circular(12.0)),
+        child: Text(
+          "Complete Review for ${review["firstName"]} ${review["lastName"]}",
+          style: const TextStyle(color: Colors.black),
+        ),
+      );
     }
   }
 
@@ -275,11 +496,13 @@ class _UserDashboardState extends State<UserDashboard> {
             targetUserId: targetUserId,
             assignmentId: assignmentId,
             reviewId: reviewId,
+            editReview: (itemsLeft[assignmentId] == 0) ? 1 : 0,
           ),
         ));
 
     // Resets Assignments list upon returning back from review page
     setState(() {
+      isLoading = true;
       assignments = [];
       totalItemsLeft = 0;
       getAllAssignments(context);
@@ -335,44 +558,32 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   // Widget for Profile Display Page
-  Widget profilePage(BuildContext context) {
-    return const Column(
-      children: [
-        Text("Student Profile Page"),
-      ],
-    );
+  Widget groupPage(BuildContext context) {
+    return UserGroup(workspaceId: widget.workspaceId, userId: userId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Dashboard"),
-              IconButton(
-                  onPressed: navigateToGroupsPage,
-                  icon: const Column(
-                    children: [
-                      Icon(Icons.group),
-                      Text("View Groups"),
-                    ],
-                  ))
-            ],
-          ),
-          backgroundColor: const Color(0xFF9bc4bc),
-        ),
-        body: _widgetTabOptions(context).elementAt(_currentIndex),
+        appBar: _widgetTabAppBarOptions(context).elementAt(_currentIndex),
+        body: _widgetTabBodyOptions(context).elementAt(_currentIndex),
+        backgroundColor: const Color(0xFF004080),
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          elevation: 8.0,
+          fixedColor: const Color(0xff004080),
+          selectedIconTheme: const IconThemeData(
+            color: Color(0xff004080),
+          ),
+          unselectedItemColor: Colors.black54,
           currentIndex: _currentIndex,
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
                 icon: Icon(Icons.assignment), label: 'To Do'),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.profile_circled),
-              label: 'Profile',
+              icon: Icon(Icons.group),
+              label: 'Groups',
             ),
           ],
           onTap: (index) {

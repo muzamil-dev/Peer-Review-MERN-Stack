@@ -1,4 +1,7 @@
+// ignore_for_file: unnecessary_const
+
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_application/src/dashboard/user_dashboard.dart';
@@ -7,6 +10,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
 import 'CreateWorkspace.dart';
 import 'package:flutter_application/src/groups/adminGroups.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AdminDashboard extends StatefulWidget {
   final String token;
@@ -78,24 +82,57 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Join Workspace'),
-          content: TextField(
-            controller: inviteCodeController,
-            decoration: const InputDecoration(labelText: 'Invite Code'),
+          title: const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: const Text(
+              'Join Workspace',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+            ),
+          ),
+          content: Container(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              controller: inviteCodeController,
+              decoration: const InputDecoration(
+                  labelText: 'Invite Code',
+                  labelStyle: TextStyle(
+                    fontSize: 20,
+                    color: Colors.black,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 2))),
+            ),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                joinWorkspace(inviteCodeController.text);
-                Navigator.pop(context);
-              },
-              child: const Text('Join'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    joinWorkspace(inviteCodeController.text);
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  child: const Text(
+                    'Join',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -156,54 +193,144 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
+  Widget displayAdminBody() {
+    if (workspaces.isEmpty) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "No Workspaces to Show",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline),
+                    ),
+                    Text(
+                      "Add or Join a Workspace to Get Started",
+                      style: TextStyle(
+                          fontSize: 18.0, fontWeight: FontWeight.w500),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          )
+        ],
+      );
+    } else {
+      return Container(
+        color: const Color(0xFF004080), // Set background color
+        child: RawScrollbar(
+          child: ListView.builder(
+            itemCount: workspaces.length,
+            itemBuilder: (context, index) {
+              return WorkspaceCard(
+                workspace: workspaces[index],
+                onTap: navigateToGroupPage,
+                userId: userId,
+              );
+            },
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Home',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ), // Change text color here
+        iconTheme: const IconThemeData(
+          color: Colors.white,
         ),
-        backgroundColor: const Color(0xFF004080),
-        centerTitle: true, // Center the title
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            const SizedBox(width: 5),
+            const Text(
+              'Workspaces',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ), // Change text color here
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF004080), // Center the title
       ),
-      body: Container(
-        color: const Color(0xFF004080), // Set background color
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                itemCount: workspaces.length,
-                itemBuilder: (context, index) {
-                  return WorkspaceCard(
-                    workspace: workspaces[index],
-                    onTap: navigateToGroupPage,
-                    userId: userId,
-                  );
-                },
-              ),
-      ),
-      bottomNavigationBar: SizedBox(
-        height: 60,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : displayAdminBody(),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+            color: Colors.white, // Set background color
+            // Set background color
+            border: Border.all(
+              color: const Color(0xFF004080), // Set background color
+              // Set background color
+            ),
+            borderRadius: BorderRadius.circular(12.0)), // Set background color
+        height: 80,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             IconButton(
-              icon: const Icon(Icons.add),
+              icon: const Column(
+                children: [
+                  Icon(
+                    Icons.add_circle,
+                    size: 42,
+                    color: Colors.green,
+                  ),
+                  Text(
+                    "Add Workspace",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
               onPressed: navigateToCreateWorkspacePage,
               tooltip: 'Add Workspace',
             ),
             IconButton(
-              icon: const Icon(Icons.input),
+              icon: const Column(
+                children: [
+                  Icon(
+                    CupertinoIcons.square_arrow_right,
+                    size: 42,
+                    color: Colors.green,
+                  ),
+                  Text(
+                    "Join Workspace",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
               onPressed: showJoinWorkspaceDialog,
               tooltip: 'Join Workspace',
             ),
           ],
         ),
       ),
+      backgroundColor: const Color(0xFF004080), // Set background color
     );
   }
 }
@@ -261,8 +388,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
         }),
       );
       if (response.statusCode == 200) {
-      } else {
-      }
+      } else {}
     } catch (error) {
       print("Error Creating Invite Code: $error");
     }
@@ -292,23 +418,14 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            title: const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                const SizedBox(width: 28.0),
-                const Center(
+                Center(
                     child: Text(
                   "Invite Code",
-                  style: TextStyle(fontSize: 24.0),
+                  style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
                 )),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    Icons.close_sharp,
-                    color: Colors.black,
-                    size: 28.0,
-                  ),
-                )
               ],
             ),
             content: Row(
@@ -318,7 +435,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
                   inviteCode,
                   style: const TextStyle(
                     fontSize: 22.0,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -336,6 +453,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
           icon: const Icon(
             Icons.person_add_alt_1,
             color: Colors.black,
+            size: 28,
           ));
     }
     return const SizedBox();
@@ -355,11 +473,14 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    widget.workspace.name,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
+                  Flexible(
+                    child: Text(
+                      widget.workspace.name,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
                   ),
                   addMemberButton(context),
                 ],
@@ -367,7 +488,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
               const SizedBox(height: 10),
               Text(
                 'Role: ${widget.workspace.role}',
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 18),
               ),
             ],
           ),

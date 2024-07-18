@@ -33,17 +33,17 @@ create table workspaces(
 );
 
 create table groups(
-    id serial primary key,
-    name text not null,
-    workspace_id int not null references workspaces (id) ON DELETE CASCADE
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    workspace_id INT NOT NULL REFERENCES workspaces (id) ON DELETE CASCADE
 );
 
 create table memberships(
-    user_id int references users (id) ON DELETE CASCADE,
-    workspace_id int references workspaces (id) ON DELETE CASCADE,
-    group_id int references groups (id) on delete set null,
-    role text not null,
-    primary key (user_id, workspace_id)
+    user_id INT REFERENCES users (id) ON DELETE CASCADE,
+    workspace_id INT REFERENCES workspaces (id) ON DELETE CASCADE,
+    group_id INT REFERENCES groups (id) ON DELETE SET NULL,
+    role TEXT NOT NULL,
+    PRIMARY KEY (user_id, workspace_id)
 );
 
 CREATE TABLE assignments(
