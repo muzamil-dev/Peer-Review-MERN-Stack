@@ -78,16 +78,16 @@ class _UserDashboardState extends State<UserDashboard> {
         var now = DateTime.now();
         await getLockedStatus(context);
 
-        setState(() {
-          for (var response in jsonResponse) {
-            var parsedDate = DateTime.parse(response["dueDate"]);
-            // Checks if the Current Assignment is Past the Due Date
-            if (parsedDate.isAfter(now)) {
-              assignments.add(response);
-              deadlines.add(getDateString(response["dueDate"]));
-              getAssignmentProgress(context, response['assignmentId']);
-            }
+        for (var response in jsonResponse) {
+          var parsedDate = DateTime.parse(response["dueDate"]);
+          // Checks if the Current Assignment is Past the Due Date
+          if (parsedDate.isAfter(now)) {
+            assignments.add(response);
+            deadlines.add(getDateString(response["dueDate"]));
+            await getAssignmentProgress(context, response['assignmentId']);
           }
+        }
+        setState(() {
           isLoading = false;
         });
       }
@@ -313,9 +313,10 @@ class _UserDashboardState extends State<UserDashboard> {
               child: const Text(
                 "Assignments",
                 style: TextStyle(
-                    fontSize: 35,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 35,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
             toDoPageBody(),
@@ -328,26 +329,29 @@ class _UserDashboardState extends State<UserDashboard> {
   Widget toDoPageBody() {
     if (assignments.isEmpty) {
       return Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: const Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: const Text(
                     "No Assignments To Display",
                     style: TextStyle(fontSize: 20),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       );
     } else {
