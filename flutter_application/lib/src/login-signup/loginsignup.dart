@@ -161,6 +161,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController resetEmailController = TextEditingController();
+  bool showPassword = false;
+  bool obscurePassword = true;
   final storage = const FlutterSecureStorage();
   final apiInstance = Api();
 
@@ -253,6 +255,19 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Widget showEyeIcon(bool password) {
+    if (password) {
+      return const Icon(
+        CupertinoIcons.eye_slash,
+        color: Colors.black,
+      );
+    }
+    return const Icon(
+      CupertinoIcons.eye,
+      color: Colors.black,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -297,8 +312,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderSide: const BorderSide(color: Colors.blue, width: 3),
                 ),
                 prefixIcon: const Icon(Icons.password),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      showPassword = !showPassword;
+                      obscurePassword = !obscurePassword;
+                    });
+                  },
+                  icon: showEyeIcon(showPassword),
+                ),
               ),
-              obscureText: true,
+              obscureText: obscurePassword,
             ),
           ),
           const SizedBox(height: 10),
