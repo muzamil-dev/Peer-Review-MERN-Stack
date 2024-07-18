@@ -55,19 +55,66 @@ class _AssignmentDetailsState extends State<AssignmentDetails> {
     }
   }
 
+  Widget ratingsDisplay(int index) {
+    return Row(
+        children: List.generate(
+            averageRatingsPerQuestion[index],
+            (index) => const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                  size: 25,
+                )));
+  }
+
   Widget questionRatingDisplay(int index) {
     return Card(
-      child: Column(
-        children: [
-          Text("Question ${index + 1}: "),
-          Text(questions[index]),
-          Row(
-            children: [
-              const Text("Rating Recieved: "),
-              Text("${averageRatingsPerQuestion[index]}"),
-            ],
-          )
-        ],
+      color: Colors.white,
+      child: Container(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  "${index + 1}) ",
+                  style: const TextStyle(fontSize: 22),
+                ),
+                Flexible(
+                    child: Text(
+                  questions[index],
+                  style: const TextStyle(fontSize: 22),
+                )),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Text(
+                      "Average Rating: ",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    Text(
+                      "${averageRatingsPerQuestion[index]}",
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ratingsDisplay(index),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -91,16 +138,42 @@ class _AssignmentDetailsState extends State<AssignmentDetails> {
   }
 
   Widget detailsBody() {
-    return Column(
-      children: [
-        Flexible(
-            child: Text(
-          "Assignment: ${widget.assignmentName}",
-          style: const TextStyle(overflow: TextOverflow.ellipsis),
-        )),
-        const Text("Questions:"),
-        displayAssignments(),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Flexible(
+              child: Text(
+            widget.assignmentName,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w600,
+                overflow: TextOverflow.ellipsis),
+          )),
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              Container(
+                  margin: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+                  child: const Text(
+                    "Questions:",
+                    style: TextStyle(
+                        fontSize: 26,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500),
+                  )),
+            ],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          displayAssignments(),
+        ],
+      ),
     );
   }
 
@@ -121,7 +194,7 @@ class _AssignmentDetailsState extends State<AssignmentDetails> {
               child: Text(
                 "Assignment Details",
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -139,6 +212,7 @@ class _AssignmentDetailsState extends State<AssignmentDetails> {
               child: CircularProgressIndicator(),
             )
           : detailsBody(),
+      backgroundColor: const Color(0xFF004080),
     );
   }
 }
