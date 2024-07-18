@@ -70,12 +70,12 @@ function ApiExamples() {
     const [reviewId, setReviewId] = useState('N/A')
 
     const handleButtonClick = async (name, fn) => {
-        console.log('Clicked ' + name);
+        //console.log('Clicked ' + name);
         setLatestButton(name);
         setApiResponse(`Waiting for backend response for ${name}...`);
         const result = await fn();
         const str = JSON.stringify(result, null, 4);
-        console.log(str);
+        //console.log(str);
         setApiResponse(str);
     };
 

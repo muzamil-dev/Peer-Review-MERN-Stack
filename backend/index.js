@@ -68,7 +68,7 @@ app.use("/jwt", jwtRoutes);
 
 // Connect to the database
 await db.connect();
-console.log(`Connected to the database.`);
+//console.log(`Connected to the database.`);
 
 // Hourly cron job
 // Deletes old temp users that were never verified
@@ -80,7 +80,7 @@ cron.schedule('0 * * * *', async() => {
         [(new Date(Date.now())).toISOString()]
     );
     // Display a message showing how many temp users were deleted
-    console.log(`Deleted ${res.rows.length} unverified users`);
+    //console.log(`Deleted ${res.rows.length} unverified users`);
 });
 
 // Once per minute cron job
@@ -99,7 +99,7 @@ cron.schedule('0 * * * * *', async() => {
     ids.forEach(id => {
         ReviewService.createReviews(id);
     });
-    console.log(`Started ${ids.length} new assignments`);
+    //console.log(`Started ${ids.length} new assignments`);
 });
 
 // Once per minute cron job
@@ -118,7 +118,7 @@ cron.schedule('0 * * * * *', async() => {
     ids.forEach(id => {
         AnalyticsService.calculateAnalytics(id);
     });
-    console.log(`Calculated analytics for ${ids.length} completed assignments`);
+    //console.log(`Calculated analytics for ${ids.length} completed assignments`);
 });
 
 app.listen(PORT, '0.0.0.0', () => {

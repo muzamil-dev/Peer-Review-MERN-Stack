@@ -120,7 +120,7 @@ const LoginPage = () => {
             return;
         }
     
-        console.log('Signup Data:', signupData); // Log the signup data for debugging
+        //console.log('Signup Data:', signupData); // Log the signup data for debugging
     
         try {
             const response = await Api.Users.CreateAccount(

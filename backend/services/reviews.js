@@ -239,7 +239,7 @@ export const getByAssignmentAndTargetWithQAverages = async(targetId, assignmentI
         }
 
         // Log the data for debugging
-        console.log("Database response:", JSON.stringify(data, null, 2));
+        //console.log("Database response:", JSON.stringify(data, null, 2));
 
         // Ensure reviews and questions are arrays
         data.reviews = data.reviews || [];

@@ -18,7 +18,7 @@ const ReviewPage = () => {
         try {
             const response = await Api.Reviews.GetReview(reviewId, localStorage.getItem('accessToken'));
             if (response.status === 200) {
-                console.log('API Response:', response.data);
+                //console.log('API Response:', response.data);
                 setReview(response.data);
                 setRatings(response.data.ratings || new Array(response.data.questions.length).fill(0));
             } else {
@@ -38,11 +38,11 @@ const ReviewPage = () => {
     const handleSubmit = async () => {
         const userId = localStorage.getItem('userId');
         try {
-            console.log('Submitting review:', userId, reviewId, ratings);
-            console.log('Target ID:', review.targetId);
+            //console.log('Submitting review:', userId, reviewId, ratings);
+            //console.log('Target ID:', review.targetId);
             const response = await Api.Reviews.SubmitReview(userId, reviewId, ratings, localStorage.getItem('accessToken'));
             if (response.success) {
-                console.log('Review submitted successfully');
+                //console.log('Review submitted successfully');
                 navigate('/userDashboard');
             } else {
                 console.error(`Failed to submit review: ${response.message}`);

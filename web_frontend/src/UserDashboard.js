@@ -120,7 +120,7 @@ const UserDashboard = () => {
                 enqueueSnackbar(`Failed to fetch reviews: ${response.message}`, { variant: 'error' });
             }
         } catch (error) {
-            console.log(`No reviews found for assignment ${assignmentId}`);
+            //console.log(`No reviews found for assignment ${assignmentId}`);
             //enqueueSnackbar(`No reviews found for assignment ${assignmentId}`, { variant: 'info' });
         }
         return null;
@@ -134,7 +134,7 @@ const UserDashboard = () => {
         const reviewsData = await Promise.all(reviewsPromises);
 
         const filtered = reviewsData.filter(assignment => assignment.reviewData);
-        console.log('filtered', filtered);
+        //console.log('filtered', filtered);
         return filtered;
     };
 

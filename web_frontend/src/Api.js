@@ -55,7 +55,7 @@ axios.interceptors.request.use(async config => {
     if (token) {
         const { exp } = jwtDecode(token);
         const now = Date.now() / 1000;
-        console.log('Api.js: Token expiration:', exp, 'now:', now);
+        //console.log('Api.js: Token expiration:', exp, 'now:', now);
 
         // Check if token is expired or about to expire
         if (exp < now) {
@@ -482,7 +482,7 @@ export default {
             //make first letter of first and last name uppercase
             firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
             lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1); 
-            
+
             const payload = {
                 firstName,
                 lastName,

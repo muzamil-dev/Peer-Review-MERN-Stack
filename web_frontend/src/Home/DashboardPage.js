@@ -22,11 +22,11 @@ const DashboardPage = () => {
             return;
         }
 
-        console.log('Token:', token); // Log the token
+        //console.log('Token:', token); // Log the token
         const decodedToken = jwtDecode(token);
-        console.log('Decoded Token:', decodedToken); // Log the decoded token
+        //console.log('Decoded Token:', decodedToken); // Log the decoded token
         const userId = decodedToken.userId;
-        console.log('User ID:', userId); // Log the userId
+        //console.log('User ID:', userId); // Log the userId
 
         if (!userId) {
             console.error('User ID not found in token');
@@ -192,8 +192,8 @@ const DashboardPage = () => {
 
     const handleWorkspaceClick = (workspaceId) => {
         const workspace = workspaces.find(w => w.workspaceId === workspaceId);
-        console.log('Workspace:', workspace); // Log the workspace object
-        console.log('Role:', workspace.role); // Log the role of the user in the workspace
+        //console.log('Workspace:', workspace); // Log the workspace object
+        //console.log('Role:', workspace.role); // Log the role of the user in the workspace
         if (workspace.role === 'Instructor') {
             navigate(`/workspaces/${workspaceId}/admin`, { state: { maxGroupSize: workspace.maxGroupSize, numGroups: workspace.numGroups } });
         } else {
