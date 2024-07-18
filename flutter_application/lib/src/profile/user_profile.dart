@@ -256,7 +256,11 @@ class _UserProfileState extends State<UserProfile> {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const AssignmentDetails(),
+              builder: (context) => AssignmentDetails(
+                assignmentName: assignmentNames[index],
+                targetUserId: widget.targetId,
+                assignmentId: assignmentIds[index],
+              ),
             ));
       },
       child: Card(
