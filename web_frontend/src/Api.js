@@ -475,6 +475,14 @@ export default {
          * @returns {Promise<{ status: number, data: {}, message: string }>} The freshly created user's data
          */
         CreateAccount: async (firstName, lastName, email, password) => {
+            
+            //make the rest of the letters lowercase
+            firstName = firstName.toLowerCase();
+            lastName = lastName.toLowerCase();
+            //make first letter of first and last name uppercase
+            firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+            lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1); 
+            
             const payload = {
                 firstName,
                 lastName,

@@ -131,7 +131,7 @@ const LoginPage = () => {
             );
             //console.log('Response from API:', response); // Add this line for debugging
             if (response.status === 201) {
-                enqueueSnackbar('Signup successful', { variant: 'success' });
+                enqueueSnackbar('Verification token sent to email', { variant: 'success' });
                 setTempEmail(signupData.email);
                 setIsVerificationActive(true);
             } else {
