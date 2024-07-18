@@ -223,7 +223,7 @@ class _UserGroupState extends State<UserGroup> {
     var groupName = currentGroup['name'];
 
     return Card(
-      color: Colors.white,
+      color: const Color.fromARGB(255, 249, 239, 239),
       child: Container(
         padding: const EdgeInsets.all(18.0),
         child: Column(
