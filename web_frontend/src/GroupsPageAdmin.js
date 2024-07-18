@@ -4,13 +4,12 @@ import styles from './GroupsPageAdmin.module.css'; // Import the CSS file as a m
 import Api from './Api.js';  // Adjust the path to where your Api.js file is located
 import { jwtDecode } from 'jwt-decode';
 //snackbar
-import { enqueueSnackbar, useSnackbar } from 'notistack';
+import { enqueueSnackbar } from 'notistack';
 
 const GroupsPageAdmin = () => {
     const [ungroupedMembers, setUngroupedMembers] = useState([]);
     const [groups, setGroups] = useState([]);
     const [workspaceDetails, setWorkspaceDetails] = useState({});
-    //variable for workspace name
     const [workspaceName, setWorkspaceName] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formData, setFormData] = useState({
@@ -23,6 +22,13 @@ const GroupsPageAdmin = () => {
     const [selectedGroupMembers, setSelectedGroupMembers] = useState([]);
     const [selectedMemberGroup, setSelectedMemberGroup] = useState({});
     const [inviteCode, setInviteCode] = useState('');
+
+    const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+    const [groupToDelete, setGroupToDelete] = useState(null);
+    const [showKickConfirmModal, setShowKickConfirmModal] = useState(false);
+    const [memberToKick, setMemberToKick] = useState(null);
+    const [kickFrom, setKickFrom] = useState(null);
+
     const { workspaceId } = useParams(); 
     const navigate = useNavigate();
 
@@ -41,10 +47,8 @@ const GroupsPageAdmin = () => {
         if (response.status === 200) {
             const allowedDomains = response.data.allowedDomains || [];
             setWorkspaceDetails(response.data);
-            console.log('Workspace details:', response.data); // Debugging information
-            //set workspace name
             setWorkspaceName(response.data.name);
-            setInviteCode(response.data.inviteCode); // Update inviteCode state
+            setInviteCode(response.data.inviteCode);
             setFormData({
                 name: response.data.name,
                 allowedDomains: allowedDomains.join(', '),
@@ -66,7 +70,7 @@ const GroupsPageAdmin = () => {
             })));
         } else {
             console.error('Failed to fetch groups:', response.message);
-            setGroups([]); // Ensure groups is an array even on error
+            setGroups([]);
         }
     };
 
@@ -77,7 +81,7 @@ const GroupsPageAdmin = () => {
             setUngroupedMembers(response.data.filter(member => member && member.userId));
         } else {
             console.error('Failed to fetch ungrouped members:', response.message);
-            setUngroupedMembers([]); // Ensure ungroupedMembers is an array even on error
+            setUngroupedMembers([]);
         }
     };
 
@@ -111,25 +115,6 @@ const GroupsPageAdmin = () => {
     const goToUserAnalytics = (userId) => {
         navigate(`/workspace/${workspaceId}/user/${userId}/analytics`);
     };
-    
-
-    // const handleAssignToGroup = async (userId, groupId) => {
-    //     const token = localStorage.getItem('accessToken');
-    //     const currentUserId = getCurrentUserId();
-    //     if (!currentUserId) {
-    //         navigate('/login');
-    //         return { success: false };
-    //     }
-    //     const response = await Api.Groups.AddUser(currentUserId, userId, groupId, token);
-    //     if (response.success) {
-    //         setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== userId));
-    //         fetchGroups(); // Refetch groups to update the UI
-    //         return { success: true };
-    //     } else {
-    //         console.error('Failed to assign user to group:', response.message);
-    //         return { success: false };
-    //     }
-    // };
 
     const handleAddUserToGroup = async (targetId, groupId) => {
         const currentUserId = getCurrentUserId();
@@ -138,9 +123,7 @@ const GroupsPageAdmin = () => {
             return { success: false };
         }
         const response = await Api.Groups.AddUser(currentUserId, targetId, groupId);
-        console.log('Adding user to group:', { targetId, groupId, currentUserId }); // Debugging information
         if (response.success) {
-            // Update the group members in the groups state
             setGroups(prevGroups => prevGroups.map(group => {
                 if (group.groupId === groupId) {
                     return { ...group, members: [...group.members, ungroupedMembers.find(member => member.userId === targetId)] };
@@ -149,8 +132,6 @@ const GroupsPageAdmin = () => {
             }));
             fetchUngroupedMembers();
             fetchGroups();
-            // Update ungroupedMembers state
-            //setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
             return { success: true };
         } else {
             console.error('Failed to add user to group:', response.message);
@@ -168,23 +149,20 @@ const GroupsPageAdmin = () => {
         const response = await Api.Groups.RemoveUser(currentUserId, targetId, editGroupId, token);
         if (response.success) {
             setSelectedGroupMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
-            // Update the group members in the groups state
             setGroups(prevGroups => prevGroups.map(group => {
                 if (group.groupId === editGroupId) {
                     return { ...group, members: group.members.filter(member => member.userId !== targetId) };
                 }
                 return group;
             }));
-            // Update ungroupedMembers state
-            //i need to update the emails of the ungrouped members and that is only done with fecthhungroupedmembers
             fetchUngroupedMembers();
             setUngroupedMembers(prevMembers => [...prevMembers, selectedGroupMembers.find(member => member.userId === targetId)]);
-            // Also update selectedMemberGroup to reflect the kicked member
             setSelectedMemberGroup(prevState => {
                 const newState = { ...prevState };
                 delete newState[targetId];
                 return newState;
             });
+            fetchGroups(); // Refetch groups to update the UI
             return { success: true };
         } else {
             console.error('Failed to kick from group:', response.message);
@@ -203,27 +181,55 @@ const GroupsPageAdmin = () => {
         if (response.success) {
             setUngroupedMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
             fetchUngroupedMembers();
+            fetchGroups(); // Refetch groups to update the UI
         } else {
             console.error('Failed to kick from workspace:', response.message);
         }
     };
 
     const handleDeleteGroup = async (groupId) => {
+        setShowDeleteConfirmModal(true);
+        setGroupToDelete(groupId);
+    };
+
+    const confirmDeleteGroup = async () => {
         const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/');
             return;
         }
-        const response = await Api.Groups.DeleteGroup(currentUserId, groupId, token);
+        const response = await Api.Groups.DeleteGroup(currentUserId, groupToDelete, token);
         fetchUngroupedMembers();
         if (response.success) {
-            setGroups(groups.filter(group => group.groupId !== groupId));
+            setGroups(groups.filter(group => group.groupId !== groupToDelete));
         } else {
             console.error('Failed to delete group:', response.message);
         }
+
+        setShowDeleteConfirmModal(false);
+        setGroupToDelete(null);
+        fetchGroups(); // Refetch groups to update the UI
     };
 
+    const handleKickConfirmation = (targetId, from) => {
+        setShowKickConfirmModal(true);
+        setMemberToKick(targetId);
+        setKickFrom(from);
+    };
+
+    const confirmKickMember = async () => {
+        if (kickFrom === 'group') {
+            await handleKickFromGroup(memberToKick);
+        } else if (kickFrom === 'workspace') {
+            await handleKickFromWorkspace(memberToKick);
+        }
+        setShowKickConfirmModal(false);
+        setMemberToKick(null);
+        setKickFrom(null);
+        fetchUngroupedMembers(); // Refetch ungrouped members to update the UI
+        fetchGroups(); // Refetch groups to update the UI
+    };
 
     const handleCreateGroup = async () => {
         const token = localStorage.getItem('accessToken');
@@ -245,7 +251,6 @@ const GroupsPageAdmin = () => {
         }
     };
 
-
     const handleSubmit = async (event) => {
         event.preventDefault();
         const token = localStorage.getItem('accessToken');
@@ -254,32 +259,22 @@ const GroupsPageAdmin = () => {
             navigate('/');
             return;
         }
-    
-        // Maximum workspace name length
-        const maxWorkspaceNameLength = 25; // Adjust the value as needed
-    
-        // Check if the workspace name exceeds the maximum length
+
+        const maxWorkspaceNameLength = 25;
         if (formData.name.length > maxWorkspaceNameLength) {
-            //console.error(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`);
-            //snackbar alert
             enqueueSnackbar(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`, { variant: 'error' });
-            // alert(`Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`);
             return;
         }
-    
-        // Add validation for allowed domains
-        // Numbers and special characters are not allowed
-        // Allowed domains should be separated by commas
-        // Should be a "." in each domain and characters before and after the "."
+
         const allowedDomainsArray = formData.allowedDomains.trim()
             ? formData.allowedDomains.split(',').map(domain => domain.trim())
             : [];
-    
+
         const isValidDomain = (domain) => {
             const domainRegex = /^[a-zA-Z]+\.[a-zA-Z]+$/;
             return domainRegex.test(domain);
         };
-    
+
         for (const domain of allowedDomainsArray) {
             if (!isValidDomain(domain)) {
                 console.error(`Invalid domain: ${domain}`);
@@ -287,7 +282,7 @@ const GroupsPageAdmin = () => {
                 return;
             }
         }
-    
+
         const response = await Api.Workspaces.EditWorkspace(currentUserId, workspaceId, formData.name, allowedDomainsArray, formData.groupMemberLimit, formData.groupLock, token);
         if (response.success) {
             setWorkspaceDetails({
@@ -295,14 +290,13 @@ const GroupsPageAdmin = () => {
                 allowedDomains: allowedDomainsArray,
                 groupMemberLimit: formData.groupMemberLimit,
                 groupLock: formData.groupLock,
-                inviteCode: workspaceDetails.inviteCode // Retain the current invite code
+                inviteCode: workspaceDetails.inviteCode
             });
             closeForm();
         } else {
             console.error('Failed to edit workspace:', response.message);
         }
     };
-    
 
     const handleGroupChangesSubmit = async (event) => {
         event.preventDefault();
@@ -320,34 +314,23 @@ const GroupsPageAdmin = () => {
 
         for (const change of changes) {
             const { memberId, newGroupId } = change;
-
-            // Remove the user from the current group if necessary
             const memberInCurrentGroup = selectedGroupMembers.some(member => member.userId === memberId);
-            console.log('memberInCurrentGroup:', memberInCurrentGroup, 'editGroupId:', editGroupId, 'newGroupId:', newGroupId);
             if (editGroupId !== newGroupId) {
-                console.log(`Attempting to remove user ${memberId} from group ${editGroupId}`);
                 const removeResponse = await handleKickFromGroup(memberId);
-                if (removeResponse.success) {
-                    console.log(`User ${memberId} successfully removed from group ${editGroupId}`);
-                } else {
+                if (!removeResponse.success) {
                     console.error(`Failed to remove user ${memberId} from group ${editGroupId}`);
                 }
             }
-
-            // Add the user to the new group
             if (newGroupId) {
-                console.log(`Attempting to add user ${memberId} to group ${newGroupId}`);
                 const addResponse = await handleAddUserToGroup(memberId, newGroupId);
-                if (addResponse.success) {
-                    console.log(`User ${memberId} successfully added to group ${newGroupId}`);
-                } else {
+                if (!addResponse.success) {
                     console.error(`Failed to add user ${memberId} to group ${newGroupId}`);
                 }
             }
         }
 
         setEditGroupId(null);
-        fetchGroups(); // Refetch groups to update the UI
+        fetchGroups();
     };
 
     const handleChange = (e) => {
@@ -374,7 +357,7 @@ const GroupsPageAdmin = () => {
         }
         const response = await Api.Workspaces.SetInviteCode(currentUserId, workspaceId, token);
         if (response.status === 200) {
-            setInviteCode(response.inviteCode); // Update inviteCode state
+            setInviteCode(response.inviteCode);
             setWorkspaceDetails(prevDetails => ({
                 ...prevDetails,
                 inviteCode: response.inviteCode
@@ -383,7 +366,6 @@ const GroupsPageAdmin = () => {
             console.error('Failed to create invite code:', response.message);
         }
     };
-
 
     const handleDeleteInviteCode = async () => {
         const token = localStorage.getItem('accessToken');
@@ -394,7 +376,7 @@ const GroupsPageAdmin = () => {
         }
         const response = await Api.Workspaces.RemoveActiveInvite(currentUserId, workspaceId, token);
         if (response.success) {
-            setInviteCode(null); // Update inviteCode state
+            setInviteCode(null);
             setWorkspaceDetails(prevDetails => ({
                 ...prevDetails,
                 inviteCode: null
@@ -403,7 +385,6 @@ const GroupsPageAdmin = () => {
             console.error('Failed to delete invite code:', response.message);
         }
     };
-
 
     const openForm = () => {
         setIsFormOpen(true);
@@ -433,11 +414,8 @@ const GroupsPageAdmin = () => {
                 <div className={styles.navbarCollapse} id="navbarNav">
                     <ul className="navbar-nav ml-auto">
                         <li className="nav-item">
-                            {/* Example of a navigation link */}
-                            {/* <a className={styles.navLink} href="/DashboardPage">Workspaces</a> */}
                         </li>
                         <li className="nav-item">
-                            {/* Example of a logout button */}
                             <button className={styles.logoutButton} onClick={handleLogout}>Logout</button>
                         </li>
                     </ul>
@@ -511,13 +489,13 @@ const GroupsPageAdmin = () => {
                                         </div>
 
                                         <div className="btn-group mb-3 d-flex justify-content-center">
-                                            <button type="button" className="btn btn-outline-dark mt-2" onClick={() => handleKickFromGroup(member.userId)}>Kick from Group</button>
-                                            <button type="button" className="btn btn-outline-dark mt-2" onClick={() => handleKickFromWorkspace(member.userId)}>Kick from Workspace</button>
+                                            <button type="button" className="btn btn-outline-dark mt-2" onClick={() => handleKickConfirmation(member.userId, 'group')}>Kick from Group</button>
+                                            <button type="button" className="btn btn-outline-dark mt-2" onClick={() => handleKickConfirmation(member.userId, 'workspace')}>Kick from Workspace</button>
                                         </div>
                                     </div>
                                 )
                             ))}
-                            <button type="submit" className="btn btn-primary mb-2">Submit Changes</button>
+                            {/* <button type="submit" className="btn btn-primary mb-2">Submit Changes</button> */}
                             <button type="button" className="btn btn-danger" onClick={() => setEditGroupId(null)}>Close</button>
                         </form>
                     </div>
@@ -562,7 +540,7 @@ const GroupsPageAdmin = () => {
                                                             </select>
                                                             <button
                                                                 className="btn btn-danger ml-2 mt-0"
-                                                                onClick={() => handleKickFromWorkspace(member.userId)}
+                                                                onClick={() => handleKickConfirmation(member.userId, 'workspace')}
                                                             >
                                                                 Kick
                                                             </button>
@@ -598,6 +576,7 @@ const GroupsPageAdmin = () => {
                                             <button
                                                 className="btn btn-primary"
                                                 onClick={() => handleOpenEditForm(group.groupId, group.members)}
+                                                disabled={group.members.length === 0}
                                             >
                                                 Edit
                                             </button>
@@ -615,6 +594,49 @@ const GroupsPageAdmin = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal for Deleting Group */}
+            <div className={`modal fade ${showDeleteConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Confirm Delete</h5>
+                            <button type="button" className="close" onClick={() => setShowDeleteConfirmModal(false)} aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Are you sure you want to delete this group?</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirmModal(false)}>Cancel</button>
+                            <button type="button" className="btn btn-primary" onClick={confirmDeleteGroup}>Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Confirmation Modal for Kicking Member */}
+            <div className={`modal fade ${showKickConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Confirm Kick</h5>
+                            <button type="button" className="close" onClick={() => setShowKickConfirmModal(false)} aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Are you sure you want to kick this member {kickFrom === 'group' ? 'from the group' : 'from the workspace'}?</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={() => setShowKickConfirmModal(false)}>Cancel</button>
+                            <button type="button" className="btn btn-primary" onClick={confirmKickMember}>Kick</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 };
