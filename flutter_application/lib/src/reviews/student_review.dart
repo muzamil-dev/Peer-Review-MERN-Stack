@@ -3,6 +3,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:convert';
 
 class StudentReview extends StatefulWidget {
@@ -123,10 +124,34 @@ class _StudentReviewState extends State<StudentReview> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Student Review Page"),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            const Flexible(
+              child: Text(
+                "Student Review",
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: const Color(0xff004080),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(14.0),
+      body: Container(
+        color: const Color(0xff004080),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -139,11 +164,27 @@ class _StudentReviewState extends State<StudentReview> {
                   Text(
                     assignmentName,
                     style: const TextStyle(
-                        fontSize: 35.0, fontWeight: FontWeight.bold),
+                        fontSize: 35.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
-                  Text("Review for $targetUserName",
-                      style: const TextStyle(
-                          fontSize: 16.0, fontWeight: FontWeight.w600)),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border:
+                          Border.all(color: const Color(0xff004080), width: 1),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Text("Review for $targetUserName",
+                        style: const TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                        )),
+                  ),
                 ],
               ),
             ),
@@ -152,8 +193,9 @@ class _StudentReviewState extends State<StudentReview> {
             ),
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 3),
+                border: Border.all(color: const Color(0xff004080), width: 1),
                 borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
               ),
               padding: const EdgeInsets.all(10.0),
               child: Row(
@@ -221,7 +263,10 @@ class _StudentReviewState extends State<StudentReview> {
 
                     return Container(
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 1)),
+                          border: Border.all(
+                              color: const Color(0xff004080), width: 1),
+                          borderRadius: BorderRadius.circular(8.0),
+                          color: Colors.white),
                       padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,10 +278,15 @@ class _StudentReviewState extends State<StudentReview> {
                                 "Question ${index + 1}",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 25,
+                                  fontSize: 27,
                                 ),
                               ),
-                              Text("Rating ${ratings[index].toInt()} / 5"),
+                              Text(
+                                "Rating: ${ratings[index].toInt()} / 5",
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(
@@ -245,7 +295,7 @@ class _StudentReviewState extends State<StudentReview> {
                           // Current Question
                           Text(
                             currentQuestion,
-                            style: const TextStyle(fontSize: 20),
+                            style: const TextStyle(fontSize: 22),
                           ),
                           const SizedBox(
                             height: 15,

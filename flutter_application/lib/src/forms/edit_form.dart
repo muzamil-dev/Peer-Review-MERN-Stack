@@ -623,7 +623,7 @@ class _EditFormState extends State<EditForm> {
                                 ),
                               ),
                               Text(
-                                "Rating: ${ratings[index]}",
+                                "Rating: ${ratings[index]} / 5",
                                 style: const TextStyle(fontSize: 20),
                               ),
                             ],
