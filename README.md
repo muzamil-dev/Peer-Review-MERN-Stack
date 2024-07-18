@@ -1,8 +1,8 @@
-# Rate my Peer
+# Rate My Peer
 
 ## Project Description
 
-Rate my Peer is a web application designed to facilitate anonymous peer reviews within group settings. The purpose of the application is to provide a platform where team members can review each other to help instructors or administrators monitor team dynamics and individual performance throughout a project. This system aims to break through team conflicts and improve overall satisfaction by providing an anonymous, structured method for feedback.
+Rate my Peer is a Web and Mobile Based application designed to facilitate anonymous peer reviews within group settings. The purpose of the application is to provide a platform where team members can review each other to help instructors or administrators monitor team dynamics and individual performance throughout a project. This system aims to break through team conflicts and improve overall satisfaction by providing an anonymous, structured method for feedback.
 
 ## Features
 
