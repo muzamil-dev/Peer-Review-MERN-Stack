@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_application/src/forms/get_forms.dart';
 import 'package:flutter_application/src/profile/user_profile.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AdminGroup extends StatefulWidget {
   final int workspaceId;
@@ -12,9 +13,7 @@ class AdminGroup extends StatefulWidget {
   final int userId; // User ID of Account User
 
   const AdminGroup(
-      {super.key,
-      required this.workspaceId,
-      required this.userId});
+      {super.key, required this.workspaceId, required this.userId});
 
   @override
   _AdminGroupState createState() => _AdminGroupState();
@@ -45,11 +44,9 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchWorkspaceDetails() async {
-    final url =
-        '/workspaces/${widget.workspaceId}';
+    final url = '/workspaces/${widget.workspaceId}';
     try {
-      final response =
-          await apiInstance.api.get(url);
+      final response = await apiInstance.api.get(url);
       if (response.statusCode == 200) {
         final responseData = response.data;
         setState(() {
@@ -72,13 +69,10 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchGroups() async {
-    final url = 
-        '/workspaces/${widget.workspaceId}/groups';
-
+    final url = '/workspaces/${widget.workspaceId}/groups';
 
     try {
-      final groupsResponse =
-          await apiInstance.api.get(url);
+      final groupsResponse = await apiInstance.api.get(url);
       if (groupsResponse.statusCode == 200) {
         final responseData = groupsResponse.data;
         setState(() {
@@ -95,11 +89,9 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> fetchUngroupedStudents() async {
-    final url = 
-        '/workspaces/${widget.workspaceId}/ungrouped';
+    final url = '/workspaces/${widget.workspaceId}/ungrouped';
     try {
-      final response = await apiInstance.api
-          .get(url);
+      final response = await apiInstance.api.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         setState(() {
@@ -117,7 +109,6 @@ class _AdminGroupState extends State<AdminGroup> {
   Future<void> deleteGroup(int groupId) async {
     final deleteUrl = '/groups/$groupId';
 
-
     try {
       final response = await apiInstance.api.delete(
         deleteUrl,
@@ -126,9 +117,9 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Group deleted successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Group deleted successfully')),
+        // );
         await fetchGroups(); // Refresh groups after deletion
         await fetchUngroupedStudents(); // Refresh ungrouped students after deletion
       } else {
@@ -152,10 +143,10 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Student added to the group successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //       content: Text('Student added to the group successfully')),
+        // );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
         final errorData = response.data;
@@ -184,10 +175,10 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Student removed from the group successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //       content: Text('Student removed from the group successfully')),
+        // );
         fetchGroupsAndStudents(); // Refresh groups and ungrouped students
       } else {
         final errorData = response.data;
@@ -203,57 +194,161 @@ class _AdminGroupState extends State<AdminGroup> {
     }
   }
 
+  // Shows the Groups
+  ListTile showMovableGroups(
+      Group currentGroup, Student student, int? currentGroupId) {
+    return ListTile(
+      title: Text(
+        currentGroup.name,
+        style: const TextStyle(fontSize: 18),
+        overflow: TextOverflow.ellipsis,
+      ),
+      onTap: () {
+        if (currentGroupId != null) {
+          // Remove from current group and add to the new group
+          removeStudentFromGroup(student.userId, currentGroupId).then((_) {
+            addStudentToGroup(student.userId, currentGroup.groupId);
+          });
+        } else {
+          // Just add to the new group
+          addStudentToGroup(student.userId, currentGroup.groupId);
+        }
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
   void showMoveStudentDialog(Student student, {int? currentGroupId}) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit Student'),
+          title: const Text(
+            'Edit Student',
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.normal),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (currentGroupId !=
-                  null) // Only show "Kick" if the student is in a group
-                ListTile(
-                  title: const Text('Kick from Group',
-                      style: TextStyle(color: Colors.red)),
-                  onTap: () {
-                    removeStudentFromGroup(student.userId, currentGroupId);
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ...currentGroups
-                  .map((group) => ListTile(
-                        title: Text(group.name),
-                        onTap: () {
-                          if (currentGroupId != null) {
-                            // Remove from current group and add to the new group
-                            removeStudentFromGroup(
-                                    student.userId, currentGroupId)
-                                .then((_) {
-                              addStudentToGroup(student.userId, group.groupId);
-                            });
-                          } else {
-                            // Just add to the new group
-                            addStudentToGroup(student.userId, group.groupId);
-                          }
-                          Navigator.of(context).pop();
-                        },
-                      ))
-                  .toList(),
-              ListTile(
-                title: const Text('Kick from Workspace',
-                    style: TextStyle(color: Colors.red)),
-                onTap: () {
-                  kickStudent(student.userId);
-                  Navigator.of(context).pop();
-                },
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Text(
+                      "Move ${student.firstName} to: ",
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
               ),
+              ...currentGroups.map((group) => ListTile(
+                    title: Text(
+                      group.name,
+                      style: const TextStyle(fontSize: 20),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onTap: () {
+                      if (currentGroupId != null) {
+                        // Remove from current group and add to the new group
+                        removeStudentFromGroup(student.userId, currentGroupId)
+                            .then((_) {
+                          addStudentToGroup(student.userId, group.groupId);
+                        });
+                      } else {
+                        // Just add to the new group
+                        addStudentToGroup(student.userId, group.groupId);
+                      }
+                      Navigator.of(context).pop();
+                    },
+                  )),
+              const SizedBox(
+                height: 15,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Text(
+                      "Kick ${student.firstName} from:",
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  if (currentGroupId !=
+                      null) // Only show "Kick" if the student is in a group
+                    TextButton(
+                      onPressed: () {
+                        removeStudentFromGroup(student.userId, currentGroupId);
+                        Navigator.of(context).pop();
+                      },
+                      style: TextButton.styleFrom(backgroundColor: Colors.red),
+                      child: const Text('Group',
+                          style: TextStyle(color: Colors.white, fontSize: 15)),
+                    ),
+                  TextButton(
+                    onPressed: () {
+                      kickStudent(student.userId);
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('Workspace',
+                        style: TextStyle(color: Colors.white, fontSize: 15)),
+                  ),
+                ],
+              )
             ],
           ),
         );
       },
     );
+  }
+
+  void showDeleteDialog(Group currentGroup) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Center(
+                child: Text(
+              'Delete ${currentGroup.name}?',
+              style:
+                  const TextStyle(fontSize: 30, fontWeight: FontWeight.normal),
+            )),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      deleteGroup(currentGroup.groupId);
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text(
+                      "Delete",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    )),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(backgroundColor: Colors.green),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    )),
+              ],
+            ),
+          );
+        });
   }
 
   Future<void> kickStudent(int userId) async {
@@ -303,9 +398,9 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Group added successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Group added successfully')),
+        // );
         await fetchGroupsAndStudents(); // Refresh groups and ungrouped students immediately after adding a group
       } else {
         print('Failed to add group. Status code: ${response.statusCode}');
@@ -321,8 +416,7 @@ class _AdminGroupState extends State<AdminGroup> {
     TextEditingController limitController = TextEditingController();
 
     // Load the current workspace details
-    final url =
-        '/workspaces/${widget.workspaceId}';
+    final url = '/workspaces/${widget.workspaceId}';
     print('Fetching workspace details from: $url');
     apiInstance.api.get(url).then((response) {
       print('Workspace details response status: ${response.statusCode}');
@@ -352,31 +446,38 @@ class _AdminGroupState extends State<AdminGroup> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Edit Workspace'),
+              title: const Text(
+                'Edit Workspace',
+                style: TextStyle(fontSize: 24),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: nameController,
-                      decoration:
-                          const InputDecoration(labelText: 'Workspace Name'),
+                      decoration: const InputDecoration(
+                          labelText: 'Workspace Name',
+                          labelStyle: TextStyle(fontSize: 18)),
                     ),
                     TextField(
                       controller: domainsController,
                       decoration: const InputDecoration(
-                          labelText: 'Allowed Domains (comma-separated)'),
+                          labelText: 'Allowed Domains',
+                          labelStyle: TextStyle(fontSize: 18)),
                     ),
                     TextField(
                       controller: limitController,
                       decoration: const InputDecoration(
-                          labelText: 'Group Member Limit'),
+                          labelText: 'Group Member Limit',
+                          labelStyle: TextStyle(fontSize: 18)),
                       keyboardType: TextInputType.number,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Lock Workspace: '),
+                        const Text('Lock Workspace: ',
+                            style: TextStyle(fontSize: 18)),
                         Switch(
                           value: groupLock,
                           onChanged: (value) {
@@ -384,6 +485,10 @@ class _AdminGroupState extends State<AdminGroup> {
                               groupLock = value;
                             });
                           },
+                          activeColor: Colors.white,
+                          activeTrackColor: Colors.red,
+                          inactiveTrackColor: Colors.green,
+                          inactiveThumbColor: Colors.white,
                         ),
                       ],
                     ),
@@ -391,23 +496,33 @@ class _AdminGroupState extends State<AdminGroup> {
                 ),
               ),
               actions: [
-                TextButton(
-                  onPressed: () async {
-                    await editWorkspace(
-                      nameController.text,
-                      domainsController.text
-                          .split(',')
-                          .map((s) => s.trim())
-                          .toList(),
-                      int.parse(limitController.text),
-                      groupLock,
-                    );
-                    if (groupLock) {
-                      await removeInviteCode(context);
-                    }
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Save'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () async {
+                        await editWorkspace(
+                          nameController.text,
+                          domainsController.text
+                              .split(',')
+                              .map((s) => s.trim())
+                              .toList(),
+                          int.parse(limitController.text),
+                          groupLock,
+                        );
+                        if (groupLock) {
+                          await removeInviteCode(context);
+                        }
+                        Navigator.of(context).pop();
+                      },
+                      style:
+                          TextButton.styleFrom(backgroundColor: Colors.green),
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             );
@@ -418,8 +533,7 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> removeInviteCode(BuildContext context) async {
-    final url = 
-        '/workspaces/${widget.workspaceId}/removeInvite';
+    final url = '/workspaces/${widget.workspaceId}/removeInvite';
 
     try {
       final response = await apiInstance.api.delete(
@@ -453,9 +567,9 @@ class _AdminGroupState extends State<AdminGroup> {
         }),
       );
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Workspace updated successfully')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Workspace updated successfully')),
+        // );
         fetchWorkspaceName(); // Refresh the workspace name
       } else {
         final errorData = response.data;
@@ -476,13 +590,27 @@ class _AdminGroupState extends State<AdminGroup> {
     return Scaffold(
       backgroundColor: const Color(0xFF004080),
       appBar: AppBar(
-        title: Text(
-          workspaceName.isEmpty ? 'Loading...' : workspaceName,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            Flexible(
+              child: Text(
+                workspaceName.isEmpty ? 'Loading...' : workspaceName,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
@@ -524,7 +652,7 @@ class _AdminGroupState extends State<AdminGroup> {
                                 Text(
                                   "View Assignments",
                                   style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Icon(Icons.arrow_forward),
@@ -539,27 +667,60 @@ class _AdminGroupState extends State<AdminGroup> {
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Text(
                                 'Ungrouped Students',
                                 style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
+                                    fontSize: 22, fontWeight: FontWeight.bold),
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(
+                                height: 15,
+                              ),
                               ListView.builder(
                                 shrinkWrap: true,
                                 itemCount: ungroupedStudents.length,
                                 itemBuilder: (context, index) {
                                   final student = ungroupedStudents[index];
-                                  return ListTile(
-                                    title: Text(
-                                        '${student.firstName} ${student.lastName}'),
-                                    subtitle: Text(student.email),
-                                    trailing: IconButton(
-                                      icon: const Icon(Icons.edit),
-                                      onPressed: () {
-                                        showMoveStudentDialog(student);
-                                      },
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white54,
+                                        border: Border.all(
+                                            color: Colors.black, width: 1),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0)),
+                                    margin:
+                                        const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                                    child: ListTile(
+                                      title: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${student.firstName} ${student.lastName}',
+                                            style:
+                                                const TextStyle(fontSize: 20),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                      // subtitle: Text(student.email), Uncomment for Student Email Display
+                                      trailing: IconButton(
+                                        icon: const CircleAvatar(
+                                          backgroundColor: Colors.green,
+                                          radius: 20,
+                                          child: Icon(
+                                            CupertinoIcons.square_pencil_fill,
+                                            size: 27,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          showMoveStudentDialog(student);
+                                        },
+                                      ),
                                     ),
                                   );
                                 },
@@ -581,16 +742,25 @@ class _AdminGroupState extends State<AdminGroup> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      group.name,
-                                      style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold),
+                                    Container(
+                                      margin: const EdgeInsets.fromLTRB(
+                                          5.0, 0, 0, 0),
+                                      child: Text(
+                                        group.name,
+                                        style: const TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.delete),
+                                      icon: const Icon(
+                                        CupertinoIcons.trash_circle_fill,
+                                        size: 45,
+                                        color: Colors.red,
+                                      ),
                                       onPressed: () {
-                                        deleteGroup(group.groupId);
+                                        showDeleteDialog(group);
                                       },
                                     ),
                                   ],
@@ -610,23 +780,46 @@ class _AdminGroupState extends State<AdminGroup> {
                                           ),
                                         );
                                       },
-                                      child: ListTile(
-                                        title: Text(
-                                            '${member.firstName} ${member.lastName}'),
-                                        trailing: IconButton(
-                                          icon: const Icon(Icons.edit),
-                                          onPressed: () {
-                                            showMoveStudentDialog(
-                                              Student(
-                                                userId: member.userId,
-                                                email:
-                                                    '', // Assuming email is not available in Member
-                                                firstName: member.firstName,
-                                                lastName: member.lastName,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            color: Colors.white54,
+                                            border: Border.all(
+                                                color: Colors.black, width: 1),
+                                            borderRadius:
+                                                BorderRadius.circular(12.0)),
+                                        margin: const EdgeInsets.fromLTRB(
+                                            0, 0, 0, 10),
+                                        child: ListTile(
+                                          title: Text(
+                                            '${member.firstName} ${member.lastName}',
+                                            style:
+                                                const TextStyle(fontSize: 20),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          trailing: IconButton(
+                                            icon: const CircleAvatar(
+                                              radius: 20,
+                                              backgroundColor: Colors.green,
+                                              child: Icon(
+                                                CupertinoIcons
+                                                    .square_pencil_fill,
+                                                size: 27,
+                                                color: Colors.white,
                                               ),
-                                              currentGroupId: group.groupId,
-                                            );
-                                          },
+                                            ),
+                                            onPressed: () {
+                                              showMoveStudentDialog(
+                                                Student(
+                                                  userId: member.userId,
+                                                  email:
+                                                      '', // Assuming email is not available in Member
+                                                  firstName: member.firstName,
+                                                  lastName: member.lastName,
+                                                ),
+                                                currentGroupId: group.groupId,
+                                              );
+                                            },
+                                          ),
                                         ),
                                       ),
                                     );
@@ -644,8 +837,12 @@ class _AdminGroupState extends State<AdminGroup> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: showAddGroupDialog,
-        backgroundColor: const Color.fromARGB(255, 117, 147, 177),
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.green,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 35,
+        ),
       ),
     );
   }

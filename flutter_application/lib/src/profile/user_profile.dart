@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_application/src/profile/analytics.dart";
+import 'package:flutter_application/src/profile/assignment_details.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class UserProfile extends StatefulWidget {
   final int workspaceId;
@@ -125,7 +128,7 @@ class _UserProfileState extends State<UserProfile> {
         // Calculates Total Average Rating Per Assignment
         double avgRating = calculateTotalAverageRating(reviews);
         tempAverageRatingsForAssignment.add(avgRating);
-        
+
         // Exits if the current assignment has No Reviews
         if (avgRating == -1) {
           return;
@@ -218,9 +221,10 @@ class _UserProfileState extends State<UserProfile> {
         children: [
           Text(
             "Reviewers: ",
-            style: TextStyle(fontSize: 17),
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
           ),
-          Text("Ratings:", style: TextStyle(fontSize: 17))
+          Text("Ratings:",
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600))
         ],
       );
     } else {
@@ -236,7 +240,7 @@ class _UserProfileState extends State<UserProfile> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Assigment Past Due",
+            "Assignment Past Due",
             style: TextStyle(color: Colors.red),
           )
         ],
@@ -247,38 +251,57 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   Widget assignmentItem(BuildContext context, int index) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  assignmentNames[index],
-                  style: const TextStyle(
-                      fontSize: 23.0, fontWeight: FontWeight.bold),
-                ),
-                printAssignmentAverageRating(
-                    averageRatingsForAssignment[index]),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            printBodyOfCards(
-                averageRatingsForAssignment[index]), // Assignment Name
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                printReviewersOfAssignment(index),
-                printRatingsOfReviewers(index),
-              ],
-            ),
-            printPastDue(dueDates[index]),
-          ],
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AssignmentDetails(
+                assignmentName: assignmentNames[index],
+                targetUserId: widget.targetId,
+                assignmentId: assignmentIds[index],
+              ),
+            ));
+      },
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      assignmentNames[index],
+                      style: const TextStyle(
+                          fontSize: 23.0, fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  printAssignmentAverageRating(
+                      averageRatingsForAssignment[index]),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              printBodyOfCards(
+                  averageRatingsForAssignment[index]), // Assignment Name
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  printReviewersOfAssignment(index),
+                  printRatingsOfReviewers(index),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              printPastDue(dueDates[index]),
+            ],
+          ),
         ),
       ),
     );
@@ -288,13 +311,27 @@ class _UserProfileState extends State<UserProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "User Profile Page",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            const Flexible(
+              child: Text(
+                "User Profile Page",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
@@ -309,19 +346,46 @@ class _UserProfileState extends State<UserProfile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "$nameOfProfile's Profile",
-                    style: const TextStyle(
-                        fontSize: 30, fontWeight: FontWeight.bold),
+                  Container(
+                    padding: const EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          CupertinoIcons.person_circle_fill,
+                          color: Colors.blueGrey,
+                          size: 40,
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        Flexible(
+                          child: Text(
+                            nameOfProfile,
+                            style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                overflow: TextOverflow.ellipsis),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       const Text(
                         "Assignments:",
                         style: TextStyle(
-                            fontSize: 26, fontWeight: (FontWeight.bold)),
+                            fontSize: 28,
+                            fontWeight: (FontWeight.bold),
+                            color: Colors.white),
                       ),
                       InkWell(
                         onTap: () {},
@@ -332,7 +396,7 @@ class _UserProfileState extends State<UserProfile> {
                                     color: Colors.green,
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
-                                      color: Colors.black,
+                                      color: Colors.green,
                                       width: 1,
                                     )),
                                 child: IconButton(
@@ -354,16 +418,19 @@ class _UserProfileState extends State<UserProfile> {
                                     ))),
                             const Text(
                               "Analytics",
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Expanded(
                     child: RawScrollbar(
+                        thumbColor: Colors.black,
                         child: ListView.separated(
                             itemBuilder: (context, index) {
                               return assignmentItem(context, index);
@@ -379,6 +446,7 @@ class _UserProfileState extends State<UserProfile> {
                 ],
               ),
             ),
+      backgroundColor: const Color(0xFF004080),
     );
   }
 }

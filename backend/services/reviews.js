@@ -183,7 +183,92 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
     catch(err){
         return { error: err.message, status: 500 };
     }
-}
+} 
+
+// services/reviews.js
+export const getByAssignmentAndTargetWithQAverages = async(targetId, assignmentId) => {
+    try {
+        const res = await db.query(
+            `WITH review_table AS
+            (SELECT r.id, r.assignment_id, r.user_id, r.target_id, 
+            array_agg(ra.rating ORDER BY q.id) FILTER (WHERE q.id IS NOT NULL) AS ratings
+            FROM reviews AS r
+            LEFT JOIN ratings as ra
+            ON r.id = ra.review_id
+            LEFT JOIN questions as q
+            ON ra.question_id = q.id
+            WHERE r.target_id = $1 AND r.assignment_id = $2
+            GROUP BY r.id
+            ORDER BY r.id),
+
+            row_table AS
+            (SELECT rt.assignment_id, rt.target_id,
+            jsonb_agg(
+                jsonb_build_object(
+                    'reviewId', rt.id,
+                    'userId', rt.user_id,
+                    'firstName', u.first_name,
+                    'lastName', u.last_name,
+                    'ratings', rt.ratings
+                ) ORDER BY rt.id
+            ) AS reviews
+            FROM review_table AS rt
+            JOIN users AS u
+            ON u.id = rt.user_id
+            GROUP BY assignment_id, target_id)
+            
+            SELECT rt.target_id, u.first_name, u.last_name, rt.reviews,
+            array_agg(q.question ORDER BY q.id) AS questions,
+            array_agg(q.id ORDER BY q.id) AS questionIds
+            FROM row_table AS rt
+            JOIN users AS u
+            ON u.id = rt.target_id
+            JOIN questions as q
+            ON rt.assignment_id = q.assignment_id
+            GROUP BY rt.target_id, u.first_name, u.last_name, rt.reviews`,
+            [targetId, assignmentId]
+        );
+
+        const data = res.rows[0];
+        if (!data) {
+            console.error("No data returned from database.");
+            return {
+                error: "The requested reviews were not found",
+                status: 200
+            };
+        }
+
+        // Log the data for debugging
+        console.log("Database response:", JSON.stringify(data, null, 2));
+
+        // Ensure reviews and questions are arrays
+        data.reviews = data.reviews || [];
+        data.questions = data.questions || [];
+
+        // Calculate average ratings per question
+        const questionAverages = data.questions.map((question, idx) => {
+            const ratings = (data.reviews || []).map(review => review.ratings ? review.ratings[idx] : null).filter(r => r !== null);
+            const averageRating = ratings.length > 0 ? ratings.reduce((acc, rating) => acc + rating, 0) / ratings.length : 0;
+            return { question, averageRating };
+        });
+
+        // Filter complete reviews, incomplete reviews will be excluded
+        data.reviews = data.reviews.filter(review => review.ratings !== null);
+        return {
+            targetId: data.target_id,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            questions: data.questions,
+            reviews: data.reviews,
+            questionAverages
+        };
+    } catch (err) {
+        console.error("Error in getByAssignmentAndTargetWithQAverages:", err);
+        return { error: err.message, status: 500 };
+    }
+};
+
+
 
 // Helper function to create reviews for an assignment
 // These will made close to when an assignment opens

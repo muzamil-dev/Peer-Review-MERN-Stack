@@ -25,7 +25,7 @@ export const getById = async(groupId) => {
             groupId: row.id,
             name: row.name,
             members: row.members,
-            workspaceId: row.workspace_id
+            workspaceId: row.workspace_id,
         }))[0];
         // Return
         if (!group)

@@ -6,15 +6,14 @@ import 'package:intl/intl.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'dart:convert';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class GetAssignments extends StatefulWidget {
   final int userId;
   final int workspaceId;
 
   const GetAssignments(
-      {super.key,
-      required this.workspaceId,
-      required this.userId});
+      {super.key, required this.workspaceId, required this.userId});
 
   static const routeName = "/getAssignments";
 
@@ -98,74 +97,63 @@ class _GetAssignmentsState extends State<GetAssignments> {
     return formattedDate;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'View Assignments',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ), // Change text color here
+  Widget displayBody() {
+    if (assignments.isEmpty) {
+      return Center(
+        child: SizedBox(
+          height: 100,
+          child: Container(
+            padding: const EdgeInsets.all(14.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.0),
             ),
-            GestureDetector(
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CreateForm(
-                      workspaceId: widget.workspaceId,
-                      userId: widget.userId,
-                    ),
-                  ),
-                );
-                fetchAssignments();
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(12)),
-                  border: Border.all(color: Colors.green, width: 1),
-                  color: Colors.green,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Press The + Button",
+                  style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87),
                 ),
-                padding: const EdgeInsets.all(6),
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              ),
+                Text(
+                  "To Create An Assignment",
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87),
+                )
+              ],
             ),
-          ],
+          ),
         ),
-        backgroundColor: const Color(0xFF004080),
-        iconTheme: const IconThemeData(color: Colors.white), // Center the title
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(children: [
-              Expanded(
-                  child: ListView(
-                children: assignments.map((assignment) {
-                  return GestureDetector(
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditForm(
-                            assignmentId: assignment.id,
-                            workspaceId: widget.workspaceId,
-                            userId: widget.userId,
-                          ),
-                        ),
-                      );
-                      fetchAssignments();
-                    },
-                    child: Card(
+      );
+    } else {
+      return Column(children: [
+        Expanded(
+            child: RawScrollbar(
+          thumbColor: Colors.black38,
+          child: ListView(
+            children: assignments.map((assignment) {
+              return GestureDetector(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditForm(
+                        assignmentId: assignment.id,
+                        workspaceId: widget.workspaceId,
+                        userId: widget.userId,
+                      ),
+                    ),
+                  );
+                  fetchAssignments();
+                },
+                child: Column(
+                  children: [
+                    Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -174,29 +162,43 @@ class _GetAssignmentsState extends State<GetAssignments> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  assignment.name,
-                                  style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold),
+                                Flexible(
+                                  child: Text(
+                                    assignment.name,
+                                    style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        overflow: TextOverflow.ellipsis),
+                                  ),
                                 ),
                                 Column(
                                   children: [
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        const Text("Start Date: "),
+                                        const Text(
+                                          "Start Date: ",
+                                          style: TextStyle(fontSize: 18),
+                                        ),
                                         const SizedBox(width: 15),
                                         Text(
-                                            getDateString(assignment.startDate))
+                                          getDateString(assignment.startDate),
+                                          style: const TextStyle(fontSize: 16),
+                                        )
                                       ],
                                     ),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        const Text("Due Date: "),
+                                        const Text(
+                                          "Due Date: ",
+                                          style: TextStyle(fontSize: 18),
+                                        ),
                                         const SizedBox(width: 15),
-                                        Text(getDateString(assignment.dueDate))
+                                        Text(
+                                          getDateString(assignment.dueDate),
+                                          style: const TextStyle(fontSize: 16),
+                                        )
                                       ],
                                     ),
                                   ],
@@ -212,7 +214,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                   children: [
                                     const Text("Questions: ",
                                         style: TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 24,
                                           fontWeight: FontWeight.w500,
                                         )),
                                     Column(
@@ -224,7 +226,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                           .map<Widget>((question) {
                                         return Text(
                                           question,
-                                          style: const TextStyle(fontSize: 16),
+                                          style: const TextStyle(fontSize: 18),
                                         );
                                       }).toList(),
                                     ),
@@ -290,16 +292,34 @@ class _GetAssignmentsState extends State<GetAssignments> {
                                                                   Navigator.pop(
                                                                       context);
                                                                 },
-                                                                child: const Text(
-                                                                    'Delete'),
+                                                                style: TextButton
+                                                                    .styleFrom(
+                                                                        backgroundColor:
+                                                                            Colors.red),
+                                                                child:
+                                                                    const Text(
+                                                                  'Delete',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white),
+                                                                ),
                                                               ),
                                                               TextButton(
                                                                 onPressed: () {
                                                                   Navigator.pop(
                                                                       context);
                                                                 },
-                                                                child: const Text(
-                                                                    'Cancel'),
+                                                                style: TextButton
+                                                                    .styleFrom(
+                                                                        backgroundColor:
+                                                                            Colors.green),
+                                                                child:
+                                                                    const Text(
+                                                                  'Cancel',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white),
+                                                                ),
                                                               ),
                                                             ],
                                                           ),
@@ -320,10 +340,74 @@ class _GetAssignmentsState extends State<GetAssignments> {
                         ),
                       ),
                     ),
-                  );
-                }).toList(),
-              ))
-            ]),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ))
+      ]);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF004080),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            const Flexible(
+              child: Text(
+                "Assignments",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF004080),
+        iconTheme: const IconThemeData(color: Colors.white), // Center the title
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: displayBody(),
+            ),
+      floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.green,
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreateForm(
+                  workspaceId: widget.workspaceId,
+                  userId: widget.userId,
+                ),
+              ),
+            );
+            fetchAssignments();
+          },
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 35,
+          )),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
