@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_application/src/profile/analytics.dart";
+import 'package:flutter_application/src/profile/assignment_details.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_application/core.services/api.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -250,44 +251,53 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   Widget assignmentItem(BuildContext context, int index) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    assignmentNames[index],
-                    style: const TextStyle(
-                        fontSize: 23.0, fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AssignmentDetails(),
+            ));
+      },
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      assignmentNames[index],
+                      style: const TextStyle(
+                          fontSize: 23.0, fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                printAssignmentAverageRating(
-                    averageRatingsForAssignment[index]),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            printBodyOfCards(
-                averageRatingsForAssignment[index]), // Assignment Name
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                printReviewersOfAssignment(index),
-                printRatingsOfReviewers(index),
-              ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            printPastDue(dueDates[index]),
-          ],
+                  printAssignmentAverageRating(
+                      averageRatingsForAssignment[index]),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              printBodyOfCards(
+                  averageRatingsForAssignment[index]), // Assignment Name
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  printReviewersOfAssignment(index),
+                  printRatingsOfReviewers(index),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              printPastDue(dueDates[index]),
+            ],
+          ),
         ),
       ),
     );
