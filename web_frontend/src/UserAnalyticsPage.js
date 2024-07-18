@@ -62,7 +62,7 @@ const UserAnalyticsPage = () => {
                     setError('Failed to fetch user analytics');
                 }
             } catch (err) {
-                setError('No analytics found: The user has not recieved any reviews yet.');
+                setError('No analytics found: The user has no assignments.');
             } finally {
                 setLoading(false);
             }
