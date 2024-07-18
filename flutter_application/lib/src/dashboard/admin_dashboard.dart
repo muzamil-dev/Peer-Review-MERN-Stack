@@ -193,6 +193,61 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
+  Widget displayAdminBody() {
+    if (workspaces.isEmpty) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "No Workspaces to Show",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline),
+                    ),
+                    Text(
+                      "Add or Join a Workspace to Get Started",
+                      style: TextStyle(
+                          fontSize: 18.0, fontWeight: FontWeight.w500),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          )
+        ],
+      );
+    } else {
+      return Container(
+        color: const Color(0xFF004080), // Set background color
+        child: RawScrollbar(
+          child: ListView.builder(
+            itemCount: workspaces.length,
+            itemBuilder: (context, index) {
+              return WorkspaceCard(
+                workspace: workspaces[index],
+                onTap: navigateToGroupPage,
+                userId: userId,
+              );
+            },
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -224,21 +279,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Container(
-              color: const Color(0xFF004080), // Set background color
-              child: RawScrollbar(
-                child: ListView.builder(
-                  itemCount: workspaces.length,
-                  itemBuilder: (context, index) {
-                    return WorkspaceCard(
-                      workspace: workspaces[index],
-                      onTap: navigateToGroupPage,
-                      userId: userId,
-                    );
-                  },
-                ),
-              ),
-            ),
+          : displayAdminBody(),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
             color: Colors.white, // Set background color
