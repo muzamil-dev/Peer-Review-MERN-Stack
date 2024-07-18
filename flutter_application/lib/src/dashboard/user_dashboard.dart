@@ -490,6 +490,7 @@ class _UserDashboardState extends State<UserDashboard> {
 
     // Resets Assignments list upon returning back from review page
     setState(() {
+      isLoading = true;
       assignments = [];
       totalItemsLeft = 0;
       getAllAssignments(context);
