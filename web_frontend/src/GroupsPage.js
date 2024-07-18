@@ -128,83 +128,106 @@ const GroupsPageUser = () => {
                 <div className="w-100 d-flex justify-content-center">
                     <button className="btn btn-danger mb-2" onClick={() => setShowConfirmModal(true)} disabled={workspaceDetails.groupLock}>Leave Workspace</button>
                 </div>
-            </div>
-
-            {errorMessage && (
-                <div className="alert alert-danger" role="alert">
-                    {errorMessage}
+                <div className="w-100 text-center text-muted">
+                    <p className='para'>
+                        {workspaceDetails.groupLock ? (
+                            <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-lock-fill" viewBox="0 0 16 16">
+                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2" />
+                                </svg>
+                                {' '}
+                                Workspace is locked
+                            </>
+                        ) : (
+                            <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-unlock-fill" viewBox="0 0 16 16">
+                                    <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2" />
+                                </svg>
+                                {' '}
+                                Workspace is unlocked
+                            </>
+                        )}
+                    </p>
                 </div>
-            )}
+                </div>
 
-            <div className="container">
-                <div className="row">
-                    {Array.isArray(groups) && groups.map((group) => (
-                        <div key={group.groupId} className="col-12 col-sm-6 col-lg-4  mb-4">
-                            <div className="card groupCard">
-                                <div className="card-body d-flex flex-column">
-                                    <h2 className="card-title">{group.name}</h2>
-                                    <ul className="list-unstyled flex-grow-1">
-                                        {Array.isArray(group.members) && group.members.map(member => (
-                                            <li key={member.userId}>{member.firstName} {member.lastName}</li>
-                                        ))}
-                                    </ul>
-                                    <div className="mt-auto">
-                                        {joinedGroupId === group.groupId ? (
-                                            <>
-                                                <button
-                                                    className="btn btn-success"
-                                                    disabled
-                                                >
-                                                    Joined
-                                                </button>
-                                                <button
-                                                    className="btn btn-danger"
-                                                    onClick={() => handleLeaveGroup(group.groupId)}
-                                                    disabled={workspaceDetails.groupLock}
-                                                >
-                                                    Leave
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <button
-                                                className="btn btn-success"
-                                                onClick={() => handleJoinGroup(group.groupId)}
-                                                disabled={joinedGroupId !== null || workspaceDetails.groupLock}
-                                            >
-                                                Join
-                                            </button>
+                {errorMessage && (
+                    <div className="alert alert-danger" role="alert">
+                        {errorMessage}
+                    </div>
+                )}
+
+                <div className="container">
+                    <div className="row">
+                        {Array.isArray(groups) && groups.map((group) => (
+                            <div key={group.groupId} className="col-12 col-sm-6 col-lg-4 mb-4">
+                                <div className="card groupCard">
+                                    <div className="card-body d-flex flex-column">
+                                        <h2 className="card-title">{group.name}</h2>
+                                        <ul className="list-unstyled flex-grow-1">
+                                            {Array.isArray(group.members) && group.members.map(member => (
+                                                <li key={member.userId}>{member.firstName} {member.lastName}</li>
+                                            ))}
+                                        </ul>
+                                        {!workspaceDetails.groupLock && (
+                                            <div className="mt-auto">
+                                                {joinedGroupId === group.groupId ? (
+                                                    <>
+                                                        <button
+                                                            className="btn btn-success"
+                                                            disabled
+                                                        >
+                                                            Joined
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-danger"
+                                                            onClick={() => handleLeaveGroup(group.groupId)}
+                                                            disabled={workspaceDetails.groupLock}
+                                                        >
+                                                            Leave
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        className="btn btn-success"
+                                                        onClick={() => handleJoinGroup(group.groupId)}
+                                                        disabled={joinedGroupId !== null || workspaceDetails.groupLock}
+                                                    >
+                                                        Join
+                                                    </button>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            {/* Confirmation form */}
-            <div className={`modal fade ${showConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <div className="modal-dialog modal-dialog-centered" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Leave</h5>
-                            <button type="button" className="close" onClick={() => setShowConfirmModal(false)} aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <p>Are you sure you want to leave this workspace?</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>Cancel</button>
-                            <button type="button" className="btn btn-primary" onClick={() => { setShowConfirmModal(false); handleLeaveWorkspace(); }}>Leave</button>
+                {/* Confirmation form */}
+                <div className={`modal fade ${showConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Leave</h5>
+                                <button type="button" className="close" onClick={() => setShowConfirmModal(false)} aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Are you sure you want to leave this workspace?</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>Cancel</button>
+                                <button type="button" className="btn btn-primary" onClick={() => { setShowConfirmModal(false); handleLeaveWorkspace(); }}>Leave</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-        </div>
-    );
+            </div>
+            );
 };
 
-export default GroupsPageUser;
+            export default GroupsPageUser;

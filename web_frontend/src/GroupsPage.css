@@ -37,6 +37,17 @@
     flex-grow: 1;
 }
 
+/* p{
+    color: black !important;
+    margin-bottom: 0cm;
+} */
+
+.para{
+    margin-top: 10px;
+    color: white !important;
+    margin-bottom: 0px;
+}
+
 /* .dashboardButton {
     position: absolute;
     right: 200px;
