@@ -39,14 +39,16 @@ class _AssignmentDetailsState extends State<AssignmentDetails> {
       if (response.statusCode == 200) {
         final jsonResponse = response.data;
         final questionAverages = jsonResponse["questionAverages"];
-        for (var response in questionAverages) {
-          questions.add(response["question"]);
-          averageRatingsPerQuestion.add(response["averageRating"]);
+
+        if (questionAverages != null) {
+          for (var response in questionAverages) {
+            questions.add(response["question"]);
+            averageRatingsPerQuestion.add(response["averageRating"]);
+          }
         }
         setState(() {
           isLoading = false;
         });
-
         print(questions);
         print(averageRatingsPerQuestion);
       }
@@ -70,7 +72,7 @@ class _AssignmentDetailsState extends State<AssignmentDetails> {
     return Card(
       color: Colors.white,
       child: Container(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -120,40 +122,81 @@ class _AssignmentDetailsState extends State<AssignmentDetails> {
   }
 
   Widget displayAssignments() {
-    return Expanded(
-      child: RawScrollbar(
-        child: ListView.separated(
-            itemBuilder: (context, index) {
-              return questionRatingDisplay(index);
-            },
-            separatorBuilder: (context, index) {
-              return const Divider(
-                height: 10,
-                thickness: 0,
-              );
-            },
-            itemCount: questions.length),
-      ),
-    );
+    if (questions.isNotEmpty) {
+      return Expanded(
+        child: RawScrollbar(
+          child: ListView.separated(
+              itemBuilder: (context, index) {
+                return questionRatingDisplay(index);
+              },
+              separatorBuilder: (context, index) {
+                return const Divider(
+                  height: 10,
+                  thickness: 0,
+                );
+              },
+              itemCount: questions.length),
+        ),
+      );
+    } else {
+      return Expanded(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFF004080), width: 1),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: const Text(
+                "Assignment Not Assigned",
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   Widget detailsBody() {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Flexible(
-              child: Text(
-            widget.assignmentName,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.w600,
-                overflow: TextOverflow.ellipsis),
-          )),
           const SizedBox(
-            height: 10,
+            height: 30,
+          ),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                "Assignment:",
+                style: TextStyle(fontSize: 35, color: Colors.white),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 20,
+              ),
+              Flexible(
+                  child: Text(
+                widget.assignmentName,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 35,
+                    fontWeight: FontWeight.w600,
+                    overflow: TextOverflow.ellipsis),
+              )),
+            ],
+          ),
+          const SizedBox(
+            height: 40,
           ),
           Row(
             children: [
