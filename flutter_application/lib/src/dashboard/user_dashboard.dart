@@ -472,9 +472,16 @@ class _UserDashboardState extends State<UserDashboard> {
         ),
       );
     } else {
-      return Text(
-        "Complete Review for ${review["firstName"]} ${review["lastName"]}",
-        style: const TextStyle(color: Colors.black),
+      return Container(
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.black, width: 1),
+            borderRadius: BorderRadius.circular(12.0)),
+        child: Text(
+          "Complete Review for ${review["firstName"]} ${review["lastName"]}",
+          style: const TextStyle(color: Colors.black),
+        ),
       );
     }
   }
@@ -489,6 +496,7 @@ class _UserDashboardState extends State<UserDashboard> {
             targetUserId: targetUserId,
             assignmentId: assignmentId,
             reviewId: reviewId,
+            editReview: (itemsLeft[assignmentId] == 0) ? 1 : 0,
           ),
         ));
 

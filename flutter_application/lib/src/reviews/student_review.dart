@@ -12,12 +12,14 @@ class StudentReview extends StatefulWidget {
   final int targetUserId;
   final int assignmentId;
   final int reviewId;
+  final int editReview;
 
   const StudentReview(
       {required this.userId,
       required this.targetUserId,
       required this.assignmentId,
       required this.reviewId,
+      required this.editReview,
       super.key});
 
   @override
@@ -125,6 +127,36 @@ class _StudentReviewState extends State<StudentReview> {
     }
   }
 
+  Widget displayStatusIcon() {
+    if (widget.editReview == 1) {
+      return const CircleAvatar(
+        radius: 15,
+        backgroundColor: Colors.green,
+        child: IconButton(
+          onPressed: null,
+          icon: Icon(
+            Icons.check,
+            color: Colors.white,
+            size: 15,
+          ),
+        ),
+      );
+    } else {
+      return const CircleAvatar(
+        radius: 15,
+        backgroundColor: Colors.red,
+        child: IconButton(
+          onPressed: null,
+          icon: Icon(
+            Icons.close_outlined,
+            color: Colors.white,
+            size: 15,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,11 +200,18 @@ class _StudentReviewState extends State<StudentReview> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const Text(
+                          "Assignment Name:",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 35,
+                              fontWeight: FontWeight.w600),
+                        ),
                         Text(
                           assignmentName,
                           style: const TextStyle(
-                              fontSize: 35.0,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 33.0,
+                              fontWeight: FontWeight.w500,
                               color: Colors.white),
                         ),
                         const SizedBox(
@@ -246,18 +285,7 @@ class _StudentReviewState extends State<StudentReview> {
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        const CircleAvatar(
-                          radius: 15,
-                          backgroundColor: Colors.red,
-                          child: IconButton(
-                            onPressed: null,
-                            icon: Icon(
-                              Icons.close_outlined,
-                              color: Colors.white,
-                              size: 15,
-                            ),
-                          ),
-                        ),
+                        displayStatusIcon(),
                       ],
                     ),
                   ),

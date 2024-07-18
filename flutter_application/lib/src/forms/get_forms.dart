@@ -103,7 +103,7 @@ class _GetAssignmentsState extends State<GetAssignments> {
         child: SizedBox(
           height: 100,
           child: Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(14.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12.0),
@@ -114,15 +114,15 @@ class _GetAssignmentsState extends State<GetAssignments> {
                 Text(
                   "Press The + Button",
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w600,
                       color: Colors.black87),
                 ),
                 Text(
                   "To Create An Assignment",
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
                       color: Colors.black87),
                 )
               ],

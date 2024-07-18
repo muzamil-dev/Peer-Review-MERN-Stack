@@ -435,7 +435,7 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
                   inviteCode,
                   style: const TextStyle(
                     fontSize: 22.0,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
