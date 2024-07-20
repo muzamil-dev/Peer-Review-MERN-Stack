@@ -24,7 +24,7 @@ CREATE TABLE groups(
     id SERIAL PRIMARY KEY,
     workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
-    UNIQUE(workspace_id, name);
+    UNIQUE(workspace_id, name)
 );
 
 /* Drop all tables (in order) */
