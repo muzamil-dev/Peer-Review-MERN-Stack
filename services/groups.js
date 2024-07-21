@@ -1,3 +1,43 @@
+// Get a group by id
+export const getById = async(db, groupId) => {
+    try{
+        const res = await db.query(
+            `SELECT g.*, jsonb_agg(
+                jsonb_build_object(
+                    'userId', u.id,
+                    'firstName', u.first_name,
+                    'lastName', u.last_name
+                ) ORDER BY u.id
+            ) AS members
+            FROM groups AS g
+            LEFT JOIN memberships AS m
+            ON g.id = m.group_id
+            LEFT JOIN users AS u
+            ON u.id = m.user_id
+            WHERE g.id = $1
+            GROUP BY g.id`,
+            [groupId]
+        );
+        // Format the above query
+        const group = res.rows.map(row => ({
+            groupId: row.id,
+            name: row.name,
+            members: row.members,
+            workspaceId: row.workspace_id
+        }))[0];
+        // Return
+        if (!group)
+            return { 
+                error: "The requested group was not found", 
+                status: 404 
+            };
+        return group;
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
 // Create a group within a given workspace
 // Only workspace instructors should be allowed to run this
 export const createGroup = async(db, workspaceId, name) => {
@@ -45,6 +85,55 @@ export const createGroups = async(db, workspaceId, names) => {
             message: `Created ${res.rows.length} groups successfully`,
             groups: res.rows
         };
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Moves the provided user to the provided group
+// The provided user must be part of the workspace that the group is in
+// Set groupId to null to remove a user from their group
+export const moveUser = async(db, userId, workspaceId, groupId) => {
+    try{
+        const res = (await db.query(`
+            UPDATE memberships
+            SET group_id = $1
+            WHERE user_id = $2 AND workspace_id = $3
+            RETURNING *`,
+        [groupId, userId, workspaceId])).rows[0];
+        if (!res)
+            return {
+                error: "The user is not a member of the group's workspace",
+                status: 400
+            }
+        // Set separate messages for adding and removing users
+        if (!groupId)
+            return { message: "Removed user from group successfully" }
+        else
+            return { message: "Added user to group successfully" }
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Delete a group
+// User must be an instructor of the workspace that contains the group
+export const deleteGroup = async(db, groupId) => {
+    try{
+        // Delete the group
+        const res = await db.query(
+            `DELETE FROM groups WHERE id = $1 RETURNING *`,
+            [groupId]
+        );
+        // Return an error if the group wasn't found
+        if (!res.rows[0])
+            return {
+                error: "The requested group was not found",
+                status: 404
+            }
+        return { message: `Deleted ${res.rows[0].name} successfully` };
     }
     catch(err){
         return { error: err.message, status: 500 };

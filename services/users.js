@@ -4,9 +4,15 @@ import jwt from "jsonwebtoken";
 // Login to a user's account
 export const login = async(db, email, password) => {
     try{
-        const res = await getByEmail(email);
+        const res = await getByEmail(db, email);
         if (res.error) // Will return if user not found
             return res;
+        // Check that the user has a password
+        if (!res.password)
+            return {
+                error: "Cannot log in. Please set a password using 'Forgot my Password'",
+                status: 401
+            };
         // Check if the password is correct
         if (!await bcrypt.compare(password, res.password))
             return {
