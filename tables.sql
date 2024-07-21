@@ -31,5 +31,6 @@ CREATE TABLE memberships(
 /* Drop all tables (in order) */
 
 DROP TABLE memberships;
+DROP TABLE groups;
 DROP TABLE workspaces;
 DROP TABLE users;

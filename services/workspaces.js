@@ -55,17 +55,20 @@ export const create = async(db, userId, name) => {
 export const insertUsers = async(db, workspaceId, users) => {
     try{
         let query = `INSERT INTO memberships 
-        (user_id, workspace_id, role) VALUES `;
+        (user_id, workspace_id, group_id, role) VALUES `;
         // Map the provided users to the query
         query += users.map((user, index) => {
             if (!user.userId)
                 throw new Error('The provided user does not have an id');
-            return `($${index+2}, $1, 'Student')`;
+            return `($${index+2}, $1, $${index+users.length+2}, 'Student')`;
         }).join(', ');
         // Add the conflict condition
         query += ` ON CONFLICT (user_id, workspace_id) DO NOTHING`;
+        // Separate userIds and groupIds
+        const userIds = users.map(user => user.userId);
+        const groupIds = users.map(user => user.groupId);
         // Insert
-        const res = await db.query(query, [workspaceId, ...users.map(user => user.userId)]);
+        const res = await db.query(query, [workspaceId, ...userIds, ...groupIds]);
         return {
             message: "Users inserted successfully"
         }
