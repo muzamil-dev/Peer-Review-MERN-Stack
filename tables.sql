@@ -13,18 +13,19 @@ CREATE TABLE workspaces(
     name TEXT NOT NULL
 );
 
-CREATE TABLE memberships(
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,
-    workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE,
-    role TEXT NOT NULL,
-    PRIMARY KEY (user_id, workspace_id)
-);
-
 CREATE TABLE groups(
     id SERIAL PRIMARY KEY,
     workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     UNIQUE(workspace_id, name)
+);
+
+CREATE TABLE memberships(
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE,
+    group_id INT REFERENCES groups(id) ON DELETE SET NULL,
+    role TEXT NOT NULL,
+    PRIMARY KEY (user_id, workspace_id)
 );
 
 /* Drop all tables (in order) */

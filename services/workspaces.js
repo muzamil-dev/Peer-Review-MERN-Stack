@@ -1,24 +1,29 @@
 // Check that a user is an instructor for a given workspace
 export const checkInstructor = async(db, userId, workspaceId) => {
-    // Check that the user creating them is an admin
-    const user = (await db.query(`
-        SELECT m.role
-        FROM users AS u
-        LEFT JOIN memberships AS m
-        ON m.user_id = u.id AND m.workspace_id = $1
-        WHERE u.id = $2`,
-        [workspaceId, userId])).rows[0];
-    if (!user) // Return the error if there was one
-        return {
-            error: "No user was found with this id",
-            status: 404
-        }
-    if (user.role !== 'Instructor')
-        return {
-            error: "User is not authorized to make this request",
-            status: 403
-        }
-    return { message: "User is authorized" }
+    try{
+        // Check that the user creating them is an admin
+        const user = (await db.query(`
+            SELECT m.role
+            FROM users AS u
+            LEFT JOIN memberships AS m
+            ON m.user_id = u.id AND m.workspace_id = $1
+            WHERE u.id = $2`,
+            [workspaceId, userId])).rows[0];
+        if (!user) // Return the error if there was one
+            return {
+                error: "No user was found with this id",
+                status: 404
+            }
+        if (user.role !== 'Instructor')
+            return {
+                error: "User is not authorized to make this request",
+                status: 403
+            }
+        return { message: "User is authorized" }
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
 }
 
 // Create the workspace and set the creator as an instructor
@@ -52,15 +57,15 @@ export const insertUsers = async(db, workspaceId, users) => {
         let query = `INSERT INTO memberships 
         (user_id, workspace_id, role) VALUES `;
         // Map the provided users to the query
-        query += users.map(user => {
+        query += users.map((user, index) => {
             if (!user.userId)
                 throw new Error('The provided user does not have an id');
-            return `(${user.userId}, ${workspaceId}, 'Student')`;
+            return `($${index+2}, $1, 'Student')`;
         }).join(', ');
         // Add the conflict condition
         query += ` ON CONFLICT (user_id, workspace_id) DO NOTHING`;
         // Insert
-        const res = await db.query(query);
+        const res = await db.query(query, [workspaceId, ...users.map(user => user.userId)]);
         return {
             message: "Users inserted successfully"
         }
