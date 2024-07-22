@@ -1,5 +1,27 @@
-// Get a group by id
+// Get a group by id (excluding members)
 export const getById = async(db, groupId) => {
+    try{
+        const res = await db.query(
+            `SELECT id AS "groupId", name, workspace_id AS "workspaceId"
+            FROM groups WHERE id = $1`,
+            [groupId]
+        );
+        const group = res.rows[0];
+        // Return
+        if (!group)
+            return { 
+                error: "The requested group was not found", 
+                status: 404 
+            };
+        return group;
+    }
+    catch(err){
+        return { error: err.message, status: 500 };
+    }
+}
+
+// Get a group by id (including members)
+export const getByIdWithMembers = async(db, groupId) => {
     try{
         const res = await db.query(
             `SELECT g.*, jsonb_agg(
