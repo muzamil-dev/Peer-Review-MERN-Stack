@@ -295,9 +295,9 @@ const LoginPage = () => {
   /**/
 
   return (
-    <>
+    <div className="page-container">
       <div className="logo-container">
-        <h1>Welcome To</h1>
+        <h1 className="text-4xl">Welcome To</h1>
         <svg
           className="looka-1j8o68f"
           width="533.0000000000001"
@@ -310,7 +310,6 @@ const LoginPage = () => {
             featurekey="odWo6G-0"
             transform="matrix(0.6553187074320751,0,0,0.6553187074320751,-1.2824166930921443,-2.94033410034786)"
             fill="#FFFFFF"
-
           >
             <path
               xmlns="http://www.w3.org/2000/svg"
@@ -327,8 +326,9 @@ const LoginPage = () => {
           </g>
         </svg>
       </div>
-      <div className="wrapper">
-        {/* <div className="title-text">
+      <div className="body-container">
+        <div className="wrapper">
+          {/* <div className="title-text">
           <div
             className={`title ${
               isLoginActive
@@ -345,343 +345,344 @@ const LoginPage = () => {
               : "Signup"}
           </div>
         </div> */}
-        <div className="form-container">
-          <div className="slide-controls">
-            <input
-              type="radio"
-              name="slide"
-              id="login"
-              checked={isLoginActive}
-              onChange={() => setIsLoginActive(true)}
-            />
-            <input
-              type="radio"
-              name="slide"
-              id="signup"
-              checked={!isLoginActive}
-              onChange={() => setIsLoginActive(false)}
-            />
-            <label
-              htmlFor="login"
-              className="slide login"
-              onClick={() => setIsLoginActive(true)}
-            >
-              Sign in
-            </label>
-            <label
-              htmlFor="signup"
-              className="slide signup "
-              onClick={() => setIsLoginActive(false)}
-            >
-              Sign up
-            </label>
-            <div
-              className="slider-tab"
-              style={{ left: isLoginActive ? "0%" : "50%" }}
-            ></div>
-          </div>
-          <div
-            className="form-inner"
-            style={{ marginLeft: isLoginActive ? "0%" : "-100%" }}
-          >
-            {isRequestResetPasswordActive ? (
-              <form
-                onSubmit={handleResetPasswordRequest}
-                className="request reset password "
+          <div className="form-container">
+            <div className="slide-controls">
+              <input
+                type="radio"
+                name="slide"
+                id="login"
+                checked={isLoginActive}
+                onChange={() => setIsLoginActive(true)}
+              />
+              <input
+                type="radio"
+                name="slide"
+                id="signup"
+                checked={!isLoginActive}
+                onChange={() => setIsLoginActive(false)}
+              />
+              <label
+                htmlFor="login"
+                className="slide login"
+                onClick={() => setIsLoginActive(true)}
               >
-                <div className="field">
-                  <input
-                    type="text"
-                    name="email"
-                    placeholder="Email Address"
-                    value={resetPasswordData.email}
-                    onChange={handleResetPasswordChange}
-                    required
-                  />
-                </div>
-
-                <div className="field btn">
-                  <div className="btn-layer"></div>
-                  <input type="submit" value="Send email" />
-                </div>
-                <div className="signup-link">
-                  <a
-                    href="#"
-                    onClick={() => setIsRequestResetPasswordActive(false)}
-                  >
-                    {" "}
-                    Back to Sign in
-                  </a>
-                </div>
-              </form>
-            ) : isResetPasswordActive ? (
-              <form onSubmit={handleResetPassword} className="reset-password">
-                <div className="field">
-                  <input
-                    type="text"
-                    name="token"
-                    placeholder="Reset Token"
-                    value={resetPasswordData.token}
-                    onChange={handleResetPasswordChange}
-                    required
-                  />
-                </div>
-                <div className="field">
-                  <input
-                    type="password"
-                    name="newPassword"
-                    placeholder="New Password"
-                    value={resetPasswordData.newPassword}
-                    onChange={handleResetPasswordChange}
-                    required
-                  />
-                </div>
-                {showResetPasswordRequirements && (
-                  <div
-                    className="password-requirements"
-                    style={{ paddingTop: "7px" }}
-                  >
-                    {!resetPasswordRequirements.uppercase && (
-                      <p style={{ color: "#004080" }}>
-                        At least one uppercase letter is required
-                      </p>
-                    )}
-                    {resetPasswordRequirements.uppercase &&
-                      !resetPasswordRequirements.specialChar && (
-                        <p style={{ color: "#004080" }}>
-                          At least one special character is required
-                        </p>
-                      )}
-                    {resetPasswordRequirements.uppercase &&
-                      resetPasswordRequirements.specialChar &&
-                      !resetPasswordRequirements.number && (
-                        <p style={{ color: "#004080" }}>
-                          At least one number is required
-                        </p>
-                      )}
-                    {resetPasswordRequirements.uppercase &&
-                      resetPasswordRequirements.specialChar &&
-                      resetPasswordRequirements.number &&
-                      !resetPasswordRequirements.lowercase && (
-                        <p style={{ color: "#004080" }}>
-                          At least one lowercase letter is required
-                        </p>
-                      )}
-                    {resetPasswordRequirements.uppercase &&
-                      resetPasswordRequirements.specialChar &&
-                      resetPasswordRequirements.number &&
-                      resetPasswordRequirements.lowercase &&
-                      !resetPasswordRequirements.length && (
-                        <p style={{ color: "#004080" }}>
-                          At least 8 characters are required
-                        </p>
-                      )}
-                  </div>
-                )}
-                <div className="field">
-                  <input
-                    type="password"
-                    name="confirmNewPassword"
-                    placeholder="Confirm New Password"
-                    value={resetPasswordData.confirmNewPassword}
-                    onChange={handleResetPasswordChange}
-                    required
-                  />
-                </div>
-                {showResetPasswordsMatch &&
-                  resetPasswordData.confirmNewPassword &&
-                  resetPasswordData.newPassword !==
-                    resetPasswordData.confirmNewPassword && (
-                    <p style={{ color: "#004080", paddingTop: "7px" }}>
-                      Passwords do not match
-                    </p>
-                  )}
-                <div className="field btn">
-                  <div className="btn-layer"></div>
-                  <input type="submit" value="Reset Password" />
-                </div>
-              </form>
-            ) : (
-              <form onSubmit={handleLogin} className="login">
-                <div className="field">
-                  <input
-                    type="text"
-                    name="email"
-                    placeholder="Email Address"
-                    value={loginData.email}
-                    onChange={handleLoginChange}
-                    required
-                  />
-                </div>
-                <div className="field password-field">
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    value={loginData.password}
-                    onChange={handleLoginChange}
-                    required
-                  />
-                </div>
-                <div className="pass-link">
-                  <a
-                    href="#"
-                    onClick={() => setIsRequestResetPasswordActive(true)}
-                    className="forget-password"
-                  >
-                    Forgot password?
-                  </a>
-                </div>
-                <div className="field btn">
-                  <div className="btn-layer"></div>
-                  <input type="submit" value="Sign in" />
-                </div>
-                <div className="signup-link">
-                  <p> Not a member? </p>
-                  <a href="#" onClick={() => setIsLoginActive(false)}>
-                    Signup now
-                  </a>
-                </div>
-              </form>
-            )}
-
-            {isVerificationActive /**/ ? (
-              <form onSubmit={handleVerify} className="verify">
-                <div className="field">
-                  <input
-                    type="text"
-                    name="token"
-                    placeholder="Verification Token"
-                    value={verificationToken}
-                    onChange={handleVerificationChange}
-                    required
-                  />
-                </div>
-                <div className="field btn">
-                  <div className="btn-layer"></div>
-                  <input type="submit" value="Verify" />
-                </div>
-                <div className="signup-link">
-                  Incorrect email?{" "}
-                  <a href="#" onClick={() => setIsVerificationActive(false)}>
-                    Back to sign up
-                  </a>
-                </div>
-              </form>
-            ) : (
-              <form onSubmit={handleSignup} className="signup">
-                <div className="field-row">
+                Sign in
+              </label>
+              <label
+                htmlFor="signup"
+                className="slide signup "
+                onClick={() => setIsLoginActive(false)}
+              >
+                Sign up
+              </label>
+              <div
+                className="slider-tab"
+                style={{ left: isLoginActive ? "0%" : "50%" }}
+              ></div>
+            </div>
+            <div
+              className="form-inner"
+              style={{ marginLeft: isLoginActive ? "0%" : "-100%" }}
+            >
+              {isRequestResetPasswordActive ? (
+                <form
+                  onSubmit={handleResetPasswordRequest}
+                  className="request reset password "
+                >
                   <div className="field">
                     <input
                       type="text"
-                      name="firstName"
-                      placeholder="First Name"
-                      value={signupData.firstName}
-                      onChange={handleSignupChange}
-                      //required
+                      name="email"
+                      placeholder="Email Address"
+                      value={resetPasswordData.email}
+                      onChange={handleResetPasswordChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="field btn">
+                    <div className="btn-layer"></div>
+                    <input type="submit" value="Send email" />
+                  </div>
+                  <div className="signup-link">
+                    <a
+                      href="#"
+                      onClick={() => setIsRequestResetPasswordActive(false)}
+                    >
+                      {" "}
+                      Back to Sign in
+                    </a>
+                  </div>
+                </form>
+              ) : isResetPasswordActive ? (
+                <form onSubmit={handleResetPassword} className="reset-password">
+                  <div className="field">
+                    <input
+                      type="text"
+                      name="token"
+                      placeholder="Reset Token"
+                      value={resetPasswordData.token}
+                      onChange={handleResetPasswordChange}
+                      required
                     />
                   </div>
                   <div className="field">
                     <input
-                      type="text"
-                      name="lastName"
-                      placeholder="Last Name"
-                      value={signupData.lastName}
-                      onChange={handleSignupChange}
-                      //required
+                      type="password"
+                      name="newPassword"
+                      placeholder="New Password"
+                      value={resetPasswordData.newPassword}
+                      onChange={handleResetPasswordChange}
+                      required
                     />
                   </div>
-                </div>
-                <div className="field">
-                  <input
-                    type="text"
-                    name="email"
-                    placeholder="Email Address"
-                    value={signupData.email}
-                    onChange={handleSignupChange}
-                    required
-                  />
-                </div>
-                <div className="field">
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    value={signupData.password}
-                    onChange={handleSignupChange}
-                    required
-                  />
-                </div>
-                {showSignupPasswordRequirements && (
-                  <div
-                    className="password-requirements"
-                    style={{ paddingTop: "7px" }}
-                  >
-                    {!signupPasswordRequirements.uppercase && (
-                      <p style={{ color: "#004080" }}>
-                        At least one uppercase letter is required
+                  {showResetPasswordRequirements && (
+                    <div
+                      className="password-requirements"
+                      style={{ paddingTop: "7px" }}
+                    >
+                      {!resetPasswordRequirements.uppercase && (
+                        <p style={{ color: "#004080" }}>
+                          At least one uppercase letter is required
+                        </p>
+                      )}
+                      {resetPasswordRequirements.uppercase &&
+                        !resetPasswordRequirements.specialChar && (
+                          <p style={{ color: "#004080" }}>
+                            At least one special character is required
+                          </p>
+                        )}
+                      {resetPasswordRequirements.uppercase &&
+                        resetPasswordRequirements.specialChar &&
+                        !resetPasswordRequirements.number && (
+                          <p style={{ color: "#004080" }}>
+                            At least one number is required
+                          </p>
+                        )}
+                      {resetPasswordRequirements.uppercase &&
+                        resetPasswordRequirements.specialChar &&
+                        resetPasswordRequirements.number &&
+                        !resetPasswordRequirements.lowercase && (
+                          <p style={{ color: "#004080" }}>
+                            At least one lowercase letter is required
+                          </p>
+                        )}
+                      {resetPasswordRequirements.uppercase &&
+                        resetPasswordRequirements.specialChar &&
+                        resetPasswordRequirements.number &&
+                        resetPasswordRequirements.lowercase &&
+                        !resetPasswordRequirements.length && (
+                          <p style={{ color: "#004080" }}>
+                            At least 8 characters are required
+                          </p>
+                        )}
+                    </div>
+                  )}
+                  <div className="field">
+                    <input
+                      type="password"
+                      name="confirmNewPassword"
+                      placeholder="Confirm New Password"
+                      value={resetPasswordData.confirmNewPassword}
+                      onChange={handleResetPasswordChange}
+                      required
+                    />
+                  </div>
+                  {showResetPasswordsMatch &&
+                    resetPasswordData.confirmNewPassword &&
+                    resetPasswordData.newPassword !==
+                      resetPasswordData.confirmNewPassword && (
+                      <p style={{ color: "#004080", paddingTop: "7px" }}>
+                        Passwords do not match
                       </p>
                     )}
-                    {signupPasswordRequirements.uppercase &&
-                      !signupPasswordRequirements.specialChar && (
-                        <p style={{ color: "#004080" }}>
-                          At least one special character is required
-                        </p>
-                      )}
-                    {signupPasswordRequirements.uppercase &&
-                      signupPasswordRequirements.specialChar &&
-                      !signupPasswordRequirements.number && (
-                        <p style={{ color: "#004080" }}>
-                          At least one number is required
-                        </p>
-                      )}
-                    {signupPasswordRequirements.uppercase &&
-                      signupPasswordRequirements.specialChar &&
-                      signupPasswordRequirements.number &&
-                      !signupPasswordRequirements.lowercase && (
-                        <p style={{ color: "#004080" }}>
-                          At least one lowercase letter is required
-                        </p>
-                      )}
-                    {signupPasswordRequirements.uppercase &&
-                      signupPasswordRequirements.specialChar &&
-                      signupPasswordRequirements.number &&
-                      signupPasswordRequirements.lowercase &&
-                      !signupPasswordRequirements.length && (
-                        <p style={{ color: "#004080" }}>
-                          At least 8 characters are required
-                        </p>
-                      )}
+                  <div className="field btn">
+                    <div className="btn-layer"></div>
+                    <input type="submit" value="Reset Password" />
                   </div>
-                )}
-                <div className="field">
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm password"
-                    value={signupData.confirmPassword}
-                    onChange={handleSignupChange}
-                    required
-                  />
-                </div>
-                {showSignupPasswordsMatch &&
-                  signupData.confirmPassword &&
-                  signupData.password !== signupData.confirmPassword && (
-                    <p style={{ color: "#004080", paddingTop: "7px" }}>
-                      Passwords do not match
-                    </p>
+                </form>
+              ) : (
+                <form onSubmit={handleLogin} className="login">
+                  <div className="field">
+                    <input
+                      type="text"
+                      name="email"
+                      placeholder="Email Address"
+                      value={loginData.email}
+                      onChange={handleLoginChange}
+                      required
+                    />
+                  </div>
+                  <div className="field password-field">
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Password"
+                      value={loginData.password}
+                      onChange={handleLoginChange}
+                      required
+                    />
+                  </div>
+                  <div className="pass-link">
+                    <a
+                      href="#"
+                      onClick={() => setIsRequestResetPasswordActive(true)}
+                      className="forget-password"
+                    >
+                      Forgot password?
+                    </a>
+                  </div>
+                  <div className="field btn">
+                    <div className="btn-layer"></div>
+                    <input type="submit" value="Sign in" />
+                  </div>
+                  <div className="signup-link">
+                    <p> Not a member? </p>
+                    <a href="#" onClick={() => setIsLoginActive(false)}>
+                      Signup now
+                    </a>
+                  </div>
+                </form>
+              )}
+
+              {isVerificationActive /**/ ? (
+                <form onSubmit={handleVerify} className="verify">
+                  <div className="field">
+                    <input
+                      type="text"
+                      name="token"
+                      placeholder="Verification Token"
+                      value={verificationToken}
+                      onChange={handleVerificationChange}
+                      required
+                    />
+                  </div>
+                  <div className="field btn">
+                    <div className="btn-layer"></div>
+                    <input type="submit" value="Verify" />
+                  </div>
+                  <div className="signup-link">
+                    Incorrect email?{" "}
+                    <a href="#" onClick={() => setIsVerificationActive(false)}>
+                      Back to sign up
+                    </a>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleSignup} className="signup">
+                  <div className="field-row">
+                    <div className="field">
+                      <input
+                        type="text"
+                        name="firstName"
+                        placeholder="First Name"
+                        value={signupData.firstName}
+                        onChange={handleSignupChange}
+                        //required
+                      />
+                    </div>
+                    <div className="field">
+                      <input
+                        type="text"
+                        name="lastName"
+                        placeholder="Last Name"
+                        value={signupData.lastName}
+                        onChange={handleSignupChange}
+                        //required
+                      />
+                    </div>
+                  </div>
+                  <div className="field">
+                    <input
+                      type="text"
+                      name="email"
+                      placeholder="Email Address"
+                      value={signupData.email}
+                      onChange={handleSignupChange}
+                      required
+                    />
+                  </div>
+                  <div className="field">
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Password"
+                      value={signupData.password}
+                      onChange={handleSignupChange}
+                      required
+                    />
+                  </div>
+                  {showSignupPasswordRequirements && (
+                    <div
+                      className="password-requirements"
+                      style={{ paddingTop: "7px" }}
+                    >
+                      {!signupPasswordRequirements.uppercase && (
+                        <p style={{ color: "#004080" }}>
+                          At least one uppercase letter is required
+                        </p>
+                      )}
+                      {signupPasswordRequirements.uppercase &&
+                        !signupPasswordRequirements.specialChar && (
+                          <p style={{ color: "#004080" }}>
+                            At least one special character is required
+                          </p>
+                        )}
+                      {signupPasswordRequirements.uppercase &&
+                        signupPasswordRequirements.specialChar &&
+                        !signupPasswordRequirements.number && (
+                          <p style={{ color: "#004080" }}>
+                            At least one number is required
+                          </p>
+                        )}
+                      {signupPasswordRequirements.uppercase &&
+                        signupPasswordRequirements.specialChar &&
+                        signupPasswordRequirements.number &&
+                        !signupPasswordRequirements.lowercase && (
+                          <p style={{ color: "#004080" }}>
+                            At least one lowercase letter is required
+                          </p>
+                        )}
+                      {signupPasswordRequirements.uppercase &&
+                        signupPasswordRequirements.specialChar &&
+                        signupPasswordRequirements.number &&
+                        signupPasswordRequirements.lowercase &&
+                        !signupPasswordRequirements.length && (
+                          <p style={{ color: "#004080" }}>
+                            At least 8 characters are required
+                          </p>
+                        )}
+                    </div>
                   )}
-                <div className="field btn">
-                  <div className="btn-layer"></div>
-                  <input type="submit" value="Signup" />
-                </div>
-              </form>
-            )}
+                  <div className="field">
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Confirm password"
+                      value={signupData.confirmPassword}
+                      onChange={handleSignupChange}
+                      required
+                    />
+                  </div>
+                  {showSignupPasswordsMatch &&
+                    signupData.confirmPassword &&
+                    signupData.password !== signupData.confirmPassword && (
+                      <p style={{ color: "#004080", paddingTop: "7px" }}>
+                        Passwords do not match
+                      </p>
+                    )}
+                  <div className="field btn">
+                    <div className="btn-layer"></div>
+                    <input type="submit" value="Signup" />
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
+          {/*{isLoading && <div className="loading">Processing...</div>} {/* Loading indicator */}
         </div>
-        {/*{isLoading && <div className="loading">Processing...</div>} {/* Loading indicator */}
       </div>
-    </>
+    </div>
   );
 };
 

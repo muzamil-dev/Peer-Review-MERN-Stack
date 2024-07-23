@@ -19,16 +19,20 @@ html,body{
   color: #fff;
 }
 
-body {
+.page-container {
+  height: 100%;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  gap: 3rem;
 }
 
 .logo-container {
   display: flex;
   flex-direction: column;
+
   align-items: center;
-  margin-bottom: 2rem;
 }
 
 .wrapper{
