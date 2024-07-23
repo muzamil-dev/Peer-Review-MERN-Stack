@@ -327,7 +327,7 @@ const LoginPage = () => {
         </svg>
       </div>
       <div className="wrapper">
-        <div className="title-text">
+        {/* <div className="title-text">
           <div
             className={`title ${
               isLoginActive
@@ -338,12 +338,12 @@ const LoginPage = () => {
             }`}
           >
             {isLoginActive
-              ? "Login Form"
+              ? "Login"
               : isVerificationActive
               ? "Verify Account"
-              : "Signup Form"}
+              : "Signup"}
           </div>
-        </div>
+        </div> */}
         <div className="form-container">
           <div className="slide-controls">
             <input
@@ -365,14 +365,14 @@ const LoginPage = () => {
               className="slide login"
               onClick={() => setIsLoginActive(true)}
             >
-              Login
+              Sign in
             </label>
             <label
               htmlFor="signup"
-              className="slide signup"
+              className="slide signup "
               onClick={() => setIsLoginActive(false)}
             >
-              Signup
+              Sign up
             </label>
             <div
               className="slider-tab"
@@ -409,7 +409,7 @@ const LoginPage = () => {
                     onClick={() => setIsRequestResetPasswordActive(false)}
                   >
                     {" "}
-                    Back to sign in
+                    Back to Sign in
                   </a>
                 </div>
               </form>
@@ -512,7 +512,7 @@ const LoginPage = () => {
                     required
                   />
                 </div>
-                <div className="field">
+                <div className="field password-field">
                   <input
                     type="password"
                     name="password"
@@ -526,16 +526,17 @@ const LoginPage = () => {
                   <a
                     href="#"
                     onClick={() => setIsRequestResetPasswordActive(true)}
+                    className="forget-password"
                   >
                     Forgot password?
                   </a>
                 </div>
                 <div className="field btn">
                   <div className="btn-layer"></div>
-                  <input type="submit" value="Login" />
+                  <input type="submit" value="Sign in" />
                 </div>
                 <div className="signup-link">
-                  Not a member?{" "}
+                  <p> Not a member? </p>
                   <a href="#" onClick={() => setIsLoginActive(false)}>
                     Signup now
                   </a>
