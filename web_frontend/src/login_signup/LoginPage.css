@@ -5,14 +5,12 @@
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
-.buttoon{
+.button{
   margin-top: 10px;
 }
 html,body{
-  display: grid;
   height: 100%;
   width: 100%;
-  place-items: center;
   background: -webkit-linear-gradient(left, #003366,#004080,#0059b3
 , #0073e6);
 }
@@ -21,18 +19,17 @@ html,body{
   color: #fff;
 }
 
+body {
+  display: flex;
+  align-items: center;
+}
+
 .logo-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 2rem;
 }
-
-.logo {
-  width: 500px;
-  height: 100px;
-}
-
 
 .wrapper{
   overflow: hidden;

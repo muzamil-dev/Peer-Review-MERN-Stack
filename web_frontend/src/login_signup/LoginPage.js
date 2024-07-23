@@ -299,7 +299,7 @@ const LoginPage = () => {
       <div className="logo-container">
         <h1>Welcome To</h1>
         <svg
-          className="logo looka-1j8o68f"
+          className="looka-1j8o68f"
           width="533.0000000000001"
           height="82.2294974960152"
           viewBox="0 0 369.65517241379314 57.02919150917273"
@@ -310,6 +310,7 @@ const LoginPage = () => {
             featurekey="odWo6G-0"
             transform="matrix(0.6553187074320751,0,0,0.6553187074320751,-1.2824166930921443,-2.94033410034786)"
             fill="#FFFFFF"
+
           >
             <path
               xmlns="http://www.w3.org/2000/svg"

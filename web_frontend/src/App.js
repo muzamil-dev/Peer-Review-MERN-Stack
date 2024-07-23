@@ -15,6 +15,8 @@ import AnalyticsPage from "./AnalyticsPage/AnalyticsPage"; // Import the Analyti
 import { SnackbarProvider } from "notistack";
 import UserAnalyticsPage from "./UserAnalyticsPage.js";
 import MainLayout from "./layouts/MainLayout.jsx";
+import "../src/styles/App.css"
+
 
 function App() {
   return (
