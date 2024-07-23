@@ -20,6 +20,18 @@ html,body{
   background: #1a75ff;
   color: #fff;
 }
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.logo {
+  width: 500px;
+  height: 100px;
+}
 .wrapper{
   overflow: hidden;
   max-width: 35rem;
