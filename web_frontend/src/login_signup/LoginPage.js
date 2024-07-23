@@ -215,7 +215,12 @@ const LoginPage = () => {
     /**/
 
     return (
-        <div className="wrapper">
+        <>
+            <div>
+                <h1>Welcome To</h1>
+                <img src="/assets/logo.svg"></img>
+            </div>
+            <div className="wrapper">
             <div className="title-text">
             <div className={`title ${isLoginActive ? 'login' : (isVerificationActive ? 'Verify Account' : 'Signup Form')}`}>
                     {isLoginActive ? 'Login Form' : (isVerificationActive ? 'Verify Account' : 'Signup Form')}
@@ -457,6 +462,8 @@ const LoginPage = () => {
             </div>
             {/*{isLoading && <div className="loading">Processing...</div>} {/* Loading indicator */}
         </div>
+        </>
+        
     );
 };
 
