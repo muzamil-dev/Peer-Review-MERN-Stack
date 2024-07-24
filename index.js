@@ -1,6 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 
+// Routers
+import workspaceRoutes from './routes/workspaces.js';
+
 // Access env variables
 dotenv.config();
 
@@ -10,6 +13,9 @@ const PORT = process.env.PORT || 5000;
 // Initialize the app
 const app = express();
 app.use(express.json());
+
+// Use routers
+app.use("/workspaces", workspaceRoutes);
 
 // Test to ping the server
 app.get("/ping", (req, res) => {
