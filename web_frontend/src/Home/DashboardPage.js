@@ -5,6 +5,8 @@ import "./DashboardPage.css";
 import Api from "../Api.js";
 //import snackbar
 import { enqueueSnackbar } from "notistack";
+import { MdAddCircleOutline } from "react-icons/md";
+import { BsBoxArrowRight } from "react-icons/bs";
 
 const DashboardPage = () => {
   const [workspaces, setWorkspaces] = useState([]);
@@ -231,7 +233,33 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="dashboard">
+    <div className="">
+      <nav className="flex items-center border bg-white p-3 justify-between rounded">
+        <div className="">
+          <a className="text-black text-2xl no-underline" href="/">
+            Dashboard
+          </a>
+        </div>
+        <div className="flex gap-6">
+          <button
+            type="button"
+            data-toggle="modal"
+            data-target="#createWorkspaceModal"
+            className="flex border border-indigo-500 p-2 rounded bg-green-500"
+          >
+            <MdAddCircleOutline className="text-black size-6" />
+          </button>
+          <button
+            type="button"
+            data-toggle="modal"
+            data-target="#joinWorkspaceModal"
+            className="flex border p-2 rounded bg-green-500"
+          >
+            <BsBoxArrowRight className="text-black size-6" />
+          </button>
+        </div>
+      </nav>
+      <h1 className="header-large">Workspaces</h1>
       <div className="container customContainer">
         <div className="row workspace-cards">
           {workspaces.map((workspace) => (
@@ -250,24 +278,6 @@ const DashboardPage = () => {
               </div>
             </div>
           ))}
-        </div>
-        <div className="workspace-actions text-center">
-          <button
-            type="button"
-            className="btn btn-primary btn-large mb-4 btn-center"
-            data-toggle="modal"
-            data-target="#joinWorkspaceModal"
-          >
-            Join
-          </button>
-          <button
-            type="button"
-            className="btn btn-success btn-large mb-4 btn-center"
-            data-toggle="modal"
-            data-target="#createWorkspaceModal"
-          >
-            Create
-          </button>
         </div>
       </div>
 

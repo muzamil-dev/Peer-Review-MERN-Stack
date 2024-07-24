@@ -16,22 +16,15 @@
     color: white !important;
 }
 
-.dashboard {
-    width: 75vw;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-y: auto;
-    padding: 50px;
-    border-radius: 20px;
-}
 
 h2{
     font-size: 2.5vh;
     font-weight: bold;
     margin-bottom: 10px;
 }
+
+
+
 
 .main-container {
     display: flex !important; 
@@ -166,9 +159,6 @@ h2{
     cursor: pointer;
 } */
 
-button:hover {
-    background-color: #0066cc;
-}
 
 .domain-restrictions {
     margin-bottom: 10px;

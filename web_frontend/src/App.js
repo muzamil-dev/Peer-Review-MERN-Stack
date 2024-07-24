@@ -14,9 +14,7 @@ import ReviewPage from "./ReviewPage";
 import AnalyticsPage from "./AnalyticsPage/AnalyticsPage"; // Import the AnalyticsPage component
 import { SnackbarProvider } from "notistack";
 import UserAnalyticsPage from "./UserAnalyticsPage.js";
-import MainLayout from "./layouts/MainLayout.jsx";
-import "../src/styles/App.css"
-
+import "../src/styles/App.css";
 
 function App() {
   return (
@@ -27,34 +25,29 @@ function App() {
         <div className="App">
           <Routes>
             <Route index element={<LoginPage />} />
-            <Route path="/" element={<MainLayout />}>
-              <Route path="/DashboardPage" element={<DashboardPage />} />
-              <Route path="/ApiExamples" element={<Example />} />
-              <Route
-                path="/groups/:workspaceId"
-                element={<CustomGroupsPage />}
-              />
-              <Route
-                path="/workspaces/:workspaceId/admin"
-                element={<GroupsPageAdmin />}
-              />
-              <Route path="/ApiExamples" element={<ApiExamples />} />
-              <Route
-                path="/formsAdmin/:workspaceId"
-                element={<FormsPageAdmin />}
-              />
-              <Route
-                path="/createForm/:workspaceId"
-                element={<CreateFormPage />}
-              />
-              <Route path="/UserDashboard" element={<UserDashboard />} />
-              <Route path="/Review/:reviewId" element={<ReviewPage />} />
-              <Route path="/Analytics/:userId" element={<AnalyticsPage />} />
-              <Route
-                path="/workspace/:workspaceId/user/:userId/analytics"
-                element={<UserAnalyticsPage />}
-              />
-            </Route>
+            <Route path="/DashboardPage" element={<DashboardPage />} />
+            <Route path="/ApiExamples" element={<Example />} />
+            <Route path="/groups/:workspaceId" element={<CustomGroupsPage />} />
+            <Route
+              path="/workspaces/:workspaceId/admin"
+              element={<GroupsPageAdmin />}
+            />
+            <Route path="/ApiExamples" element={<ApiExamples />} />
+            <Route
+              path="/formsAdmin/:workspaceId"
+              element={<FormsPageAdmin />}
+            />
+            <Route
+              path="/createForm/:workspaceId"
+              element={<CreateFormPage />}
+            />
+            <Route path="/UserDashboard" element={<UserDashboard />} />
+            <Route path="/Review/:reviewId" element={<ReviewPage />} />
+            <Route path="/Analytics/:userId" element={<AnalyticsPage />} />
+            <Route
+              path="/workspace/:workspaceId/user/:userId/analytics"
+              element={<UserAnalyticsPage />}
+            />
           </Routes>
         </div>
       </Router>
