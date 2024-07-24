@@ -1,9 +1,9 @@
-import pg from "pg"
+import pg from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-// Fill in client information from .env
+// Fill in pool information from .env
 const pool = new pg.Pool({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,

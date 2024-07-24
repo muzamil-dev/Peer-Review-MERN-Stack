@@ -1,3 +1,5 @@
+import HttpError from "./utils/httpError.js";
+
 // Get a group by id (excluding members)
 export const getById = async(db, groupId) => {
     try{
@@ -58,6 +60,63 @@ export const getByIdWithMembers = async(db, groupId) => {
     catch(err){
         return { error: err.message, status: 500 };
     }
+}
+
+// Get basic information about each group in a workspace
+export const getByWorkspace = async(db, workspaceId) => {
+    // Query for groups and members
+    const res = await db.query(
+        `SELECT g.id AS "groupId", g.name
+        FROM workspaces AS w
+        LEFT JOIN groups AS g
+        ON g.workspace_id = w.id
+        WHERE w.id = $1
+        GROUP BY g.id
+        ORDER BY g.id`,
+        [workspaceId]
+    );
+    // Check if the workspace was not found
+    if (res.rows.length === 0)
+        throw new HttpError("The requested workspace was not found", 404);
+    // Check if a null group was joined. If so, the workspace exists but has no groups
+    if (!res.rows[0].groupId)
+        res.rows = [];
+    // Return formatted json
+    return res.rows;
+}
+
+// Get all groups in a workspace with members
+export const getByWorkspaceWithMembers = async(db, workspaceId) => {
+    // Query for groups and members
+    const res = await db.query(
+        `SELECT g.id AS "groupId", g.name,
+        jsonb_agg(
+            jsonb_build_object(
+                'userId', u.id,
+                'firstName', u.first_name,
+                'lastName', u.last_name
+            ) ORDER BY u.last_name, u.id
+        ) as members
+        FROM workspaces AS w
+        LEFT JOIN groups AS g
+        ON g.workspace_id = w.id
+        LEFT JOIN memberships AS m
+        ON g.id = m.group_id
+        LEFT JOIN users AS u
+        ON u.id = m.user_id
+        WHERE w.id = $1
+        GROUP BY g.id
+        ORDER BY g.id`,
+        [workspaceId]
+    );
+    // Check if the workspace was not found
+    if (res.rows.length === 0)
+        throw new HttpError("The requested workspace was not found", 404);
+    // Check if a null group was joined. If so, the workspace exists but has no groups
+    if (!res.rows[0].groupId)
+        res.rows = [];
+    // Return formatted json
+    return res.rows;
 }
 
 // Create a group within a given workspace

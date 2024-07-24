@@ -1,55 +1,51 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+import HttpError from "./utils/httpError.js";
+
 // Login to a user's account
 export const login = async(db, email, password) => {
-    try{
-        const res = await getByEmail(db, email);
-        if (res.error) // Will return if user not found
-            return res;
-        // Check that the user has a password
-        if (!res.password)
-            return {
-                error: "Cannot log in. Please set a password using 'Forgot my Password'",
-                status: 401
-            };
-        // Check if the password is correct
-        if (!await bcrypt.compare(password, res.password))
-            return {
-                error: "The email/password combination was incorrect",
-                status: 401
-            }
-        // Select data to include in jwt
-        const data = {
-            userId: res.userId,
-            firstName: res.firstName,
-            lastName: res.lastName,
-            email: res.email
-        };
-        // Assign JWTs (access and refresh)
-        const accessToken = jwt.sign(
-            data,
-            process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: "15m" }
+    const res = (await db.query(
+        `SELECT password FROM users WHERE email = $1`, [email]
+    )).rows[0];
+    if (!res)
+        throw new HttpError("The requested user was not found", 404);
+    // Check that the user has a password
+    if (!res.password)
+        throw new HttpError(
+            "Cannot log in. Please set a password using 'Forgot my Password'",
+            401
         );
-        const refreshToken = jwt.sign(
-            data,
-            process.env.REFRESH_TOKEN_SECRET,
-            { expiresIn: "1d" }
-        );
-        // Insert the refresh token into the database
-        const refreshUpload = await db.query(
-            `UPDATE users SET refresh_token = $1 WHERE id = $2`,
-            [refreshToken, data.userId]
-        );
-        return {
-            accessToken, refreshToken,
-            refreshTokenAge: 24*60*60*1000
-        };
-    }
-    catch(err){
-        return { error: err.message, status: 500 };
-    }
+    // Check if the password is correct
+    if (!await bcrypt.compare(password, res.password))
+        throw new HttpError("The email/password combination was incorrect", 401);
+    // Select data to include in jwt
+    const data = {
+        userId: res.userId,
+        firstName: res.firstName,
+        lastName: res.lastName,
+        email: res.email
+    };
+    // Assign JWTs (access and refresh)
+    const accessToken = jwt.sign(
+        data,
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "15m" }
+    );
+    const refreshToken = jwt.sign(
+        data,
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: "1d" }
+    );
+    // Insert the refresh token into the database
+    const refreshUpload = await db.query(
+        `UPDATE users SET refresh_token = $1 WHERE id = $2`,
+        [refreshToken, data.userId]
+    );
+    return {
+        accessToken, refreshToken,
+        refreshTokenAge: 24*60*60*1000
+    };
 }
 
 // Get a user by their id
@@ -94,7 +90,6 @@ export const getByEmail = async(db, email) => {
             firstName: data.first_name,
             lastName: data.last_name,
             email: data.email,
-            password: data.password,
             role: data.role
         };
     }
@@ -110,10 +105,7 @@ export const checkAdmin = async(db, userId) => {
     if (user.error) // Return the error if there was one
         return user;
     if (user.role !== 'Admin')
-        return {
-            error: "User is not authorized to make this request",
-            status: 403
-        }
+        throw new HttpError("User is not authorized to make this request", 403);
     return { message: "User is authorized" }
 }
 
