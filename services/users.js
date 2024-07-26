@@ -133,35 +133,30 @@ export const createUser = async(db, user) => {
 // Users is an array of user objects, assumed to be students
 // If a given user exists, the row will be updated
 export const createUsers = async(db, users) => {
-    try{
-        // Create the users
-        // Separate fields into individual arrays
-        let query = `INSERT INTO users 
-        (first_name, last_name, email, role) VALUES `;
-        // Build the insert clause
-        query += users.map(
-            user => {
-                if (!user.firstName || !user.lastName || !user.email)
-                    throw new Error('One or more first names, last names, or emails is missing');
-                return `('${user.firstName}', '${user.lastName}',
-                '${user.email}', 'User')`;
-            }
-        ).join(', ');
+    // Create the users
+    // Separate fields into individual arrays
+    let query = `INSERT INTO users 
+    (first_name, last_name, email, role) VALUES `;
+    // Build the insert clause
+    query += users.map(
+        user => {
+            if (!user.firstName || !user.lastName || !user.email)
+                throw new Error('One or more first names, last names, or emails is missing');
+            return `('${user.firstName}', '${user.lastName}',
+            '${user.email}', 'User')`;
+        }
+    ).join(', ');
 
-        // Set the conflict clause
-        query += ` ON CONFLICT (email) DO NOTHING `;
-        // Set the returning clause
-        query += `RETURNING id AS "userId", first_name AS "firstName", last_name AS "lastName", email`;
+    // Set the conflict clause
+    query += ` ON CONFLICT (email) DO NOTHING `;
+    // Set the returning clause
+    query += `RETURNING id AS "userId", first_name AS "firstName", last_name AS "lastName", email`;
 
-        // Run the user query
-        const res = await db.query(query);
-        // Return success message
-        return { 
-            message: `Created ${res.rows.length} new users successfully`,
-            users: res.rows
-        };
-    }
-    catch(err){
-        return { error: err.message, status: 500 };
-    }
+    // Run the user query
+    const res = await db.query(query);
+    // Return success message
+    return { 
+        message: `Created ${res.rows.length} new users successfully`,
+        users: res.rows
+    };
 }

@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 
 // Routers
+import groupRoutes from './routes/groups.js';
 import workspaceRoutes from './routes/workspaces.js';
 
 // Access env variables
@@ -15,12 +16,21 @@ const app = express();
 app.use(express.json());
 
 // Use routers
+app.use("/groups", groupRoutes);
 app.use("/workspaces", workspaceRoutes);
 
 // Test to ping the server
 app.get("/ping", (req, res) => {
     const message = "If you're seeing this, the api is accessible";
     return res.json({ message });
+});
+
+// A joke <3
+app.get("/joke", (req, res) => {
+    return res.json({
+        question: "Why did Hashim cross the road?",
+        answer: "To work on 'The Jokes Webapp'"
+    });
 });
 
 // Listen on the provided port
