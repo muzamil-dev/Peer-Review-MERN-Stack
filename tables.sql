@@ -8,6 +8,12 @@ CREATE TABLE users(
     refresh_token TEXT
 );
 
+CREATE TABLE password_reset(
+    email TEXT UNIQUE REFERENCES users (email) ON DELETE CASCADE,
+    reset_token TEXT UNIQUE,
+    reset_token_expiry TIMESTAMP WITH TIME ZONE
+);
+
 CREATE TABLE workspaces(
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL
@@ -33,4 +39,5 @@ CREATE TABLE memberships(
 DROP TABLE memberships;
 DROP TABLE groups;
 DROP TABLE workspaces;
+DROP TABLE password_reset;
 DROP TABLE users;

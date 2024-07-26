@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 
 // Routers
 import groupRoutes from './routes/groups.js';
+import userRoutes from './routes/users.js';
 import workspaceRoutes from './routes/workspaces.js';
 
 // Access env variables
@@ -17,6 +18,7 @@ app.use(express.json());
 
 // Use routers
 app.use("/groups", groupRoutes);
+app.use("/users", userRoutes);
 app.use("/workspaces", workspaceRoutes);
 
 // Test to ping the server

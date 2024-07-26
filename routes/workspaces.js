@@ -12,7 +12,7 @@ import * as GroupService from "../services/groups.js"
 import { convertEmailAndGroupNames } from '../services/utils/conversions.js';
 
 const router = express.Router();
-const upload = multer();
+const upload = multer(); // Store incoming csv in memory
 
 // Get basic information about a workspace
 router.get("/:workspaceId", async(req, res) => {
@@ -84,7 +84,7 @@ router.post("/create", async(req, res) => {
     }
 });
 
-// Import csv woooooo
+// Import a csv to create users, groups, and join them in a workspace
 router.post("/import", upload.single('csvFile'), async(req, res) => {
     let db;
     try{
