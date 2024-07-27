@@ -7,7 +7,7 @@ import { sendEmail } from "./emailService.js";
 // Login to a user's account
 export const login = async(db, email, password) => {
     const res = (await db.query(
-        `SELECT password FROM users WHERE email = $1`, [email]
+        `SELECT * FROM users WHERE email = $1`, [email]
     )).rows[0];
     if (!res)
         throw new HttpError("The requested user was not found", 404);
@@ -22,9 +22,9 @@ export const login = async(db, email, password) => {
         throw new HttpError("The email/password combination was incorrect", 401);
     // Select data to include in jwt
     const data = {
-        userId: res.userId,
-        firstName: res.firstName,
-        lastName: res.lastName,
+        userId: res.id,
+        firstName: res.first_name,
+        lastName: res.last_name,
         email: res.email
     };
     // Assign JWTs (access and refresh)

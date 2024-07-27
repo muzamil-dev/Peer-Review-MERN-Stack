@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../config.js';
+import verifyJWT from '../middleware/verifyJWT.js';
 
 import HttpError from '../services/utils/httpError.js';
 
@@ -7,6 +8,10 @@ import * as GroupService from "../services/groups.js";
 import * as WorkspaceService from "../services/workspaces.js";
 
 const router = express.Router();
+
+// Require JWT
+if (process.env.JWT_ENABLED === "true")
+    router.use(verifyJWT);
 
 // Get a group by its id
 router.get("/:groupId", async(req, res) => {

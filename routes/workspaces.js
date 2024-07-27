@@ -3,6 +3,7 @@ import multer from 'multer';
 import csv from 'csvtojson';
 
 import pool from '../config.js';
+import verifyJWT from '../middleware/verifyJWT.js';
 
 import HttpError from '../services/utils/httpError.js';
 
@@ -13,6 +14,10 @@ import { convertEmailAndGroupNames } from '../services/utils/conversions.js';
 
 const router = express.Router();
 const upload = multer(); // Store incoming csv in memory
+
+// Require JWT
+if (process.env.JWT_ENABLED === "true")
+    router.use(verifyJWT);
 
 // Get basic information about a workspace
 router.get("/:workspaceId", async(req, res) => {
