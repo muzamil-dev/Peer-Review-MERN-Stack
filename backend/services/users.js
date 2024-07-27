@@ -10,53 +10,47 @@ import generateCode from "./generateCode.js";
 
 dotenv.config();
 
-// Sign up for a new account
-export const signup = async(firstName, lastName, email, password) => {
-    try{
-        // Check that the user provided a valid email
+export const signup = async (firstName, lastName, email, password) => {
+    try {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email))
-            return { 
+            return {
                 error: "Invalid email address",
                 status: 400
             };
 
-        // Check that user doesn't already exist
         const existingUser = await getByEmail(email);
         if (existingUser)
-            return { 
+            return {
                 error: "An account with this email already exists",
                 status: 400
             };
-        
-        // Insert the new temporary user
+
         const verificationToken = crypto.randomInt(100000, 1000000).toString();
-        const verificationTokenExpires = Date.now() + 10*60*1000; // 10 minutes
-        const tempUser = await db.query(
-            `INSERT INTO temp_users VALUES
-            ($1, $2, $3, $4, $5, $6)
+        const verificationTokenExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+        await db.query(
+            `INSERT INTO temp_users (first_name, last_name, email, password, verification_token, verification_token_expiry)
+            VALUES ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (email) DO UPDATE SET
             first_name = EXCLUDED.first_name,
             last_name = EXCLUDED.last_name,
             password = EXCLUDED.password,
             verification_token = EXCLUDED.verification_token,
             verification_token_expiry = EXCLUDED.verification_token_expiry`,
-            [firstName, lastName, email, password, verificationToken, 
+            [firstName, lastName, email, password, verificationToken,
             (new Date(verificationTokenExpires)).toISOString()]
         );
 
-        // Generate the email with the token and sending it
         const message = `
             <p>Please verify your email by entering the following token:</p>
             <p><strong>${verificationToken}</strong></p>
         `;
         await sendEmail(email, 'Email Verification', message);
         return { message: "User created. Please check your email for verification." };
-    }
-    catch(err){
+    } catch (err) {
         return { error: err.message, status: 500 };
     }
-}
+};
 
 // Login to a user's account
 export const login = async(email, password) => {
@@ -99,40 +93,48 @@ export const login = async(email, password) => {
 }
 
 // Verify the user's email on signup
-export const verifyEmail = async(token) => {
-    try{
+export const verifyEmail = async (token) => {
+    try {
         const res = await db.query(
-            `SELECT * FROM temp_users
-            WHERE verification_token = $1`,
+            `SELECT * FROM temp_users WHERE verification_token = $1`,
             [token]
         );
         const data = res.rows[0];
+
         // Token was not found
-        if (!data)
+        if (!data) {
             return {
                 error: "No account was found with this token",
                 status: 401
             };
+        }
 
         // Token was found but it expired
-        if ((new Date(data.verification_token_expiry)) < Date.now())
+        if ((new Date(data.verification_token_expiry)) < Date.now()) {
             return {
                 error: "Verification token expired. Please sign up again",
                 status: 401
             };
-        
+        }
+
         // Verification successful, create the new user
-        const newUser = await db.query(
+        await db.query(
             `INSERT INTO users (first_name, last_name, email, password)
             VALUES ($1, $2, $3, $4)`,
             [data.first_name, data.last_name, data.email, data.password]
         );
-        return { message: "User verified successfully" }
-    }
-    catch(err){
+
+        // Delete the temporary user entry
+        await db.query(
+            `DELETE FROM temp_users WHERE verification_token = $1`,
+            [token]
+        );
+
+        return { message: "User verified successfully" };
+    } catch (err) {
         return { error: err.message, status: 500 };
     }
-}
+};
 
 // Function to request a password reset
 export const requestPasswordReset = async(email) => {

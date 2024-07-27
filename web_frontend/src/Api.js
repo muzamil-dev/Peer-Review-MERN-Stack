@@ -280,9 +280,9 @@ export default {
          */
         GetAllReviewsByUser: async (assignmentId, userId) => {
             let response;
-            if (!userId){
+            if (!userId) {
                 response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/user`), null);
-            } else{
+            } else {
                 response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/user/${userId}`), null);
             }
             return {
@@ -383,7 +383,7 @@ export default {
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
         DeleteAssignment: async (assignmentId, userId) => {
-            const payload = {userId};
+            const payload = { userId };
             const response = await apiRequest(DELETE, getUrl(ASSIGNMENTS, assignmentId), payload);
             return {
                 status: response.status,
@@ -466,23 +466,19 @@ export default {
         },
 
         /**
-         * Creates an account with the specified information.
-         * @param {string} firstName 
-         * @param {string} middleName 
-         * @param {string} lastName 
-         * @param {string} email 
-         * @param {string} password 
-         * @returns {Promise<{ status: number, data: {}, message: string }>} The freshly created user's data
-         */
+     * Creates an account with the specified information.
+     * @param {string} firstName 
+     * @param {string} lastName 
+     * @param {string} email 
+     * @param {string} password 
+     * @returns {Promise<{ status: number, data: {}, message: string }>} The freshly created user's data
+     */
         CreateAccount: async (firstName, lastName, email, password) => {
-            
-            //make the rest of the letters lowercase
             firstName = firstName.toLowerCase();
             lastName = lastName.toLowerCase();
-            //make first letter of first and last name uppercase
             firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
-            lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1); 
-
+            lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
+    
             const payload = {
                 firstName,
                 lastName,
@@ -500,7 +496,6 @@ export default {
                 message: response.data.message
             };
         },
-
         /**
          * Verify the token for the user
          * @param {string} email 
@@ -883,7 +878,7 @@ export default {
          * }>}
          */
         GetAnalyticsForUser: async (targetId, workspaceId, userId) => {
-            const payload = {userId};
+            const payload = { userId };
             const response = await apiRequest(GET, getUrl(ANALYTICS, `workspace/${workspaceId}/user/${targetId}`), payload);
             return {
                 status: response.status,
@@ -909,8 +904,8 @@ export default {
          *  message: string
          * }>}
          */
-        GetAnalyticsForAssignment: async (assignmentId, userId, page=0, perPage=10) => {
-            const payload = {userId};
+        GetAnalyticsForAssignment: async (assignmentId, userId, page = 0, perPage = 10) => {
+            const payload = { userId };
             const response = await apiRequest(GET, getUrl(ANALYTICS, `assignment/${assignmentId}?page=${page}&perPage=${perPage}`), payload);
             return {
                 status: response.status,
