@@ -67,6 +67,40 @@ router.post("/create", async(req, res) => {
     }
 });
 
+// Edit a group's info (only name)
+router.put("/edit", async(req, res) => {
+    let db; // Save the client for use in all blocks
+    try{
+        db = await pool.connect();
+        await db.query('BEGIN');
+        const { userId, groupId, name } = req.body;
+        const updates = { name };
+        // Check that the groupId was provided
+        if (!groupId)
+            throw new HttpError("One or more required fields is missing", 400);
+        // Get the group workspace
+        const workspaceId = (await GroupService.getById(db, groupId)).workspaceId;
+        // Check that the provided user is an instructor of the workspace
+        await WorkspaceService.checkInstructor(db, userId, workspaceId);
+        // Edit the workspace
+        const msg = await GroupService.edit(db, groupId, updates);
+        // Commit and release connection
+        await db.query('COMMIT');
+        // Send data and release
+        return res.json(msg);
+    }
+    catch(err){
+        if (db) 
+            await db.query('ROLLBACK');
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.release();
+    }
+});
+
 // Delete a provided group
 router.delete("/:groupId/delete", async(req, res) => {
     let db; // Save the client for use in all blocks

@@ -165,6 +165,32 @@ export const moveUser = async(db, userId, workspaceId, groupId) => {
         return { message: "Added user to group successfully" }
 }
 
+// Edit a group (name only)
+export const edit = async(db, groupId, updates) => {
+    // Find edited fields
+    const edits = {};
+    if (updates.name)
+        edits.name = updates.name;
+
+    // Separate keys and values
+    const keys = Object.keys(edits);
+    const values = Object.values(edits);
+    if (keys.length === 0)
+        throw new HttpError("Could not edit because no fields were provided", 400);
+
+    // Build the edit query
+    let query = `UPDATE groups SET `
+    query += keys.map((key, index) => `${key} = $${index+2}`).join(', ');
+    query += ` WHERE id = $1 RETURNING *`;
+    // Send the query
+    const res = await db.query(query, [groupId, ...values]);
+    // Check if any workspace was updated
+    if (res.rows.length === 0)
+        throw new HttpError("The requested group was not found", 404);
+
+    return { message: "Group updated successfully" };
+}
+
 // Delete a group
 // User must be an instructor of the workspace that contains the group
 export const deleteGroup = async(db, groupId) => {
