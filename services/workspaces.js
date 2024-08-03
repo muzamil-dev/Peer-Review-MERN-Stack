@@ -53,6 +53,22 @@ export const create = async(db, userId, name) => {
     }
 }
 
+// Change a user's role within a workspace
+export const setRole = async(db, targetId, workspaceId, role) => {
+    // Set role
+    const res = await db.query(
+        `UPDATE memberships
+        SET role = $1 WHERE user_id = $2 AND workspace_id = $3
+        RETURNING *`,
+        [role, targetId, workspaceId]
+    );
+    // Check if the role was updated
+    if (res.rows.length === 0)
+        throw new HttpError("The provided user is not a member of this workspace", 400);
+    // Return
+    return { message: "Role updated successfully" };
+}
+
 // Edit a workspace (name only)
 export const edit = async(db, workspaceId, updates) => {
     // Find edited fields

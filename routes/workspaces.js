@@ -164,6 +164,63 @@ router.put("/edit", async(req, res) => {
     }
 });
 
+// Promote a user to instructor (from student)
+router.put("/promoteUser", async(req, res) => {
+    let db;
+    try{
+        db = await pool.connect();
+        await db.query('BEGIN');
+        const { userId, workspaceId, targetId } = req.body;
+        console.log(userId);
+        // Check that the provided user is an instructor of the workspace
+        await WorkspaceService.checkInstructor(db, userId, workspaceId);
+        // Delete the workspace
+        const msg = await WorkspaceService.setRole(db, targetId, workspaceId, 'Instructor');
+        // Commit and release connection
+        await db.query('COMMIT');
+        // Send data and release
+        return res.json(msg);
+    }
+    catch(err){
+        if (db) 
+            await db.query('ROLLBACK');
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.release();
+    }
+});
+
+// Promote a user to instructor (from student)
+router.put("/demoteUser", async(req, res) => {
+    let db;
+    try{
+        db = await pool.connect();
+        await db.query('BEGIN');
+        const { userId, workspaceId, targetId } = req.body;
+        // Check that the provided user is an instructor of the workspace
+        await WorkspaceService.checkInstructor(db, userId, workspaceId);
+        // Delete the workspace
+        const msg = await WorkspaceService.setRole(db, targetId, workspaceId, 'Student');
+        // Commit and release connection
+        await db.query('COMMIT');
+        // Send data and release
+        return res.json(msg);
+    }
+    catch(err){
+        if (db) 
+            await db.query('ROLLBACK');
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.release();
+    }
+});
+
 // Remove a user from the workspace
 router.put("/removeUser", async(req, res) => {
     let db; // Save the client for use in all blocks
@@ -190,7 +247,7 @@ router.put("/removeUser", async(req, res) => {
     finally{
         if (db) db.release();
     }
-})
+});
 
 // Delete a workspace, used by instructors
 router.delete("/:workspaceId/delete", async(req, res) => {
