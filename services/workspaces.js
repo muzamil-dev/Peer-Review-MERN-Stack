@@ -134,7 +134,7 @@ export const removeUser = async(db, userId, workspaceId) => {
     if (!data)
         throw new HttpError("User is not in the specified workspace", 400);
 
-    return { message: "User removed from workspace successfully" };
+    return { message: "User removed successfully" };
 }
 
 // Delete the workspace

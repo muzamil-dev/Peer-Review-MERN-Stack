@@ -86,7 +86,9 @@ export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
     );
     const data = res.rows[0];
     if (!data)
-        return { message: "This assignment is not currently accessible" };
+        throw new HttpError(
+            "Reviews cannot be accessed as this assignment has not started", 400
+        );
 
     // Filter complete and incomplete reviews
     const completedReviews = data.reviews.filter(review => review.ratings !== null);
@@ -100,6 +102,70 @@ export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
         questions: data.questions,
         completedReviews,
         incompleteReviews
+    };
+}
+
+// Get reviews on an assignment created toward a specified user
+// Only completed reviews will be provided
+export const getByAssignmentAndTarget = async(db, targetId, assignmentId) => {
+    const res = await db.query(
+        `/* Get the review ids and ratings, group them together to create an array of ratings for each review */
+        WITH review_table AS
+        (SELECT r.id, r.assignment_id, r.user_id, r.target_id, r.comment, 
+        array_agg(ra.rating ORDER BY q.id) FILTER (WHERE q.id IS NOT NULL) AS ratings
+        FROM reviews AS r
+        LEFT JOIN ratings as ra
+        ON r.id = ra.review_id
+        LEFT JOIN questions as q
+        ON ra.question_id = q.id
+        WHERE r.target_id = $1 AND r.assignment_id = $2
+        GROUP BY r.id
+        ORDER BY r.id),
+
+        /* Group into one row with the specified assignment and target, join user name */
+        row_table AS
+        (SELECT rt.assignment_id, rt.target_id,
+        jsonb_agg(
+            jsonb_build_object(
+                'reviewId', rt.id,
+                'userId', rt.user_id,
+                'firstName', u.first_name,
+                'lastName', u.last_name,
+                'ratings', rt.ratings,
+                'comment', rt.comment
+            ) ORDER BY rt.id
+        ) AS reviews
+        FROM review_table AS rt
+        JOIN users AS u
+        ON u.id = rt.user_id
+        GROUP BY assignment_id, target_id)
+        
+        /* Join the assignment questions and user's name */
+        SELECT rt.target_id, u.first_name, u.last_name, rt.reviews,
+        array_agg(q.question ORDER BY q.id) AS questions
+        FROM row_table AS rt
+        JOIN users AS u
+        ON u.id = rt.target_id
+        JOIN questions AS q
+        ON rt.assignment_id = q.assignment_id
+        GROUP BY rt.target_id, u.first_name, u.last_name, rt.reviews`,
+        [targetId, assignmentId]
+    );
+    // Check if the reviews were found
+    const data = res.rows[0];
+    if (!data)
+        throw new HttpError(
+            "Reviews cannot be accessed as this assignment has not started", 400
+        );
+
+    // Filter complete reviews, incomplete reviews will be excluded
+    data.reviews = data.reviews.filter(review => review.ratings !== null);
+    return {
+        targetId: data.target_id,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        questions: data.questions,
+        reviews: data.reviews
     };
 }
 

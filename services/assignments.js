@@ -1,5 +1,7 @@
 import HttpError from '../services/utils/httpError.js';
 
+import { createReviews } from './reviews.js';
+
 // Get an assignment by its id
 export const getById = async(db, assignmentId) => {
     const res = await db.query(
@@ -98,13 +100,13 @@ export const create = async(db, workspaceId, settings) => {
     const questionRes = await createQuestions(db, assignmentId, questions);
 
     // Create reviews if assignment has already started
-    // if (started)
-    //     await ReviewService.createReviews(assignmentId);
+    if (started)
+        await createReviews(db, assignmentId);
     return { message: "Created assignment successfully" };
 }
 
 // Helper function for adding review questions
-export const createQuestions = async(db, assignmentId, questions) => {
+const createQuestions = async(db, assignmentId, questions) => {
     // Insert the questions
     let questionsQuery = `INSERT INTO questions (assignment_id, question) VALUES `
     questionsQuery += questions.map((_, index) => `($1, $${index+2})`).join(', ');

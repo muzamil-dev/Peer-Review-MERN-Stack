@@ -202,11 +202,9 @@ export const deleteGroup = async(db, groupId) => {
         );
         // Return an error if the group wasn't found
         if (!res.rows[0])
-            return {
-                error: "The requested group was not found",
-                status: 404
-            }
-        return { message: `Deleted group successfully` };
+            throw new HttpError("The requested group was not found", 404);
+
+        return { message: `Group deleted successfully` };
     }
     catch(err){
         return { error: err.message, status: 500 };

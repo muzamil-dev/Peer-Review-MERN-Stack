@@ -102,7 +102,7 @@ router.put("/edit", async(req, res) => {
 });
 
 // Delete a provided group
-router.delete("/:groupId/delete", async(req, res) => {
+router.delete("/:groupId", async(req, res) => {
     let db; // Save the client for use in all blocks
     try{
         db = await pool.connect();
