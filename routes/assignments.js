@@ -44,7 +44,7 @@ router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, re
         // If a route parameter was provided, check that the person viewing is an instructor
         if (req.params.userId){
             // Check that the user is an instructor of the assignment's workspace
-            await AssignmentService.checkInstructor(db, userId, assignmentId);
+            await AssignmentService.checkInstructor(db, req.body.userId, assignmentId);
             userId = req.params.userId;
         }
         else

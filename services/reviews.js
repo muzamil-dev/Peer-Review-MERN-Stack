@@ -1,5 +1,7 @@
 import HttpError from "./utils/httpError.js";
 
+import * as AssignmentService from "../services/assignments.js";
+
 // Get a review by id
 export const getById = async(db, reviewId) => {
     const res = await db.query(
@@ -41,6 +43,15 @@ export const getById = async(db, reviewId) => {
 // Read the blocks of sql and comments above each block to get 
 // a better understanding of the query (it is very long)
 export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
+    // Check that the assignment has started
+    const assignment = await AssignmentService.getById(db, assignmentId);
+    if (new Date(assignment.startDate) > Date.now())
+        throw new HttpError(
+            "Cannot get reviews for this assignment as it has not started",
+            400
+        );
+    
+    // Get the reviews with names attached
     const res = await db.query(
         `/* Get the review ids and ratings, group them together to create an array of ratings for each review */
         WITH review_table AS
@@ -87,7 +98,7 @@ export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
     const data = res.rows[0];
     if (!data)
         throw new HttpError(
-            "Reviews cannot be accessed as this assignment has not started", 400
+            "No reviews were assigned for this user", 400
         );
 
     // Filter complete and incomplete reviews
@@ -108,6 +119,15 @@ export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
 // Get reviews on an assignment created toward a specified user
 // Only completed reviews will be provided
 export const getByAssignmentAndTarget = async(db, targetId, assignmentId) => {
+    // Check that the assignment has started
+    const assignment = await AssignmentService.getById(db, assignmentId);
+    if (new Date(assignment.startDate) > Date.now())
+        throw new HttpError(
+            "Cannot get reviews for this assignment as it has not started",
+            400
+        );
+
+    // Get reviews with names attached
     const res = await db.query(
         `/* Get the review ids and ratings, group them together to create an array of ratings for each review */
         WITH review_table AS

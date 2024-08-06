@@ -10,6 +10,7 @@ import HttpError from '../services/utils/httpError.js';
 import * as UserService from "../services/users.js";
 import * as WorkspaceService from "../services/workspaces.js";
 import * as GroupService from "../services/groups.js"
+import * as AssignmentService from "../services/assignments.js";
 import { convertEmailAndGroupNames } from '../services/utils/conversions.js';
 
 const router = express.Router();
@@ -27,6 +28,26 @@ router.get("/:workspaceId", async(req, res) => {
         db = await pool.connect();
         const workspace = await WorkspaceService.getById(db, workspaceId);
         return res.json(workspace);
+    }
+    catch(err){
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.release();
+    }
+});
+
+// Get all assignments for a provided workspace
+router.get("/:workspaceId/assignments", async(req, res) => {
+    const { workspaceId } = req.params;
+    let db;
+    try{
+        db = await pool.connect();
+        // Make the call to the service
+        const data = await AssignmentService.getByWorkspace(db, workspaceId);
+        res.json(data);
     }
     catch(err){
         return res.status(err.status || 500).json(
