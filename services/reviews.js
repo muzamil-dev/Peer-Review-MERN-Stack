@@ -233,7 +233,7 @@ export const submit = async(db, userId, reviewId, ratings, comment) => {
     const startDate = new Date(data.start_date);
     const dueDate = new Date(data.due_date);
     if (startDate > Date.now() || dueDate < Date.now())
-        throw new HttpError("This assignment is currently not active", 400);
+        throw new HttpError("This assignment is not currently active", 400);
     
     // Questions are sorted by id, the ratings' order is assumed to match the ordering of questions
     const questionIds = data.questionIds;

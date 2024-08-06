@@ -6,6 +6,7 @@ import jwtRoutes from './routes/jwt.js';
 import groupRoutes from './routes/groups.js';
 import userRoutes from './routes/users.js';
 import workspaceRoutes from './routes/workspaces.js';
+import assignmentRoutes from './routes/assignments.js';
 
 // Access env variables
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use("/groups", groupRoutes);
 app.use("/users", userRoutes);
 app.use("/workspaces", workspaceRoutes);
+app.use("/assignments", assignmentRoutes);
 app.use("/jwt", jwtRoutes);
 
 // Test to ping the server

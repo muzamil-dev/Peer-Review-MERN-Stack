@@ -69,6 +69,25 @@ export const getByWorkspace = async(db, workspaceId) => {
     }));
 }
 
+// Check instructor given an assignment id
+export const checkInstructor = async(db, userId, assignmentId) => {
+    const user = (await db.query(
+        `SELECT m.role
+        FROM assignments AS a
+        LEFT JOIN memberships AS m
+        ON a.workspace_id = m.workspace_id AND m.user_id = $1
+        WHERE a.id = $2`,
+        [userId, assignmentId]
+    )).rows[0];
+
+    if (!user)
+        throw new HttpError("The requested assignment was not found", 404);
+    if (user.role !== 'Instructor')
+        throw new HttpError("User is not an instructor of this workspace", 403);
+
+    return { message: "User authorized" }
+}
+
 // Create a new assignment
 export const create = async(db, workspaceId, settings) => {
     // Get all relevant settings from the settings object
@@ -119,7 +138,7 @@ const createQuestions = async(db, assignmentId, questions) => {
 // Change to create reviews if start date is reached
 export const edit = async(db, assignmentId, settings) => {
     // Get the assignment, for use for certain comparisons
-    const assignment = await getById(assignmentId);
+    const assignment = await getById(db, assignmentId);
     // Insert updates to make
     const updates = {};
     if (settings.name)
@@ -150,7 +169,7 @@ export const edit = async(db, assignmentId, settings) => {
             FROM questions 
             WHERE assignment_id = $1
             GROUP BY assignment_id`,
-            [assignment.id]
+            [assignment.assignmentId]
         )).rows[0].questions;
         // Check that the questions arrays aren't the same
         let flag = true; // true if the arrays are the same, false if not
@@ -165,12 +184,13 @@ export const edit = async(db, assignmentId, settings) => {
             }
         }
         if (!flag){ // Questions are different, replace them
-            await Promise.all([
-                // Delete old questions
-                db.query(`DELETE FROM questions WHERE assignment_id = $1`, [assignment.id]),
-                // Add new questions
-                createQuestions(assignment.id, settings.questions)
-            ]);
+            // Delete old questions
+            await db.query(
+                `DELETE FROM questions WHERE assignment_id = $1`, 
+                [assignment.assignmentId]
+            )
+            // Add new questions
+            await createQuestions(assignment.assignmentId, settings.questions)
         }
     }
 
@@ -182,9 +202,9 @@ export const edit = async(db, assignmentId, settings) => {
     if (keys.length > 0){
         updateQuery += keys.map((key, index) => `${key} = $${index+1}`).join(', ');
         // Complete the query with assignment id
-        updateQuery += ` WHERE id = $${values.length+1}`;
+        updateQuery += ` WHERE id = $${values.length+1} RETURNING *`;
         // Query the update
-        const updateRes = await db.query(updateQuery, [...values, assignment.id]);
+        const updateRes = await db.query(updateQuery, [...values, assignment.assignmentId]);
     }
 
     return { message: "Assignment updated successfully" };

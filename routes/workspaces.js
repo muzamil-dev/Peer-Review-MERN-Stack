@@ -142,7 +142,7 @@ router.put("/edit", async(req, res) => {
         const updates = { name };
         // Check that the workspaceId was provided
         if (!workspaceId)
-            throw new HttpError("One or more required fields is missing", 400);
+            throw new HttpError("One or more required fields is not present", 400);
         // Check that the provided user is an instructor of the workspace
         await WorkspaceService.checkInstructor(db, userId, workspaceId);
         // Edit the workspace
