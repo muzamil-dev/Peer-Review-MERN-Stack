@@ -67,8 +67,16 @@ CREATE TABLE ratings(
     PRIMARY KEY (review_id, question_id)
 );
 
+CREATE TABLE analytics(
+    user_id INT REFERENCES users (id) ON DELETE CASCADE,
+    assignment_id INT REFERENCES assignments (id) ON DELETE CASCADE,
+    average_rating NUMERIC,
+    PRIMARY KEY (user_id, assignment_id)
+);
+
 /* Drop all tables (in order) */
 
+DROP TABLE analytics;
 DROP TABLE ratings;
 DROP TABLE reviews;
 DROP TABLE questions;

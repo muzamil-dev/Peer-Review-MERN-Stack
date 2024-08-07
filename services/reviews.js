@@ -6,7 +6,7 @@ import * as AssignmentService from "../services/assignments.js";
 export const getById = async(db, reviewId) => {
     const res = await db.query(
         `WITH rating_table AS
-        (SELECT r.user_id, r.target_id, r.comment, a.start_date, a.due_date,
+        (SELECT a.id AS "assignmentId", r.user_id, r.target_id, r.comment, a.start_date, a.due_date,
         array_agg(q.question ORDER BY q.id) FILTER(WHERE q.question IS NOT NULL) AS questions,
         array_agg(ra.rating ORDER BY ra.question_id) FILTER(WHERE ra.rating IS NOT NULL) AS ratings
         FROM reviews AS r
@@ -19,7 +19,7 @@ export const getById = async(db, reviewId) => {
         WHERE r.id = $1
         GROUP BY r.id, a.id)
         
-        SELECT user_id AS "userId", target_id AS "targetId",
+        SELECT "assignmentId", user_id AS "userId", target_id AS "targetId",
         u1.first_name AS "firstName", u1.last_name AS "lastName",
         u2.first_name AS "targetFirstName", u2.last_name AS "targetLastName",
         start_date AS "startDate", due_date AS "dueDate",
@@ -224,41 +224,17 @@ export const createReviews = async(db, assignmentId) => {
 }
 
 // Submit a review
-export const submit = async(db, userId, reviewId, ratings, comment) => {
-    // Get the associated review and assignment
-    const res = await db.query(
-        `SELECT r.*, a.start_date, a.due_date,
-        array_agg(
-            q.id ORDER BY q.id
-        ) AS "questionIds"
-        FROM reviews as r
-        LEFT JOIN assignments AS a
-        ON r.assignment_id = a.id
-        LEFT JOIN questions AS q
+export const submit = async(db, reviewId, ratings, comment) => {
+    // Get ids of questions to submit ratings
+    const questions = await db.query(
+        `SELECT q.id FROM questions AS q
+        JOIN reviews AS r
         ON q.assignment_id = r.assignment_id
         WHERE r.id = $1
-        GROUP BY r.id, a.id`,
+        ORDER BY q.id`,
         [reviewId]
     );
-    const data = res.rows[0];
-    // Check that the referenced review exists
-    if (!data)
-        throw new HttpError("The requested review was not found", 404);
-
-    // Check that the user submitting the review is the user listed on the review
-    if (userId !== data.user_id)
-        throw new HttpError("Incorrect review submission", 400);
-
-    // Check that the submission is within the start and end dates
-    const startDate = new Date(data.start_date);
-    const dueDate = new Date(data.due_date);
-    if (startDate > Date.now() || dueDate < Date.now())
-        throw new HttpError("This assignment is not currently active", 400);
-    
-    // Questions are sorted by id, the ratings' order is assumed to match the ordering of questions
-    const questionIds = data.questionIds;
-    if (questionIds.length !== ratings.length)
-        throw new HttpError("Incorrect number of ratings given", 400);
+    const questionIds = questions.rows.map(q => q.id);
 
     // Delete old ratings
     const deleteRatings = await db.query(
@@ -271,7 +247,7 @@ export const submit = async(db, userId, reviewId, ratings, comment) => {
     ratingsQuery += ratings.map(
         (_, idx) => `($1, $${idx+2}, $${idx+2+ratings.length})`
     ).join(', ');
-    const insertRatings = await db.query(ratingsQuery, [data.id, ...questionIds, ...ratings]);
+    const insertRatings = await db.query(ratingsQuery, [reviewId, ...questionIds, ...ratings]);
     // Update comment
     if (comment)
         await db.query('UPDATE reviews SET comment = $1 WHERE id = $2', [comment, reviewId]);
