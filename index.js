@@ -8,6 +8,7 @@ import groupRoutes from './routes/groups.js';
 import userRoutes from './routes/users.js';
 import workspaceRoutes from './routes/workspaces.js';
 import assignmentRoutes from './routes/assignments.js';
+import reviewRoutes from './routes/reviews.js';
 
 // Access env variables
 dotenv.config();
@@ -41,6 +42,7 @@ app.use("/groups", groupRoutes);
 app.use("/users", userRoutes);
 app.use("/workspaces", workspaceRoutes);
 app.use("/assignments", assignmentRoutes);
+app.use("/reviews", reviewRoutes);
 app.use("/jwt", jwtRoutes);
 
 // Test to ping the server
