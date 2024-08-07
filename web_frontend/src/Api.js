@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
 // const getUrl = (prefix, route) => {
@@ -25,7 +25,7 @@ const getUrl = (prefix, route) => {
 
 const getConfig = () => ({
     headers: {
-         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
     }
 });
 
@@ -78,6 +78,8 @@ axios.interceptors.request.use(async config => {
                 // Handle case where refresh token failed
                 return Promise.reject(new Error('Failed to refresh access token'));
             }
+        } else {
+            config.headers['Authorization'] = `Bearer ${token}`;
         }
     }
     return config;
@@ -87,7 +89,7 @@ axios.interceptors.request.use(async config => {
 
 const apiRequest = async (method, url, data = null) => {
     try {
-        const response = await axios({ method, url, data, ...getConfig(), withCredentials: true  });
+        const response = await axios({ method, url, data, ...getConfig(), withCredentials: true });
         return response;
     } catch (error) {
         console.error('Api.js: Error Caught:', error);
@@ -140,7 +142,7 @@ export default {
          * @param {string} name
          * @returns {Promise<{ status: number, data: {}, message: string }>} Returns the newly created group's info
          */
-        CreateGroup : async (userId, workspaceId, name) => {
+        CreateGroup: async (userId, workspaceId, name) => {
             const payload = {
                 userId,
                 workspaceId,
@@ -162,7 +164,7 @@ export default {
                 };
             }
         },
-        
+
         /**
          * Adds the user specified by id to the group specified by groupId
          * @param {number} groupId 
@@ -491,7 +493,7 @@ export default {
                 return err.response || Response503;
             }
         },
-        
+
 
         /**
      * Creates an account with the specified information.
@@ -506,7 +508,7 @@ export default {
             lastName = lastName.toLowerCase();
             firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
             lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
-    
+
             const payload = {
                 firstName,
                 lastName,
@@ -665,11 +667,12 @@ export default {
          * @returns {Promise<{ status: number, data: {}[], message: string }>} The list of groups
          */
         GetGroups: async (workspaceId) => {
-            const response = await apiRequest(GET, getUrl(WORKSPACES, `${workspaceId}/groups`), null);
+            const config = getConfig(); // Ensure the token is included in the headers
+            const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/groups?members=true`), config);
             return {
                 status: response.status,
                 data: response.data,
-                message: response.message
+                message: response.data.message
             };
         },
         /**
@@ -776,22 +779,17 @@ export default {
             };
         },
         /**
-         * Edits the workspace specified by workspaceID
+         * Edits the workspace name specified by workspaceID
+         * @param {number} userId
          * @param {number} workspaceId
          * @param {string} name
-         * @param {string[]} allowedDomains 
-         * @param {number} groupMemberLimit
-         * @param {boolean} groupLock
          * @returns {Promise<{ status: number, success: boolean, message: string }>}
          */
-        EditWorkspace: async (userId, workspaceId, name, allowedDomains, groupMemberLimit, groupLock) => {
+        EditWorkspace: async (userId, workspaceId, name) => {
             const payload = {
                 userId,
                 workspaceId,
-                name,
-                allowedDomains,
-                groupMemberLimit,
-                groupLock
+                name
             };
             const response = await apiRequest(PUT, getUrl(WORKSPACES, 'edit'), payload);
             return {

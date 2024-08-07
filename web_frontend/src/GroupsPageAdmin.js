@@ -64,15 +64,19 @@ const GroupsPageAdmin = () => {
     };
 
     const fetchGroups = async () => {
-        const token = localStorage.getItem('accessToken');
-        const response = await Api.Workspaces.GetGroups(workspaceId, token);
-        if (response.status === 200 && Array.isArray(response.data.groups)) {
-            setGroups(response.data.groups.map(group => ({
-                ...group,
-                members: group.members.filter(member => member && member.userId)
-            })));
-        } else {
-            console.error('Failed to fetch groups:', response.message);
+        try {
+            const response = await Api.Workspaces.GetGroups(workspaceId);
+            if (response.status === 200 && Array.isArray(response.data)) {
+                setGroups(response.data.map(group => ({
+                    ...group,
+                    members: Array.isArray(group.members) ? group.members.filter(member => member && member.userId) : []
+                })));
+            } else {
+                console.error('Failed to fetch groups:', response.message);
+                setGroups([]);
+            }
+        } catch (error) {
+            console.error('Error fetching groups:', error);
             setGroups([]);
         }
     };
@@ -275,7 +279,6 @@ const GroupsPageAdmin = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/');
@@ -288,32 +291,13 @@ const GroupsPageAdmin = () => {
             return;
         }
 
-        const allowedDomainsArray = formData.allowedDomains.trim()
-            ? formData.allowedDomains.split(',').map(domain => domain.trim())
-            : [];
-
-        const isValidDomain = (domain) => {
-            const domainRegex = /^[a-zA-Z]+\.[a-zA-Z]+$/;
-            return domainRegex.test(domain);
-        };
-
-        for (const domain of allowedDomainsArray) {
-            if (!isValidDomain(domain)) {
-                console.error(`Invalid domain: ${domain}`);
-                alert(`Invalid domain: ${domain}`);
-                return;
-            }
-        }
-
-        const response = await Api.Workspaces.EditWorkspace(currentUserId, workspaceId, formData.name, allowedDomainsArray, formData.groupMemberLimit, formData.groupLock, token);
+        const response = await Api.Workspaces.EditWorkspace(currentUserId, workspaceId, formData.name);
         if (response.success) {
             setWorkspaceDetails({
-                name: formData.name,
-                allowedDomains: allowedDomainsArray,
-                groupMemberLimit: formData.groupMemberLimit,
-                groupLock: formData.groupLock,
-                inviteCode: workspaceDetails.inviteCode
+                ...workspaceDetails,
+                name: formData.name
             });
+            fetchWorkspaceDetails();
             closeForm();
         } else {
             console.error('Failed to edit workspace:', response.message);
@@ -465,34 +449,13 @@ const GroupsPageAdmin = () => {
                             <label htmlFor="name"><b>Workspace Name</b></label>
                             <input type="text" placeholder="Enter Workspace Name" name="name" required value={formData.name} onChange={handleChange} />
 
-                            <label htmlFor="allowedDomains"><b>Allowed Domains</b></label>
-                            <input type="text" placeholder="Ex: ucf.edu, gmail.com" name="allowedDomains" value={formData.allowedDomains} onChange={handleChange} />
-
-                            <label htmlFor="groupMemberLimit"><b>Maximum Group Size</b></label>
-                            <input type="number" placeholder="Enter Group Member Limit" name="groupMemberLimit" value={formData.groupMemberLimit} onChange={handleChange} />
-
-                            {/* Invite Code Section */}
-                            <div className="mb-2 text-center">
-                                <label><b>Invite Code:</b></label>
-                                <p>{inviteCode ? inviteCode : "No invite code available"}</p>
-                                <div className="btn-group mb-3">
-                                    <button type="button" className="btn btn-success" onClick={handleCreateInviteCode} style={{ width: '100px' }}>Create</button>
-                                    <button type="button" className="btn btn-danger mb-0" onClick={handleDeleteInviteCode} style={{ width: '100px' }}>Delete</button>
-                                </div>
-                            </div>
-
-                            {/*button group to lock or unlock the workspace */}
-                            <div className="btn-group mb-3">
-                                <button type="button" className={`btn ${formData.groupLock ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => handleLockChange(true)}>Lock</button>
-                                <button type="button" className={`btn ${!formData.groupLock ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => handleLockChange(false)}>Unlock</button>
-                            </div>
-
                             <button type="submit" className="btn btn-outline-success mb-3">Save</button>
                             <button type="button" className="btn cancel btn-outline-danger" onClick={closeForm}>Close</button>
                         </form>
                     </div>
                 </div>
             )}
+
 
             {/* Create Group Modal */}
             {showCreateGroupModal && (
