@@ -20,7 +20,7 @@ const app = express();
 app.use(express.json());
 
 // Set allowed origins
-const allowedOrigins = ['http://v2.ratemypeer.site'];
+const allowedOrigins = ['http://v2.ratemypeer.site', 'http://localhost:3000'];
 // Configure CORS options
 const corsOptions = {
     origin: function (origin, callback) {
