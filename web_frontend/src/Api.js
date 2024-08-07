@@ -7,16 +7,16 @@ const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
 //     return 'http://localhost:5000' + prefix + route;
 // };
 
+//use this for testing local API
 // const getUrl = (prefix, route) => {
+//     const baseUrl = 'http://localhost:5000'; // Local development URL
 //     const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
 //     const formattedRoute = route.startsWith('/') ? route : `/${route}`;
-//     const url = `http://localhost:5000/${formattedPrefix}${formattedRoute}`;
-//     console.log('Constructed URL:', url); // Debug log
-//     return url;
+//     return `${baseUrl}/${formattedPrefix}${formattedRoute}`;
 // };
 
 
-
+//use this for testing deployed API
 const getUrl = (prefix, route) => {
     const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
     const formattedRoute = route.startsWith('/') ? route : `/${route}`;
@@ -85,32 +85,12 @@ axios.interceptors.request.use(async config => {
     return Promise.reject(error);
 });
 
-// const apiRequest = async (method, url, data = null) => {
-//     try {
-//         const response = await axios({ method, url, data, ...getConfig(), withCredentials: true  });
-//         return response;
-//     } catch (error) {
-//         console.error('Api.js: Error Caught:', error);
-//         throw error;
-//     }
-// };
-
 const apiRequest = async (method, url, data = null) => {
     try {
-        const response = await axios({ method, url, data, ...getConfig(), withCredentials: true });
+        const response = await axios({ method, url, data, ...getConfig(), withCredentials: true  });
         return response;
     } catch (error) {
-        console.error('Api.js: Error Caught:', error); // Log the full error object
-        if (error.response) {
-            console.error('Response Data:', error.response.data);
-            console.error('Response Status:', error.response.status);
-            console.error('Response Headers:', error.response.headers);
-        } else if (error.request) {
-            console.error('Request Data:', error.request);
-        } else {
-            console.error('Error Message:', error.message);
-        }
-        console.error('Config:', error.config);
+        console.error('Api.js: Error Caught:', error);
         throw error;
     }
 };
