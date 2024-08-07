@@ -134,23 +134,35 @@ export default {
         },
 
         /**
-         * Creates a new group in workspace specified by workspaceId
+         * Creates a new group in the workspace specified by workspaceId
          * @param {number} userId 
          * @param {number} workspaceId 
+         * @param {string} name
          * @returns {Promise<{ status: number, data: {}, message: string }>} Returns the newly created group's info
          */
-        CreateGroup: async (userId, workspaceId) => {
+        CreateGroup : async (userId, workspaceId, name) => {
             const payload = {
                 userId,
-                workspaceId
+                workspaceId,
+                name
             };
-            const response = await apiRequest(POST, getUrl(GROUPS, 'create'), payload);
-            return {
-                status: response.status,
-                data: response.data,
-                message: response.data.message
-            };
+            try {
+                const response = await axios.post(getUrl(GROUPS, 'create'), payload);
+                return {
+                    status: response.status,
+                    data: response.data,
+                    message: response.data.message
+                };
+            } catch (err) {
+                console.error('Error creating group:', err);
+                return {
+                    status: err.response ? err.response.status : 500,
+                    data: err.response ? err.response.data : null,
+                    message: err.response ? err.response.data.message : 'Internal Server Error'
+                };
+            }
         },
+        
         /**
          * Adds the user specified by id to the group specified by groupId
          * @param {number} groupId 
