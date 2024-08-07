@@ -8,20 +8,20 @@ const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
 // };
 
 //use this for testing local API
-// const getUrl = (prefix, route) => {
-//     const baseUrl = 'http://localhost:5000'; // Local development URL
-//     const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
-//     const formattedRoute = route.startsWith('/') ? route : `/${route}`;
-//     return `${baseUrl}/${formattedPrefix}${formattedRoute}`;
-// };
+const getUrl = (prefix, route) => {
+    const baseUrl = 'http://localhost:5000'; // Local development URL
+    const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
+    const formattedRoute = route.startsWith('/') ? route : `/${route}`;
+    return `${baseUrl}/${formattedPrefix}${formattedRoute}`;
+};
 
 
 //use this for testing deployed API
-const getUrl = (prefix, route) => {
-    const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
-    const formattedRoute = route.startsWith('/') ? route : `/${route}`;
-    return `http://v2.ratemypeer.site/api/${formattedPrefix}${formattedRoute}`;
-};
+// const getUrl = (prefix, route) => {
+//     const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
+//     const formattedRoute = route.startsWith('/') ? route : `/${route}`;
+//     return `http://v2.ratemypeer.site/api/${formattedPrefix}${formattedRoute}`;
+// };
 
 const getConfig = () => ({
     headers: {

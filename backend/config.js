@@ -14,4 +14,12 @@ export const dbConfig = {
 
 const pool = new pg.Pool(dbConfig);
 
+//comment this in to connect to DB locally 
+// const pool = new pg.Pool({
+//     connectionString: process.env.DATABASE_URL,
+//     ssl: {
+//         rejectUnauthorized: false, // This might be necessary for some cloud services
+//     },
+// });
+
 export default pool;
