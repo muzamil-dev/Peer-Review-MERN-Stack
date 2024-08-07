@@ -22,12 +22,19 @@ html,body{
 }
 .wrapper{
   overflow: hidden;
-  max-width: 390px;
+  max-width: 500px;
+  width: 40vh;
+  height: 45vh;
   background: #fff;
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0px 15px 20px rgba(0,0,0,0.1);
 }
+
+.login{
+  margin-top: 14px;
+}
+
 .wrapper .title-text{
   display: flex;
   width: 200%;
