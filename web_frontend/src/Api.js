@@ -9,10 +9,7 @@ const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
 
 //use this for testing local API
 const getUrl = (prefix, route) => {
-    const baseUrl = 'http://localhost:5000'; // Local development URL
-    const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
-    const formattedRoute = route.startsWith('/') ? route : `/${route}`;
-    return `${baseUrl}/${formattedPrefix}${formattedRoute}`;
+    return 'http://localhost:5000/' + prefix + route;
 };
 
 
@@ -202,6 +199,32 @@ export default {
             };
         },
         /**
+         * Moves a user to a specified group
+         * @param {number} userId - professor's id
+         * @param {string} targetId - userId of the student that is being moved
+         * @param {number} workspaceId - id of the workspace that the group belongs to
+         * @param {number|null} groupId - id of the group to move the user to, or null to remove the user from their group
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        MoveUser: async (userId, targetId, workspaceId, groupId) => {
+            const payload = {
+                userId,
+                targetId,
+                workspaceId,
+                groupId
+            };
+            const response = await apiRequest(PUT, getUrl(GROUPS, 'moveUser'), payload)
+                .catch((err) => {
+                    console.error(err);
+                    return err.response || Response503;
+                });
+            return {
+                status: response.status,
+                success: response.status === 200,
+                message: response.data.message
+            };
+        },
+        /**
          * Admin adds a user (specified by userId) to a group (specified by groupId), overrides member limit and locks
          * @param {number} userId professor's id
          * @param {string} targetId userId of the student that is being added
@@ -255,13 +278,14 @@ export default {
             const payload = {
                 userId
             };
-            const response = await apiRequest(DELETE, getUrl(GROUPS, groupId), payload);
+            const response = await apiRequest(DELETE, getUrl(GROUPS, groupId), { data: payload });
             return {
                 status: response.status,
                 success: response.status === 200,
                 message: response.data.message
             };
         },
+
     },
     Assignments: {
         /**

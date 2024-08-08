@@ -133,7 +133,7 @@ const GroupsPageAdmin = () => {
             navigate('/');
             return { success: false };
         }
-        const response = await Api.Groups.AddUser(currentUserId, targetId, groupId);
+        const response = await Api.Groups.MoveUser(currentUserId, targetId, workspaceId, groupId);
         if (response.success) {
             setGroups(prevGroups => prevGroups.map(group => {
                 if (group.groupId === groupId) {
@@ -150,14 +150,14 @@ const GroupsPageAdmin = () => {
         }
     };
 
+
     const handleKickFromGroup = async (targetId) => {
-        const token = localStorage.getItem('accessToken');
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
             navigate('/');
             return { success: false };
         }
-        const response = await Api.Groups.RemoveUser(currentUserId, targetId, editGroupId, token);
+        const response = await Api.Groups.MoveUser(currentUserId, targetId, workspaceId, null);
         if (response.success) {
             setSelectedGroupMembers(prevMembers => prevMembers.filter(member => member.userId !== targetId));
             setGroups(prevGroups => prevGroups.map(group => {
@@ -180,6 +180,8 @@ const GroupsPageAdmin = () => {
             return { success: false };
         }
     };
+    
+
 
     const handleKickFromWorkspace = async (targetId) => {
         const token = localStorage.getItem('accessToken');
