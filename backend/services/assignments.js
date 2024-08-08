@@ -162,16 +162,9 @@ export const edit = async(db, assignmentId, settings) => {
         updates.description = settings.description;
 
     // Set the questions if provided
-    if (settings.questions && Array.isArray(settings.questions)){
+    if (settings.questions){
         // Get the current questions
-        const curQuestionsRes = await db.query(`
-            SELECT array_agg(question ORDER BY id) AS questions
-            FROM questions 
-            WHERE assignment_id = $1
-            GROUP BY assignment_id`,
-            [assignmentId]
-        );
-        const curQuestions = curQuestionsRes.rows[0]?.questions || [];
+        const curQuestions = assignment.questions;
         // Check that the questions arrays aren't the same
         let flag = true; // true if the arrays are the same, false if not
         if (curQuestions.length !== settings.questions.length)
@@ -188,10 +181,10 @@ export const edit = async(db, assignmentId, settings) => {
             // Delete old questions
             await db.query(
                 `DELETE FROM questions WHERE assignment_id = $1`, 
-                [assignmentId]
+                [assignment.assignmentId]
             )
             // Add new questions
-            await createQuestions(db, assignmentId, settings.questions);
+            await createQuestions(db, assignment.assignmentId, settings.questions)
         }
     }
 
@@ -205,7 +198,7 @@ export const edit = async(db, assignmentId, settings) => {
         // Complete the query with assignment id
         updateQuery += ` WHERE id = $${values.length+1} RETURNING *`;
         // Query the update
-        const updateRes = await db.query(updateQuery, [...values, assignmentId]);
+        const updateRes = await db.query(updateQuery, [...values, assignment.assignmentId]);
     }
 
     return { message: "Assignment updated successfully" };
