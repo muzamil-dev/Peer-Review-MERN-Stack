@@ -16,6 +16,6 @@ export const supaConfig = {
     connectionString: process.env.DB_CONNSTRING
 };
 
-const pool = new pg.Pool(supaConfig);
+const pool = new pg.Pool(dbConfig);
 
 export default pool;

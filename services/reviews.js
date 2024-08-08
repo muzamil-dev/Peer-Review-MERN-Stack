@@ -1,6 +1,7 @@
 import HttpError from "./utils/httpError.js";
 
 import * as AssignmentService from "../services/assignments.js";
+import * as AnalyticsService from "../services/analytics.js";
 
 // Get a review by id
 export const getById = async(db, reviewId) => {
@@ -224,17 +225,38 @@ export const createReviews = async(db, assignmentId) => {
 }
 
 // Submit a review
-export const submit = async(db, reviewId, ratings, comment) => {
-    // Get ids of questions to submit ratings
-    const questions = await db.query(
-        `SELECT q.id FROM questions AS q
-        JOIN reviews AS r
-        ON q.assignment_id = r.assignment_id
+export const submit = async(db, userId, reviewId, ratings, comment) => {
+    // Get required data about the review and assignment
+    const data = (await db.query(
+        `SELECT r.user_id AS "userId", r.target_id AS "targetId",
+        a.id AS "assignmentId", 
+        a.start_date AS "startDate", a.due_date AS "dueDate", 
+        array_agg(q.id ORDER BY q.id) as "questionIds"
+        FROM reviews AS r
+        JOIN assignments AS a
+        ON r.assignment_id = a.id
+        JOIN questions AS q
+        ON a.id = q.assignment_id
         WHERE r.id = $1
-        ORDER BY q.id`,
+        GROUP BY r.id, a.id`,
         [reviewId]
-    );
-    const questionIds = questions.rows.map(q => q.id);
+    )).rows[0];
+    if (!data)
+        throw new HttpError("The requested review was not found", 404);
+
+    // Check that the user submitting the review is the user listed on the review
+    if (userId !== data.userId)
+        throw new HttpError("Incorrect review submission", 400);
+
+    // Check that the submission is within the start and end dates
+    const startDate = new Date(data.startDate);
+    const dueDate = new Date(data.dueDate);
+    if (startDate > Date.now() || dueDate < Date.now())
+        throw new HttpError("This assignment is not currently active", 400);
+
+    // Questions are sorted by id, the ratings' order is assumed to match the ordering of questions
+    if (data.questionIds.length !== ratings.length)
+        throw new HttpError("Incorrect number of ratings given", 400);
 
     // Delete old ratings
     await db.query(
@@ -242,14 +264,19 @@ export const submit = async(db, reviewId, ratings, comment) => {
         [reviewId]
     );
 
-    // Insert new ratings
+    // Build a query to insert all of the ratings
     let ratingsQuery = `INSERT INTO ratings VALUES `;
     ratingsQuery += ratings.map(
         (_, idx) => `($1, $${idx+2}, $${idx+2+ratings.length})`
     ).join(', ');
-    const insertRatings = await db.query(ratingsQuery, [reviewId, ...questionIds, ...ratings]);
-    // Update comment
-    if (comment)
-        await db.query('UPDATE reviews SET comment = $1 WHERE id = $2', [comment, reviewId]);
+    // Insert the ratings and the comment
+    await Promise.all([
+        db.query(ratingsQuery, [reviewId, ...data.questionIds, ...ratings]), // ratings
+        db.query('UPDATE reviews SET comment = $1 WHERE id = $2', [comment, reviewId]) // comment
+    ]);
+
+    // Update the analytics for that user
+    await AnalyticsService.updateAnalytics(db, data.targetId, data.assignmentId);
+    
     return { message: "Review submitted successfully" };
 }
