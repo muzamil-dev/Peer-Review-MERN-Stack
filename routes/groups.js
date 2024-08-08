@@ -56,8 +56,7 @@ router.post("/create", async(req, res) => {
         return res.status(201).json(group);
     }
     catch(err){
-        if (db) 
-            await db.query('ROLLBACK');
+        if (db) await db.query('ROLLBACK');
         return res.status(err.status || 500).json(
             { message: err.message }
         );
@@ -92,6 +91,36 @@ router.put("/edit", async(req, res) => {
     catch(err){
         if (db) 
             await db.query('ROLLBACK');
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.release();
+    }
+});
+
+// Move a user to a different group
+router.put("/moveUser", async(req, res) => {
+    let db; // Save the client for use in all blocks
+    try{
+        db = await pool.connect();
+        await db.query('BEGIN');
+        const { userId, targetId, groupId } = req.body;
+        // Check that the groupId was provided
+        if (!targetId || !groupId)
+            throw new HttpError("One or more required fields is missing", 400);
+        // Check that the user requesting is an instructor
+        await GroupService.checkInstructor(db, userId, groupId);
+        // Add the user
+        const msg = await GroupService.moveUser(db, targetId, groupId);
+        // Commit and release connection
+        await db.query('COMMIT');
+        // Send data and release
+        return res.json(msg);
+    }
+    catch(err){
+        if (db) await db.query('ROLLBACK');
         return res.status(err.status || 500).json(
             { message: err.message }
         );

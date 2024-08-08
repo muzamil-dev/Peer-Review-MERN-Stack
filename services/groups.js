@@ -105,6 +105,25 @@ export const getByWorkspaceWithMembers = async(db, workspaceId) => {
     return res.rows;
 }
 
+// Check that a user is an instructor of the workspace assocaited with a group
+export const checkInstructor = async(db, userId, groupId) => {
+    const user = (await db.query(
+        `SELECT m.role
+        FROM groups AS g
+        LEFT JOIN memberships AS m
+        ON g.workspace_id = m.workspace_id AND m.user_id = $1
+        WHERE g.id = $2`,
+        [userId, groupId]
+    )).rows[0];
+
+    if (!user)
+        throw new HttpError("The requested assignment was not found", 404);
+    if (user.role !== 'Instructor')
+        throw new HttpError("User is not an instructor of this workspace", 403);
+
+    return { message: "User authorized" }
+}
+
 // Create a group within a given workspace
 // Only workspace instructors should be allowed to run this
 export const createGroup = async(db, workspaceId, name) => {
@@ -147,7 +166,9 @@ export const createGroups = async(db, workspaceId, names) => {
 // Moves the provided user to the provided group
 // The provided user must be part of the workspace that the group is in
 // Set groupId to null to remove a user from their group
-export const moveUser = async(db, userId, workspaceId, groupId) => {
+export const moveUser = async(db, userId, groupId) => {
+    // Get the group's workspace
+    const workspaceId = (await getById(db, groupId)).workspaceId;
     const res = (await db.query(`
         UPDATE memberships
         SET group_id = $1
@@ -159,10 +180,7 @@ export const moveUser = async(db, userId, workspaceId, groupId) => {
             "The user is not a member of the group's workspace", 400
         );
     // Set separate messages for adding and removing users
-    if (!groupId)
-        return { message: "Removed user from group successfully" }
-    else
-        return { message: "Added user to group successfully" }
+    return { message: "Added user to group successfully" }
 }
 
 // Edit a group (name only)

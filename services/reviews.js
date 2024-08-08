@@ -237,7 +237,7 @@ export const submit = async(db, reviewId, ratings, comment) => {
     const questionIds = questions.rows.map(q => q.id);
 
     // Delete old ratings
-    const deleteRatings = await db.query(
+    await db.query(
         `DELETE FROM ratings WHERE review_id = $1`,
         [reviewId]
     );

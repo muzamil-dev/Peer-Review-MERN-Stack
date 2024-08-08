@@ -5,14 +5,7 @@ import * as AssignmentService from "../services/assignments.js";
 // Update analytics for a specific user. Used when submitting reviews
 // Must be used within a transaction
 export const updateAnalytics = async(db, userId, assignmentId) => {
-    // Lock the row to prevent collisions
-    await db.query(
-        `SELECT * FROM analytics 
-        WHERE user_id = $1 AND assignment_id = $2
-        FOR UPDATE`,
-        [userId, assignmentId]
-    );
-    // Compute analytics
+    // Compute analytics and insert
     const res = await db.query(
         `INSERT INTO analytics
         SELECT target_id AS user_id, assignment_id, avg(rating) AS average_rating
