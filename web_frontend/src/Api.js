@@ -224,6 +224,7 @@ export default {
                 message: response.data.message
             };
         },
+
         /**
          * Admin adds a user (specified by userId) to a group (specified by groupId), overrides member limit and locks
          * @param {number} userId professor's id
@@ -672,6 +673,32 @@ export default {
         }
     },
     Workspaces: {
+        /**
+         * Imports a CSV to create users, groups, and join them in a workspace
+         * @param {number} userId
+         * @param {number} workspaceId
+         * @param {File} csvFile
+         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         */
+        importCSV: async (userId, workspaceId, csvFile) => {
+            const formData = new FormData();
+            formData.append('csvFile', csvFile);
+            formData.append('userId', userId);
+            formData.append('workspaceId', workspaceId);
+
+            const response = await axios.post(getUrl(WORKSPACES, 'import'), formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                },
+                withCredentials: true
+            });
+            return {
+                status: response.status,
+                success: response.status === 201,
+                message: response.data.message
+            };
+        },
         /**
          * Gets a list of assignments made in the specified workspace
          * @param {number} workspaceId

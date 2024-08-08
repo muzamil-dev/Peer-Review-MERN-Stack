@@ -116,7 +116,7 @@ router.post("/import", upload.single('csvFile'), async(req, res) => {
     try{
         db = await pool.connect();
         await db.query('BEGIN');
-        const userId = req.userId;
+        const userId = req.userId || req.body.userId;
         const { workspaceId } = req.body;
 
         // Check that the user is an instructor

@@ -32,6 +32,8 @@ const GroupsPageAdmin = () => {
     const [showCreateGroupModal, setShowCreateGroupModal] = useState(false); // New state for create group modal
     const [newGroupName, setNewGroupName] = useState(''); // New state for the new group name
 
+    const [csvFile, setCsvFile] = useState(null); // New state for the CSV file
+
     const { workspaceId } = useParams();
     const navigate = useNavigate();
 
@@ -141,7 +143,6 @@ const GroupsPageAdmin = () => {
                 }
                 return group;
             }));
-            // fetchUngroupedMembers();
             fetchGroups();
             return { success: true };
         } else {
@@ -149,7 +150,6 @@ const GroupsPageAdmin = () => {
             return { success: false };
         }
     };
-
 
     const handleKickFromGroup = async (targetId) => {
         const currentUserId = getCurrentUserId();
@@ -166,21 +166,21 @@ const GroupsPageAdmin = () => {
                 }
                 return group;
             }));
-            // fetchUngroupedMembers();
             setUngroupedMembers(prevMembers => [...prevMembers, selectedGroupMembers.find(member => member.userId === targetId)]);
             setSelectedMemberGroup(prevState => {
                 const newState = { ...prevState };
                 delete newState[targetId];
                 return newState;
             });
-            fetchGroups(); // Refetch groups to update the UI
+            fetchGroups();
             return { success: true };
         } else {
             console.error('Failed to kick from group:', response.message);
             return { success: false };
         }
     };
-    
+
+
 
 
     const handleKickFromWorkspace = async (targetId) => {
@@ -400,6 +400,28 @@ const GroupsPageAdmin = () => {
         }
     };
 
+    const handleImportCSV = async () => {
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId || !csvFile) {
+            enqueueSnackbar('Please select a file and ensure you are logged in.', { variant: 'error' });
+            return;
+        }
+
+        try {
+            const response = await Api.Workspaces.importCSV(currentUserId, workspaceId, csvFile);
+            if (response.success) {
+                enqueueSnackbar('CSV imported successfully!', { variant: 'success' });
+                fetchGroups(); // Refetch groups to update the UI
+            } else {
+                console.error('Failed to import CSV:', response.message);
+                enqueueSnackbar('Failed to import CSV: ' + response.message, { variant: 'error' });
+            }
+        } catch (error) {
+            console.error('Error importing CSV:', error);
+            enqueueSnackbar('Error importing CSV: ' + error.message, { variant: 'error' });
+        }
+    };
+
     const openForm = () => {
         setIsFormOpen(true);
     };
@@ -415,6 +437,10 @@ const GroupsPageAdmin = () => {
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
         navigate('/');
+    };
+
+    const handleFileChange = (e) => {
+        setCsvFile(e.target.files[0]);
     };
 
     return (
@@ -441,6 +467,11 @@ const GroupsPageAdmin = () => {
                 <button className={`open-button col-xl-3 col-lg-3 col-md-3 col-sm-3 btn btn-light mb-2 mb-md-0 ${styles.fixedWidthSm}`} onClick={openForm}>Edit Workspace</button>
                 <button className={`col-xl-2 col-lg-2 col-md-3 btn btn-success col-sm-4 mb-2 mb-md-0 ${styles.fixedWidthSm}`} onClick={handleOpenCreateGroupModal}>Add Group</button>
             </div>
+            <div className="row">
+                <input type="file" onChange={handleFileChange} />
+                <button className="btn btn-primary" onClick={handleImportCSV}>Import CSV</button>
+            </div>
+
 
             {isFormOpen && (
                 <div className={styles.modalOverlay}>
@@ -602,6 +633,7 @@ const GroupsPageAdmin = () => {
                 </div>
             </div>
 
+
             {/* Confirmation Modal for Deleting Group */}
             <div className={`modal fade ${showDeleteConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                 <div className="modal-dialog modal-dialog-centered" role="document">
@@ -645,6 +677,7 @@ const GroupsPageAdmin = () => {
             </div>
 
         </div>
+
     );
 };
 

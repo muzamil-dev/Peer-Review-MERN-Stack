@@ -175,6 +175,11 @@ export const createUser = async(db, user) => {
             `INSERT INTO users
             (first_name, last_name, email, password, role)
             VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (email) DO UPDATE SET
+            first_name = EXCLUDED.first_name,
+            last_name = EXCLUDED.last_name,
+            password = EXCLUDED.password,
+            role = EXCLUDED.role
             RETURNING id AS "userId", first_name AS "firstName", last_name AS "lastName", email`,
             fields
         );
