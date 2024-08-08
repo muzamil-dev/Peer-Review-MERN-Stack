@@ -257,26 +257,34 @@ export const submit = async(db, userId, reviewId, ratings, comment) => {
     // Questions are sorted by id, the ratings' order is assumed to match the ordering of questions
     if (data.questionIds.length !== ratings.length)
         throw new HttpError("Incorrect number of ratings given", 400);
-
-    // Delete old ratings
-    await db.query(
-        `DELETE FROM ratings WHERE review_id = $1`,
-        [reviewId]
-    );
+    // Check that each rating is between 1 and 5
+    ratings.forEach(rating => {
+        if (!Number.isInteger(rating) || rating < 1 || rating > 5)
+            throw new HttpError("All ratings must be between 1 and 5", 400);
+    });
 
     // Build a query to insert all of the ratings
+    // Prepared statement isn't used as all values either come from the database
+    // or have been validated
     let ratingsQuery = `INSERT INTO ratings VALUES `;
     ratingsQuery += ratings.map(
-        (_, idx) => `($1, $${idx+2}, $${idx+2+ratings.length})`
+        (_, idx) => `(${reviewId}, ${data.questionIds[idx]}, ${ratings[idx]})`
     ).join(', ');
-    // Insert the ratings and the comment
-    await Promise.all([
-        db.query(ratingsQuery, [reviewId, ...data.questionIds, ...ratings]), // ratings
-        db.query('UPDATE reviews SET comment = $1 WHERE id = $2', [comment, reviewId]) // comment
-    ]);
+    ratingsQuery += ';';
+
+    await db.query(
+        // Delete old ratings
+        `DELETE FROM ratings WHERE review_id = ${reviewId};
+        ${ratingsQuery}` // Insert ratings
+    );
+    // Insert comment
+    await db.query(
+        `UPDATE reviews SET comment = $1 WHERE id = $2`, 
+        [comment, reviewId]
+    );
 
     // Update the analytics for that user
     await AnalyticsService.updateAnalytics(db, data.targetId, data.assignmentId);
-    
+
     return { message: "Review submitted successfully" };
 }
