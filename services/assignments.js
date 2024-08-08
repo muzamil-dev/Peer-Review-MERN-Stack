@@ -164,13 +164,7 @@ export const edit = async(db, assignmentId, settings) => {
     // Set the questions if provided
     if (settings.questions){
         // Get the current questions
-        const curQuestions = (await db.query(`
-            SELECT array_agg(question ORDER BY id) AS questions
-            FROM questions 
-            WHERE assignment_id = $1
-            GROUP BY assignment_id`,
-            [assignment.assignmentId]
-        )).rows[0].questions;
+        const curQuestions = assignment.questions;
         // Check that the questions arrays aren't the same
         let flag = true; // true if the arrays are the same, false if not
         if (curQuestions.length !== settings.questions.length)
@@ -190,7 +184,7 @@ export const edit = async(db, assignmentId, settings) => {
                 [assignment.assignmentId]
             )
             // Add new questions
-            await createQuestions(assignment.assignmentId, settings.questions)
+            await createQuestions(db, assignment.assignmentId, settings.questions)
         }
     }
 
