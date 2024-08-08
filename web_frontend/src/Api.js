@@ -401,6 +401,7 @@ export default {
         /**
          * Edits an assignment
          * @param {number} userId 
+         * @param {number} assignmentId 
          * @param {number} workspaceId 
          * @param {string} name 
          * @param {number} startDate epoch

@@ -39,7 +39,7 @@ const ViewFormsAdminPage = () => {
             const response = await Api.Workspaces.GetAssignments(workspaceId);
             if (response.status === 200) {
                 setForms(response.data); // Assuming response.data contains the list of assignments/forms
-                await fetchAnalyticsForAssignments(response.data);
+                //await fetchAnalyticsForAssignments(response.data);
             } else {
                 console.error('Failed to fetch forms:', response.message);
                 enqueueSnackbar(`Failed to fetch forms: ${response.message}`, { variant: 'error' });
@@ -49,22 +49,22 @@ const ViewFormsAdminPage = () => {
         fetchForms();
     }, [workspaceId]);
 
-    const fetchAnalyticsForAssignments = async (assignments) => {
-        const userId = getCurrentUserId();
-        if (!userId) return;
+    // const fetchAnalyticsForAssignments = async (assignments) => {
+    //     const userId = getCurrentUserId();
+    //     if (!userId) return;
 
-        const assignmentsWithRatings = await Promise.all(assignments.map(async (assignment) => {
-            const response = await Api.Analytics.GetAnalyticsForAssignment(assignment.assignmentId, userId, 1, 1);
-            if (response.status === 200 && response.data.length > 0) {
-                return { ...assignment, averageRating: response.data[0].averageRating };
-            } else {
-                console.error(`Failed to fetch analytics for assignment ${assignment.assignmentId}:`, response.message);
-                return assignment;
-            }
-        }));
+    //     const assignmentsWithRatings = await Promise.all(assignments.map(async (assignment) => {
+    //         const response = await Api.Analytics.GetAnalyticsForAssignment(assignment.assignmentId, userId, 1, 1);
+    //         if (response.status === 200 && response.data.length > 0) {
+    //             return { ...assignment, averageRating: response.data[0].averageRating };
+    //         } else {
+    //             console.error(`Failed to fetch analytics for assignment ${assignment.assignmentId}:`, response.message);
+    //             return assignment;
+    //         }
+    //     }));
 
-        setForms(assignmentsWithRatings);
-    };
+    //     setForms(assignmentsWithRatings);
+    // };
 
     const handleCreateForm = () => {
         navigate(`/createForm/${workspaceId}`);
@@ -81,7 +81,7 @@ const ViewFormsAdminPage = () => {
         });
         setIsEditModalOpen(true);
     };
-
+    
     const handleEditFormChange = (e) => {
         const { name, value } = e.target;
         setEditFormData(prevState => ({
@@ -89,7 +89,7 @@ const ViewFormsAdminPage = () => {
             [name]: value
         }));
     };
-
+    
     const handleQuestionChange = (index, value) => {
         const updatedQuestions = [...editFormData.questions];
         updatedQuestions[index] = value;
@@ -98,14 +98,14 @@ const ViewFormsAdminPage = () => {
             questions: updatedQuestions
         }));
     };
-
+    
     const handleAddQuestion = () => {
         setEditFormData(prevState => ({
             ...prevState,
             questions: [...prevState.questions, '']
         }));
     };
-
+    
     const handleRemoveQuestion = (index) => {
         const updatedQuestions = editFormData.questions.filter((_, i) => i !== index);
         setEditFormData(prevState => ({
@@ -113,7 +113,7 @@ const ViewFormsAdminPage = () => {
             questions: updatedQuestions
         }));
     };
-
+    
     const handleEditFormSubmit = async (e) => {
         e.preventDefault();
         const userId = getCurrentUserId();
@@ -147,8 +147,12 @@ const ViewFormsAdminPage = () => {
             setIsEditModalOpen(false);
             setForms(forms.map(form => form.assignmentId === currentForm.assignmentId ? { ...form, ...editFormData } : form));
         } else {
-            console.error('Failed to update form:', response.message);
-            enqueueSnackbar(`Failed to update form: ${response.message}`, { variant: 'error' });
+            if (response.message === "Cannot modify start date because the assignment has already been started") {
+                enqueueSnackbar('Cannot modify start date because the assignment has already been started.', { variant: 'error' });
+            } else {
+                console.error('Failed to update form:', response.message);
+                enqueueSnackbar(`Failed to update form: ${response.message}`, { variant: 'error' });
+            }
         }
     };
 
@@ -180,15 +184,13 @@ const ViewFormsAdminPage = () => {
     return (
         <div className="view-forms-admin-page">
             <nav className="navbar">
-                {/* //link to take to dashboard page */}
                 <a className="navbar-brand" href="/DashboardPage">Rate My Peer</a>
-                {/* <a className="navbar-brand">Assignments Page</a> */}
                 <ul className="navbar-links">
                     <li><a href="/DashboardPage">Workspaces</a></li>
                     <li><button onClick={handleLogout} className="btn-danger btn">Logout</button></li>
                 </ul>
             </nav>
-
+    
             <div className="header-container">
                 <button className="create-form-button" onClick={handleCreateForm}>
                     + Assign Form
@@ -226,7 +228,7 @@ const ViewFormsAdminPage = () => {
                     <p>No forms available</p>
                 )}
             </div>
-
+    
             {isEditModalOpen && (
                 <div className="edit-modal">
                     <div className="edit-modal-content">
@@ -250,6 +252,7 @@ const ViewFormsAdminPage = () => {
                                     value={new Date(editFormData.startDate).toISOString().split('T')[0]}
                                     onChange={handleEditFormChange}
                                     className="form-control"
+                                    disabled={currentForm.started} // Disable if the assignment has started
                                 />
                             </div>
                             <div className="form-groupz">
