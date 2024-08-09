@@ -11,7 +11,6 @@ import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin com
 import CreateFormPage from './CreateForm/CreateFormPageAdmin'; // Import the CreateFormPage component
 import UserDashboard from './UserDashboard';
 import ReviewPage from './ReviewPage';
-import AnalyticsPage from './AnalyticsPage/AnalyticsPage'; // Import the AnalyticsPage component
 import { SnackbarProvider } from 'notistack';
 import UserAnalyticsPage from './UserAnalyticsPage.js';
 
@@ -32,7 +31,6 @@ function App() {
                         <Route path="/createForm/:workspaceId" element={<CreateFormPage />} />
                         <Route path="/UserDashboard" element={<UserDashboard />} />
                         <Route path="/Review/:reviewId" element={<ReviewPage />} />
-                        <Route path="/Analytics/:userId" element={<AnalyticsPage />} />
                         <Route path="/workspace/:workspaceId/user/:userId/analytics" element={<UserAnalyticsPage />} />
                     </Routes>
                 </div>
