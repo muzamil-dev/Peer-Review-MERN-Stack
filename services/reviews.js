@@ -56,7 +56,7 @@ export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
     const res = await db.query(
         `/* Get the review ids and ratings, group them together to create an array of ratings for each review */
         WITH review_table AS
-        (SELECT r.id, r.assignment_id, r.user_id, r.target_id, r.comment,
+        (SELECT r.id, r.assignment_id, r.user_id, r.target_id, r.comment, r.completed,
         array_agg(ra.rating ORDER BY q.id) FILTER (WHERE q.id IS NOT NULL) AS ratings
         FROM reviews AS r
         LEFT JOIN ratings as ra
@@ -77,7 +77,8 @@ export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
                 'firstName', u.first_name,
                 'lastName', u.last_name,
                 'ratings', rt.ratings,
-                'comment', rt.comment
+                'comment', rt.comment,
+                'completed', rt.completed
             ) ORDER BY rt.id
         ) AS reviews
         FROM review_table AS rt
@@ -103,8 +104,8 @@ export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
         );
 
     // Filter complete and incomplete reviews
-    const completedReviews = data.reviews.filter(review => review.ratings !== null);
-    const incompleteReviews = data.reviews.filter(review => review.ratings === null);
+    const completedReviews = data.reviews.filter(review => review.completed);
+    const incompleteReviews = data.reviews.filter(review => !review.completed);
 
     // Return formatted object
     return {
@@ -260,7 +261,7 @@ export const submit = async(db, userId, reviewId, ratings, comment) => {
     // Check that each rating is between 1 and 5
     ratings.forEach(rating => {
         if (!Number.isInteger(rating) || rating < 1 || rating > 5)
-            throw new HttpError("All ratings must be between 1 and 5", 400);
+            throw new HttpError("All ratings must be integers between 1 and 5", 400);
     });
 
     // Build a query to insert all of the ratings
@@ -277,9 +278,11 @@ export const submit = async(db, userId, reviewId, ratings, comment) => {
         `DELETE FROM ratings WHERE review_id = ${reviewId};
         ${ratingsQuery}` // Insert ratings
     );
-    // Insert comment
+    // Insert comment and set review to completed
     await db.query(
-        `UPDATE reviews SET comment = $1 WHERE id = $2`, 
+        `UPDATE reviews SET 
+        completed = true, comment = $1 
+        WHERE id = $2`, 
         [comment, reviewId]
     );
 

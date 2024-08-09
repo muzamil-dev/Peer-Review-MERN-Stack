@@ -57,6 +57,7 @@ CREATE TABLE reviews(
     user_id INT REFERENCES users (id) ON DELETE CASCADE,
     target_id INT REFERENCES users (id) ON DELETE CASCADE,
     comment TEXT,
+    completed BOOLEAN NOT NULL DEFAULT false
     UNIQUE(assignment_id, user_id, target_id)
 );
 
