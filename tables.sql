@@ -72,6 +72,8 @@ CREATE TABLE analytics(
     user_id INT REFERENCES users (id) ON DELETE CASCADE,
     assignment_id INT REFERENCES assignments (id) ON DELETE CASCADE,
     average_rating NUMERIC,
+    completed_reviews INT NOT NULL DEFAULT 0,
+    total_reviews INT NOT NULL,
     PRIMARY KEY (user_id, assignment_id)
 );
 
