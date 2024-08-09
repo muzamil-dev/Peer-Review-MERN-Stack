@@ -30,7 +30,7 @@ router.get("/:assignmentId", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -59,7 +59,7 @@ router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, re
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -84,7 +84,7 @@ router.get("/:assignmentId/target/:targetId", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -122,7 +122,7 @@ router.post("/create", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -161,7 +161,7 @@ router.put("/edit", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -188,7 +188,7 @@ router.delete("/:assignmentId", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 

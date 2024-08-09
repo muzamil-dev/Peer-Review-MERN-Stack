@@ -6,7 +6,7 @@ export const getById = async(db, workspaceId) => {
         `SELECT id AS "workspaceId", name
         FROM workspaces WHERE id = $1`,
         [workspaceId]
-    )).rows[0];
+    ))[0];
     // Throw an error if nothing was found
     if (!workspace)
         throw new HttpError("The requested workspace was not found", 404);
@@ -22,7 +22,7 @@ export const checkInstructor = async(db, userId, workspaceId) => {
         LEFT JOIN memberships AS m
         ON m.user_id = u.id AND m.workspace_id = $1
         WHERE u.id = $2`,
-        [workspaceId, userId])).rows[0];
+        [workspaceId, userId]))[0];
 
     if (!user) // Return the error if there was one
         throw new HttpError("The requested user was not found", 404);
@@ -45,10 +45,10 @@ export const create = async(db, userId, name) => {
     await db.query(
         `INSERT INTO memberships (user_id, workspace_id, role)
         VALUES ($1, $2, $3)`,
-        [userId, res.rows[0].id, 'Instructor']
+        [userId, res[0].id, 'Instructor']
     );
     return {
-        workspaceId: res.rows[0].id,
+        workspaceId: res[0].id,
         name
     }
 }
@@ -63,7 +63,7 @@ export const setRole = async(db, targetId, workspaceId, role) => {
         [role, targetId, workspaceId]
     );
     // Check if the role was updated
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The provided user is not a member of this workspace", 400);
     // Return
     return { message: "Role updated successfully" };
@@ -89,7 +89,7 @@ export const edit = async(db, workspaceId, updates) => {
     // Send the query
     const res = await db.query(query, [workspaceId, ...values]);
     // Check if any workspace was updated
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The requested workspace was not found", 404);
 
     return { message: "Workspace updated successfully" };
@@ -130,7 +130,7 @@ export const removeUser = async(db, userId, workspaceId) => {
         RETURNING *`,
         [userId, workspaceId]
     );
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError("User is not in the specified workspace", 400);
 
@@ -146,7 +146,7 @@ export const deleteWorkspace = async(db, workspaceId) => {
         `DELETE FROM workspaces WHERE id = $1 RETURNING *`,
         [workspaceId]
     );
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The requested workspace was not found", 404);
     
     return { message: "Workspace deleted successfully" };

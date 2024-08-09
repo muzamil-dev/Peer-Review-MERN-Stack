@@ -35,7 +35,7 @@ router.get("/:workspaceId", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -55,7 +55,7 @@ router.get("/:workspaceId/assignments", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -78,7 +78,7 @@ router.get("/:workspaceId/groups", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -106,7 +106,7 @@ router.post("/create", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -150,7 +150,7 @@ router.post("/import", upload.single('csvFile'), async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -182,7 +182,7 @@ router.put("/edit", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -211,7 +211,7 @@ router.put("/promoteUser", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -239,7 +239,7 @@ router.put("/demoteUser", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -267,7 +267,7 @@ router.put("/removeUser", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -296,7 +296,7 @@ router.delete("/:workspaceId/delete", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 

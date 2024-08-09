@@ -36,7 +36,7 @@ router.post("/login", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -62,7 +62,7 @@ router.post("/requestPasswordReset", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -92,7 +92,7 @@ router.post("/resetPassword", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -114,7 +114,7 @@ router.get("/", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -132,7 +132,7 @@ router.get("/workspaces", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 

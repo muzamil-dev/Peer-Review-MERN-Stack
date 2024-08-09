@@ -18,7 +18,7 @@ export const getByAssignment = async(db, assignmentId, page, perPage) => {
         LIMIT $2 OFFSET $3`,
         [assignmentId, perPage, startIndex]
     );
-    return res.rows.map(row => ({
+    return res.map(row => ({
         ...row,
         averageRating: parseFloat(row.averageRating)
     }));
@@ -60,24 +60,58 @@ export const getIncomplete = async(db, assignmentId, page, perPage) => {
             FROM limited_results) AS "results"`,
         [assignmentId, perPage, startIndex]
     );
-    return res.rows;
+    return res;
+}
+
+// Initialize the analytics table with reviews. Use after creating reviews
+export const createAnalytics = async(db, assignmentId) => {
+    const res = await db.query(
+        `INSERT INTO analytics (user_id, assignment_id, total_reviews)
+        SELECT r.user_id, r.assignment_id,
+        count(*)::int AS total_reviews
+        FROM reviews AS r
+        WHERE r.assignment_id = $1
+        GROUP BY r.user_id, r.assignment_id
+        RETURNING *`,
+        [assignmentId]
+    );
+    return res;
 }
 
 // Update analytics for a specific user. Used when submitting reviews
-export const updateAnalytics = async(db, userId, assignmentId) => {
+// This does not use prepared 
+export const updateAnalytics = async(db, userId, targetId, assignmentId) => {
+    // Check if the review was previously completed. If it wasn't, set
     // Compute analytics and insert
-    const res = await db.query(
-        `INSERT INTO analytics
-        SELECT target_id AS user_id, assignment_id, avg(rating) AS average_rating
+    const res = await Promise.all([
+        db.query(
+        `WITH averages AS
+        (SELECT avg(ra.rating) AS average_rating
+        FROM reviews AS r
+        LEFT JOIN ratings AS ra
+        ON ra.review_id = r.id
+        WHERE r.assignment_id = $1 AND r.target_id = $2
+        GROUP BY r.target_id, r.assignment_id)
+
+        UPDATE analytics
+        SET average_rating = a.average_rating
+        FROM averages AS a
+        WHERE assignment_id = $1 AND user_id = $2`,
+        [assignmentId, targetId]),
+
+        db.query(
+        `WITH completion AS
+        (SELECT count(CASE WHEN completed = true THEN 1 END)::int 
+        AS completed_reviews
         FROM reviews
-        LEFT JOIN ratings
-        ON review_id = id
-        WHERE assignment_id = $1 AND target_id = $2
-        GROUP BY target_id, assignment_id
-        ON CONFLICT (user_id, assignment_id) DO UPDATE SET
-        average_rating = EXCLUDED.average_rating
-        RETURNING *`,
-        [assignmentId, userId]
-    );
-    return res.rows;
+        WHERE user_id = $2 AND assignment_id = $1)
+        
+        UPDATE analytics SET
+        completed_reviews = c.completed_reviews
+        FROM completion AS c
+        WHERE assignment_id = $1 AND user_id = $2`,
+        [assignmentId, userId])
+    ]);
+
+    return { message: "Analytics computed" };
 }

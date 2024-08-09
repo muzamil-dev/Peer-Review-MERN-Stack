@@ -30,5 +30,5 @@ export const convertEmailAndGroupNames = async(db, workspaceId, users) => {
         ON g.name = t.group_name AND g.workspace_id = $1`,
         [workspaceId]
     );
-    return res.rows;
+    return res;
 }

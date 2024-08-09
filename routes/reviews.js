@@ -38,7 +38,7 @@ router.post("/submit", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 

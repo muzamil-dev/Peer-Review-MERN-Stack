@@ -22,7 +22,7 @@ router.get("/refresh", async(req, res) => {
             `SELECT id AS "userId", first_name AS "firstName", last_name AS "lastName"
             FROM users WHERE refresh_token = $1`,
             [refresh]
-        )).rows[0];
+        ))[0];
         if (!user)
             res.status(403).json({ message: "JWT refresh failed - Could not authenticate user"});
         // Verify the refresh token if found in db

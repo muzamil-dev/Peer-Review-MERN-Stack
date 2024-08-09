@@ -1,6 +1,7 @@
 import HttpError from '../services/utils/httpError.js';
 
-import { createReviews } from './reviews.js';
+import * as AnalyticsService from './analytics.js';
+import * as ReviewService from './reviews.js';
 
 // Get an assignment by its id
 export const getById = async(db, assignmentId) => {
@@ -14,7 +15,7 @@ export const getById = async(db, assignmentId) => {
         GROUP BY a.id`,
         [assignmentId]
     );
-    const data = res.rows[0];
+    const data = res[0];
     // Check if assignment was found
     if (!data)
         throw new HttpError("The requested assignment was not found", 404);
@@ -47,7 +48,7 @@ export const getByWorkspace = async(db, workspaceId) => {
         ORDER BY a.due_date`,
         [workspaceId]
     );
-    const data = res.rows;
+    const data = res;
     // Workspace does not exist if no rows are found
     if (data.length === 0)
         throw new HttpError("The requested workspace was not found", 404);
@@ -78,7 +79,7 @@ export const checkInstructor = async(db, userId, assignmentId) => {
         ON a.workspace_id = m.workspace_id AND m.user_id = $1
         WHERE a.id = $2`,
         [userId, assignmentId]
-    )).rows[0];
+    ))[0];
 
     if (!user)
         throw new HttpError("The requested assignment was not found", 404);
@@ -111,7 +112,7 @@ export const create = async(db, workspaceId, settings) => {
         [name, workspaceId, start_date.toISOString(), due_date, description, started]
     );
     // Get the assignment id
-    const assignmentId = assignmentRes.rows[0].id;
+    const assignmentId = assignmentRes[0].id;
     if (!assignmentId)
         throw new HttpError("Assignment failed to create", 500);
 
@@ -119,8 +120,12 @@ export const create = async(db, workspaceId, settings) => {
     const questionRes = await createQuestions(db, assignmentId, questions);
 
     // Create reviews if assignment has already started
-    if (started)
-        await createReviews(db, assignmentId);
+    if (started){
+        // Assign reviews
+        await ReviewService.createReviews(db, assignmentId);
+        // Create analytics based on the reviews assigned
+        await AnalyticsService.createAnalytics(db, assignmentId);
+    }
     return { message: "Created assignment successfully" };
 }
 
@@ -210,7 +215,7 @@ export const deleteAssignment = async(db, assignmentId) => {
     const assignment = (await db.query(
         `DELETE FROM assignments WHERE id = $1 RETURNING *`,
         [assignmentId]
-    )).rows[0];
+    ))[0];
     // Error if assignment wasn't found
     if (!assignment)
         throw new HttpError("The requested assignment was not found", 404);

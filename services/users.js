@@ -8,7 +8,7 @@ import { sendEmail } from "./emailService.js";
 export const login = async(db, email, password) => {
     const res = (await db.query(
         `SELECT * FROM users WHERE email = $1`, [email]
-    )).rows[0];
+    ))[0];
     if (!res)
         throw new HttpError("The requested user was not found", 404);
     // Check that the user has a password
@@ -83,7 +83,7 @@ export const resetPassword = async(db, jsonData) => {
         WHERE email = $1 AND reset_token = $2`,
         [email, token]
     );
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError(
             "No password reset with this token was found", 404
@@ -108,7 +108,7 @@ export const getById = async(db, userId) => {
     const res = await db.query
     (`SELECT * FROM users WHERE id = $1`, [userId]);
     // Throw error if not found
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError("No user was found with this id", 404);
 
@@ -126,7 +126,7 @@ export const getByEmail = async(db, email) => {
     const res = await db.query
     (`SELECT * FROM users WHERE email = $1`, [email]);
     // Return if not found
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError("No user was found with this email", 404);
 
@@ -150,7 +150,7 @@ export const getWorkspaces = async(db, userId) => {
         ORDER BY w.id`,
         [userId]
     );
-    return res.rows;
+    return res;
 }
 
 // Check that a user is an admin
@@ -183,7 +183,7 @@ export const createUser = async(db, user) => {
             RETURNING id AS "userId", first_name AS "firstName", last_name AS "lastName", email`,
             fields
         );
-        return res.rows[0];
+        return res[0];
     }
     catch(err){
         return { error: err.message, status: 500 };
@@ -216,7 +216,7 @@ export const createUsers = async(db, users) => {
     const res = await db.query(query);
     // Return success message
     return { 
-        message: `Created ${res.rows.length} new users successfully`,
-        users: res.rows
+        message: `Created ${res.length} new users successfully`,
+        users: res
     };
 }

@@ -33,7 +33,7 @@ export const getById = async(db, reviewId) => {
         [reviewId]
     );
     // Check that the review exists
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError("The requested review was not found", 404);
         
@@ -97,7 +97,7 @@ export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
         GROUP BY rt.user_id, u.first_name, u.last_name, rt.reviews`,
         [userId, assignmentId]
     );
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError(
             "No reviews were assigned for this user", 400
@@ -174,7 +174,7 @@ export const getByAssignmentAndTarget = async(db, targetId, assignmentId) => {
         [targetId, assignmentId]
     );
     // Check if the reviews were found
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError(
             "Reviews cannot be accessed as this assignment has not started", 400
@@ -209,7 +209,7 @@ export const createReviews = async(db, assignmentId) => {
     // Build the query
     let query = `INSERT INTO reviews (assignment_id, group_id, user_id, target_id) VALUES `
     const insertions = [];
-    res.rows.forEach(row => {
+    res.forEach(row => {
         const group = row.group_id;
         const members = row.group_members;
         for (let i = 0; i < members.length; i++){
@@ -230,7 +230,7 @@ export const submit = async(db, userId, reviewId, ratings, comment) => {
     // Get required data about the review and assignment
     const data = (await db.query(
         `SELECT r.user_id AS "userId", r.target_id AS "targetId",
-        a.id AS "assignmentId", 
+        r.completed, a.id AS "assignmentId", 
         a.start_date AS "startDate", a.due_date AS "dueDate", 
         array_agg(q.id ORDER BY q.id) as "questionIds"
         FROM reviews AS r
@@ -241,7 +241,7 @@ export const submit = async(db, userId, reviewId, ratings, comment) => {
         WHERE r.id = $1
         GROUP BY r.id, a.id`,
         [reviewId]
-    )).rows[0];
+    ))[0];
     if (!data)
         throw new HttpError("The requested review was not found", 404);
 
@@ -287,7 +287,10 @@ export const submit = async(db, userId, reviewId, ratings, comment) => {
     );
 
     // Update the analytics for that user
-    await AnalyticsService.updateAnalytics(db, data.targetId, data.assignmentId);
+    await AnalyticsService.updateAnalytics(
+        db, data.userId, data.targetId, 
+        data.assignmentId
+    );
 
     return { message: "Review submitted successfully" };
 }

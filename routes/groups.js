@@ -32,7 +32,7 @@ router.get("/:groupId", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -62,7 +62,7 @@ router.post("/create", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -96,7 +96,7 @@ router.put("/edit", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -126,7 +126,7 @@ router.put("/moveUser", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 });
 
@@ -157,7 +157,7 @@ router.delete("/:groupId", async(req, res) => {
         );
     }
     finally{
-        if (db) db.release();
+        if (db) db.done();
     }
 })
 

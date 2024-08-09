@@ -7,7 +7,7 @@ export const getById = async(db, groupId) => {
         FROM groups WHERE id = $1`,
         [groupId]
     );
-    const group = res.rows[0];
+    const group = res[0];
     // Return
     if (!group)
         throw new HttpError("The requested group was not found", 404);
@@ -35,7 +35,7 @@ export const getByIdWithMembers = async(db, groupId) => {
         [groupId]
     );
     // Format the above query
-    const group = res.rows.map(row => ({
+    const group = res.map(row => ({
         groupId: row.id,
         name: row.name,
         members: row.members,
@@ -62,13 +62,13 @@ export const getByWorkspace = async(db, workspaceId) => {
         [workspaceId]
     );
     // Check if the workspace was not found
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The requested workspace was not found", 404);
     // Check if a null group was joined. If so, the workspace exists but has no groups
-    if (!res.rows[0].groupId)
-        res.rows = [];
+    if (!res[0].groupId)
+        res = [];
     // Return formatted json
-    return res.rows;
+    return res;
 }
 
 // Get all groups in a workspace with members
@@ -96,13 +96,13 @@ export const getByWorkspaceWithMembers = async(db, workspaceId) => {
         [workspaceId]
     );
     // Check if the workspace was not found
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The requested workspace was not found", 404);
     // Check if a null group was joined. If so, the workspace exists but has no groups
-    if (!res.rows[0].groupId)
-        res.rows = [];
+    if (!res[0].groupId)
+        res = [];
     // Return formatted json
-    return res.rows;
+    return res;
 }
 
 // Check that a user is an instructor of the workspace assocaited with a group
@@ -114,7 +114,7 @@ export const checkInstructor = async(db, userId, groupId) => {
         ON g.workspace_id = m.workspace_id AND m.user_id = $1
         WHERE g.id = $2`,
         [userId, groupId]
-    )).rows[0];
+    ))[0];
 
     if (!user)
         throw new HttpError("The requested assignment was not found", 404);
@@ -134,10 +134,10 @@ export const createGroup = async(db, workspaceId, name) => {
         [workspaceId, name]
     );
     // Check that the group didn't already exist
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The provided group name is already in use", 400);
     return {
-        groupId: res.rows[0].id,
+        groupId: res[0].id,
         workspaceId, name
     }
 }
@@ -158,8 +158,8 @@ export const createGroups = async(db, workspaceId, names) => {
     const res = await db.query(query, [workspaceId, ...names]);
     // Return the new groups
     return {
-        message: `Created ${res.rows.length} groups successfully`,
-        groups: res.rows
+        message: `Created ${res.length} groups successfully`,
+        groups: res
     };
 }
 
@@ -174,7 +174,7 @@ export const moveUser = async(db, userId, groupId) => {
         SET group_id = $1
         WHERE user_id = $2 AND workspace_id = $3
         RETURNING *`,
-    [groupId, userId, workspaceId])).rows[0];
+    [groupId, userId, workspaceId]))[0];
     if (!res)
         throw new HttpError(
             "The user is not a member of the group's workspace", 400
@@ -203,7 +203,7 @@ export const edit = async(db, groupId, updates) => {
     // Send the query
     const res = await db.query(query, [groupId, ...values]);
     // Check if any workspace was updated
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The requested group was not found", 404);
 
     return { message: "Group updated successfully" };
@@ -219,7 +219,7 @@ export const deleteGroup = async(db, groupId) => {
             [groupId]
         );
         // Return an error if the group wasn't found
-        if (!res.rows[0])
+        if (!res[0])
             throw new HttpError("The requested group was not found", 404);
 
         return { message: `Group deleted successfully` };
