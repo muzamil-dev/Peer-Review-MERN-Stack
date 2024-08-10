@@ -69,6 +69,43 @@ export const getCompletionByAssignment = async(db, assignmentId, page, perPage) 
     return res[0];
 }
 
+// Get all averages on an assignment for a user and workspace
+export const getByUserAndWorkspace = async(db, userId, workspaceId) => {
+    const curDate = (new Date(Date.now())).toISOString();
+    // Get the results
+    const res = await db.query(
+        `WITH averages AS
+        (SELECT u.id AS user_id,
+        jsonb_agg(
+            jsonb_build_object(
+                'assignmentId', a.assignment_id,
+                'startDate', b.start_date,
+                'dueDate', b.due_date,
+                'averageRating', round(a.average_rating, 2)::float
+            ) ORDER BY b.due_date
+        ) AS "assignments"
+        FROM users AS u
+        LEFT JOIN analytics AS a
+        ON u.id = a.user_id
+        JOIN assignments AS b
+        ON a.assignment_id = b.id AND b.workspace_id = $2 
+        AND b.start_date < $3
+        WHERE u.id = $1
+        GROUP BY u.id)
+        
+        SELECT u.id AS "userId", u.first_name AS "firstName",
+        u.last_name AS "lastName", 
+        COALESCE(a.assignments, '[]'::jsonb) AS assignments
+        FROM users AS u
+        LEFT JOIN averages AS a
+        ON u.id = a.user_id
+        WHERE u.id = $1`,
+        [userId, workspaceId, curDate]
+    );
+    const data = res[0];
+    return data;
+}
+
 // Initialize the analytics table with reviews. Use after creating reviews
 export const createAnalytics = async(db, assignmentId) => {
     const res = await db.query(
