@@ -329,16 +329,16 @@ export default {
         *      }}, 
         *  message: string }>} Returns an array of reviews created by the current user
         */
-        GetReviewsForUser : async (assignmentId) => {
-           const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/user`), null);
-       
-           return {
-               status: response.status,
-               data: response.data,
-               message: response.data.message
-           };
-       },
-       
+        GetReviewsForUser: async (assignmentId) => {
+            const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/user`), null);
+
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
+        },
+
 
         /**
          * Gets all reviews created by a specific user for a specific assignment
@@ -368,7 +368,7 @@ export default {
         *      }}, 
         *  message: string }>} Returns an array of reviews created by the specified user
         */
-        GetReviewsForAdmin : async (assignmentId, userId) => {
+        GetReviewsForAdmin: async (assignmentId, userId) => {
             const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/user/${userId}`), null);
             return {
                 status: response.status,
@@ -482,19 +482,23 @@ export default {
     },
     Reviews: {
         /**
-         * Gets a review by the specified reviewId
-         * @param {number} reviewId 
-         * @returns {Promise<{ 
-         *  status: number,
-         *  data: {
-         *      userId: number,
-         *      targetId: number,
-         *      firstname: string,
-         *      lastName: string,
-         *      targetFirstName: string,
-         *      targetLastName: string}, 
-         *  message: string }>}
-         */
+        * Gets a review by the specified reviewId
+        * @param {number} reviewId 
+        * @returns {Promise<{ 
+        *  status: number,
+        *  data: {
+        *      userId: number,
+        *      targetId: number,
+        *      firstName: string,
+        *      lastName: string,
+        *      targetFirstName: string,
+        *      targetLastName: string,
+        *      questions: string[],
+        *      ratings: number[],
+        *      comment: string
+        *  }, 
+        *  message: string }>}
+        */
         GetReview: async (reviewId) => {
             const response = await apiRequest(GET, getUrl(REVIEWS, reviewId), null);
             return {
@@ -503,18 +507,21 @@ export default {
                 message: response.data.message
             };
         },
+
         /**
-         * Submits a review
-         * @param {number} userId 
-         * @param {number} reviewId 
-         * @param {number[]} ratings 
-         * @returns {Promise<{ status: number, success: boolean, message: string }>}
+         * Submits a review to the backend
+         * @param {number} userId - The ID of the user submitting the review
+         * @param {number} reviewId - The ID of the review being submitted
+         * @param {number[]} ratings - An array of ratings for each question in the review
+         * @param {string} comment - The comment for the review
+         * @returns {Promise<{ status: number, success: boolean, message: string }>} - The response from the server
          */
-        SubmitReview: async (userId, reviewId, ratings) => {
+        SubmitReview: async (userId, reviewId, ratings, comment) => {
             const payload = {
                 userId,
                 reviewId,
-                ratings
+                ratings,
+                comment // Add the comment to the payload
             };
             const response = await apiRequest(POST, getUrl(REVIEWS, 'submit'), payload);
             return {
@@ -523,6 +530,7 @@ export default {
                 message: response.data.message
             };
         },
+
     },
     Users: {
         /**

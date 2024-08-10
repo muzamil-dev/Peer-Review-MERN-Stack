@@ -4,23 +4,29 @@ import Api from './Api';
 import './ReviewPage.css'; // Ensure you create and style this CSS file
 
 const ReviewPage = () => {
-    const { reviewId } = useParams();
-    const [review, setReview] = useState(null);
-    const [ratings, setRatings] = useState([]);
-    const navigate = useNavigate();
-    const isCompleted = ratings.length > 0 && !ratings.includes(0);
+    const { reviewId } = useParams(); // Get the review ID from the URL
+    const [review, setReview] = useState(null); // State to store the review details
+    const [ratings, setRatings] = useState([]); // State to store ratings for each question
+    const [comment, setComment] = useState(''); // State to store the comment
+    const navigate = useNavigate(); // Navigation hook for redirecting users
+    const isCompleted = ratings.length > 0 && !ratings.includes(0); // Check if all ratings are completed
 
+    // Fetch the review data when the component mounts
     useEffect(() => {
         fetchReview();
     }, []);
 
+    // Function to fetch review details from the API
     const fetchReview = async () => {
         try {
-            const response = await Api.Reviews.GetReview(reviewId, localStorage.getItem('accessToken'));
+            const response = await Api.Reviews.GetReview(reviewId);
             if (response.status === 200) {
-                //console.log('API Response:', response.data);
+                console.log('Fetched review:', response.data); // Log the entire response data
+    
+                // Set the fetched review data, including comment and ratings
                 setReview(response.data);
                 setRatings(response.data.ratings || new Array(response.data.questions.length).fill(0));
+                setComment(response.data.comment || ''); // Load the existing comment, if available
             } else {
                 console.error(`Failed to fetch review: ${response.message}`);
             }
@@ -29,21 +35,26 @@ const ReviewPage = () => {
         }
     };
 
+    // Handle rating change for a specific question
     const handleRatingChange = (questionIndex, rating) => {
         const updatedRatings = [...ratings];
         updatedRatings[questionIndex] = rating;
         setRatings(updatedRatings);
     };
 
+    // Handle comment change
+    const handleCommentChange = (e) => {
+        setComment(e.target.value);
+    };
+
+    // Submit the completed review with ratings and comment
     const handleSubmit = async () => {
         const userId = localStorage.getItem('userId');
         try {
-            //console.log('Submitting review:', userId, reviewId, ratings);
-            //console.log('Target ID:', review.targetId);
-            const response = await Api.Reviews.SubmitReview(userId, reviewId, ratings, localStorage.getItem('accessToken'));
+            // Include the comment in the submission
+            const response = await Api.Reviews.SubmitReview(userId, reviewId, ratings, comment);
             if (response.success) {
-                //console.log('Review submitted successfully');
-                navigate('/userDashboard');
+                navigate('/userDashboard'); // Redirect to the user dashboard on success
             } else {
                 console.error(`Failed to submit review: ${response.message}`);
             }
@@ -53,7 +64,7 @@ const ReviewPage = () => {
     };
 
     if (!review) {
-        return <div>Loading...</div>;
+        return <div>Loading...</div>; // Show a loading message while fetching the review
     }
 
     return (
@@ -88,6 +99,14 @@ const ReviewPage = () => {
                         <p>Rating {ratings[index] || 0} / 5</p>
                     </div>
                 ))}
+            </div>
+            <div className="review-comment">
+                <h2>Comment</h2>
+                <textarea 
+                    value={comment}
+                    onChange={handleCommentChange}
+                    className="comment-textarea"
+                />
             </div>
             <button onClick={handleSubmit} className="btn btn-primary submit-button">Submit</button>
         </div>
