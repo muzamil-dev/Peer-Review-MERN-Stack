@@ -1,4 +1,3 @@
-import pg from "pg";
 import pgPromise from 'pg-promise';
 import dotenv from "dotenv";
 
@@ -19,7 +18,6 @@ export const supaConfig = {
     connectionString: process.env.DB_CONNSTRING
 };
 
-//const pool = new pg.Pool(dbConfig);
-const pool = pgp(dbConfig);
+const pool = pgp(supaConfig);
 
 export default pool;

@@ -14,6 +14,32 @@ const router = express.Router();
 if (process.env.JWT_ENABLED === 'true')
     router.use(verifyJWT);
 
+// Get a review
+router.get("/:reviewId", async(req, res) => {
+    let db;
+    const { reviewId } = req.params;
+    const { userId } = req.body;
+    try{
+        // Connect to db
+        db = await pool.connect();
+        
+        // Get the review
+        const review = await ReviewService.getById(db, reviewId);
+        // Check that the correct user is viewing it
+        if (userId !== review.userId)
+            throw new HttpError("User is not authorized to view this resource", 403);
+        return res.json(review);
+    }
+    catch(err){
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.done();
+    }
+})
+
 // Submit a review
 router.post("/submit", async(req, res) => {
     let db;
