@@ -86,13 +86,25 @@ axios.interceptors.request.use(async config => {
 
 const apiRequest = async (method, url, data = null) => {
     try {
-        const response = await axios({ method, url, data, ...getConfig(), withCredentials: true });
+        const token = localStorage.getItem('accessToken');
+        const response = await axios({
+            method,
+            url,
+            data, // userId will be included here
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                ...getConfig().headers
+            },
+            withCredentials: true,
+        });
         return response;
     } catch (error) {
         console.error('Api.js: Error Caught:', error);
         throw error;
     }
 };
+
+
 
 const GROUPS = 'groups/';
 const ASSIGNMENTS = 'assignments/';
@@ -479,6 +491,44 @@ export default {
                 message: response.data.message
             };
         },
+        /**
+     * Gets the averages for an assignment, sorted from lowest to highest
+     * @param {number} assignmentId - The ID of the assignment
+     * @param {number} page - The page number for pagination
+     * @param {number} perPage - The number of results per page
+     * @param {number} userId - The ID of the user making the request
+     * @returns {Promise<{ status: number, data: { totalResults: number, results: object[] }, message: string }>} 
+     * Returns the average ratings for the assignment
+     */
+        GetAveragesByAssignment: async (assignmentId, page, perPage, userId) => {
+            const queryParams = `?page=${page}&perPage=${perPage}`;
+            const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/averages${queryParams}`), { userId });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message,
+            };
+        },
+
+        /**
+         * Gets users who haven't completed all of their reviews for an assignment
+         * Sorted by least complete to most complete by percentage, not including 100%
+         * @param {number} assignmentId - The ID of the assignment
+         * @param {number} page - The page number for pagination
+         * @param {number} perPage - The number of results per page
+         * @param {number} userId - The ID of the user making the request
+         * @returns {Promise<{ status: number, data: { totalResults: number, results: object[] }, message: string }>}
+         * Returns the list of users who haven't completed all their reviews
+         */
+        GetCompletionByAssignment: async (assignmentId, page, perPage, userId) => {
+            const queryParams = `?page=${page}&perPage=${perPage}`;
+            const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/completion${queryParams}`), { userId });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message,
+            };
+        },
     },
     Reviews: {
         /**
@@ -566,13 +616,13 @@ export default {
 
 
         /**
-     * Creates an account with the specified information.
-     * @param {string} firstName 
-     * @param {string} lastName 
-     * @param {string} email 
-     * @param {string} password 
-     * @returns {Promise<{ status: number, data: {}, message: string }>} The freshly created user's data
-     */
+        * Creates an account with the specified information.
+        * @param {string} firstName 
+        * @param {string} lastName 
+        * @param {string} email 
+        * @param {string} password 
+        * @returns {Promise<{ status: number, data: {}, message: string }>} The freshly created user's data
+        */
         CreateAccount: async (firstName, lastName, email, password) => {
             firstName = firstName.toLowerCase();
             lastName = lastName.toLowerCase();
@@ -597,11 +647,11 @@ export default {
             };
         },
         /**
-         * Verify the token for the user
-         * @param {string} email 
-         * @param {string} code 
-         * @returns {Promise<{ status: number, data: {}, message: string }>}
-         */
+        * Verify the token for the user
+        * @param {string} email 
+        * @param {string} code 
+        * @returns {Promise<{ status: number, data: {}, message: string }>}
+        */
         VerifyEmailCode: async (email, code) => {
             const payload = { email: email.toLowerCase(), token: code };
             const response = await apiRequest(POST, getUrl(USERS, 'verifyEmail'), payload)
@@ -617,9 +667,9 @@ export default {
         },
 
         /**
-         * Gets the workspace for the user
-         * @returns {Promise<{ status: number, data: {}, message: string }>}
-         */
+        * Gets the workspace for the user
+        * @returns {Promise<{ status: number, data: {}, message: string }>}
+        */
         getUserWorkspaces: async () => {
             const response = await apiRequest(GET, getUrl(USERS, 'workspaces'), null);
             return {
@@ -629,10 +679,10 @@ export default {
             };
         },
         /**
-         * Delete account specified by id
-         * @param {number} id 
-         * @returns {Promise<{ status: number, success: boolean, message: string }>}
-         */
+        * Delete account specified by id
+        * @param {number} id 
+        * @returns {Promise<{ status: number, success: boolean, message: string }>}
+        */
         DeleteAccount: async (id) => {
             const payload = {
                 id
