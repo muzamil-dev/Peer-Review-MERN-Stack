@@ -303,45 +303,81 @@ export default {
             };
         },
         /**
-         * Gets all reviews created by the user specified by userId
+         * Gets all reviews created by the current user for a specific assignment
          * @param {number} assignmentId 
-         * @param {number} userId not required
+         * @param {number} userId 
          * @returns {Promise<{ 
          *  status: number, 
-         *  data: {
-         *      userId: number,
-         *      firstName: string,
-         *      lastName: string,
-         *      questions: string[],
-         *      completedReviews: {
-         *          reviewId: number,
-         *          targetId: number,
-         *          firstName: string,
-         *          lastName: string,
-         *          ratings: number[],
-         *      }[],
-         *      incompleteReviews: {
-         *          reviewId: number,
-         *          targetId: number,
-         *          firstName: string,
-         *          lastName: string,
-         *          ratings: number[],
-         *      }}, 
-         *  message: string }>} Returns an array of reviews created by the user
-         */
-        GetAllReviewsByUser: async (assignmentId, userId) => {
-            let response;
-            if (!userId) {
-                response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/user`), null);
-            } else {
-                response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/user/${userId}`), null);
-            }
+        *  data: {
+        *      userId: number,
+        *      firstName: string,
+        *      lastName: string,
+        *      questions: string[],
+        *      completedReviews: {
+        *          reviewId: number,
+        *          targetId: number,
+        *          firstName: string,
+        *          lastName: string,
+        *          ratings: number[],
+        *      }[],
+        *      incompleteReviews: {
+        *          reviewId: number,
+        *          targetId: number,
+        *          firstName: string,
+        *          lastName: string,
+        *          ratings: number[],
+        *      }}, 
+        *  message: string }>} Returns an array of reviews created by the current user
+        */
+        GetReviewsForUser : async (assignmentId) => {
+           const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/user`), null);
+       
+           return {
+               status: response.status,
+               data: response.data,
+               message: response.data.message
+           };
+       },
+       
+
+        /**
+         * Gets all reviews created by a specific user for a specific assignment
+         * (Instructor viewing another user's reviews)
+         * @param {number} assignmentId 
+         * @param {number} userId 
+         * @returns {Promise<{ 
+         *  status: number, 
+        *  data: {
+        *      userId: number,
+        *      firstName: string,
+        *      lastName: string,
+        *      questions: string[],
+        *      completedReviews: {
+        *          reviewId: number,
+        *          targetId: number,
+        *          firstName: string,
+        *          lastName: string,
+        *          ratings: number[],
+        *      }[],
+        *      incompleteReviews: {
+        *          reviewId: number,
+        *          targetId: number,
+        *          firstName: string,
+        *          lastName: string,
+        *          ratings: number[],
+        *      }}, 
+        *  message: string }>} Returns an array of reviews created by the specified user
+        */
+        GetReviewsForAdmin : async (assignmentId, userId) => {
+            const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/user/${userId}`), null);
             return {
                 status: response.status,
                 data: response.data,
                 message: response.data.message
             };
         },
+
+
         /**
          * Gets all reviews written about a user specified by targetId
          * @param {number} assignmentId 

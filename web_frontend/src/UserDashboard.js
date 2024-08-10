@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Api from './Api';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 import { useSnackbar } from 'notistack';
 import './UserDashboard.css';
 
@@ -41,8 +41,8 @@ const UserDashboard = () => {
                 setWorkspaces(studentWorkspaces);
                 if (studentWorkspaces.length > 0) {
                     setSelectedWorkspace(studentWorkspaces[0].workspaceId);
+                    fetchAssignments(studentWorkspaces[0].workspaceId);
                 }
-                fetchAssignmentsCompletionStatus(studentWorkspaces);
             } else {
                 setErrorMessage(`Failed to fetch workspaces: ${response.message}`);
                 enqueueSnackbar(`Failed to fetch workspaces: ${response.message}`, { variant: 'error' });
@@ -54,42 +54,25 @@ const UserDashboard = () => {
         }
     };
 
-    const fetchAssignmentsCompletionStatus = async (workspaces) => {
-        const completionStatus = {};
-
-        for (const workspace of workspaces) {
-            try {
-                const response = await Api.Workspaces.GetAssignments(workspace.workspaceId, localStorage.getItem('accessToken'));
-                if (response.status === 200) {
-                    const assignments = response.data;
-                    const now = new Date();
-                    const currentAssignments = assignments.filter(assignment => new Date(assignment.dueDate) >= now);
-                    const reviewsData = await fetchAndFilterReviews(currentAssignments);
-                    const allCompleted = reviewsData.every(assignment => assignment.reviewData.incompleteReviews.length === 0);
-                    completionStatus[workspace.workspaceId] = allCompleted;
-                }
-            } catch (error) {
-                console.error(`Error fetching assignments for workspace ${workspace.workspaceId}:`, error);
-            }
-        }
-
-        setWorkspaceCompletionStatus(completionStatus);
-    };
-
     const fetchAssignments = async (workspaceId) => {
         try {
-            const response = await Api.Workspaces.GetAssignments(workspaceId, localStorage.getItem('accessToken'));
+            const response = await Api.Workspaces.GetAssignments(workspaceId);
             if (response.status === 200) {
                 const fetchedAssignments = response.data;
-                const reviewsData = await fetchAndFilterReviews(fetchedAssignments);
                 const now = new Date();
 
-                const currentAssignments = reviewsData.filter(assignment => new Date(assignment.dueDate) >= now);
-                const pastDueAssignments = reviewsData.filter(assignment => new Date(assignment.dueDate) < now);
+                // Filter assignments based on their due date
+                const currentAssignments = fetchedAssignments.filter(assignment => new Date(assignment.dueDate) >= now);
+                const pastDueAssignments = fetchedAssignments.filter(assignment => new Date(assignment.dueDate) < now);
 
+                // Fetch and filter reviews for assignments
+                const filteredAssignmentsWithReviews = await fetchAndFilterReviews(currentAssignments);
+                const filteredPastDueAssignmentsWithReviews = await fetchAndFilterReviews(pastDueAssignments);
+
+                // Update state with filtered assignments and reviews
                 setAssignments(fetchedAssignments);
-                setFilteredAssignments(currentAssignments);
-                setPastDueAssignments(pastDueAssignments);
+                setFilteredAssignments(filteredAssignmentsWithReviews);
+                setPastDueAssignments(filteredPastDueAssignmentsWithReviews);
             } else {
                 setErrorMessage(`Failed to fetch assignments: ${response.message}`);
                 enqueueSnackbar(`Failed to fetch assignments: ${response.message}`, { variant: 'error' });
@@ -102,11 +85,8 @@ const UserDashboard = () => {
     };
 
     const fetchReviews = async (assignmentId) => {
-        const userId = getCurrentUserId();
-        if (!userId) return;
-
         try {
-            const response = await Api.Assignments.GetAllReviewsByUser(assignmentId, userId, localStorage.getItem('accessToken'));
+            const response = await Api.Assignments.GetReviewsForUser(assignmentId);
             if (response.status === 200) {
                 if (response.data.completedReviews.length > 0 || response.data.incompleteReviews.length > 0) {
                     setReviews(prevReviews => ({
@@ -120,8 +100,8 @@ const UserDashboard = () => {
                 enqueueSnackbar(`Failed to fetch reviews: ${response.message}`, { variant: 'error' });
             }
         } catch (error) {
-            //console.log(`No reviews found for assignment ${assignmentId}`);
-            //enqueueSnackbar(`No reviews found for assignment ${assignmentId}`, { variant: 'info' });
+            console.error(`No reviews found for assignment ${assignmentId}`, error);
+            enqueueSnackbar(`No reviews found for assignment ${assignmentId}`, { variant: 'info' });
         }
         return null;
     };
@@ -133,9 +113,8 @@ const UserDashboard = () => {
         });
         const reviewsData = await Promise.all(reviewsPromises);
 
-        const filtered = reviewsData.filter(assignment => assignment.reviewData);
-        //console.log('filtered', filtered);
-        return filtered;
+        // Filter out assignments with no reviews
+        return reviewsData.filter(assignment => assignment.reviewData);
     };
 
     useEffect(() => {
@@ -177,9 +156,9 @@ const UserDashboard = () => {
 
     const renderReviewDropdown = (assignmentId, dueDate) => {
         const assignmentReviews = reviews[assignmentId];
-    
+
         if (!assignmentReviews) return null;
-    
+
         return (
             <div className="review-dropdown">
                 <select
@@ -204,7 +183,6 @@ const UserDashboard = () => {
                     disabled={!selectedReview[assignmentId]}
                 >
                     Edit
-                    {/* {assignmentReviews.incompleteReviews.length > 0 ? 'Start' : 'Edit'} */}
                 </button>
             </div>
         );
