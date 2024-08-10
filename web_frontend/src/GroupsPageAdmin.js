@@ -44,7 +44,7 @@ const GroupsPageAdmin = () => {
         }
         const decodedToken = jwtDecode(token);
         return decodedToken.userId;
-    }
+    };
 
     const fetchWorkspaceDetails = async () => {
         const token = localStorage.getItem('accessToken');
@@ -83,23 +83,7 @@ const GroupsPageAdmin = () => {
         }
     };
 
-    // const fetchUngroupedMembers = async () => {
-    //     const token = localStorage.getItem('accessToken');
-    //     const response = await Api.Workspaces.GetStudentsWithoutGroup(workspaceId, token);
-    //     if (response.status === 200 && Array.isArray(response.data)) {
-    //         const sortedMembers = response.data
-    //             .filter(member => member && member.userId)
-    //             .sort((a, b) => a.lastName.localeCompare(b.lastName));
-    //         setUngroupedMembers(sortedMembers);
-    //     } else {
-    //         console.error('Failed to fetch ungrouped members:', response.message);
-    //         setUngroupedMembers([]);
-    //     }
-    // };
-
-
     useEffect(() => {
-        // fetchUngroupedMembers();
         fetchGroups();
         fetchWorkspaceDetails();
     }, [workspaceId]);
@@ -129,6 +113,10 @@ const GroupsPageAdmin = () => {
         navigate(`/workspace/${workspaceId}/user/${userId}/analytics`);
     };
 
+    const goToGradesPage = () => {
+        navigate(`/grades/${workspaceId}`);
+    };
+
     const handleAddUserToGroup = async (targetId, groupId) => {
         const currentUserId = getCurrentUserId();
         if (!currentUserId) {
@@ -150,6 +138,7 @@ const GroupsPageAdmin = () => {
             return { success: false };
         }
     };
+
 
     const handleKickFromGroup = async (targetId) => {
         const currentUserId = getCurrentUserId();
@@ -453,6 +442,9 @@ const GroupsPageAdmin = () => {
                 <div className={styles.navbarCollapse} id="navbarNav">
                     <ul className="navbar-nav ml-auto">
                         <li className="nav-item">
+                            <button className="btn btn-info" onClick={goToGradesPage}>
+                                View Grades
+                            </button>
                         </li>
                         <li className="nav-item">
                             <button className={styles.logoutButton} onClick={handleLogout}>Logout</button>
