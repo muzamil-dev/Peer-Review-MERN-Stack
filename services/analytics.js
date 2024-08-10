@@ -2,30 +2,36 @@ import HttpError from "./utils/httpError.js";
 
 import * as AssignmentService from "../services/assignments.js";
 
-export const getByAssignment = async(db, assignmentId, page, perPage) => {
+export const getAveragesByAssignment = async(db, assignmentId, page, perPage) => {
     // Set start point
     const startIndex = perPage * (page - 1);
     const res = await db.query(
-        `SELECT a.user_id AS "userId",
+        `WITH all_results AS
+        (SELECT a.user_id AS "userId",
         u.first_name AS "firstName",
         u.last_name AS "lastName",
-        round(a.average_rating, 2) AS "averageRating"
+        round(a.average_rating, 2)::float AS "averageRating"
         FROM analytics AS a
         JOIN users AS u
         ON u.id = a.user_id
         WHERE a.assignment_id = $1 AND a.average_rating IS NOT NULL
-        ORDER BY average_rating
-        LIMIT $2 OFFSET $3`,
+        ORDER BY average_rating),
+        
+        limited_results AS
+        (SELECT * FROM all_results
+        LIMIT $2 OFFSET $3)
+        
+        SELECT
+            (SELECT count(*)::int FROM all_results) AS "totalResults",
+            (SELECT jsonb_agg(limited_results) FROM
+            limited_results) AS results`,
         [assignmentId, perPage, startIndex]
     );
-    return res.map(row => ({
-        ...row,
-        averageRating: parseFloat(row.averageRating)
-    }));
+    return res[0];
 }
 
 // Function to get users who haven't completed all of their reviews
-export const getIncomplete = async(db, assignmentId, page, perPage) => {
+export const getCompletionByAssignment = async(db, assignmentId, page, perPage) => {
     // Set start point
     const startIndex = perPage * (page - 1);
     const res = await db.query(
@@ -60,7 +66,7 @@ export const getIncomplete = async(db, assignmentId, page, perPage) => {
             FROM limited_results) AS "results"`,
         [assignmentId, perPage, startIndex]
     );
-    return res;
+    return res[0];
 }
 
 // Initialize the analytics table with reviews. Use after creating reviews

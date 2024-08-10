@@ -7,6 +7,7 @@ import HttpError from '../services/utils/httpError.js';
 import * as AssignmentService from "../services/assignments.js";
 import * as ReviewService from "../services/reviews.js";
 import * as WorkspaceService from '../services/workspaces.js';
+import * as AnalyticsService from '../services/analytics.js';
 
 const router = express.Router();
 
@@ -87,6 +88,73 @@ router.get("/:assignmentId/target/:targetId", async(req, res) => {
         if (db) db.done();
     }
 });
+
+// Get averages for an assignment. Sorted lowest to highest
+router.get("/:assignmentId/averages", async(req, res) => {
+    const { assignmentId } = req.params;
+    const { page, perPage } = req.query;
+    const { userId } = req.body;
+    let db;
+    try{
+        // Check for query parameters
+        if (!page || !perPage)
+            throw new HttpError(
+                "Page and per page query parameters must be provided", 400
+            );
+        // Check out a client
+        db = await pool.connect();
+        // Check that the user is an instructor of the assignment's workspace
+        await AssignmentService.checkInstructor(db, userId, assignmentId);
+        // Call the service
+        const data = await AnalyticsService.getAveragesByAssignment(
+            db, assignmentId, page, perPage
+        );
+        // Send the data back
+        res.json(data);
+    }
+    catch(err){
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.done();
+    }
+});
+
+// Get users who haven't completed all of their reviews
+// Sorted by least complete to most complete by percentage, not including 100%
+router.get("/:assignmentId/completion", async(req, res) => {
+    const { assignmentId } = req.params;
+    const { page, perPage } = req.query;
+    const { userId } = req.body;
+    let db;
+    try{
+        // Check for query parameters
+        if (!page || !perPage)
+            throw new HttpError(
+                "Page and per page query parameters must be provided", 400
+            );
+        // Check out a client
+        db = await pool.connect();
+        // Check that the user is an instructor of the assignment's workspace
+        await AssignmentService.checkInstructor(db, userId, assignmentId);
+        // Call the service
+        const data = await AnalyticsService.getCompletionByAssignment(
+            db, assignmentId, page, perPage
+        );
+        // Send the data back
+        res.json(data);
+    }
+    catch(err){
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.done();
+    }
+})
 
 // Create a new assignment
 router.post("/create", async(req, res) => {
