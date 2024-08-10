@@ -11,6 +11,7 @@ import * as UserService from "../services/users.js";
 import * as WorkspaceService from "../services/workspaces.js";
 import * as GroupService from "../services/groups.js"
 import * as AssignmentService from "../services/assignments.js";
+import * as AnalyticsService from "../services/analytics.js";
 import { convertEmailAndGroupNames } from '../services/utils/conversions.js';
 
 const router = express.Router();
@@ -81,6 +82,31 @@ router.get("/:workspaceId/groups", async(req, res) => {
         if (db) db.done();
     }
 });
+
+// Get analytics for a particular user across all of the workspace's assignments
+router.get("/:workspaceId/analytics/:targetId", async(req, res) => {
+    let db;
+    const { userId } = req.body;
+    const { targetId, workspaceId } = req.params;
+    try{
+        db = await pool.connect();
+        // Check that the user is an instructor
+        await WorkspaceService.checkInstructor(db, userId, workspaceId);
+        // Call the function
+        const data = await AnalyticsService.getByUserAndWorkspace(
+            db, targetId, workspaceId
+        );
+        return res.json(data);
+    }
+    catch(err){
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.done();
+    }
+})
 
 // Create a new workspace
 router.post("/create", async(req, res) => {
