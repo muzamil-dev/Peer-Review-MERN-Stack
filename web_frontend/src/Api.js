@@ -411,7 +411,7 @@ export default {
          *  message: string }>} Returns an array of reviews about the target user
          */
         GetAllReviewsAboutTarget: async (assignmentId, targetId) => {
-            const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `/averages/${assignmentId}/target/${targetId}`), null);
+            const response = await apiRequest(GET, getUrl(ASSIGNMENTS, `${assignmentId}/target/${targetId}`), null);
             return {
                 status: response.status,
                 data: response.data,
@@ -768,6 +768,22 @@ export default {
         }
     },
     Workspaces: {
+        /**
+         * Get analytics for a particular user across all of the workspace's assignments
+         * @param {number} workspaceId - The ID of the workspace
+         * @param {number} targetId - The ID of the user to fetch analytics for
+         * @param {number} userId - The ID of the current user making the request (usually the instructor)
+         * @returns {Promise<{status: number, data: object, message: string}>} The analytics data
+         */
+        GetAnalyticsByUserAndWorkspace: async (workspaceId, targetId, userId) => {
+            const url = getUrl(WORKSPACES, `${workspaceId}/analytics/${targetId}`);
+            const response = await apiRequest(GET, url, { userId });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message,
+            };
+        },
         /**
          * Imports a CSV to create users, groups, and join them in a workspace
          * @param {number} userId

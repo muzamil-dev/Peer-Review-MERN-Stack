@@ -24,17 +24,24 @@ const UserAnalyticsPage = () => {
         }
         const decodedToken = jwtDecode(token);
         return decodedToken.userId;
-    }
-
+    };
+    
     useEffect(() => {
         const fetchUserAnalytics = async () => {
             try {
-                //get current user id
+                // Get the current user ID
                 const adminID = getCurrentUserId();
-                const response = await Api.Analytics.GetAnalyticsForUser(userId, workspaceId, adminID);
+                if (!adminID) {
+                    setError('You must be logged in to view this page.');
+                    return;
+                }
+
+                // Fetch analytics data for the user across all assignments in the workspace
+                const response = await Api.Workspaces.GetAnalyticsByUserAndWorkspace(workspaceId, userId, adminID);
                 if (response.status === 200) {
                     const analyticsData = response.data;
 
+                    // Fetch additional assignment details and reviews
                     const assignmentsWithDetails = await Promise.all(
                         analyticsData.assignments.map(async (assignment) => {
                             try {
@@ -43,7 +50,7 @@ const UserAnalyticsPage = () => {
                                 return {
                                     ...assignment,
                                     name: assignmentInfo.data.name,
-                                    questions: assignmentReviews.status === 200 ? assignmentReviews.data.questions : [],
+                                    questions: assignmentInfo.data.questions, // Use the questions fetched from the assignment info
                                     reviews: assignmentReviews.status === 200 ? assignmentReviews.data.reviews : [],
                                     questionAverages: assignmentReviews.status === 200 ? assignmentReviews.data.questionAverages : []
                                 };
@@ -70,6 +77,7 @@ const UserAnalyticsPage = () => {
 
         fetchUserAnalytics();
     }, [workspaceId, userId]);
+
 
     const handleAssignmentClick = (assignment) => {
         setSelectedAssignment(assignment);
@@ -124,7 +132,6 @@ const UserAnalyticsPage = () => {
                         <table className={`table table-striped table-bordered mt-3 ${styles.table}`}>
                             <thead className="thead-dark">
                                 <tr>
-                                    {/* <th>Assignment ID</th> */}
                                     <th>Assignment Name</th>
                                     <th>Start Date</th>
                                     <th>Due Date</th>
@@ -135,7 +142,6 @@ const UserAnalyticsPage = () => {
                             <tbody>
                                 {userAnalytics.assignments.map((assignment) => (
                                     <tr key={assignment.assignmentId} onClick={() => handleAssignmentClick(assignment)} style={{ cursor: 'pointer' }}>
-                                        {/* <td>{assignment.assignmentId}</td> */}
                                         <td>{assignment.name}</td>
                                         <td>{new Date(assignment.startDate).toLocaleDateString()}</td>
                                         <td>{new Date(assignment.dueDate).toLocaleDateString()}</td>
@@ -158,14 +164,30 @@ const UserAnalyticsPage = () => {
                                 <p>Due Date: {new Date(selectedAssignment.dueDate).toLocaleDateString()}</p>
                                 <p>Average Rating: {selectedAssignment.averageRating !== null ? selectedAssignment.averageRating.toFixed(2) : 'N/A'}</p>
                                 <h6>Questions & Ratings:</h6>
-                                {selectedAssignment.questionAverages && selectedAssignment.questionAverages.length > 0 ? (
-                                    selectedAssignment.questionAverages.map((qa, index) => (
+                                {selectedAssignment.questions && selectedAssignment.questions.length > 0 ? (
+                                    selectedAssignment.questions.map((question, index) => (
                                         <div key={index}>
-                                            <strong>{qa.question}</strong>: {qa.averageRating.toFixed(2)}
+                                            <strong>{question}</strong>
                                         </div>
                                     ))
                                 ) : (
                                     <div>No questions found</div>
+                                )}
+                                <h6>Reviews:</h6>
+                                {selectedAssignment.reviews && selectedAssignment.reviews.length > 0 ? (
+                                    selectedAssignment.reviews.map((review, index) => (
+                                        <div key={index} className="mb-3">
+                                            <strong>Reviewed by {review.firstName} {review.lastName}</strong>
+                                            <p>Comment: {review.comment}</p>
+                                            <ul>
+                                                {review.ratings.map((rating, ratingIndex) => (
+                                                    <li key={ratingIndex}>Rating for "{selectedAssignment.questions[ratingIndex]}": {rating}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div>No reviews found</div>
                                 )}
                             </Modal.Body>
                             <Modal.Footer>

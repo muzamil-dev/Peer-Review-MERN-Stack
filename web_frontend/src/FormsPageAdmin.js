@@ -195,7 +195,7 @@ const ViewFormsAdminPage = () => {
                 <button className="create-form-button" onClick={handleCreateForm}>
                     + Assign Form
                 </button>
-                <button className="btn btn-outline-primary btn-md" onClick={() => navigate(`/groups/${workspaceId}`)}>Back</button>
+                <button className="btn btn-outline-primary btn-md" onClick={() => navigate(`/workspaces/${workspaceId}/admin`)}>Back</button>
             </div>
             <div className="forms-containerz">
                 <h2>Assignments</h2>
