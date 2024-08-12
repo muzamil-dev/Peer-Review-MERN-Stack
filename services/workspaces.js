@@ -95,6 +95,21 @@ export const edit = async(db, workspaceId, updates) => {
     return { message: "Workspace updated successfully" };
 }
 
+// Insert a single user into a workspace
+export const insertUser = async(db, workspaceId, user) => {
+    const { userId, groupId, role } = user;
+    // Build the query
+    const membership = await db.query(`INSERT INTO memberships
+    (user_id, workspace_id, group_id, role) VALUES 
+    ($1, $2, $3, $4) 
+    ON CONFLICT (user_id, workspace_id) DO UPDATE SET
+    group_id = EXCLUDED.group_id,
+    role = EXCLUDED.role`,
+    [userId, workspaceId, groupId, role]);
+
+    return { message: "Inserted user into workspace successfully" };
+}   
+
 // Insert a list of users into a workspace
 // Each element of users must contain a userId
 export const insertUsers = async(db, workspaceId, users) => {

@@ -136,6 +136,53 @@ router.post("/create", async(req, res) => {
     }
 });
 
+// Insert a single user into the workspace, creates their account if
+// it does not exist
+router.post("/insertUser", async(req, res) => {
+    let db;
+    const { userId, workspaceId, groupId,
+        firstName, lastName, email, role } = req.body;
+    try{
+        // Check for required fields
+        if (!workspaceId || !email || !role)
+            throw new HttpError("One or more required fields is not present", 400);
+        if (role !== 'Student' && role !== 'Instructor')
+            throw new HttpError("Role must be either student or instructor", 400);
+        // Check that either the student is given a group, or the instructor is given no group
+        if (role === 'Student' && !groupId)
+            throw new HttpError("Student must be placed into a group", 400);
+        if (role === 'Instructor' && groupId)
+            throw new HttpError("Instructors cannot be placed in groups", 400);
+        // Check out a client
+        db = await pool.connect();
+        await db.query('BEGIN');
+        // Authenticate instructor
+        await WorkspaceService.checkInstructor(db, userId, workspaceId);
+        // Create the account if it doesn't exist
+        let user = await UserService.createUsers(db, [{ firstName, lastName, email }]);
+        if (user.users.length === 0)
+            user = await UserService.getByEmail(db, email);
+        else
+            user = user.users[0];
+        // Insert the user into the workspace
+        await WorkspaceService.insertUser(db, workspaceId, { 
+            userId: user.userId, groupId, role 
+        });
+        await db.query('COMMIT');
+        return res.status(201).json({ message: "User inserted successfully" });
+    }
+    catch(err){
+        if (db) 
+            await db.query('ROLLBACK');
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.done();
+    }
+})
+
 // Import a csv to create users, groups, and join them in a workspace
 router.post("/import", upload.single('csvFile'), async(req, res) => {
     let db;
