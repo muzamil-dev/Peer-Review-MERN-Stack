@@ -6,8 +6,8 @@ import * as journalService from '../services/journals.js';
 
 const router = express.Router();
 
-// if (process.env.JWT_ENABLED === "true")
-//     router.use(verifyJWT);
+if (process.env.JWT_ENABLED === "true")
+    router.use(verifyJWT);
 
 // Route to submit a journal entry
 router.post('/:journalAssignmentId/submit', async (req, res) => {

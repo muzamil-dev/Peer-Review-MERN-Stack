@@ -67,16 +67,13 @@ export const submitJournalEntry = async (db, journalAssignmentId, userId, conten
         throw new HttpError('Journal entry submission is not allowed outside the assignment period', 403);
     }
 
-    try {
-        await db.query(
-            `INSERT INTO journal_entries (journal_assignment_id, user_id, content)
-             VALUES ($1, $2, $3)
-             ON CONFLICT (journal_assignment_id, user_id) DO UPDATE SET content = EXCLUDED.content, submitted_at = CURRENT_TIMESTAMP`,
-            [journalAssignmentId, userId, content]
-        );
-    } catch (err) {
-        throw new HttpError('Error submitting journal entry', 500);
-    }
+    // Insert or update the journal entry
+    await db.query(
+        `INSERT INTO journal_entries (journal_assignment_id, user_id, content)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (journal_assignment_id, user_id) DO UPDATE SET content = EXCLUDED.content, submitted_at = CURRENT_TIMESTAMP`,
+        [journalAssignmentId, userId, content]
+    );
 };
 
 
