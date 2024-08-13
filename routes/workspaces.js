@@ -12,6 +12,7 @@ import * as WorkspaceService from "../services/workspaces.js";
 import * as GroupService from "../services/groups.js"
 import * as AssignmentService from "../services/assignments.js";
 import * as AnalyticsService from "../services/analytics.js";
+import * as journalService from '../services/journals.js';
 import { convertEmailAndGroupNames } from '../services/utils/conversions.js';
 
 const router = express.Router();
@@ -369,6 +370,64 @@ router.delete("/:workspaceId/delete", async(req, res) => {
         );
     }
     finally{
+        if (db) db.done();
+    }
+});
+
+// Route to create multiple journal assignments
+router.post('/:workspaceId/createJournals', async (req, res) => {
+    const { workspaceId } = req.params;
+    const { startDate, endDate, journalDay, weekNumbersToSkip } = req.body;
+    let db;
+
+    try {
+        db = await pool.connect();
+
+        const journalDates = journalService.generateJournalDates(startDate, endDate, journalDay, weekNumbersToSkip);
+
+        for (const [weekNumber, journal] of journalDates.entries()) {
+            await journalService.createJournalAssignment(db, workspaceId, weekNumber + 1, journal.start, journal.end);
+        }
+
+        res.status(201).json({ message: 'Journals created successfully' });
+    } catch (err) {
+        if (err instanceof HttpError) {
+            res.status(err.status).json({ message: err.message });
+        } else {
+            console.error('Error creating journals:', err);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    } finally {
+        if (db) db.done();
+    }
+});
+
+// Get all journals submitted by a user in a specific workspace
+router.get(["/:workspaceId/user", "/:workspaceId/user/:userId"], async (req, res) => {
+    const { workspaceId } = req.params;
+    let userId, db;
+
+    try {
+        db = await pool.connect();
+
+        // If a userId is provided in the route parameter, check if the requester is an instructor
+        if (req.params.userId) {
+            await WorkspaceService.checkInstructor(db, req.body.userId, workspaceId); // Assuming req.body.userId is the admin's userId from JWT
+            userId = req.params.userId;
+        } else {
+            userId = req.body.userId; // For regular users who pass their userId in the body
+        }
+
+        const journals = await journalService.getJournalsByUserAndWorkspace(db, workspaceId, userId);
+        res.status(200).json(journals);
+    } catch (err) {
+        if (err instanceof HttpError) {
+            res.status(err.status).json({ message: err.message });
+        } else {
+            console.error('Error fetching journals:', err);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    } finally {
         if (db) db.done();
     }
 });

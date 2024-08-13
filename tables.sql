@@ -77,6 +77,26 @@ CREATE TABLE analytics(
     PRIMARY KEY (user_id, assignment_id)
 );
 
+CREATE TABLE journal_assignments (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE,
+    start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    week_number INT NOT NULL,
+    UNIQUE (workspace_id, week_number)
+);
+
+CREATE TABLE journal_entries (
+    id SERIAL PRIMARY KEY,
+    journal_assignment_id INT REFERENCES journal_assignments(id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT,
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (journal_assignment_id, user_id)
+);
+
+
 /* Drop all tables (in order) */
 
 DROP TABLE analytics;
@@ -89,3 +109,5 @@ DROP TABLE groups;
 DROP TABLE workspaces;
 DROP TABLE password_reset;
 DROP TABLE users;
+DROP TABLE journal_entries;
+DROP TABLE journal_assignments;

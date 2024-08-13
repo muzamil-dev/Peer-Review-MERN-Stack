@@ -13,6 +13,7 @@ import userRoutes from './routes/users.js';
 import workspaceRoutes from './routes/workspaces.js';
 import assignmentRoutes from './routes/assignments.js';
 import reviewRoutes from './routes/reviews.js';
+import journalRoutes from './routes/journals.js';
 
 // Services (for cron job)
 import * as ReviewService from './services/reviews.js';
@@ -51,6 +52,7 @@ app.use("/users", userRoutes);
 app.use("/workspaces", workspaceRoutes);
 app.use("/assignments", assignmentRoutes);
 app.use("/reviews", reviewRoutes);
+app.use("/journals", journalRoutes);
 app.use("/jwt", jwtRoutes);
 
 // Test to ping the server
