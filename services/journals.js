@@ -49,6 +49,24 @@ export const submitJournalEntry = async (db, journalAssignmentId, userId, conten
         throw new HttpError('Missing required fields for submitting a journal entry', 400);
     }
 
+    // Fetch the journal assignment to check its start and end dates
+    const res = await db.query(
+        `SELECT start_date, end_date FROM journal_assignments WHERE id = $1`,
+        [journalAssignmentId]
+    );
+
+    if (res.length === 0) {
+        throw new HttpError('Journal assignment not found', 404);
+    }
+
+    const { start_date, end_date } = res[0];
+    const now = new Date();
+
+    // Check if the current date is within the start and end dates
+    if (now < start_date || now > end_date) {
+        throw new HttpError('Journal entry submission is not allowed outside the assignment period', 403);
+    }
+
     try {
         await db.query(
             `INSERT INTO journal_entries (journal_assignment_id, user_id, content)
@@ -60,6 +78,7 @@ export const submitJournalEntry = async (db, journalAssignmentId, userId, conten
         throw new HttpError('Error submitting journal entry', 500);
     }
 };
+
 
 
 export const getJournalsByUserAndWorkspace = async (db, workspaceId, userId) => {
