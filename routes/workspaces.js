@@ -382,6 +382,7 @@ router.post('/:workspaceId/createJournals', async (req, res) => {
 
     try {
         db = await pool.connect();
+        await db.query('BEGIN');
 
         const journalDates = journalService.generateJournalDates(startDate, endDate, journalDay, weekNumbersToSkip);
 
@@ -389,8 +390,12 @@ router.post('/:workspaceId/createJournals', async (req, res) => {
             await journalService.createJournalAssignment(db, workspaceId, weekNumber + 1, journal.start, journal.end);
         }
 
+        await db.query('COMMIT');
         res.status(201).json({ message: 'Journals created successfully' });
     } catch (err) {
+        if (db) 
+            await db.query('ROLLBACK');
+
         if (err instanceof HttpError) {
             res.status(err.status).json({ message: err.message });
         } else {
@@ -409,6 +414,7 @@ router.get(["/:workspaceId/user", "/:workspaceId/user/:userId"], async (req, res
 
     try {
         db = await pool.connect();
+        await db.query('BEGIN');
 
         // If a userId is provided in the route parameter, check if the requester is an instructor
         if (req.params.userId) {
@@ -419,8 +425,13 @@ router.get(["/:workspaceId/user", "/:workspaceId/user/:userId"], async (req, res
         }
 
         const journals = await journalService.getJournalsByUserAndWorkspace(db, workspaceId, userId);
+
+        await db.query('COMMIT');
         res.status(200).json(journals);
     } catch (err) {
+        if (db) 
+            await db.query('ROLLBACK');
+
         if (err instanceof HttpError) {
             res.status(err.status).json({ message: err.message });
         } else {

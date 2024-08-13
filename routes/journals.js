@@ -17,9 +17,16 @@ router.post('/:journalAssignmentId/submit', async (req, res) => {
 
     try {
         db = await pool.connect();
+        await db.query('BEGIN');
+
         await journalService.submitJournalEntry(db, journalAssignmentId, userId, content);
+
+        await db.query('COMMIT');
         res.status(201).json({ message: 'Journal entry submitted successfully' });
     } catch (err) {
+        if (db) 
+            await db.query('ROLLBACK');
+
         if (err instanceof HttpError) {
             res.status(err.status).json({ message: err.message });
         } else {
