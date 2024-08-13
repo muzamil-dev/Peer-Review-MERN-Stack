@@ -34,6 +34,15 @@ const GroupsPageAdmin = () => {
 
     const [csvFile, setCsvFile] = useState(null); // New state for the CSV file
 
+    const [showInsertUserModal, setShowInsertUserModal] = useState(false); // New state for the insert user modal
+    const [insertUserData, setInsertUserData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: 'Student',
+        groupId: ''
+    });
+
     const { workspaceId } = useParams();
     const navigate = useNavigate();
 
@@ -87,6 +96,63 @@ const GroupsPageAdmin = () => {
         fetchGroups();
         fetchWorkspaceDetails();
     }, [workspaceId]);
+
+    const handleInsertUserChange = (e) => {
+        const { name, value } = e.target;
+        setInsertUserData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const handleOpenInsertUserModal = () => {
+        setShowInsertUserModal(true);
+    };
+
+    const handleCloseInsertUserModal = () => {
+        setShowInsertUserModal(false);
+        setInsertUserData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            role: 'Student',
+            groupId: ''
+        });
+    };
+
+    const handleInsertUserSubmit = async (e) => {
+        e.preventDefault();
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            navigate('/');
+            return;
+        }
+
+        try {
+            const groupId = insertUserData.role === 'Instructor' ? null : insertUserData.groupId;
+            const response = await Api.Workspaces.InsertUser(
+                currentUserId,
+                workspaceId,
+                groupId,
+                insertUserData.firstName,
+                insertUserData.lastName,
+                insertUserData.email.toLowerCase(),  // Make sure email is in lowercase
+                insertUserData.role
+            );
+
+            if (response.status === 201) {
+                enqueueSnackbar('User inserted successfully!', { variant: 'success' });
+                fetchGroups(); // Refresh the groups list
+                handleCloseInsertUserModal(); // Close the modal
+            } else {
+                enqueueSnackbar(`Failed to insert user: ${response.message}`, { variant: 'error' });
+            }
+        } catch (error) {
+            console.error('Error inserting user into workspace:', error);
+            enqueueSnackbar('Error inserting user into workspace', { variant: 'error' });
+        }
+    };
+
 
     const handleEditGroup = (groupId) => {
         navigate(`/groups/${groupId}/edit`);
@@ -463,6 +529,90 @@ const GroupsPageAdmin = () => {
                 <input type="file" onChange={handleFileChange} />
                 <button className="btn btn-primary" onClick={handleImportCSV}>Import CSV</button>
             </div>
+
+            <div className="row mt-4">
+                <button className="btn btn-primary" onClick={handleOpenInsertUserModal}>Insert User</button>
+            </div>
+
+            {showInsertUserModal && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <h2>Insert User</h2>
+                        <form onSubmit={handleInsertUserSubmit}>
+                            <div className="form-group">
+                                <label>First Name</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    name="firstName"
+                                    value={insertUserData.firstName}
+                                    onChange={handleInsertUserChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Last Name</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    name="lastName"
+                                    value={insertUserData.lastName}
+                                    onChange={handleInsertUserChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    className="form-control"
+                                    name="email"
+                                    //lowercase email
+                                    value={insertUserData.email.toLowerCase()}
+                                    onChange={handleInsertUserChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Role</label>
+                                <select
+                                    className="form-control"
+                                    name="role"
+                                    value={insertUserData.role}
+                                    onChange={handleInsertUserChange}
+                                    required
+                                >
+                                    <option value="Student">Student</option>
+                                    <option value="Instructor">Instructor</option>
+                                </select>
+                            </div>
+                            {insertUserData.role === 'Student' && (
+                                <div className="form-group">
+                                    <label>Group</label>
+                                    <select
+                                        className="form-control"
+                                        name="groupId"
+                                        value={insertUserData.groupId}
+                                        onChange={handleInsertUserChange}
+                                        required
+                                    >
+                                        <option value="">Select Group</option>
+                                        {groups.map(group => (
+                                            <option key={group.groupId} value={group.groupId}>
+                                                {group.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                            <div className={styles.modalActions}>
+                                <button type="submit" className="btn btn-primary">Insert User</button>
+                                <button type="button" className="btn btn-secondary" onClick={handleCloseInsertUserModal}>Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
 
             {isFormOpen && (

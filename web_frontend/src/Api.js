@@ -1042,14 +1042,14 @@ export default {
             };
         },
 
-        InsertUser: async (userId, workspaceId, email, groupId, firstName, lastName, role) => {
+        InsertUser: async (userId, workspaceId, groupId, firstName, lastName, email, role) => {
             const payload = {
                 userId,
                 workspaceId,
-                email,
                 groupId,
                 firstName,
                 lastName,
+                email,
                 role
             };
 
@@ -1060,7 +1060,7 @@ export default {
                 message: response.data.message
             };
         }
-        
+
     },
     Analytics: {
         /**
