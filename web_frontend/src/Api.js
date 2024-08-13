@@ -1042,6 +1042,25 @@ export default {
             };
         },
 
+        InsertUser: async (userId, workspaceId, email, groupId, firstName, lastName, role) => {
+            const payload = {
+                userId,
+                workspaceId,
+                email,
+                groupId,
+                firstName,
+                lastName,
+                role
+            };
+
+            const response = await apiRequest(POST, getUrl(WORKSPACES, 'insertUser'), payload);
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
+        }
+        
     },
     Analytics: {
         /**
