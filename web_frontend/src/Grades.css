@@ -1,13 +1,21 @@
 /* General page styling */
 .grades-page {
-    padding: 20px;
-    font-family: Arial, sans-serif;
+    padding: 4vh;
+    width: 80vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Use a modern font */
+    background-color: #F0F8FF; /* Alice Blue */
+    color: #2F4F4F; /* Dark Slate Gray */
+    max-width: 1400px; /* Wider container for larger screens */
+    margin: 0 auto; /* Center align the page */
 }
 
+/* Header styling */
 .grades-page h1 {
     text-align: center;
-    margin-bottom: 20px;
-    color: white;
+    margin-bottom: 0px;
+    color: #1E90FF; /* Dodger Blue */
+    font-size: 2em; /* Larger font size for emphasis */
+    font-weight: 600; /* Semi-bold for prominence */
 }
 
 /* Assignment Selector styling */
@@ -19,51 +27,58 @@
 .assignment-selector label {
     margin-right: 10px;
     font-size: 18px;
-    color: white;
+    color: #4682B4; /* Steel Blue */
+    font-weight: 500; /* Medium weight for labels */
 }
 
 .assignment-selector select {
-    padding: 8px 12px;
+    padding: 10px 15px; /* Increased padding for better usability */
     font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    transition: border-color 0.3s ease;
+    border: 1px solid #D3D3D3; /* Light Gray */
+    border-radius: 5px; /* Slightly larger radius for a softer look */
+    background-color: #FFFFFF; /* White */
+    color: #2F4F4F; /* Dark Slate Gray */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .assignment-selector select:focus {
-    border-color: #007bff;
+    border-color: #5F9EA0; /* Cadet Blue */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow on focus */
+    outline: none; /* Remove default outline */
 }
 
 /* Table styling */
 .table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    margin-bottom: 200px;
+    background-color: #FFFFFF; /* White */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Enhanced shadow for depth */
+    border-radius: 8px; /* Rounded corners for modern look */
 }
 
 .table th, .table td {
-    padding: 12px 15px;
+    padding: 15px 20px; /* More padding for improved readability */
     text-align: left;
-    border: 1px solid #ddd;
+    border: 1px solid #D3D3D3; /* Light Gray */
 }
 
 .table th {
-    background-color: #f2f2f2;
-    color: #333;
-    font-weight: bold;
+    background-color: #1E90FF; /* Dodger Blue */
+    color: #FFFFFF; /* White */
+    font-weight: 600; /* Semi-bold for header text */
 }
 
 .table tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: #E6E6FA; /* Lavender */
 }
 
 .table tr:hover {
-    background-color: #f1f1f1;
+    background-color: #F0F8FF; /* Alice Blue */
 }
 
 .table td {
-    color: #555;
+    color: #2F4F4F; /* Dark Slate Gray */
 }
 
 /* Section headers styling */
@@ -71,8 +86,11 @@
 .completion-data h2 {
     margin-top: 30px;
     margin-bottom: 10px;
-    color: #007bff;
-    text-align: left;
+    color: #1E90FF; /* Dodger Blue */
+    font-size: 1.5em; /* Slightly larger for emphasis */
+    font-weight: 600; /* Semi-bold for consistency */
+    border-bottom: 2px solid #E6E6FA; /* Underline for visual separation */
+    padding-bottom: 10px; /* Space below the text */
 }
 
 /* Pagination controls styling */
@@ -82,27 +100,44 @@
 }
 
 .pagination-controls button {
-    padding: 8px 16px;
+    padding: 10px 20px; /* Larger padding for easier interaction */
     margin: 0 5px;
     font-size: 16px;
-    color: #fff;
-    background-color: #007bff;
+    color: #FFFFFF; /* White */
+    background-color: #1E90FF; /* Dodger Blue */
     border: none;
-    border-radius: 4px;
+    border-radius: 5px; /* Rounded corners for buttons */
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .pagination-controls button:disabled {
-    background-color: #ccc;
+    background-color: #B0C4DE; /* Light Steel Blue */
     cursor: not-allowed;
 }
 
 .pagination-controls button:hover:not(:disabled) {
-    background-color: #0056b3;
+    background-color: #4682B4; /* Steel Blue */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Shadow on hover */
 }
 
 .pagination-controls span {
     font-size: 16px;
+    color: #2F4F4F; /* Dark Slate Gray */
+}
+
+.btn-primary {
+    background-color: #0080ff;
     color: white;
+    text-align: center;
+
+    display: flex;
+    justify-content: center;
+
+    align-items: center;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
