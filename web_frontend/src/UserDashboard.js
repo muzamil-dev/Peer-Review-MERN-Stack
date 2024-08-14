@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Api from './Api';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { useSnackbar } from 'notistack';
 import './UserDashboard.css';
 
@@ -18,7 +18,6 @@ const UserDashboard = () => {
     const [hasJournals, setHasJournals] = useState(false); // Track if journals exist
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
-    const groupId = 25; // Replace with the actual groupId you need
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
@@ -209,7 +208,7 @@ const UserDashboard = () => {
 
     return (
         <div className="dashboardz">
-            <button className="btn btn-light mt-2 back-button" onClick={() => navigate(`/groups/${groupId}`)}>Back</button>
+            <button className="btn btn-light mt-2 back-button" onClick={() => navigate(`/groups/${selectedWorkspace}`)}>Back</button>
             <h1 className="header-large">Assignments</h1>
             <div className="workspace-selector">
                 <label htmlFor="workspace">Workspace: </label>

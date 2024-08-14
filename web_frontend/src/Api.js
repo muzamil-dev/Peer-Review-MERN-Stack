@@ -797,6 +797,8 @@ export default {
             formData.append('csvFile', csvFile);
             formData.append('userId', userId);
             formData.append('workspaceId', workspaceId);
+            //lower case the email here
+            //how can i do that
 
             const response = await axios.post(getUrl(WORKSPACES, 'import'), formData, {
                 headers: {
@@ -1096,10 +1098,10 @@ export default {
         },
 
         /**
-     * Get available weeks for journal assignments in a workspace
-     * @param {number} workspaceId - The ID of the workspace
-     * @returns {Promise<{ status: number, data: object, message: string }>} The list of weeks
-     */
+         * Get available weeks for journal assignments in a workspace
+         * @param {number} workspaceId - The ID of the workspace
+         * @returns {Promise<{ status: number, data: object, message: string }>} The list of weeks
+         */
         getWeeks: async (workspaceId) => {
             try {
                 const config = getConfig(); // Ensure the token is included in the headers
@@ -1116,7 +1118,34 @@ export default {
                     message: error.response ? error.response.data.message : 'Failed to fetch weeks',
                 };
             }
+        },
+        /**
+         * Create multiple journal assignments in a workspace
+         * @param {number} workspaceId - The ID of the workspace
+         * @param {object} payload - The payload containing startDate, endDate, journalDay, and weekNumbersToSkip
+         * @returns {Promise<{ status: number, data: object, message: string }>} The result of the journal creation
+         */
+        createJournals: async (workspaceId, payload) => {
+            try {
+                const config = getConfig();
+                console.log("Sending request with payload:", payload);
+                const response = await axios.post(getUrl(WORKSPACES, `${workspaceId}/createJournals`), payload, config);
+                console.log("Response received:", response);
+                return {
+                    status: response.status,
+                    data: response.data,
+                    message: response.data.message,
+                };
+            } catch (error) {
+                console.error("Error response:", error.response?.data || error.message);
+                return {
+                    status: error.response ? error.response.status : 500,
+                    data: null,
+                    message: error.response ? error.response.data.message : 'Failed to create journals',
+                };
+            }
         }
+
     },
     Analytics: {
         /**

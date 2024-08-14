@@ -3,7 +3,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "modal": "^1.2.0",
     "nodemon": "^3.1.4",
+    "react-modal": "^3.16.1",
     "react-scripts": "^5.0.1"
   }
 }
