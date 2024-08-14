@@ -112,6 +112,7 @@ const REVIEWS = 'reviews/';
 const WORKSPACES = 'workspaces/';
 const USERS = 'users/';
 const ANALYTICS = 'analytics/';
+const JOURNALS = 'journals/';
 
 const GET = 'get';
 const POST = 'post';
@@ -1059,8 +1060,40 @@ export default {
                 data: response.data,
                 message: response.data.message
             };
-        }
+        },
 
+        /**
+         * Get all journals submitted by the student in a specific workspace
+         * @param {number} workspaceId - The ID of the workspace
+         * @param {number} userId - The ID of the student (should be the student's own ID)
+         * @returns {Promise<{ status: number, data: object[], message: string }>} The list of journals
+         */
+        GetStudentJournalsByWorkspace: async (workspaceId, userId) => {
+            const url = getUrl(WORKSPACES, `${workspaceId}/user`);
+            const response = await apiRequest(GET, url, { userId });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
+        },
+
+        /**
+         * Get all journals submitted by a user in a specific workspace (admin access)
+         * @param {number} workspaceId - The ID of the workspace
+         * @param {number} userId - The ID of the user to fetch journals for
+         * @param {number} requesterId - The ID of the admin making the request
+         * @returns {Promise<{ status: number, data: object[], message: string }>} The list of journals
+         */
+        GetUserJournalsByWorkspaceAdmin: async (workspaceId, userId, requesterId) => {
+            const url = getUrl(WORKSPACES, `${workspaceId}/user/${userId}`);
+            const response = await apiRequest(GET, url, { userId: requesterId });
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message
+            };
+        }
     },
     Analytics: {
         /**
@@ -1121,5 +1154,37 @@ export default {
             };
         },
 
+    },
+    Journals: {
+        /**
+         * Submit a journal entry for a specific journal assignment
+         * @param {number} journalAssignmentId - The ID of the journal assignment
+         * @param {number} userId - The ID of the user submitting the journal entry
+         * @param {string} content - The content of the journal entry
+         * @returns {Promise<{ status: number, message: string }>} Response status and message
+         */
+        SubmitJournalEntry: async (journalAssignmentId, userId, content) => {
+            const url = getUrl(JOURNALS, `${journalAssignmentId}/submit`);
+            const response = await apiRequest(POST, url, { userId, content });
+            return {
+                status: response.status,
+                message: response.data.message
+            };
+        },
+        /**
+         * Get a specific journal by its ID for a user
+         * @param {number} journalAssignmentId - The ID of the journal assignment
+         * @param {number} userId - The ID of the user
+         * @returns {Promise<{ status: number, data: object, message: string }>} The journal data
+         */
+        GetJournalById: async (journalAssignmentId, userId) => {
+            const url = getUrl(JOURNALS, `${journalAssignmentId}/user/${userId}`);
+            const response = await apiRequest(GET, url);
+            return {
+                status: response.status,
+                data: response.data,
+                message: response.data.message,
+            };
+        },
     }
 };

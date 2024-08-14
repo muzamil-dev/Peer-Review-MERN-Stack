@@ -15,6 +15,7 @@ const UserDashboard = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [reviews, setReviews] = useState({});
     const [selectedReview, setSelectedReview] = useState({});
+    const [hasJournals, setHasJournals] = useState(false); // Track if journals exist
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
     const groupId = 25; // Replace with the actual groupId you need
@@ -42,6 +43,7 @@ const UserDashboard = () => {
                 if (studentWorkspaces.length > 0) {
                     setSelectedWorkspace(studentWorkspaces[0].workspaceId);
                     fetchAssignments(studentWorkspaces[0].workspaceId);
+                    checkForJournals(studentWorkspaces[0].workspaceId);
                 }
             } else {
                 setErrorMessage(`Failed to fetch workspaces: ${response.message}`);
@@ -81,6 +83,21 @@ const UserDashboard = () => {
             console.error('Error fetching assignments:', error);
             setErrorMessage(`Failed to fetch assignments: ${error.response ? error.response.data.message : error.message}`);
             enqueueSnackbar(`Failed to fetch assignments: ${error.response ? error.response.data.message : error.message}`, { variant: 'error' });
+        }
+    };
+
+    const checkForJournals = async (workspaceId) => {
+        const userId = getCurrentUserId();
+        try {
+            const response = await Api.Workspaces.GetStudentJournalsByWorkspace(workspaceId, userId);
+            if (response.status === 200 && response.data.length > 0) {
+                setHasJournals(true);
+            } else {
+                setHasJournals(false);
+            }
+        } catch (error) {
+            console.error('Error checking for journals:', error);
+            setHasJournals(false);
         }
     };
 
@@ -124,11 +141,13 @@ const UserDashboard = () => {
     useEffect(() => {
         if (selectedWorkspace) {
             fetchAssignments(selectedWorkspace);
+            checkForJournals(selectedWorkspace);
         }
     }, [selectedWorkspace]);
 
     const handleWorkspaceChange = (e) => {
         setSelectedWorkspace(e.target.value);
+        checkForJournals(e.target.value);
     };
 
     const handleReviewChange = (assignmentId, reviewId) => {
@@ -202,6 +221,15 @@ const UserDashboard = () => {
                     ))}
                 </select>
             </div>
+
+            {hasJournals && (
+                <button 
+                    className="btn btn-info mt-0 mb-3" 
+                    onClick={() => navigate(`/workspaces/${selectedWorkspace}/journals`)}
+                >
+                    View My Journals
+                </button>
+            )}
 
             <h2>Current Assignments</h2>
             <div className="assignments-table">
