@@ -297,7 +297,7 @@ const LoginPage = () => {
   return (
     <div className="page-container">
       <div className="logo-container">
-        <h1 className="text-4xl">Welcome To</h1>
+        <h1 className="text-4xl">Sign in to</h1>
         <svg
           className="looka-1j8o68f"
           width="533.0000000000001"

@@ -7,6 +7,8 @@ import Api from "../Api.js";
 import { enqueueSnackbar } from "notistack";
 import { MdAddCircleOutline } from "react-icons/md";
 import { BsBoxArrowRight } from "react-icons/bs";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { ReactComponent as Logo } from "../assets/logo.svg";
 
 const DashboardPage = () => {
   const [workspaces, setWorkspaces] = useState([]);
@@ -183,7 +185,7 @@ const DashboardPage = () => {
         const newWorkspace = {
           workspaceId: response.workspaceId,
           name: newWorkspaceName,
-          role: "Admin",
+          role: "Instructor",
           maxGroupSize: maxGroupSize,
           numGroups: numGroups,
         };
@@ -232,52 +234,85 @@ const DashboardPage = () => {
     navigate("/");
   };
 
+  const WorkspaceDisplay = () => {
+    if (workspaces.length)
+      return workspaces.map((workspace) => (
+        <div key={workspace.workspaceId} className="flex sm:justify-center">
+          <div
+            className="workspace-card card hover:shadow-lg hover:border-white"
+            onClick={() => handleWorkspaceClick(workspace.workspaceId)}
+          >
+            <div className="card-body flex flex-col justify-center">
+              <h2 className="card-title text-4xl hover:underline">
+                {workspace.name}
+              </h2>
+              <p className="card-text text-2xl text-start">
+                Role: {workspace.role}
+              </p>
+            </div>
+          </div>
+        </div>
+      ));
+    else {
+      return (
+        <div className="flex flex-col items-center  justify-center mt-4 border bg-white rounded-md p-3 sm:h-56 ">
+          <h1 className="text-black text-3xl xl:text-4xl">
+          No Workspaces To Show
+          </h1>
+          <h4 className="text-lg text-slate-500 xl:text-xl">
+            Add or Join a Workspace to Display Available Workspaces
+          </h4>
+        </div>
+      );
+    }
+  };
+
+  const addTooltip = <Tooltip id="add-tooltip">Add Workspace</Tooltip>;
+
+  const joinTooltip = <Tooltip id="join-tooltip">Join Workspace</Tooltip>;
+
   return (
-    <div className="">
-      <nav className="flex items-center border bg-white p-3 justify-between rounded">
-        <div className="">
-          <a className="text-black text-2xl no-underline" href="/">
-            Dashboard
+    <div className="main-contain">
+      <nav className="flex items-center  bg-slate-100 p-3 justify-between navigation">
+        <div className="flex items-center">
+          <a
+            className="text-black no-underline text-4xl hover:-translate-y-1"
+            href="/"
+          >
+            <Logo className="w-72"></Logo>
           </a>
         </div>
         <div className="flex gap-6">
-          <button
-            type="button"
-            data-toggle="modal"
-            data-target="#createWorkspaceModal"
-            className="flex border border-indigo-500 p-2 rounded bg-green-500"
-          >
-            <MdAddCircleOutline className="text-black size-6" />
-          </button>
-          <button
-            type="button"
-            data-toggle="modal"
-            data-target="#joinWorkspaceModal"
-            className="flex border p-2 rounded bg-green-500"
-          >
-            <BsBoxArrowRight className="text-black size-6" />
-          </button>
+          <OverlayTrigger placement="bottom" overlay={addTooltip}>
+            <button
+              type="button"
+              data-toggle="modal"
+              data-target="#createWorkspaceModal"
+              className="flex border-2 border-slate-100 p-2  rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm"
+            >
+              <MdAddCircleOutline className="text-black size-8" />
+            </button>
+          </OverlayTrigger>
+
+          <OverlayTrigger placement="bottom" overlay={joinTooltip}>
+            <button
+              type="button"
+              data-toggle="modal"
+              data-target="#joinWorkspaceModal"
+              className="flex border-2 border-slate-100 p-2  bg-green-500 rounded-xl hover:border-green-500 hover:shadow-sm"
+            >
+              <BsBoxArrowRight className="text-black size-8" />
+            </button>
+          </OverlayTrigger>
         </div>
       </nav>
-      <h1 className="header-large">Workspaces</h1>
-      <div className="container customContainer">
-        <div className="row workspace-cards">
-          {workspaces.map((workspace) => (
-            <div
-              key={workspace.workspaceId}
-              className="col-xl-3 col-lg-4 col-md-6 col-sm-12 col-xs-12 mb-4"
-            >
-              <div
-                className="workspace-card card"
-                onClick={() => handleWorkspaceClick(workspace.workspaceId)}
-              >
-                <div className="card-body">
-                  <h2 className="card-title">{workspace.name}</h2>
-                  <p className="card-text">Role: {workspace.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+
+      <div className="customContainer">
+        <div className="workspace-cards flex flex-col gap-3">
+          <div className="workspaces-name mt-3 mb-2 md:ml-6 text-5xl text-white flex justify-center">
+            Workspaces
+          </div>
+          <WorkspaceDisplay />
         </div>
       </div>
 
@@ -292,7 +327,7 @@ const DashboardPage = () => {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="joinWorkspaceModalLabel">
+              <h5 className="modal-title text-3xl" id="joinWorkspaceModalLabel">
                 Join Workspace
               </h5>
               <button
@@ -310,20 +345,13 @@ const DashboardPage = () => {
                 placeholder="Enter code"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
-                className="form-control mb-2"
+                className="form-control mb-2 border-black"
               />
             </div>
-            <div className="modal-footer">
+            <div className="flex justify-center">
               <button
                 type="button"
-                className="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
+                className="mb-3 bg-green-600 rounded border p-2 px-3 text-white hover:bg-green-500"
                 onClick={handleJoinWorkspace}
               >
                 Join
@@ -344,8 +372,11 @@ const DashboardPage = () => {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="createWorkspaceModalLabel">
-                Create Workspace
+              <h5
+                className="modal-title text-3xl"
+                id="createWorkspaceModalLabel"
+              >
+                Add Workspace
               </h5>
               <button
                 type="button"
@@ -356,48 +387,41 @@ const DashboardPage = () => {
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div className="modal-body">
+            <div className="modal-body flex flex-col gap-2">
               <input
                 required
                 type="text"
                 placeholder="Workspace Name"
                 value={newWorkspaceName}
                 onChange={(e) => setNewWorkspaceName(e.target.value)}
-                className="form-control mb-2"
+                className="form-control mb-2 border-black"
               />
               <input
                 type="text"
                 placeholder="Domain Restrictions (comma separated)"
                 value={newWorkspaceDomains}
                 onChange={(e) => setNewWorkspaceDomains(e.target.value)}
-                className="form-control mb-2"
+                className="form-control mb-2 border-black"
               />
               <input
                 type="text"
                 placeholder="Max Group Size (optional)"
                 value={maxGroupSize}
                 onChange={(e) => setMaxGroupSize(e.target.value)}
-                className="form-control mb-2"
+                className="form-control mb-2 border-black"
               />
               <input
                 type="text"
                 placeholder="Number of Groups (optional)"
                 value={numGroups}
                 onChange={(e) => setNumGroups(e.target.value)}
-                className="form-control mb-2"
+                className="form-control mb-2 border-black"
               />
             </div>
-            <div className="modal-footer">
+            <div className="flex justify-center">
               <button
                 type="button"
-                className="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn btn-success"
+                className="rounded border p-2 px-3 bg-green-600 text-white mb-2 hover:bg-green-500 hover"
                 onClick={handleAddWorkspace}
               >
                 Create
