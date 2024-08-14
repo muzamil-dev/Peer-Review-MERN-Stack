@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styles from './GroupsPageAdmin.module.css'; // Import the CSS file as a module
 import Api from './Api.js';  // Adjust the path to where your Api.js file is located
 import { jwtDecode } from 'jwt-decode';
+import Modal from 'react-modal';
 //snackbar
 import { enqueueSnackbar } from 'notistack';
 
@@ -41,6 +42,16 @@ const GroupsPageAdmin = () => {
         email: '',
         role: 'Student',
         groupId: ''
+    });
+
+    const [hasJournals, setHasJournals] = useState(false);
+
+    const [isJournalModalOpen, setIsJournalModalOpen] = useState(false);
+    const [journalFormData, setJournalFormData] = useState({
+        startDate: '',
+        endDate: '',
+        journalDay: 0,
+        weekNumbersToSkip: '',
     });
 
     const { workspaceId } = useParams();
@@ -234,8 +245,6 @@ const GroupsPageAdmin = () => {
             return { success: false };
         }
     };
-
-
 
 
     const handleKickFromWorkspace = async (targetId) => {
@@ -498,6 +507,98 @@ const GroupsPageAdmin = () => {
         setCsvFile(e.target.files[0]);
     };
 
+    // Fetch journals or check if journals exist when the component mounts
+    useEffect(() => {
+        checkForJournals();
+        fetchGroups();
+        fetchWorkspaceDetails();
+    }, [workspaceId]);
+
+    const checkForJournals = async () => {
+        try {
+            const response = await Api.Workspaces.getWeeks(workspaceId);
+            if (response.status === 200) {
+                const { past, current, future } = response.data;
+                if (past.length > 0 || current.length > 0 || future.length > 0) {
+                    setHasJournals(true);
+                } else {
+                    setHasJournals(false);
+                }
+            } else {
+                setHasJournals(false);
+                console.error('Failed to check for journals:', response.message);
+            }
+        } catch (error) {
+            setHasJournals(false);
+            console.error('Error checking for journals:', error);
+        }
+    };
+
+    const handleOpenJournalModal = () => {
+        setIsJournalModalOpen(true);
+    };
+
+    const handleCloseJournalModal = () => {
+        setIsJournalModalOpen(false);
+        setJournalFormData({
+            startDate: '',
+            endDate: '',
+            journalDay: 0,
+            weekNumbersToSkip: '',
+        });
+    };
+
+    const handleJournalFormChange = (e) => {
+        const { name, value } = e.target;
+        setJournalFormData((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+    };
+
+    const handleCreateJournals = async () => {
+        try {
+            const currentUserId = getCurrentUserId();
+            if (!currentUserId) {
+                navigate('/');
+                return;
+            }
+    
+            // Convert dates to ISO format (UTC)
+            const startDate = new Date(journalFormData.startDate).toISOString();
+            console.log(startDate);
+            const endDate = new Date(journalFormData.endDate).toISOString();
+            console.log(endDate);
+    
+            // Prepare the payload with formatted dates
+            const payload = {
+                startDate: startDate,
+                endDate: endDate,
+                journalDay: Number(journalFormData.journalDay), // Ensure journalDay is a number
+                weekNumbersToSkip: journalFormData.weekNumbersToSkip
+                    .split(',')
+                    .map(Number) // Convert to an array of numbers
+                    .filter(week => week > 0), // Ensure valid week numbers, remove 0 if it's not intended
+            };
+    
+            console.log(payload);
+    
+            const response = await Api.Workspaces.createJournals(workspaceId, payload);
+    
+            if (response.status === 201) {
+                enqueueSnackbar('Journals created successfully!', { variant: 'success' });
+                checkForJournals(); // Refresh the journals status
+                handleCloseJournalModal(); // Close the modal
+            } else {
+                enqueueSnackbar(`Failed to create journals: ${response.message}`, { variant: 'error' });
+            }
+        } catch (error) {
+            console.error('Error creating journals:', error);
+            enqueueSnackbar('Error creating journals', { variant: 'error' });
+        }
+    };
+    
+
     return (
         <div className={styles.workspaceAdmin}>
             <nav className={styles.navbarContainer}>
@@ -532,7 +633,15 @@ const GroupsPageAdmin = () => {
 
             <div className="row mt-4">
                 <button className="btn btn-primary" onClick={handleOpenInsertUserModal}>Insert User</button>
-                <button className="btn btn-secondary ml-2" onClick={() => navigate(`/workspaces/${workspaceId}/admin/journals`)}>Manage Journals</button>
+                {hasJournals ? (
+                    <button className="btn btn-primary mt-2" onClick={() => navigate(`/workspaces/${workspaceId}/admin/journals`)}>
+                        View Journals
+                    </button>
+                ) : (
+                    <button className="btn btn-success mt-2" onClick={handleOpenJournalModal}>
+                        Create Journals
+                    </button>
+                )}
             </div>
 
             {showInsertUserModal && (
@@ -818,6 +927,70 @@ const GroupsPageAdmin = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Journal Creation Modal */}
+            <Modal
+                isOpen={isJournalModalOpen}
+                onRequestClose={handleCloseJournalModal}
+                contentLabel="Create Journals"
+            >
+                <h2>Create Journals</h2>
+                <form>
+                    <div className="form-group">
+                        <label>Start Date</label>
+                        <input
+                            type="date"
+                            name="startDate"
+                            className="form-control"
+                            value={journalFormData.startDate}
+                            onChange={handleJournalFormChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>End Date</label>
+                        <input
+                            type="date"
+                            name="endDate"
+                            className="form-control"
+                            value={journalFormData.endDate}
+                            onChange={handleJournalFormChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Journal Day (0 for Sunday, 6 for Saturday)</label>
+                        <input
+                        //journalDay is an integer
+
+                            type="number"
+                            name="journalDay"
+                            className="form-control"
+                            value={journalFormData.journalDay}
+                            onChange={handleJournalFormChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Weeks to Skip (comma-separated)</label>
+                        <input
+                            type="text"
+                            name="weekNumbersToSkip"
+                            className="form-control"
+                            value={journalFormData.weekNumbersToSkip}
+                            onChange={handleJournalFormChange}
+                        />
+                    </div>
+                </form>
+                <div className="modal-actions">
+                    <button className="btn btn-primary" onClick={handleCreateJournals}>
+                        Create Journals
+                    </button>
+                    <button className="btn btn-secondary" onClick={handleCloseJournalModal}>
+                        Cancel
+                    </button>
+                </div>
+            </Modal>
 
         </div>
 
