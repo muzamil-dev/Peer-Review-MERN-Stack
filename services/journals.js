@@ -80,10 +80,11 @@ export const submitJournalEntry = async (db, journalAssignmentId, userId, conten
 
 export const getJournalsByUserAndWorkspace = async (db, workspaceId, userId) => {
     const res = await db.query(
-        `SELECT ja.id AS "journalAssignmentId", ja.name, ja.week_number, je.content, je.submitted_at AS "submittedAt"
+        `SELECT ja.id AS "journalAssignmentId", ja.name, ja.week_number, ja.start_date AS "startDate", ja.end_date AS "endDate", 
+                je.content, je.submitted_at AS "submittedAt"
          FROM journal_assignments AS ja
-         LEFT JOIN journal_entries AS je ON ja.id = je.journal_assignment_id
-         WHERE ja.workspace_id = $1 AND je.user_id = $2
+         LEFT JOIN journal_entries AS je ON ja.id = je.journal_assignment_id AND je.user_id = $2
+         WHERE ja.workspace_id = $1
          ORDER BY ja.start_date ASC`,
         [workspaceId, userId]
     );
@@ -93,4 +94,22 @@ export const getJournalsByUserAndWorkspace = async (db, workspaceId, userId) => 
     }
 
     return res;
+};
+
+//get journal by id
+export const getJournalById = async (db, journalAssignmentId, userId) => {
+    const res = await db.query(
+        `SELECT ja.id AS "journalAssignmentId", ja.name, ja.start_date AS "startDate", ja.end_date AS "endDate", 
+                je.content, je.submitted_at AS "submittedAt"
+         FROM journal_assignments AS ja
+         LEFT JOIN journal_entries AS je ON ja.id = je.journal_assignment_id AND je.user_id = $2
+         WHERE ja.id = $1`,
+        [journalAssignmentId, userId]
+    );
+
+    if (res.length === 0) {
+        throw new HttpError("Journal assignment not found", 404);
+    }
+
+    return res[0];
 };
