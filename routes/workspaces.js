@@ -443,4 +443,29 @@ router.get(["/:workspaceId/user", "/:workspaceId/user/:userId"], async (req, res
     }
 });
 
+//get number of weeks in journal_assignment
+router.get("/:workspaceId/weeks", async(req, res) => {
+    let db;
+    const { workspaceId } = req.params;
+    try{
+        db = await pool.connect();
+        await db.query('BEGIN');
+
+        const weeks = await journalService.getWeeks(db, workspaceId);
+        await db.query('COMMIT');
+        return res.json(weeks);
+    }
+    catch(err){
+        if (db) 
+            await db.query('ROLLBACK');
+
+        return res.status(err.status || 500).json(
+            { message: err.message }
+        );
+    }
+    finally{
+        if (db) db.done();
+    }
+});
+
 export default router;
