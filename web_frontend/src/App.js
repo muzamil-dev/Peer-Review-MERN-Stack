@@ -15,6 +15,7 @@ import UserAnalyticsPage from './UserAnalyticsPage.js';
 import GradesPage from './Grades'; // Import the GradesPage component
 import UserJournalsPage from './UserJournalsPage'; // Import the UserJournalsPage component
 import SubmitJournal from './SubmitJournal'; // Import the SubmitJournal component
+import AdminJournalsPage from './AdminJournalsPage'; // Import the AdminJournalsPage component
 import { SnackbarProvider } from 'notistack';
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
                         <Route path="/grades/:workspaceId" element={<GradesPage />} /> {/* New route for GradesPage */}
                         <Route path="/workspaces/:workspaceId/journals" element={<UserJournalsPage />} /> {/* New route for UserJournalsPage */}
                         <Route path="/workspaces/:workspaceId/journals/:journalAssignmentId" element={<SubmitJournal />} /> {/* New route for SubmitJournal */}
+                        <Route path="/workspaces/:workspaceId/admin/journals" element={<AdminJournalsPage />} /> {/* New route for AdminJournalsPage */}
                     </Routes>
                 </div>
             </Router>

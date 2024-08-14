@@ -532,6 +532,7 @@ const GroupsPageAdmin = () => {
 
             <div className="row mt-4">
                 <button className="btn btn-primary" onClick={handleOpenInsertUserModal}>Insert User</button>
+                <button className="btn btn-secondary ml-2" onClick={() => navigate(`/workspaces/${workspaceId}/admin/journals`)}>Manage Journals</button>
             </div>
 
             {showInsertUserModal && (

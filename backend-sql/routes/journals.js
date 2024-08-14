@@ -59,4 +59,5 @@ router.get('/:journalAssignmentId/user/:userId', async (req, res) => {
     }
 });
 
+
 export default router;

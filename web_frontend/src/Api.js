@@ -1093,6 +1093,29 @@ export default {
                 data: response.data,
                 message: response.data.message
             };
+        },
+
+        /**
+     * Get available weeks for journal assignments in a workspace
+     * @param {number} workspaceId - The ID of the workspace
+     * @returns {Promise<{ status: number, data: object, message: string }>} The list of weeks
+     */
+        getWeeks: async (workspaceId) => {
+            try {
+                const config = getConfig(); // Ensure the token is included in the headers
+                const response = await axios.get(getUrl(WORKSPACES, `${workspaceId}/weeks`), config);
+                return {
+                    status: response.status,
+                    data: response.data,  // This will return an object with past, current, and future weeks
+                    message: response.data.message || 'Weeks fetched successfully',
+                };
+            } catch (error) {
+                return {
+                    status: error.response ? error.response.status : 500,
+                    data: { past: [], current: [], future: [] },
+                    message: error.response ? error.response.data.message : 'Failed to fetch weeks',
+                };
+            }
         }
     },
     Analytics: {

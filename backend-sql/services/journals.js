@@ -113,3 +113,37 @@ export const getJournalById = async (db, journalAssignmentId, userId) => {
 
     return res[0];
 };
+
+
+export const getWeeks = async (db, workspaceId) => {
+    const res = await db.query(
+        `SELECT DISTINCT week_number, start_date, end_date
+         FROM journal_assignments
+         WHERE workspace_id = $1
+         ORDER BY week_number ASC`,
+        [workspaceId]
+    );
+
+    const now = new Date();
+
+    const weeks = {
+        past: [],
+        current: [],
+        future: []
+    };
+
+    res.forEach(row => {
+        const startDate = new Date(row.start_date);
+        const endDate = new Date(row.end_date);
+
+        if (now > endDate) {
+            weeks.past.push(row.week_number);
+        } else if (now >= startDate && now <= endDate) {
+            weeks.current.push(row.week_number);
+        } else if (now < startDate) {
+            weeks.future.push(row.week_number);
+        }
+    });
+
+    return weeks;
+};
