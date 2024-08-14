@@ -797,6 +797,8 @@ export default {
             formData.append('csvFile', csvFile);
             formData.append('userId', userId);
             formData.append('workspaceId', workspaceId);
+            //lower case the email here
+            //how can i do that
 
             const response = await axios.post(getUrl(WORKSPACES, 'import'), formData, {
                 headers: {

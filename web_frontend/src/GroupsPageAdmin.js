@@ -419,51 +419,6 @@ const GroupsPageAdmin = () => {
         }));
     };
 
-    const handleLockChange = (value) => {
-        setFormData(prevState => ({
-            ...prevState,
-            groupLock: value
-        }));
-    };
-
-    const handleCreateInviteCode = async () => {
-        const token = localStorage.getItem('accessToken');
-        const currentUserId = getCurrentUserId();
-        if (!currentUserId) {
-            navigate('/');
-            return;
-        }
-        const response = await Api.Workspaces.SetInviteCode(currentUserId, workspaceId, token);
-        if (response.status === 200) {
-            setInviteCode(response.inviteCode);
-            setWorkspaceDetails(prevDetails => ({
-                ...prevDetails,
-                inviteCode: response.inviteCode
-            }));
-        } else {
-            console.error('Failed to create invite code:', response.message);
-        }
-    };
-
-    const handleDeleteInviteCode = async () => {
-        const token = localStorage.getItem('accessToken');
-        const currentUserId = getCurrentUserId();
-        if (!currentUserId) {
-            navigate('/');
-            return;
-        }
-        const response = await Api.Workspaces.RemoveActiveInvite(currentUserId, workspaceId, token);
-        if (response.success) {
-            setInviteCode(null);
-            setWorkspaceDetails(prevDetails => ({
-                ...prevDetails,
-                inviteCode: null
-            }));
-        } else {
-            console.error('Failed to delete invite code:', response.message);
-        }
-    };
-
     const handleImportCSV = async () => {
         const currentUserId = getCurrentUserId();
         if (!currentUserId || !csvFile) {
