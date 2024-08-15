@@ -107,7 +107,7 @@ const DashboardPage = () => {
         const newWorkspace = {
           workspaceId: response.workspaceId,
           name: newWorkspaceName,
-          role: "Admin",
+          role: "Instructor",
         };
         setWorkspaces([...workspaces, newWorkspace]);
         setNewWorkspaceName("");
@@ -176,7 +176,7 @@ const DashboardPage = () => {
             No Workspaces To Show
           </h1>
           <h4 className="text-lg text-slate-500 xl:text-xl">
-            Add or Join a Workspace to Display Available Workspaces
+            Add a Workspace to Display Available Workspaces
           </h4>
         </div>
       );
@@ -186,7 +186,7 @@ const DashboardPage = () => {
   const addTooltip = <Tooltip id="add-tooltip">Add Workspace</Tooltip>;
 
   return (
-    <div className="dashboard">
+    <div className="main-contain">
       <nav className="flex items-center  bg-slate-100 p-3 justify-between navigation">
         <div className="flex items-center">
           <a
@@ -204,7 +204,7 @@ const DashboardPage = () => {
               data-target="#createWorkspaceModal"
               className="flex border-2 border-slate-100 p-2  rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm"
             >
-              <MdAddCircleOutline className="text-black size-8" />
+              <MdAddCircleOutline className="text-slate-100 size-8" />
             </button>
           </OverlayTrigger>
         </div>
