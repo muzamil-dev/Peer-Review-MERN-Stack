@@ -155,14 +155,31 @@ export const removeUser = async(db, userId, workspaceId) => {
 // Delete the workspace
 // This also deletes all assets associated with the workspace, such as groups,
 // assignments, and memberships by extension
-export const deleteWorkspace = async(db, workspaceId) => {
-    // Delete the workspace
+export const deleteWorkspace = async (db, workspaceId) => {
+    // First, delete all journal entries related to the workspace
+    await db.query(
+        `DELETE FROM journal_entries 
+         WHERE journal_assignment_id IN (
+            SELECT id FROM journal_assignments WHERE workspace_id = $1
+         )`,
+        [workspaceId]
+    );
+
+    // Then, delete all journal assignments related to the workspace
+    await db.query(
+        `DELETE FROM journal_assignments WHERE workspace_id = $1`,
+        [workspaceId]
+    );
+
+    // Finally, delete the workspace itself
     const res = await db.query(
         `DELETE FROM workspaces WHERE id = $1 RETURNING *`,
         [workspaceId]
     );
-    if (res.length === 0)
+
+    if (res.rowCount === 0) {
         throw new HttpError("The requested workspace was not found", 404);
-    
-    return { message: "Workspace deleted successfully" };
-}
+    }
+
+    return { message: "Workspace and all associated journals deleted successfully" };
+};
