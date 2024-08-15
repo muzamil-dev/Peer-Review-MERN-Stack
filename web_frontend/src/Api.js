@@ -964,20 +964,19 @@ export default {
             };
         },
         /**
-         * Delete the workspace specified by workspaceID
-         * @param {number} userId 
-         * @param {number} workspaceId 
-         * @returns {Promise<{ status: number, success: boolean, message: string }>}
-         */
-        DeleteWorkspace: async (userId, workspaceId) => {
-            const payload = {
-                userId,
-                workspaceId
-            };
-            const response = await apiRequest(DELETE, getUrl(WORKSPACES, `${workspaceId}`), payload);
+        * Deletes a workspace and all associated data, including journals
+        * @param {number} workspaceId - The ID of the workspace to delete
+        * @param {number} userId - The ID of the user making the delete request
+        * @returns {Promise<{ status: number, message: string }>} The result of the delete operation
+        */
+        deleteWorkspace: async (workspaceId, userId) => {
+            const config = getConfig();
+            const response = await axios.delete(getUrl(WORKSPACES, `${workspaceId}/delete`), {
+                data: { userId }, // Pass the userId in the request body
+                ...config
+            });
             return {
                 status: response.status,
-                success: response.status === 200,
                 message: response.data.message
             };
         },
