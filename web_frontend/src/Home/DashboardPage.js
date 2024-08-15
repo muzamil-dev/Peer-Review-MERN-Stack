@@ -8,8 +8,7 @@ import { enqueueSnackbar } from "notistack";
 import { MdAddCircleOutline } from "react-icons/md";
 import { BsBoxArrowRight } from "react-icons/bs";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import { ReactComponent as Logo } from '../assets/logo.svg';
-
+import { ReactComponent as Logo } from "../assets/logo.svg";
 
 const DashboardPage = () => {
   const [workspaces, setWorkspaces] = useState([]);
@@ -151,6 +150,41 @@ const DashboardPage = () => {
     navigate("/");
   };
 
+  const WorkspaceDisplay = () => {
+    if (workspaces.length)
+      return workspaces.map((workspace) => (
+        <div key={workspace.workspaceId} className="flex sm:justify-center">
+          <div
+            className="workspace-card card hover:shadow-lg hover:border-white"
+            onClick={() => handleWorkspaceClick(workspace.workspaceId)}
+          >
+            <div className="card-body flex flex-col justify-center">
+              <h2 className="card-title text-4xl hover:underline">
+                {workspace.name}
+              </h2>
+              <p className="card-text text-2xl text-start">
+                Role: {workspace.role}
+              </p>
+            </div>
+          </div>
+        </div>
+      ));
+    else {
+      return (
+        <div className="flex flex-col items-center  justify-center mt-4 border bg-white rounded-md p-3 sm:h-56 ">
+          <h1 className="text-black text-3xl xl:text-4xl">
+            No Workspaces To Show
+          </h1>
+          <h4 className="text-lg text-slate-500 xl:text-xl">
+            Add or Join a Workspace to Display Available Workspaces
+          </h4>
+        </div>
+      );
+    }
+  };
+
+  const addTooltip = <Tooltip id="add-tooltip">Add Workspace</Tooltip>;
+
   return (
     <div className="dashboard">
       <nav className="flex items-center  bg-slate-100 p-3 justify-between navigation">
@@ -174,16 +208,6 @@ const DashboardPage = () => {
             </button>
           </OverlayTrigger>
 
-          <OverlayTrigger placement="bottom" overlay={joinTooltip}>
-            <button
-              type="button"
-              data-toggle="modal"
-              data-target="#joinWorkspaceModal"
-              className="flex border-2 border-slate-100 p-2  bg-green-500 rounded-xl hover:border-green-500 hover:shadow-sm"
-            >
-              <BsBoxArrowRight className="text-black size-8" />
-            </button>
-          </OverlayTrigger>
         </div>
       </nav>
       <h1 className="header-large">Workspaces</h1>
