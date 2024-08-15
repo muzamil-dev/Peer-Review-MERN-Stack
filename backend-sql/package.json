@@ -23,6 +23,7 @@
     "new_peer": "file:",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.14",
-    "pg-promise": "^11.9.1"
+    "pg-promise": "^11.9.1",
+    "sib-api-v3-sdk": "^8.5.0"
   }
 }

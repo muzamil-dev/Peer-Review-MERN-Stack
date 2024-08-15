@@ -119,7 +119,7 @@ const LoginPage = () => {
         e.preventDefault();
         try {
             const response = await Api.Users.RequestPasswordReset(resetPasswordData.email);
-            if (response.success) {
+            if (response.status == 200) {
                 enqueueSnackbar('Reset token sent. Please check your email', { variant: 'success' });
                 setIsRequestResetPasswordActive(false);
                 setIsResetPasswordActive(true);
@@ -148,7 +148,7 @@ const LoginPage = () => {
         }
         try {
             const response = await Api.Users.ResetPassword(resetPasswordData.email, resetPasswordData.token, resetPasswordData.newPassword);
-            if (response.status === 201) {
+            if (response.status === 201 || response.status === 200) {
                 enqueueSnackbar('Password reset successful. You can now log in with your new password.', { variant: 'success' });
                 setIsLoginActive(true);
                 setIsResetPasswordActive(false);

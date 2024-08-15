@@ -1,25 +1,30 @@
-import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import SibApiV3Sdk from 'sib-api-v3-sdk';
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-    service: 'Outlook365',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = process.env.BREVO_API_KEY;
 
 export const sendEmail = async (to, subject, message) => {
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to,
-        subject,
-        html: message,
-    };
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
-    const emailSent = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully');
-    return emailSent;
+    sendSmtpEmail.to = [{ email: to }];
+    sendSmtpEmail.sender = { email: process.env.EMAIL_USER };
+    sendSmtpEmail.subject = subject;
+    sendSmtpEmail.htmlContent = message;
+
+    try {
+        const response = await apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log('Email sent successfully:', response);
+        return response;
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return {
+            error: error.message,
+            status: 500
+        };
+    }
 };
