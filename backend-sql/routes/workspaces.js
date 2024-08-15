@@ -19,8 +19,8 @@ const router = express.Router();
 const upload = multer(); // Store incoming csv in memory
 
 // Require JWT
-// if (process.env.JWT_ENABLED === "true")
-//     router.use(verifyJWT);
+if (process.env.JWT_ENABLED === "true")
+    router.use(verifyJWT);
 
 // Get basic information about a workspace
 router.get("/:workspaceId", async(req, res) => {
@@ -353,6 +353,9 @@ router.delete("/:workspaceId/delete", async (req, res) => {
         await db.query('BEGIN');
         const { userId } = req.body;
         const { workspaceId } = req.params;
+
+        //check that the user is an admin
+        await UserService.checkAdmin(db, userId);
 
         // Check that the provided user is an instructor of the workspace
         await WorkspaceService.checkInstructor(db, userId, workspaceId);

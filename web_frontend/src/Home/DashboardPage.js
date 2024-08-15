@@ -3,18 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import "./DashboardPage.css";
 import Api from "../Api.js";
-//import snackbar
 import { enqueueSnackbar } from "notistack";
 import { MdAddCircleOutline } from "react-icons/md";
-import { BsBoxArrowRight } from "react-icons/bs";
+import { BsTrash } from "react-icons/bs";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { ReactComponent as Logo } from "../assets/logo.svg";
 
 const DashboardPage = () => {
   const [workspaces, setWorkspaces] = useState([]);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [workspaceToDelete, setWorkspaceToDelete] = useState(null);
   const navigate = useNavigate();
-  const createButton = document.getElementById("create-btn");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -23,11 +23,8 @@ const DashboardPage = () => {
       return;
     }
 
-    //console.log('Token:', token); // Log the token
     const decodedToken = jwtDecode(token);
-    //console.log('Decoded Token:', decodedToken); // Log the decoded token
     const userId = decodedToken.userId;
-    //console.log('User ID:', userId); // Log the userId
 
     if (!userId) {
       console.error("User ID not found in token");
@@ -61,10 +58,8 @@ const DashboardPage = () => {
     const decodedToken = jwtDecode(token);
     const userId = decodedToken.userId;
 
-    // Maximum workspace name length
-    const maxWorkspaceNameLength = 25; // Adjust the value as needed
+    const maxWorkspaceNameLength = 25;
 
-    // Check if the workspace name exceeds the maximum length
     if (newWorkspaceName.length > maxWorkspaceNameLength) {
       enqueueSnackbar(
         `Workspace name exceeds the maximum length of ${maxWorkspaceNameLength} characters.`,
@@ -73,13 +68,7 @@ const DashboardPage = () => {
       return;
     }
 
-    // Add validation for allowed domains
-    // Numbers and special characters are not allowed
-    // Allowed domains should be separated by commas
-    // Should be a "." in each domain and characters before and after the "."
-
     try {
-      //check if name is empty
       if (newWorkspaceName === "") {
         enqueueSnackbar("Workspace name cannot be empty.", {
           variant: "error",
@@ -116,19 +105,15 @@ const DashboardPage = () => {
           variant: "success",
         });
       } else {
-        //console.error('Failed to create workspace:', response.message);
         enqueueSnackbar("Failed to create workspace.", { variant: "error" });
       }
     } catch (error) {
       enqueueSnackbar("Error creating workspace.", { variant: "error" });
-      // console.error('Error creating workspace:', error);
     }
   };
 
   const handleWorkspaceClick = (workspaceId) => {
     const workspace = workspaces.find((w) => w.workspaceId === workspaceId);
-    //console.log('Workspace:', workspace); // Log the workspace object
-    //console.log('Role:', workspace.role); // Log the role of the user in the workspace
     if (workspace.role === "Instructor") {
       navigate(`/workspaces/${workspaceId}/admin`, {
         state: {
@@ -146,15 +131,43 @@ const DashboardPage = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    navigate("/");
+  const handleDeleteWorkspaceClick = (workspaceId) => {
+    setWorkspaceToDelete(workspaceId);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const confirmDeleteWorkspace = async () => {
+    if (workspaceToDelete) {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      const decodedToken = jwtDecode(token);
+      const userId = decodedToken.userId;
+
+      try {
+        const response = await Api.Workspaces.deleteWorkspace(workspaceToDelete, userId);
+        if (response.status === 200) {
+          setWorkspaces(workspaces.filter((workspace) => workspace.workspaceId !== workspaceToDelete));
+          enqueueSnackbar("Workspace deleted successfully.", { variant: "success" });
+        } else {
+          enqueueSnackbar("Failed to delete workspace.", { variant: "error" });
+        }
+      } catch (error) {
+        enqueueSnackbar("Only Admins can delete workspaces.", { variant: "error" });
+      } finally {
+        setShowDeleteConfirmModal(false);
+        setWorkspaceToDelete(null);
+      }
+    }
   };
 
   const WorkspaceDisplay = () => {
     if (workspaces.length)
       return workspaces.map((workspace) => (
-        <div key={workspace.workspaceId} className="flex sm:justify-center">
+        <div key={workspace.workspaceId} className="flex sm:justify-center relative">
           <div
             className="workspace-card card hover:shadow-lg hover:border-white"
             onClick={() => handleWorkspaceClick(workspace.workspaceId)}
@@ -166,6 +179,17 @@ const DashboardPage = () => {
               <p className="card-text text-2xl text-start">
                 Role: {workspace.role}
               </p>
+              {workspace.role === "Instructor" && (
+                <button
+                  className="absolute top-0 right-0 mt-2 mr-2 text-red-600 hover:text-red-800"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteWorkspaceClick(workspace.workspaceId);
+                  }}
+                >
+                  <BsTrash size={24} />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -270,6 +294,28 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal for Deleting Workspace */}
+      <div className={`modal fade ${showDeleteConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal-dialog modal-dialog-centered" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Confirm Delete</h5>
+              <button type="button" className="close" onClick={() => setShowDeleteConfirmModal(false)} aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete this workspace? This action cannot be undone.</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirmModal(false)}>Cancel</button>
+              <button type="button" className="btn btn-primary" onClick={confirmDeleteWorkspace}>Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };
