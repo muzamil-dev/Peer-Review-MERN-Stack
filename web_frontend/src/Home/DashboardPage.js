@@ -4,7 +4,8 @@ import { jwtDecode } from "jwt-decode";
 import "./DashboardPage.css";
 import Api from "../Api.js";
 import { enqueueSnackbar } from "notistack";
-import { MdAddCircleOutline } from "react-icons/md";
+import { FaPlus } from "react-icons/fa6";
+import { MdLogout } from "react-icons/md";
 import { BsTrash } from "react-icons/bs";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { ReactComponent as Logo } from "../assets/logo.svg";
@@ -148,15 +149,26 @@ const DashboardPage = () => {
       const userId = decodedToken.userId;
 
       try {
-        const response = await Api.Workspaces.deleteWorkspace(workspaceToDelete, userId);
+        const response = await Api.Workspaces.deleteWorkspace(
+          workspaceToDelete,
+          userId
+        );
         if (response.status === 200) {
-          setWorkspaces(workspaces.filter((workspace) => workspace.workspaceId !== workspaceToDelete));
-          enqueueSnackbar("Workspace deleted successfully.", { variant: "success" });
+          setWorkspaces(
+            workspaces.filter(
+              (workspace) => workspace.workspaceId !== workspaceToDelete
+            )
+          );
+          enqueueSnackbar("Workspace deleted successfully.", {
+            variant: "success",
+          });
         } else {
           enqueueSnackbar("Failed to delete workspace.", { variant: "error" });
         }
       } catch (error) {
-        enqueueSnackbar("Only Admins can delete workspaces.", { variant: "error" });
+        enqueueSnackbar("Only Admins can delete workspaces.", {
+          variant: "error",
+        });
       } finally {
         setShowDeleteConfirmModal(false);
         setWorkspaceToDelete(null);
@@ -167,7 +179,10 @@ const DashboardPage = () => {
   const WorkspaceDisplay = () => {
     if (workspaces.length)
       return workspaces.map((workspace) => (
-        <div key={workspace.workspaceId} className="flex sm:justify-center relative">
+        <div
+          key={workspace.workspaceId}
+          className="flex sm:justify-center relative"
+        >
           <div
             className="workspace-card card hover:shadow-lg hover:border-white"
             onClick={() => handleWorkspaceClick(workspace.workspaceId)}
@@ -208,7 +223,13 @@ const DashboardPage = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    navigate("/");
+  };
+
   const addTooltip = <Tooltip id="add-tooltip">Add Workspace</Tooltip>;
+  const logOutTooltip = <Tooltip id="leave-tooltip">Sign out</Tooltip>;
 
   return (
     <div className="main-contain">
@@ -229,7 +250,16 @@ const DashboardPage = () => {
               data-target="#createWorkspaceModal"
               className="flex border-2 border-slate-100 p-2  rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm"
             >
-              <MdAddCircleOutline className="text-slate-100 size-8" />
+              <FaPlus className="text-slate-100 size-8" />
+            </button>
+          </OverlayTrigger>
+          <OverlayTrigger placement="bottom" overlay={logOutTooltip}>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex border-2 border-slate-100 p-2  rounded-xl bg-red-500 hover:border-red-500 hover:shadow-sm"
+            >
+              <MdLogout className="text-slate-100 size-8" />
             </button>
           </OverlayTrigger>
         </div>
@@ -296,26 +326,50 @@ const DashboardPage = () => {
       </div>
 
       {/* Confirmation Modal for Deleting Workspace */}
-      <div className={`modal fade ${showDeleteConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <div
+        className={`modal fade ${showDeleteConfirmModal ? "show d-block" : ""}`}
+        tabIndex="-1"
+        role="dialog"
+        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      >
         <div className="modal-dialog modal-dialog-centered" role="document">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Confirm Delete</h5>
-              <button type="button" className="close" onClick={() => setShowDeleteConfirmModal(false)} aria-label="Close">
+              <button
+                type="button"
+                className="close"
+                onClick={() => setShowDeleteConfirmModal(false)}
+                aria-label="Close"
+              >
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              <p>Are you sure you want to delete this workspace? This action cannot be undone.</p>
+              <p>
+                Are you sure you want to delete this workspace? This action
+                cannot be undone.
+              </p>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirmModal(false)}>Cancel</button>
-              <button type="button" className="btn btn-primary" onClick={confirmDeleteWorkspace}>Delete</button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowDeleteConfirmModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={confirmDeleteWorkspace}
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
       </div>
-
     </div>
   );
 };
