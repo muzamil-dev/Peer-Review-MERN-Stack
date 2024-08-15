@@ -2,3 +2,6 @@ backend/node_modules
 web_frontend/node_modules
 backend/.env
 node_modules
+backend-sql/.env
+backend-sql/config.js
+
