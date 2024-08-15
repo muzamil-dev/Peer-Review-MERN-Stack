@@ -188,23 +188,28 @@ const DashboardPage = () => {
             onClick={() => handleWorkspaceClick(workspace.workspaceId)}
           >
             <div className="card-body flex flex-col justify-center">
-              <h2 className="card-title text-4xl hover:underline">
-                {workspace.name}
-              </h2>
+              <div className="flex justify-between">
+                <h2 className="card-title text-4xl hover:underline w-fit">
+                  {workspace.name}
+                </h2>
+                <OverlayTrigger placement="bottom" overlay={deleteTooltip}>
+                  {workspace.role === "Instructor" && (
+                    <button
+                      className="bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteWorkspaceClick(workspace.workspaceId);
+                      }}
+                    >
+                      <BsTrash className="text-white size-7" />
+                    </button>
+                  )}
+                </OverlayTrigger>
+              </div>
+
               <p className="card-text text-2xl text-start">
                 Role: {workspace.role}
               </p>
-              {workspace.role === "Instructor" && (
-                <button
-                  className="absolute top-0 right-0 mt-2 mr-2 text-red-600 hover:text-red-800"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteWorkspaceClick(workspace.workspaceId);
-                  }}
-                >
-                  <BsTrash size={24} />
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -230,6 +235,7 @@ const DashboardPage = () => {
 
   const addTooltip = <Tooltip id="add-tooltip">Add Workspace</Tooltip>;
   const logOutTooltip = <Tooltip id="leave-tooltip">Sign out</Tooltip>;
+  const deleteTooltip = <Tooltip id="delete-tooltip">Delete</Tooltip>;
 
   return (
     <div className="main-contain">
@@ -335,7 +341,7 @@ const DashboardPage = () => {
         <div className="modal-dialog modal-dialog-centered" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">Confirm Delete</h5>
+              <h5 className="modal-title text-3xl">Delete Workspace</h5>
               <button
                 type="button"
                 className="close"
@@ -345,23 +351,18 @@ const DashboardPage = () => {
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div className="modal-body">
-              <p>
-                Are you sure you want to delete this workspace? This action
-                cannot be undone.
+            <div className="p-3 flex flex-col justify-center">
+              <p className="text-2xl font-semibold text-black">
+                Are you sure you want to delete this workspace?
+              </p>
+              <p className="font-extrabold text-slate-500">
+                This action cannot be undone
               </p>
             </div>
-            <div className="modal-footer">
+            <div className="flex justify-center mb-3">
               <button
                 type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowDeleteConfirmModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
+                className="bg-red-500 text-white p-2  rounded hover:bg-red-400"
                 onClick={confirmDeleteWorkspace}
               >
                 Delete
