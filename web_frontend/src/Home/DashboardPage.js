@@ -5,6 +5,9 @@ import "./DashboardPage.css";
 import Api from "../Api.js";
 //import snackbar
 import { enqueueSnackbar } from "notistack";
+import { MdAddCircleOutline } from "react-icons/md";
+import { BsBoxArrowRight } from "react-icons/bs";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { ReactComponent as Logo } from '../assets/logo.svg';
 
 
