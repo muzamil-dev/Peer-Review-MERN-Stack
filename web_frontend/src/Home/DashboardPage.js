@@ -207,38 +207,15 @@ const DashboardPage = () => {
               <MdAddCircleOutline className="text-black size-8" />
             </button>
           </OverlayTrigger>
-
         </div>
       </nav>
-      <h1 className="header-large">Workspaces</h1>
-      <div className="container customContainer">
-        <div className="row workspace-cards">
-          {workspaces.map((workspace) => (
-            <div
-              key={workspace.workspaceId}
-              className="col-xl-3 col-lg-4 col-md-6 col-sm-12 col-xs-12 mb-4"
-            >
-              <div
-                className="workspace-card card"
-                onClick={() => handleWorkspaceClick(workspace.workspaceId)}
-              >
-                <div className="card-body">
-                  <h2 className="card-title">{workspace.name}</h2>
-                  <p className="card-text">Role: {workspace.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="workspace-actions text-center">
-          <button
-            type="button"
-            className="btn btn-success btn-large mb-4 btn-center"
-            data-toggle="modal"
-            data-target="#createWorkspaceModal"
-          >
-            Create
-          </button>
+
+      <div className="customContainer">
+        <div className="workspace-cards flex flex-col gap-3">
+          <div className="workspaces-name mt-3 mb-2 md:ml-6 text-5xl text-white flex justify-center">
+            Workspaces
+          </div>
+          <WorkspaceDisplay />
         </div>
       </div>
 
