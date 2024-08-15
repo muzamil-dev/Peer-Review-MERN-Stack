@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css"; // Assuming you save the CSS styles in LoginPage.css
-import {ReactComponent as Logo} from "../assets/logo.svg";
+import {ReactComponent as Logo} from "./logo.svg";
 
 const LoginPage = () => {
   const [isLoginActive, setIsLoginActive] = useState(true);
@@ -383,7 +383,7 @@ const LoginPage = () => {
                       required
                     />
                   </div>
-                  <div className="pass-link">
+                  <div className="pass-link ml-2 mt-3">
                     <a
                       href="#"
                       onClick={() => setIsRequestResetPasswordActive(true)}

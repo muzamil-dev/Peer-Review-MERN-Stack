@@ -14,6 +14,7 @@ const DashboardPage = () => {
   const [workspaces, setWorkspaces] = useState([]);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   const navigate = useNavigate();
+  const createButton = document.getElementById("create-btn");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -230,8 +231,11 @@ const DashboardPage = () => {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="createWorkspaceModalLabel">
-                Create Workspace
+              <h5
+                className="modal-title text-3xl"
+                id="createWorkspaceModalLabel"
+              >
+                Add Workspace
               </h5>
               <button
                 type="button"
@@ -249,20 +253,15 @@ const DashboardPage = () => {
                 placeholder="Workspace Name"
                 value={newWorkspaceName}
                 onChange={(e) => setNewWorkspaceName(e.target.value)}
-                className="form-control mb-2"
+                className="form-control mb-2 border-black focus:border-none"
               />
             </div>
-            <div className="modal-footer">
+            <div className="flex justify-center mb-2">
               <button
-                type="button"
-                className="btn btn-secondary"
+                id="create-btn"
                 data-dismiss="modal"
-              >
-                Close
-              </button>
-              <button
                 type="button"
-                className="btn btn-success"
+                className="bg-green-600 rounded-lg p-2  hover:bg-green-500 text-white"
                 onClick={handleAddWorkspace}
               >
                 Create

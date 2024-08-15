@@ -37,9 +37,9 @@ html,body{
 .wrapper{
   overflow: hidden;
   max-width: 500px;
-  width: 40vh;
+  width: 50vh;
   height: 45vh;
-  background: #fff;
+  background-color: #fff;
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0px 15px 20px rgba(0,0,0,0.1);
@@ -186,7 +186,7 @@ form .field input:focus::placeholder{
 }
 .form-inner form .pass-link a,
 .form-inner form .signup-link a{
-  color: #1a75ff;
+  color: #2F669D;
   text-decoration: none;
 }
 .form-inner form .pass-link a:hover,
