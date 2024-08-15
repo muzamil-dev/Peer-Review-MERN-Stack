@@ -346,30 +346,34 @@ router.put("/removeUser", async(req, res) => {
 });
 
 // Delete a workspace, used by instructors
-router.delete("/:workspaceId/delete", async(req, res) => {
+router.delete("/:workspaceId/delete", async (req, res) => {
     let db; // Save the client for use in all blocks
-    try{
+    try {
         db = await pool.connect();
         await db.query('BEGIN');
         const { userId } = req.body;
         const { workspaceId } = req.params;
+
+        //check that the user is an admin
+        await UserService.checkAdmin(db, userId);
+
         // Check that the provided user is an instructor of the workspace
         await WorkspaceService.checkInstructor(db, userId, workspaceId);
-        // Delete the workspace
+
+        // Delete the workspace and all associated journals
         const msg = await WorkspaceService.deleteWorkspace(db, workspaceId);
+
         // Commit and release connection
         await db.query('COMMIT');
+
         // Send data and release
         return res.json(msg);
-    }
-    catch(err){
-        if (db) 
-            await db.query('ROLLBACK');
+    } catch (err) {
+        if (db) await db.query('ROLLBACK');
         return res.status(err.status || 500).json(
             { message: err.message }
         );
-    }
-    finally{
+    } finally {
         if (db) db.done();
     }
 });
