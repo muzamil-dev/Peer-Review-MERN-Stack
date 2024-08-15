@@ -9,23 +9,37 @@
   margin-top: 10px;
 }
 html,body{
-  display: grid;
+
   height: 100%;
-  width: 100%;
-  place-items: center;
-  background: -webkit-linear-gradient(left, #003366,#004080,#0059b3
-, #0073e6);
+  height: 100%;
+  background-color: #2F669D;
 }
 ::selection{
   background: #1a75ff;
   color: #fff;
 }
+
+.page-container {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .wrapper{
   overflow: hidden;
   max-width: 500px;
-  width: 40vh;
-  height: 52vh;
-  background: #fff;
+  width: 50vh;
+  height: 45vh;
+  background-color: #fff;
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0px 15px 20px rgba(0,0,0,0.1);
@@ -43,7 +57,7 @@ html,body{
   width: 50%;
   font-size: 35px;
   font-weight: 600;
-  color: #004080;
+  color: #2F669D;
   text-align: center;
   transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
 }
@@ -172,7 +186,7 @@ form .field input:focus::placeholder{
 }
 .form-inner form .pass-link a,
 .form-inner form .signup-link a{
-  color: #1a75ff;
+  color: #2F669D;
   text-decoration: none;
 }
 .form-inner form .pass-link a:hover,
@@ -199,10 +213,9 @@ form .btn .btn-layer{
   width: 300%;
   position: absolute;
   left: -100%;
-  background: -webkit-linear-gradient(right,#003366,#004080,#0059b3
-, #0073e6);
+  height: 100%;
+  background-color: #2F669D;
   border-radius: 15px;
-  transition: all 0.4s ease;;
 }
 form .btn:hover .btn-layer{
   left: 0;
