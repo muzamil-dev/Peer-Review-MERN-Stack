@@ -16,16 +16,6 @@
     color: white !important;
 }
 
-.dashboard {
-    width: 75vw;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-y: auto;
-    padding: 50px;
-    border-radius: 20px;
-}
 
 h2{
     font-size: 2.5vh;
@@ -33,16 +23,14 @@ h2{
     margin-bottom: 10px;
 }
 
-.main-container {
-    display: flex !important; 
-    width: 100% !important;
-    /* max-width: 1200px; */
-    height: 100% !important;
-    justify-content: space-between !important;
-    background-color: white !important;
-    border-radius: 10px !important;
-    overflow-y: auto !important;
+.main-contain {
+    height: 100%;
 }
+
+body {
+    background-color: #2F669D;
+}
+
 
 .workspace-cards {
     /* display: grid;
@@ -52,23 +40,38 @@ h2{
     width: 100%; */
     height: 100%;
     overflow-y: auto;
-    padding: 20px;
+    padding: 25px;
 }
 
 .workspace-card {
     background-color: white;
-    border: 1px solid black;
-    border-radius: 8px;
     padding: 16px;
     cursor: pointer;
     transition: box-shadow 0.3s;
     margin-bottom: 10px;
     color: black;
     height: 20vh;
+    width: 798px;
+}
+
+@media (min-width: 1024px) {
+    .workspace-card {
+        width: 962px;
+    }
+
+    .workspaces-name {
+        margin-left: 50px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .workspace-card {
+        width: 80%;
+    }
 }
 
 .workspace-card:hover {
-    border: 3px solid black;
+    transform:translateY(-2px);
 }
 
 .workspace-actions {
@@ -80,7 +83,7 @@ h2{
     /* border-radius: 8px; */
     /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
     color: black;
-    border-radius: 10px;
+
 }
 
 @media (max-width: 1100px) {
@@ -166,9 +169,6 @@ h2{
     cursor: pointer;
 } */
 
-button:hover {
-    background-color: #0066cc;
-}
 
 .domain-restrictions {
     margin-bottom: 10px;
@@ -245,11 +245,12 @@ button:hover {
     margin-top: 60px; /* Adjust this based on the height of your navbar */
 }
 
-.navbar navbar-expand-lg navbar-light bg-light {
-    background-color: #007df9;
-    color: tomato;
-}
-
 .navbar {
     background-color: transparent !important;
 }
+
+.logo {
+    height: 50px;
+    width: 50px;
+}
+
