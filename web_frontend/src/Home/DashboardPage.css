@@ -120,22 +120,7 @@ body {
     }
 }
 
-@media (max-width: 600px) {
-    .workspace-cards,
-    .workspace-actions {
-        width: 150%;
-        /* overflow-y: visible; */
-        /* Remove individual scroll */
-    }
 
-    .customContainer{
-        width: 100% !important;
-        padding: 0 0px 0px 0px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-}
 
 .workspace-actions h2 {
     margin-top: 0;
@@ -209,10 +194,7 @@ body {
     /* background-color: #007df9; */
     padding: 10px 20px;
     color: #fff;
-    position: fixed;
     width: 100%;
-    top: 0;
-    z-index: 1000;
 }
 
 .navbar .navbar-brand {

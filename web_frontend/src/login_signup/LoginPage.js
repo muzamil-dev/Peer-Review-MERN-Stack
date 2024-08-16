@@ -226,8 +226,8 @@ const LoginPage = () => {
   return (
     <div className="page-container">
       <div className="logo-container">
-        <h1 className="text-4xl">Welcome to</h1>
-        <Logo />
+        <h1 className="login-header text-4xl">Welcome to</h1>
+        <Logo className="login-logo"/>
       </div>
       <div className="body-container">
         <div className="wrapper">

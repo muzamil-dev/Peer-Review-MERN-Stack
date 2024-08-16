@@ -28,6 +28,10 @@ html,body{
   gap: 2rem;
 }
 
+.login-logo {
+  width: 450px;
+}
+
 .logo-container {
   display: flex;
   flex-direction: column;
@@ -36,7 +40,6 @@ html,body{
 
 .wrapper{
   overflow: hidden;
-  max-width: 500px;
   width: 50vh;
   height: 45vh;
   background-color: #fff;
@@ -289,4 +292,14 @@ form .btn input[type="submit"]{
   font-size: 1.5em;
   color: #0073e6;
   z-index: 1000;
+}
+
+@media (min-width:600px) {
+  .login-logo {
+    width: fit-content;
+  }
+
+  .login-header {
+    font-size: 40px;
+  }
 }
