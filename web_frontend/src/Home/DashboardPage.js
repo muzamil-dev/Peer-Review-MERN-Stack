@@ -6,6 +6,7 @@ import Api from "../Api.js";
 import { enqueueSnackbar } from "notistack";
 import { FaPlus } from "react-icons/fa6";
 import { MdLogout } from "react-icons/md";
+import { MdMenu } from "react-icons/md";
 import { BsTrash } from "react-icons/bs";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { ReactComponent as Logo } from "../assets/logo.svg";
@@ -245,10 +246,10 @@ const DashboardPage = () => {
             className="text-black no-underline text-4xl hover:-translate-y-1"
             href="/"
           >
-            <Logo className="w-72"></Logo>
+            <Logo className="dash-logo"></Logo>
           </a>
         </div>
-        <div className="flex gap-6">
+        <div className="flex gap-6 dash-buttons">
           <OverlayTrigger placement="bottom" overlay={addTooltip}>
             <button
               type="button"
@@ -269,9 +270,15 @@ const DashboardPage = () => {
             </button>
           </OverlayTrigger>
         </div>
+        <button
+          className="dash-menu"
+          
+        >
+          <MdMenu size={35}/>
+        </button>
       </nav>
 
-      <div className="customContainer">
+      <div className="">
         <div className="workspace-cards flex flex-col gap-3">
           <div className="workspaces-name mt-3 mb-2 md:ml-6 text-5xl text-white flex justify-center">
             Workspaces
@@ -329,44 +336,46 @@ const DashboardPage = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Confirmation Modal for Deleting Workspace */}
-      <div
-        className={`modal fade ${showDeleteConfirmModal ? "show d-block" : ""}`}
-        tabIndex="-1"
-        role="dialog"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      >
-        <div className="modal-dialog modal-dialog-centered" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title text-3xl">Delete Workspace</h5>
-              <button
-                type="button"
-                className="close"
-                onClick={() => setShowDeleteConfirmModal(false)}
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="p-3 flex flex-col justify-center">
-              <p className="text-2xl font-semibold text-black">
-                Are you sure you want to delete this workspace?
-              </p>
-              <p className="font-extrabold text-slate-500">
-                This action cannot be undone
-              </p>
-            </div>
-            <div className="flex justify-center mb-3">
-              <button
-                type="button"
-                className="bg-red-500 text-white p-2  rounded hover:bg-red-400"
-                onClick={confirmDeleteWorkspace}
-              >
-                Delete
-              </button>
+        {/* Confirmation Modal for Deleting Workspace */}
+        <div
+          className={`modal fade ${
+            showDeleteConfirmModal ? "show d-block" : ""
+          }`}
+          tabIndex="-1"
+          role="dialog"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title text-3xl">Delete Workspace</h5>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => setShowDeleteConfirmModal(false)}
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="p-3 flex flex-col justify-center">
+                <p className="text-2xl font-semibold text-black">
+                  Are you sure you want to delete this workspace?
+                </p>
+                <p className="font-extrabold text-slate-500">
+                  This action cannot be undone
+                </p>
+              </div>
+              <div className="flex justify-center mb-3">
+                <button
+                  type="button"
+                  className="bg-red-500 text-white p-2  rounded hover:bg-red-400"
+                  onClick={confirmDeleteWorkspace}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
