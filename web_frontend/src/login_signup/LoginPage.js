@@ -224,16 +224,16 @@ const LoginPage = () => {
   /**/
 
   return (
-    <div className="page-container">
-      <div className="logo-container">
-        <h1 className="text-4xl">Welcome to</h1>
-        <Logo />
+    <div className="flex flex-col h-full gap-4 justify-center">
+      <div className="flex items-center flex-col">
+        <h1 className="text-3xl sm:text-4xl">Welcome to</h1>
+        <Logo className="login-logo -mt-3 sm:-m-0"/>
       </div>
-      <div className="body-container">
-        <div className="wrapper">
-          <div className="title-text">
+      <div className="w-full sm:flex sm:justify-center">
+        <div className="wrapper bg-white rounded-xl p-4 sm:w-4/5 md:w-8/12 lg:6/12 xl:w-5/12">
+          <div className="flex justify-center">
             <div
-              className={`title ${
+              className={`title md:text-4xl ${
                 isLoginActive
                   ? "login"
                   : isVerificationActive
