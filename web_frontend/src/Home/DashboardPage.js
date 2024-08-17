@@ -190,7 +190,7 @@ const DashboardPage = () => {
           >
             <div className="card-body flex flex-col justify-center">
               <div className="flex justify-between">
-                <h2 className="card-title text-4xl hover:underline w-fit">
+                <h2 className="card-title text-4xl hover:underline w-fit text-center">
                   {workspace.name}
                 </h2>
                 <OverlayTrigger placement="bottom" overlay={deleteTooltip}>
@@ -211,11 +211,10 @@ const DashboardPage = () => {
               <p className="card-text text-2xl text-start">
                 Role: {workspace.role}
               </p>
-              <OverlayTrigger placement="bottom" overlay={deleteTooltip}>
                 <div className="flex justify-center">
                   {workspace.role === "Instructor" && (
                     <button
-                      className="sm:hidden flex gap-2 w-full text-white text-2xl justify-center items-center bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
+                      className="sm:hidden flex gap-2 w-6/12 text-white text-xl justify-center items-center bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteWorkspaceClick(workspace.workspaceId);
@@ -225,7 +224,6 @@ const DashboardPage = () => {
                     </button>
                   )}
                 </div>
-              </OverlayTrigger>
             </div>
           </div>
         </div>
@@ -331,7 +329,7 @@ const DashboardPage = () => {
 
       <div className="">
         <div className="workspace-cards flex flex-col gap-3">
-          <div className="workspaces-name mt-3 mb-2 md:ml-6 text-5xl text-white flex justify-center">
+          <div className="workspaces-name mt-3 mb-2 md:ml-6 text-4xl sm:text-5xl lg:text-6xl text-white flex justify-center">
             Workspaces
           </div>
           <WorkspaceDisplay />
