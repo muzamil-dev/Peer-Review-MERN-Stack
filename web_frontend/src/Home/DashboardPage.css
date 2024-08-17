@@ -67,6 +67,22 @@ h2{
     width: 798px;
 }
 
+.dash-dropdown .dash-content {
+    display: none;
+    position: absolute;
+    min-width: 100px;
+}
+
+.dash-dropdown:focus .dash-content {
+    display: block;
+
+}
+
+.collapse.show {
+    visibility: visible;
+}
+
+
 @media (min-width: 1024px) {
     .workspace-card {
         width: 962px;

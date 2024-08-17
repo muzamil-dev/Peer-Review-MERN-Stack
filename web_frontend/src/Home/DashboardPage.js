@@ -240,42 +240,78 @@ const DashboardPage = () => {
 
   return (
     <div className="main-contain">
-      <nav className="flex items-center  bg-slate-100 p-3 justify-between navigation">
-        <div className="flex items-center">
+      <nav className="flex items-center flex-col bg-slate-100 p-3 justify-between navigation navbar-expand-lg">
+        <div className="flex items-center w-full justify-between p-2">
           <a
             className="text-black no-underline text-4xl hover:-translate-y-1"
             href="/"
           >
-            <Logo className="dash-logo"></Logo>
+            <Logo className="dash-logo navbar-brand"></Logo>
           </a>
-        </div>
-        <div className="flex gap-6 dash-buttons">
-          <OverlayTrigger placement="bottom" overlay={addTooltip}>
+          <div className="dash-menu">
             <button
+              className="navbar-toggler"
               type="button"
-              data-toggle="modal"
-              data-target="#createWorkspaceModal"
-              className="flex border-2 border-slate-100 p-2  rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm"
+              data-toggle="collapse"
+              data-target="#dash-collapse"
+              aria-controls="dash-collapse"
+              aria-label="Toggle Navbar"
+              aria-expanded="false"
             >
-              <FaPlus className="text-slate-100 size-8" />
+              <MdMenu size={35} />
             </button>
-          </OverlayTrigger>
-          <OverlayTrigger placement="bottom" overlay={logOutTooltip}>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="flex border-2 border-slate-100 p-2  rounded-xl bg-red-500 hover:border-red-500 hover:shadow-sm"
-            >
-              <MdLogout className="text-slate-100 size-8" />
-            </button>
-          </OverlayTrigger>
+          </div>
+          <div className="flex gap-6 dash-buttons">
+            <OverlayTrigger placement="bottom" overlay={addTooltip}>
+              <button
+                type="button"
+                data-toggle="modal"
+                data-target="#createWorkspaceModal"
+                className="flex border-2 border-slate-100 p-2  rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm"
+              >
+                <FaPlus className="text-slate-100 size-8" />
+              </button>
+            </OverlayTrigger>
+            <OverlayTrigger placement="bottom" overlay={logOutTooltip}>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex border-2 border-slate-100 p-2  rounded-xl bg-red-500 hover:border-red-500 hover:shadow-sm"
+              >
+                <MdLogout className="text-slate-100 size-8" />
+              </button>
+            </OverlayTrigger>
+          </div>
         </div>
-        <button
-          className="dash-menu"
-          
+
+        <div
+          className="sm:none collapse navbar-collapse w-full justify-center"
+          id="dash-collapse"
         >
-          <MdMenu size={35}/>
-        </button>
+          <ul className="navbar-nav mr-auto">
+            <li className="nav-item">
+              <button
+                type="button"
+                data-toggle="modal"
+                data-target="#createWorkspaceModal"
+                className="flex text-center items-center gap-2 border-2 border-slate-100 p-2  text-white rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm w-full"
+              >
+                <FaPlus />
+                Add Workspace
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex border-2 items-center gap-2 border-slate-100 p-2  text-white rounded-xl bg-red-500 hover:border-red-500 hover:shadow-sm w-full"
+              >
+                <MdLogout />
+                Sign Out
+              </button>
+            </li>
+          </ul>
+        </div>
       </nav>
 
       <div className="">
