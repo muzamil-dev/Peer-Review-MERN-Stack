@@ -213,19 +213,19 @@ const DashboardPage = () => {
               <p className="card-text text-2xl text-start">
                 Role: {workspace.role}
               </p>
-                <div className="flex justify-center">
-                  {workspace.role === "Instructor" && (
-                    <button
-                      className="sm:hidden flex gap-2 w-6/12 text-white text-xl justify-center items-center bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteWorkspaceClick(workspace.workspaceId);
-                      }}
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
+              <div className="flex justify-center">
+                {workspace.role === "Instructor" && (
+                  <button
+                    className="sm:hidden flex gap-2 w-6/12 text-white text-xl justify-center items-center bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteWorkspaceClick(workspace.workspaceId);
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -254,7 +254,7 @@ const DashboardPage = () => {
   const deleteTooltip = <Tooltip id="delete-tooltip">Delete</Tooltip>;
 
   return (
-    <div className="main-contain">
+    <div className="flex flex-col h-full">
       <nav className="flex w-full items-center flex-col bg-slate-100 p-3 justify-between navigation navbar-expand-lg">
         <div className="flex items-center w-full justify-between">
           <a
@@ -311,7 +311,7 @@ const DashboardPage = () => {
                 data-target="#createWorkspaceModal"
                 className="flex text-xl text-center items-center gap-2 border-2 border-slate-100 p-2  text-white rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm w-full"
               >
-                <FaPlus className="size-7=true"/>
+                <FaPlus className="size-7=true" />
                 Add Workspace
               </button>
             </li>
@@ -321,7 +321,7 @@ const DashboardPage = () => {
                 onClick={handleLogout}
                 className="flex text-xl border-2 items-center gap-2 border-slate-100 p-2  text-white rounded-xl bg-red-500 hover:border-red-500 hover:shadow-sm w-full"
               >
-                <MdLogout className="size-7=true"/>
+                <MdLogout className="size-7=true" />
                 Sign Out
               </button>
             </li>
