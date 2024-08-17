@@ -72,12 +72,12 @@ app.get("/joke", (req, res) => {
 // Once per 5 minutes cron job
 // Creates the reviews and analytics for assignments
 // within 15 minutes before the assignment's start date
-cron.schedule('*/5 * * * *', async() => {
+cron.schedule('*/5 * * * *', async () => {
     // Set date to 15 minutes after now
-    const minute = 60*1000; // 60s * 1000ms
+    const minute = 60 * 1000; // 60s * 1000ms
     const maxStartDate = (new Date(Date.now() + 15 * minute)).toISOString();
     // Check out a client
-    try{
+    try {
         const db = await pool.connect();
         await db.query('BEGIN')
         const res = await db.query(
@@ -90,18 +90,18 @@ cron.schedule('*/5 * * * *', async() => {
         // Get all ids of review assignments
         const ids = res.map(obj => obj.id);
         // Create reviews for each assignment
-        const promises = ids.map(async(id) => {
+        const promises = ids.map(async (id) => {
             await ReviewService.createReviews(db, id);
             await AnalyticsService.createAnalytics(db, id);
         });
         await Promise.all(promises);
         await db.query('COMMIT');
     }
-    catch(err){
+    catch (err) {
         if (db) await db.query('ROLLBACK');
         console.log(err);
     }
-    finally{
+    finally {
         if (db) db.done();
     }
 });
