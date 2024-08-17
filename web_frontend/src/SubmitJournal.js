@@ -75,6 +75,11 @@ const SubmitJournal = () => {
         return <div>Loading...</div>; // Show a loading message while checking authentication
     }
 
+    const formatContent = (content) => {
+        return { __html: content.replace(/\n/g, '<br/>') };
+    };
+    
+
     return (
         <div className="submit-journal-page">
             <header className="journal-header">
@@ -87,23 +92,27 @@ const SubmitJournal = () => {
                     <p><strong>End Date:</strong> {new Date(journal.endDate).toLocaleDateString()}</p>
                 </div>
             </header>
-
+    
             <div className="journal-content">
-                <textarea
-                    placeholder="Write or edit your journal entry here..."
-                    value={content}
-                    onChange={handleContentChange}
-                    className="journal-textarea"
-                    disabled={!isEditable} // Disable textarea if not editable
-                />
+                {isEditable ? (
+                    <textarea
+                        placeholder="Write or edit your journal entry here..."
+                        value={content}
+                        onChange={handleContentChange}
+                        className="journal-textarea"
+                    />
+                ) : (
+                    <div className="formatted-content" dangerouslySetInnerHTML={formatContent(content)} />
+                )}
                 {error && <div className="error-message">{error}</div>}
-                <button 
-                    onClick={handleSubmit} 
-                    className="btn btn-primary submit-button"
-                    disabled={!isEditable} // Disable button if not editable
-                >
-                    Submit
-                </button>
+                {isEditable && (
+                    <button 
+                        onClick={handleSubmit} 
+                        className="btn btn-primary submit-button"
+                    >
+                        Submit
+                    </button>
+                )}
                 {!isEditable && (
                     <div className="info-message">
                         You cannot edit this journal because it is past or before the submission period.
@@ -111,7 +120,7 @@ const SubmitJournal = () => {
                 )}
             </div>
         </div>
-    );
+    );    
 };
 
 export default SubmitJournal;

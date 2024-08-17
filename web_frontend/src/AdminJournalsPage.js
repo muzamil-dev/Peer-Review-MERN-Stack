@@ -77,6 +77,11 @@ const AdminJournalsPage = () => {
         navigate(`/workspaces/${workspaceId}/admin`);
     };
 
+    // Reuse the formatContent function from SubmitJournal
+    const formatContent = (content) => {
+        return { __html: content.replace(/\n/g, '<br/>') };
+    };
+
     return (
         <div className="admin-journals-page">
             <div className="sidebar">
@@ -103,7 +108,7 @@ const AdminJournalsPage = () => {
                     <p>No journals found for this student.</p>
                 )}
                 {journals.length > 0 && (
-                    <ul>
+                    <ul className='unordered-list'>
                         {journals.map((journal, index) => (
                             <li 
                                 key={index} 
@@ -119,12 +124,13 @@ const AdminJournalsPage = () => {
                 )}
             </div>
 
-            {isPopupOpen && (
+            {isPopupOpen && selectedJournal && (
                 <div className="popup-overlay" onClick={() => setIsPopupOpen(false)}>
                     <div className="popup-content" onClick={(e) => e.stopPropagation()}>
                         <h2>{selectedJournal.name}</h2>
                         <p><strong>Submitted on:</strong> {selectedJournal.submittedAt ? new Date(selectedJournal.submittedAt).toLocaleDateString() : 'Not submitted'}</p>
-                        <p>{selectedJournal.content}</p>
+                        {/* Render the content with the same formatting as the user page */}
+                        <div className="formatted-content" dangerouslySetInnerHTML={formatContent(selectedJournal.content)} />
                         <button onClick={() => setIsPopupOpen(false)} className="btn btn-primary">Close</button>
                     </div>
                 </div>

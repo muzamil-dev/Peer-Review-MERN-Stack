@@ -92,9 +92,14 @@
     border-radius: 8px;
     max-width: 1100px;
     width: 100vh;
+    max-height: 80vh;
+    /* Limit the height to 80% of the viewport height */
+    overflow-y: auto;
+    /* Enable vertical scrolling */
     text-align: left;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
 
 .backAJ {
     width: 100px;
@@ -110,4 +115,71 @@
 
 .backAJ:hover {
     background-color: #c82333;
+}
+
+.unordered-list {
+    list-style-type: none;
+    padding: 0 !important;
+}
+
+@media (max-width: 1000px) {
+    .sidebar {
+        width: 30%;
+    }
+}
+
+/* Media query for screens less than or equal to 700px */
+@media (max-width: 600px) {
+    .admin-journals-page {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .sidebar {
+        flex-direction: row;
+        /* Horizontal alignment for back button and dropdown */
+        align-items: center;
+        width: 100%;
+        /* Full width */
+        padding-right: 0;
+        margin-bottom: 20px;
+        /* Space between sidebar and content */
+    }
+
+    .backAJ {
+        margin-right: 20px;
+        /* Space between back button and dropdown */
+        width: auto;
+        padding: 10px 20px;
+        /* Adjust padding for better tap target */
+    }
+
+    .filter-group {
+        flex-direction: row;
+        align-items: center;
+        margin-top: 0;
+        width: 100%;
+        /* Full width */
+    }
+
+    .filter-group label {
+        margin-bottom: 0;
+        margin-right: 10px;
+        /* Space between label and dropdown */
+    }
+
+    .filter-group select {
+        flex-grow: 1;
+        width: auto;
+    }
+
+    .journals-list {
+        padding: 10px;
+    }
+
+    .popup-content {
+        padding: 15px;
+        max-width: 90%;
+        width: auto;
+    }
 }
