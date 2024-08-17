@@ -193,7 +193,7 @@ const DashboardPage = () => {
                   {workspace.name}
                 </h2>
                 <OverlayTrigger placement="bottom" overlay={deleteTooltip}>
-                  {workspace.role === "Instructor" && (
+                  {workspace.role === "Instructor" ? (
                     <button
                       className="bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
                       onClick={(e) => {
@@ -203,6 +203,8 @@ const DashboardPage = () => {
                     >
                       <BsTrash className="text-white size-7" />
                     </button>
+                  ) : (
+                    <span></span>
                   )}
                 </OverlayTrigger>
               </div>
