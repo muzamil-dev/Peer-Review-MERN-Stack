@@ -300,7 +300,7 @@ const DashboardPage = () => {
         </div>
 
         <div
-          className="sm:none collapse navbar-collapse w-full justify-center border"
+          className="sm:none collapse navbar-collapse w-full justify-center"
           id="dash-collapse"
         >
           <ul className="navbar-nav">
@@ -311,7 +311,7 @@ const DashboardPage = () => {
                 data-target="#createWorkspaceModal"
                 className="flex text-xl text-center items-center gap-2 border-2 border-slate-100 p-2  text-white rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm w-full"
               >
-                <FaPlus className="size-6=true"/>
+                <FaPlus className="size-7=true"/>
                 Add Workspace
               </button>
             </li>
@@ -321,7 +321,7 @@ const DashboardPage = () => {
                 onClick={handleLogout}
                 className="flex text-xl border-2 items-center gap-2 border-slate-100 p-2  text-white rounded-xl bg-red-500 hover:border-red-500 hover:shadow-sm w-full"
               >
-                <MdLogout className="size-6=true"/>
+                <MdLogout className="size-7=true"/>
                 Sign Out
               </button>
             </li>
