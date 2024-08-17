@@ -7,7 +7,7 @@ label {
 select {
     width: 17vw;
     padding: 0.5rem;
-
+    color: black !important;
 }
 
 .dashboardz {
