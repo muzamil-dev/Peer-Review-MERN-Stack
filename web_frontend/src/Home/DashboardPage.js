@@ -196,7 +196,7 @@ const DashboardPage = () => {
                 <OverlayTrigger placement="bottom" overlay={deleteTooltip}>
                   {workspace.role === "Instructor" && (
                     <button
-                      className="bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
+                      className="hidden sm:block bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteWorkspaceClick(workspace.workspaceId);
@@ -211,6 +211,19 @@ const DashboardPage = () => {
               <p className="card-text text-2xl text-start">
                 Role: {workspace.role}
               </p>
+              <OverlayTrigger placement="bottom" overlay={deleteTooltip}>
+                {workspace.role === "Instructor" && (
+                  <button
+                    className="sm:hidden bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteWorkspaceClick(workspace.workspaceId);
+                    }}
+                  >
+                    <BsTrash className="text-white size-7" />
+                  </button>
+                )}
+              </OverlayTrigger>
             </div>
           </div>
         </div>
@@ -393,8 +406,13 @@ const DashboardPage = () => {
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <h5 className="text-center"> Are you sure you want to delete this workspace?</h5>
-              <h6 className="text-center font-bold">This action cannot be undone</h6>
+              <h5 className="text-center">
+                {" "}
+                Are you sure you want to delete this workspace?
+              </h5>
+              <h6 className="text-center font-bold">
+                This action cannot be undone
+              </h6>
             </Modal.Body>
             <div className="flex justify-center mb-3">
               <Button
