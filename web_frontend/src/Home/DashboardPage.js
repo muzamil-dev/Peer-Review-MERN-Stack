@@ -212,17 +212,19 @@ const DashboardPage = () => {
                 Role: {workspace.role}
               </p>
               <OverlayTrigger placement="bottom" overlay={deleteTooltip}>
-                {workspace.role === "Instructor" && (
-                  <button
-                    className="sm:hidden bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteWorkspaceClick(workspace.workspaceId);
-                    }}
-                  >
-                    <BsTrash className="text-white size-7" />
-                  </button>
-                )}
+                <div className="flex justify-center">
+                  {workspace.role === "Instructor" && (
+                    <button
+                      className="sm:hidden flex gap-2 w-full text-white text-2xl justify-center items-center bg-red-500 rounded-2xl border-2 border-slate-100 p-2 hover:border hover:border-red-500 hover:shadow-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteWorkspaceClick(workspace.workspaceId);
+                      }}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               </OverlayTrigger>
             </div>
           </div>
@@ -253,8 +255,8 @@ const DashboardPage = () => {
 
   return (
     <div className="main-contain">
-      <nav className="flex items-center flex-col bg-slate-100 p-3 justify-between navigation navbar-expand-lg">
-        <div className="flex items-center w-full justify-between p-2">
+      <nav className="flex w-full items-center flex-col bg-slate-100 p-3 justify-between navigation navbar-expand-lg">
+        <div className="flex items-center w-full justify-between">
           <a
             className="text-black no-underline text-4xl hover:-translate-y-1"
             href="/"
@@ -298,18 +300,18 @@ const DashboardPage = () => {
         </div>
 
         <div
-          className="sm:none collapse navbar-collapse w-full justify-center"
+          className="sm:none collapse navbar-collapse w-full justify-center border"
           id="dash-collapse"
         >
-          <ul className="navbar-nav mr-auto">
+          <ul className="navbar-nav">
             <li className="nav-item">
               <button
                 type="button"
                 data-toggle="modal"
                 data-target="#createWorkspaceModal"
-                className="flex text-center items-center gap-2 border-2 border-slate-100 p-2  text-white rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm w-full"
+                className="flex text-xl text-center items-center gap-2 border-2 border-slate-100 p-2  text-white rounded-xl bg-green-500 hover:border-green-500 hover:shadow-sm w-full"
               >
-                <FaPlus />
+                <FaPlus className="size-6=true"/>
                 Add Workspace
               </button>
             </li>
@@ -317,9 +319,9 @@ const DashboardPage = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex border-2 items-center gap-2 border-slate-100 p-2  text-white rounded-xl bg-red-500 hover:border-red-500 hover:shadow-sm w-full"
+                className="flex text-xl border-2 items-center gap-2 border-slate-100 p-2  text-white rounded-xl bg-red-500 hover:border-red-500 hover:shadow-sm w-full"
               >
-                <MdLogout />
+                <MdLogout className="size-6=true"/>
                 Sign Out
               </button>
             </li>
