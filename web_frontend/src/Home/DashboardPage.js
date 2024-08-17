@@ -8,7 +8,7 @@ import { FaPlus } from "react-icons/fa6";
 import { MdLogout } from "react-icons/md";
 import { MdMenu } from "react-icons/md";
 import { BsTrash } from "react-icons/bs";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Modal, Button } from "react-bootstrap";
 import { ReactComponent as Logo } from "../assets/logo.svg";
 
 const DashboardPage = () => {
@@ -382,38 +382,30 @@ const DashboardPage = () => {
           role="dialog"
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
         >
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title text-3xl">Delete Workspace</h5>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={() => setShowDeleteConfirmModal(false)}
-                  aria-label="Close"
-                >
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="p-3 flex flex-col justify-center">
-                <p className="text-2xl font-semibold text-black">
-                  Are you sure you want to delete this workspace?
-                </p>
-                <p className="font-extrabold text-slate-500">
-                  This action cannot be undone
-                </p>
-              </div>
-              <div className="flex justify-center mb-3">
-                <button
-                  type="button"
-                  className="bg-red-500 text-white p-2  rounded hover:bg-red-400"
-                  onClick={confirmDeleteWorkspace}
-                >
-                  Delete
-                </button>
-              </div>
+          <Modal
+            show={showDeleteConfirmModal}
+            onHide={() => setShowDeleteConfirmModal(false)}
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>
+                <h3 className="text-3xl">Delete Workspace</h3>
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <h5 className="text-center"> Are you sure you want to delete this workspace?</h5>
+              <h6 className="text-center font-bold">This action cannot be undone</h6>
+            </Modal.Body>
+            <div className="flex justify-center mb-3">
+              <Button
+                variant="danger"
+                onClick={confirmDeleteWorkspace}
+                className=""
+              >
+                Delete
+              </Button>
             </div>
-          </div>
+          </Modal>
         </div>
       </div>
     </div>
