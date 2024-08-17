@@ -8,9 +8,7 @@ const AdminJournalsPage = () => {
     const { workspaceId } = useParams();
     const [students, setStudents] = useState([]);
     const [selectedStudent, setSelectedStudent] = useState(null);
-    const [selectedWeek, setSelectedWeek] = useState('');
     const [journals, setJournals] = useState([]);
-    const [weeks, setWeeks] = useState([]);
     const [error, setError] = useState('');
     const [selectedJournal, setSelectedJournal] = useState(null);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -18,7 +16,6 @@ const AdminJournalsPage = () => {
 
     useEffect(() => {
         fetchStudents();
-        fetchWeeks();
     }, []);
 
     const getCurrentUserId = () => {
@@ -47,25 +44,9 @@ const AdminJournalsPage = () => {
         }
     };
 
-    const fetchWeeks = async () => {
+    const fetchJournals = async (studentId) => {
         try {
-            const response = await Api.Workspaces.getWeeks(workspaceId);
-            if (response.status === 200) {
-                const { past, current } = response.data;
-                const pastAndCurrentWeeks = [...past, ...current];
-                setWeeks([...new Set(pastAndCurrentWeeks)]);
-            } else {
-                setError(`Failed to fetch weeks: ${response.message}`);
-            }
-        } catch (error) {
-            console.error('Error fetching weeks:', error);
-            setError('Error fetching weeks.');
-        }
-    };
-
-    const fetchJournals = async (studentId, week) => {
-        try {
-            const response = await Api.Workspaces.GetUserJournalsByWorkspaceAdmin(workspaceId, studentId, week);
+            const response = await Api.Workspaces.GetUserJournalsByWorkspaceAdmin(workspaceId, studentId);
             if (response.status === 200) {
                 setJournals(response.data);
             } else {
@@ -80,16 +61,8 @@ const AdminJournalsPage = () => {
     const handleStudentChange = (e) => {
         const studentId = e.target.value;
         setSelectedStudent(studentId);
-        if (studentId && selectedWeek) {
-            fetchJournals(studentId, selectedWeek);
-        }
-    };
-
-    const handleWeekChange = (e) => {
-        const week = e.target.value;
-        setSelectedWeek(week);
-        if (selectedStudent && week) {
-            fetchJournals(selectedStudent, week);
+        if (studentId) {
+            fetchJournals(studentId);
         }
     };
 
@@ -106,14 +79,10 @@ const AdminJournalsPage = () => {
 
     return (
         <div className="admin-journals-page">
-            <header className="admin-journals-header">
-                <button onClick={handleBackClick} className="btn btn-danger">
+            <div className="sidebar">
+                <button onClick={handleBackClick} className="btn btn-danger backAJ">
                     &#8592; Back
                 </button>
-                <h1 className="admin-journals-title">Manage Student Journals</h1>
-            </header>
-
-            <div className="filters">
                 <div className="filter-group">
                     <label htmlFor="student-select">Select Student:</label>
                     <select id="student-select" value={selectedStudent || ''} onChange={handleStudentChange}>
@@ -125,25 +94,13 @@ const AdminJournalsPage = () => {
                         ))}
                     </select>
                 </div>
-
-                <div className="filter-group">
-                    <label htmlFor="week-select">Select Week:</label>
-                    <select id="week-select" value={selectedWeek || ''} onChange={handleWeekChange}>
-                        <option value="" disabled>Select a week</option>
-                        {weeks.map(week => (
-                            <option key={week} value={week}>
-                                Week {week}
-                            </option>
-                        ))}
-                    </select>
-                </div>
             </div>
 
             <div className="journals-list">
-                <h2>Journals for Selected Week</h2>
+                <h2>Journals for Selected Student</h2>
                 {error && <div className="error-message">{error}</div>}
                 {journals.length === 0 && !error && (
-                    <p>No journals found for this week.</p>
+                    <p>No journals found for this student.</p>
                 )}
                 {journals.length > 0 && (
                     <ul>
