@@ -1,11 +1,12 @@
 import HttpError from '../services/utils/httpError.js';
+import { query } from '../config.js';
 
 import * as AnalyticsService from './analytics.js';
 import * as ReviewService from './reviews.js';
 
 // Get an assignment by its id
-export const getById = async(db, assignmentId) => {
-    const res = await db.query(
+export const getById = async(assignmentId) => {
+    const res = await query(
         `SELECT a.*, 
         array_agg(q.question ORDER BY q.id) AS questions
         FROM assignments AS a
@@ -15,7 +16,7 @@ export const getById = async(db, assignmentId) => {
         GROUP BY a.id`,
         [assignmentId]
     );
-    const data = res[0];
+    const data = res.rows[0];
     // Check if assignment was found
     if (!data)
         throw new HttpError("The requested assignment was not found", 404);
@@ -34,8 +35,8 @@ export const getById = async(db, assignmentId) => {
 }
 
 // Get all assignments for a given workspace
-export const getByWorkspace = async(db, workspaceId) => {
-    const res = await db.query(
+export const getByWorkspace = async(workspaceId) => {
+    const res = await query(
         `SELECT a.*, 
         array_agg(q.question ORDER BY q.id) AS questions
         FROM workspaces AS w
@@ -48,7 +49,7 @@ export const getByWorkspace = async(db, workspaceId) => {
         ORDER BY a.due_date`,
         [workspaceId]
     );
-    const data = res;
+    const data = res.rows;
     // Workspace does not exist if no rows are found
     if (data.length === 0)
         throw new HttpError("The requested workspace was not found", 404);
@@ -71,15 +72,15 @@ export const getByWorkspace = async(db, workspaceId) => {
 }
 
 // Check instructor given an assignment id
-export const checkInstructor = async(db, userId, assignmentId) => {
-    const user = (await db.query(
+export const checkInstructor = async(userId, assignmentId) => {
+    const user = (await query(
         `SELECT m.role
         FROM assignments AS a
         LEFT JOIN memberships AS m
         ON a.workspace_id = m.workspace_id AND m.user_id = $1
         WHERE a.id = $2`,
         [userId, assignmentId]
-    ))[0];
+    )).rows[0];
 
     if (!user)
         throw new HttpError("The requested assignment was not found", 404);
@@ -90,7 +91,7 @@ export const checkInstructor = async(db, userId, assignmentId) => {
 }
 
 // Create a new assignment
-export const create = async(db, workspaceId, settings) => {
+export const create = async(workspaceId, settings) => {
     // Get all relevant settings from the settings object
     const { name, startDate, dueDate, questions, description } = settings;
     // Check for a start date. If none was provided, set it to now
@@ -106,44 +107,44 @@ export const create = async(db, workspaceId, settings) => {
         started = true
 
     // Insert the assignment
-    const assignmentRes = await db.query(
+    const assignmentRes = await query(
         `INSERT INTO assignments (name, workspace_id, start_date, due_date, description, started)
         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
         [name, workspaceId, start_date.toISOString(), due_date, description, started]
     );
     // Get the assignment id
-    const assignmentId = assignmentRes[0].id;
+    const assignmentId = assignmentRes.rows[0].id;
     if (!assignmentId)
         throw new HttpError("Assignment failed to create", 500);
 
     // Insert the questions
-    const questionRes = await createQuestions(db, assignmentId, questions);
+    const questionRes = await createQuestions(assignmentId, questions);
 
     // Create reviews if assignment has already started
     if (started){
         // Assign reviews
-        await ReviewService.createReviews(db, assignmentId);
+        await ReviewService.createReviews(assignmentId);
         // Create analytics based on the reviews assigned
-        await AnalyticsService.createAnalytics(db, assignmentId);
+        await AnalyticsService.createAnalytics(assignmentId);
     }
     return { message: "Created assignment successfully" };
 }
 
 // Helper function for adding review questions
-const createQuestions = async(db, assignmentId, questions) => {
+const createQuestions = async(assignmentId, questions) => {
     // Insert the questions
     let questionsQuery = `INSERT INTO questions (assignment_id, question) VALUES `
     questionsQuery += questions.map((_, index) => `($1, $${index+2})`).join(', ');
     questionsQuery += `RETURNING id`;
-    const questionRes = await db.query(questionsQuery, [assignmentId, ...questions]);
+    const questionRes = await query(questionsQuery, [assignmentId, ...questions]);
     return questionRes;
 }
 
 // Edit an assignment
 // Change to create reviews if start date is reached
-export const edit = async(db, assignmentId, settings) => {
+export const edit = async(assignmentId, settings) => {
     // Get the assignment, for use for certain comparisons
-    const assignment = await getById(db, assignmentId);
+    const assignment = await getById(assignmentId);
     // Insert updates to make
     const updates = {};
     if (settings.name)
@@ -184,12 +185,12 @@ export const edit = async(db, assignmentId, settings) => {
         }
         if (!flag){ // Questions are different, replace them
             // Delete old questions
-            await db.query(
+            await query(
                 `DELETE FROM questions WHERE assignment_id = $1`, 
                 [assignment.assignmentId]
             )
             // Add new questions
-            await createQuestions(db, assignment.assignmentId, settings.questions)
+            await createQuestions(assignment.assignmentId, settings.questions)
         }
     }
 
@@ -203,19 +204,19 @@ export const edit = async(db, assignmentId, settings) => {
         // Complete the query with assignment id
         updateQuery += ` WHERE id = $${values.length+1} RETURNING *`;
         // Query the update
-        const updateRes = await db.query(updateQuery, [...values, assignment.assignmentId]);
+        const updateRes = await query(updateQuery, [...values, assignment.assignmentId]);
     }
 
     return { message: "Assignment updated successfully" };
 }
 
 // Delete an assignment
-export const deleteAssignment = async(db, assignmentId) => {
+export const deleteAssignment = async(assignmentId) => {
     // Delete the assignment
-    const assignment = (await db.query(
+    const assignment = (await query(
         `DELETE FROM assignments WHERE id = $1 RETURNING *`,
         [assignmentId]
-    ))[0];
+    )).rows[0];
     // Error if assignment wasn't found
     if (!assignment)
         throw new HttpError("The requested assignment was not found", 404);

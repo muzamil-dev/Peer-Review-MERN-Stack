@@ -1,5 +1,5 @@
 import express from 'express';
-import pool from '../config.js';
+import { query } from '../config.js';
 import verifyJWT from '../middleware/verifyJWT.js';
 
 import HttpError from '../services/utils/httpError.js';
@@ -18,49 +18,39 @@ if (process.env.JWT_ENABLED === 'true')
 // Get the details of an assignment
 router.get("/:assignmentId", async(req, res) => {
     const { assignmentId } = req.params;
-    let db;
     try{
-        db = await pool.connect();
         // Call the service
-        const data = await AssignmentService.getById(db, assignmentId);
+        const data = await AssignmentService.getById(query, assignmentId);
         res.json(data);
     }
     catch(err){
         return res.status(err.status || 500).json(
             { message: err.message }
         );
-    }
-    finally{
-        if (db) db.done();
     }
 });
 
 // Get all reviews created by a user for an assignment
 router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, res) => {
     const { assignmentId } = req.params;
-    let userId, db;
-    // Call the service
+    let userId;
     try{
-        db = await pool.connect();
         // If a route parameter was provided, check that the person viewing is an instructor
         if (req.params.userId){
             // Check that the user is an instructor of the assignment's workspace
-            await AssignmentService.checkInstructor(db, req.body.userId, assignmentId);
+            await AssignmentService.checkInstructor(query, req.body.userId, assignmentId);
             userId = req.params.userId;
         }
         else
             userId = req.body.userId;
         // Call the service
-        const data = await ReviewService.getByAssignmentAndUser(db, userId, assignmentId);
+        const data = await ReviewService.getByAssignmentAndUser(query, userId, assignmentId);
         res.json(data);
     }
     catch(err){
         return res.status(err.status || 500).json(
             { message: err.message }
         );
-    }
-    finally{
-        if (db) db.done();
     }
 });
 
@@ -68,14 +58,11 @@ router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, re
 router.get("/:assignmentId/target/:targetId", async(req, res) => {
     const { assignmentId, targetId } = req.params;
     const { userId } = req.body;
-    let db;
     try{
-        db = await pool.connect();
         // Check that the user is an instructor of the assignment's workspace
-        await AssignmentService.checkInstructor(db, userId, assignmentId);
+        await AssignmentService.checkInstructor(query, userId, assignmentId);
         // Call the service
-        const data = await ReviewService.getByAssignmentAndTarget(
-                        db, targetId, assignmentId);
+        const data = await ReviewService.getByAssignmentAndTarget(query, targetId, assignmentId);
         // Send the data back
         res.json(data);
     }
@@ -83,9 +70,6 @@ router.get("/:assignmentId/target/:targetId", async(req, res) => {
         return res.status(err.status || 500).json(
             { message: err.message }
         );
-    }
-    finally{
-        if (db) db.done();
     }
 });
 
@@ -94,21 +78,16 @@ router.get("/:assignmentId/averages", async(req, res) => {
     const { assignmentId } = req.params;
     const { page, perPage } = req.query;
     const { userId } = req.body;
-    let db;
     try{
         // Check for query parameters
         if (!page || !perPage)
             throw new HttpError(
                 "Page and per page query parameters must be provided", 400
             );
-        // Check out a client
-        db = await pool.connect();
         // Check that the user is an instructor of the assignment's workspace
-        await AssignmentService.checkInstructor(db, userId, assignmentId);
+        await AssignmentService.checkInstructor(query, userId, assignmentId);
         // Call the service
-        const data = await AnalyticsService.getAveragesByAssignment(
-            db, assignmentId, page, perPage
-        );
+        const data = await AnalyticsService.getAveragesByAssignment(query, assignmentId, page, perPage);
         // Send the data back
         res.json(data);
     }
@@ -116,9 +95,6 @@ router.get("/:assignmentId/averages", async(req, res) => {
         return res.status(err.status || 500).json(
             { message: err.message }
         );
-    }
-    finally{
-        if (db) db.done();
     }
 });
 
@@ -128,21 +104,16 @@ router.get("/:assignmentId/completion", async(req, res) => {
     const { assignmentId } = req.params;
     const { page, perPage } = req.query;
     const { userId } = req.body;
-    let db;
     try{
         // Check for query parameters
         if (!page || !perPage)
             throw new HttpError(
                 "Page and per page query parameters must be provided", 400
             );
-        // Check out a client
-        db = await pool.connect();
         // Check that the user is an instructor of the assignment's workspace
-        await AssignmentService.checkInstructor(db, userId, assignmentId);
+        await AssignmentService.checkInstructor(query, userId, assignmentId);
         // Call the service
-        const data = await AnalyticsService.getCompletionByAssignment(
-            db, assignmentId, page, perPage
-        );
+        const data = await AnalyticsService.getCompletionByAssignment(query, assignmentId, page, perPage);
         // Send the data back
         res.json(data);
     }
@@ -151,46 +122,37 @@ router.get("/:assignmentId/completion", async(req, res) => {
             { message: err.message }
         );
     }
-    finally{
-        if (db) db.done();
-    }
-})
+});
 
 // Create a new assignment
 router.post("/create", async(req, res) => {
     const { userId, workspaceId, name, startDate, dueDate, questions, description } = req.body;
-    let db;
     try{
         // Check for required fields
         if (!userId || !workspaceId || !name || !dueDate || !questions){
             throw new HttpError("One or more required fields is not present", 400);
-        };
+        }
 
         // Check that questions exists and there is at least one question
         if (!Array.isArray(questions) || questions.length < 1)
             throw new HttpError("Assignments must have at least one question", 400);
 
-        // Connect to the database
-        db = await pool.connect();
-        await db.query('BEGIN');
+        await query('BEGIN');
         // Check that the user is an instructor
-        await WorkspaceService.checkInstructor(db, userId, workspaceId);
+        await WorkspaceService.checkInstructor(query, userId, workspaceId);
         // Build the settings object, these will be used to create the new assignment
         const settings = { name, startDate, dueDate, questions, description };
         // Call the service
-        const data = await AssignmentService.create(db, workspaceId, settings);
-        await db.query('COMMIT');
+        const data = await AssignmentService.create(query, workspaceId, settings);
+        await query('COMMIT');
         // Send the data back
         res.json(data);
     }
     catch(err){
-        if (db) await db.query('ROLLBACK');
+        await query('ROLLBACK');
         return res.status(err.status || 500).json(
             { message: err.message }
         );
-    }
-    finally{
-        if (db) db.done();
     }
 });
 
@@ -200,11 +162,8 @@ router.put("/edit", async(req, res) => {
         userId, assignmentId, name, startDate, dueDate, 
         questions, description 
     } = req.body;
-    let db;
     try{
-        // Connect to the database
-        db = await pool.connect();
-        await db.query('BEGIN');
+        await query('BEGIN');
         // Check for required fields
         if (!assignmentId){
             throw new HttpError("One or more required fields is not present", 400);
@@ -216,20 +175,17 @@ router.put("/edit", async(req, res) => {
         // Build the settings object used to update the assignment
         const settings = { name, startDate, dueDate, questions, description };
         // Check that the user is an instructor of the assignment's workspace
-        await AssignmentService.checkInstructor(db, userId, assignmentId);
+        await AssignmentService.checkInstructor(query, userId, assignmentId);
         // Call the service
-        const data = await AssignmentService.edit(db, assignmentId, settings);
-        await db.query('COMMIT');
+        const data = await AssignmentService.edit(query, assignmentId, settings);
+        await query('COMMIT');
         return res.json(data);
     }
     catch(err){
-        if (db) await db.query('ROLLBACK');
+        await query('ROLLBACK');
         return res.status(err.status || 500).json(
             { message: err.message }
         );
-    }
-    finally{
-        if (db) db.done();
     }
 });
 
@@ -237,26 +193,20 @@ router.put("/edit", async(req, res) => {
 router.delete("/:assignmentId", async(req, res) => {
     const { assignmentId } = req.params;
     const { userId } = req.body;
-    let db;
     try{
-        // Connect to the database
-        db = await pool.connect();
-        await db.query('BEGIN');
+        await query('BEGIN');
         // Check that the user is an instructor of the assignment's workspace
-        await AssignmentService.checkInstructor(db, userId, assignmentId);
+        await AssignmentService.checkInstructor(query, userId, assignmentId);
         // Call the service
-        const data = await AssignmentService.deleteAssignment(db, assignmentId);
-        await db.query('COMMIT');
+        const data = await AssignmentService.deleteAssignment(query, assignmentId);
+        await query('COMMIT');
         res.json(data);
     }
     catch(err){
-        if (db) await db.query('ROLLBACK');
+        await query('ROLLBACK');
         return res.status(err.status || 500).json(
             { message: err.message }
         );
-    }
-    finally{
-        if (db) db.done();
     }
 });
 

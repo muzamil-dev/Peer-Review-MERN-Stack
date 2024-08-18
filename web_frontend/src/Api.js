@@ -8,17 +8,16 @@ const app_name = 'cop4331-mern-cards-d3d1d335310b';// TODO - get real URL
 // };
 
 //use this for testing local API
-const getUrl = (prefix, route) => {
-    return 'http://localhost:5000/' + prefix + route;
-};
-
-
-//use this for testing deployed API
 // const getUrl = (prefix, route) => {
-//     const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
-//     const formattedRoute = route.startsWith('/') ? route : `/${route}`;
-//     return `http://v2.ratemypeer.site/api/${formattedPrefix}${formattedRoute}`;
+//     return 'http://localhost:5000/' + prefix + route;
 // };
+
+
+const getUrl = (prefix, route) => {
+    const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
+    const formattedRoute = route.startsWith('/') ? route : `/${route}`;
+    return `https://peerreview.site/backend/${formattedPrefix}${formattedRoute}`;
+};
 
 const getConfig = () => ({
     headers: {

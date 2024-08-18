@@ -30,30 +30,33 @@ const app = express();
 app.use(express.json());
 
 // Set allowed origins
-const allowedOrigins = ['http://v2.ratemypeer.site', 'http://localhost:3000'];
-// Configure CORS options
+const allowedOrigins = ['https://peerreview.site', 'http://peerreview.site', 'http://localhost:3000'];
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests with no origin
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1)
-            callback(null, true);
-        else
-            callback(new Error(`CORS error: Disallowed origin (${origin})`));
+        if (!origin) return callback(null, true); // Allow requests with no origin (like mobile apps)
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true); // Allow the request
+        } else {
+            callback(new Error(`CORS error: Disallowed origin (${origin})`)); // Deny the request
+        }
     },
-    credentials: true, // Enable cookies and other credentials
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Skip-Interceptor'],
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // This will handle preflight requests for all routes
+
+
 
 // Use routers
-app.use("/groups", groupRoutes);
-app.use("/users", userRoutes);
-app.use("/workspaces", workspaceRoutes);
-app.use("/assignments", assignmentRoutes);
-app.use("/reviews", reviewRoutes);
-app.use("/journals", journalRoutes);
-app.use("/jwt", jwtRoutes);
+app.use("/backend/groups", groupRoutes);
+app.use("/backend/users", userRoutes);
+app.use("/backend/workspaces", workspaceRoutes);
+app.use("/backend/assignments", assignmentRoutes);
+app.use("/backend/reviews", reviewRoutes);
+app.use("/backend/journals", journalRoutes);
+app.use("/backend/jwt", jwtRoutes);
 
 // Test to ping the server
 app.get("/ping", (req, res) => {

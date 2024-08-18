@@ -1,7 +1,6 @@
-import pgPromise from 'pg-promise';
 import dotenv from "dotenv";
-
-const pgp = pgPromise();
+import pkg from 'pg';
+const { Pool } = pkg;
 
 dotenv.config();
 
@@ -14,10 +13,23 @@ export const dbConfig = {
     database: process.env.DB_NAME
 };
 
-export const supaConfig = {
-    connectionString: process.env.DB_CONNSTRING
-};
+// Create a new Pool instance
+const pool = new Pool({
+    connectionString: process.env.DB_CONNSTRING,
+    max: 30, // Maximum number of clients in the pool
+    idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+    connectionTimeoutMillis: 2000, // Return an error after 2 seconds if a connection cannot be established
+});
 
-const pool = pgp(supaConfig);
+// Function to execute queries with proper connection management
+export const query = async (text, params) => {
+    const client = await pool.connect();
+    try {
+        const res = await client.query(text, params);
+        return res;
+    } finally {
+        client.release(); // Properly release the client back to the pool
+    }
+};
 
 export default pool;
