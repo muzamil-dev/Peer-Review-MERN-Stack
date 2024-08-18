@@ -54,33 +54,33 @@ const UserJournalsPage = () => {
     }
 
     return (
-        <div className="journals-page">
-            <header className="journals-header">
-                <button onClick={() => navigate('/userDashboard')} className="btn btn-danger">
+        <div className="user-journals-page">
+            <header className="user-journals-header">
+                <button onClick={() => navigate('/userDashboard')} className="user-journals-back-button">
                     &#8592; Back
                 </button>
-                <h1 className="journals-title">My Journals</h1>
+                <h1 className="user-journals-title">My Journals</h1>
             </header>
 
-            <div className="journals-list">
+            <div className="user-journals-list">
                 <h2>My Journal Entries</h2>
                 {journals.map((journal, index) => (
                     <div 
                         key={index} 
-                        className={`journal-entry ${isEditable(journal.startDate, journal.endDate) ? 'editable' : ''}`}
+                        className={`user-journals-entry ${isEditable(journal.startDate, journal.endDate) ? 'user-journals-entry--editable' : ''}`}
                         onClick={() => handleJournalClick(journal)}
                     >
-                        <h3>{journal.name}</h3>
-                        <p>Start Date: {new Date(journal.startDate).toLocaleDateString()}</p>
-                        <p>End Date: {new Date(journal.endDate).toLocaleDateString()}</p>
-                        <p>Submitted on: {journal.submittedAt ? new Date(journal.submittedAt).toLocaleDateString() : 'Not submitted'}</p>
+                        <h3 className="user-journals-entry__title">{journal.name}</h3>
+                        <p className="user-journals-entry__details">Start Date: {new Date(journal.startDate).toLocaleDateString()}</p>
+                        <p className="user-journals-entry__details">End Date: {new Date(journal.endDate).toLocaleDateString()}</p>
+                        <p className="user-journals-entry__details">Submitted on: {journal.submittedAt ? new Date(journal.submittedAt).toLocaleDateString() : 'Not submitted'}</p>
                         {isEditable(journal.startDate, journal.endDate) && (
                             <button 
                                 onClick={(e) => {
                                     e.stopPropagation(); // Prevent the click from triggering the onClick of the journal entry
                                     handleJournalClick(journal);
                                 }} 
-                                className="btn btn-primary">
+                                className="user-journals-edit-button">
                                 {journal.submittedAt ? 'Edit' : 'Start'}
                             </button>
                         )}

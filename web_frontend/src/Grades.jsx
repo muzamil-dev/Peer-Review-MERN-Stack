@@ -6,22 +6,22 @@ import { jwtDecode } from 'jwt-decode';
 import './Grades.css';
 
 const Grades = () => {
-    const [assignments, setAssignments] = useState([]); // State to store the list of assignments
-    const [selectedAssignment, setSelectedAssignment] = useState(''); // State to store the selected assignment ID
-    const [averageData, setAverageData] = useState([]); // State to store the average ratings data
-    const [completionData, setCompletionData] = useState([]); // State to store the completion data
-    const [page, setPage] = useState(1); // Pagination state
-    const [totalResults, setTotalResults] = useState(0); // Total number of results
-    const [view, setView] = useState('average'); // State to control view (average or completion)
-    const [perPage] = useState(10); // Number of items per page
-    const { enqueueSnackbar } = useSnackbar(); // Snackbar for notifications
-    const { workspaceId } = useParams(); // Get the workspaceId from the URL params
+    const [assignments, setAssignments] = useState([]);
+    const [selectedAssignment, setSelectedAssignment] = useState('');
+    const [averageData, setAverageData] = useState([]);
+    const [completionData, setCompletionData] = useState([]);
+    const [page, setPage] = useState(1);
+    const [totalResults, setTotalResults] = useState(0);
+    const [view, setView] = useState('average');
+    const [perPage] = useState(10);
+    const { enqueueSnackbar } = useSnackbar();
+    const { workspaceId } = useParams();
     const navigate = useNavigate();
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            navigate('/'); // Redirect to login if token is not available
+            navigate('/');
             return null;
         }
         const decodedToken = jwtDecode(token);
@@ -30,14 +30,12 @@ const Grades = () => {
 
     const userId = getCurrentUserId();
 
-    // Fetch the list of assignments when the component mounts or when workspaceId changes
     useEffect(() => {
         if (workspaceId) {
             fetchAssignments();
         }
     }, [workspaceId]);
 
-    // Fetch the data for the selected assignment whenever it changes
     useEffect(() => {
         if (selectedAssignment) {
             if (view === 'average') {
@@ -48,14 +46,13 @@ const Grades = () => {
         }
     }, [selectedAssignment, page, view]);
 
-    // Function to fetch the list of assignments in the workspace
     const fetchAssignments = async () => {
         try {
             const response = await Api.Workspaces.GetAssignments(workspaceId);
             if (response.status === 200) {
                 setAssignments(response.data);
                 if (response.data.length > 0) {
-                    setSelectedAssignment(response.data[0].assignmentId); // Select the first assignment by default
+                    setSelectedAssignment(response.data[0].assignmentId);
                 }
             } else {
                 enqueueSnackbar(`Failed to fetch assignments: ${response.message}`, { variant: 'error' });
@@ -65,7 +62,6 @@ const Grades = () => {
         }
     };
 
-    // Function to fetch the average ratings for the selected assignment
     const fetchAverages = async () => {
         try {
             const response = await Api.Assignments.GetAveragesByAssignment(selectedAssignment, page, perPage, userId);
@@ -80,7 +76,6 @@ const Grades = () => {
         }
     };
 
-    // Function to fetch the completion data for the selected assignment
     const fetchCompletion = async () => {
         try {
             const response = await Api.Assignments.GetCompletionByAssignment(selectedAssignment, page, perPage, userId);
@@ -95,32 +90,29 @@ const Grades = () => {
         }
     };
 
-    // Function to handle assignment change
     const handleAssignmentChange = (event) => {
         setSelectedAssignment(event.target.value);
-        setPage(1); // Reset page to 1 when assignment changes
+        setPage(1);
     };
 
-    // Function to handle pagination
     const handlePageChange = (newPage) => {
         setPage(newPage);
     };
 
-    // Function to toggle between views
     const toggleView = () => {
         setView(view === 'average' ? 'completion' : 'average');
-        setPage(1); // Reset to the first page when changing views
+        setPage(1);
     };
 
     return (
-        <div className="grades-page">
+        <div className="grades-page-container">
             <h1>Grades Overview</h1>
 
-            {/* Assignment Selector */}
-            <div className="assignment-selector">
-                <label htmlFor="assignment-select">Select Assignment:</label>
+            <div className="assignment-selector-container">
+                <label className="assignment-selector-label" htmlFor="assignment-select">Select Assignment:</label>
                 <select
                     id="assignment-select"
+                    className="assignment-selector-select"
                     value={selectedAssignment || ''}
                     onChange={handleAssignmentChange}
                 >
@@ -133,17 +125,16 @@ const Grades = () => {
                 </select>
             </div>
 
-            {/* Slider to switch between views */}
             <div className="view-slider">
-                <button class = "btn btn-primary" onClick={toggleView}>
+                <button className="btn-primary-custom" onClick={toggleView}>
                     {view === 'average' ? 'Switch to Completion Status' : 'Switch to Average Ratings'}
                 </button>
             </div>
 
             {view === 'average' ? (
-                <div className="average-ratings">
+                <div className="average-ratings-header">
                     <h2>Average Ratings</h2>
-                    <table className="table">
+                    <table className="grades-table">
                         <thead>
                             <tr>
                                 <th>Student Name</th>
@@ -161,9 +152,9 @@ const Grades = () => {
                     </table>
                 </div>
             ) : (
-                <div className="completion-data">
+                <div className="completion-data-header">
                     <h2>Completion Status</h2>
-                    <table className="table">
+                    <table className="grades-table">
                         <thead>
                             <tr>
                                 <th>Student Name</th>
@@ -184,13 +175,12 @@ const Grades = () => {
                 </div>
             )}
 
-            {/* Pagination Controls */}
-            <div className="pagination-controls">
-                <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}>
+            <div className="pagination-controls-container">
+                <button className="pagination-controls-button" onClick={() => handlePageChange(page - 1)} disabled={page === 1}>
                     Previous
                 </button>
-                <span>Page {page}</span>
-                <button onClick={() => handlePageChange(page + 1)} disabled={page * perPage >= totalResults}>
+                <span className="pagination-controls-span">Page {page}</span>
+                <button className="pagination-controls-button" onClick={() => handlePageChange(page + 1)} disabled={page * perPage >= totalResults}>
                     Next
                 </button>
             </div>

@@ -1,72 +1,128 @@
+/* General page styles */
 .submit-journal-page {
-    max-width: 1500px;
-    width: 100vh;
-    margin: 0 auto;
+    font-family: Arial, sans-serif;
     padding: 20px;
+    max-width: 800px;
+    margin: auto;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.journal-header {
+/* Header styles */
+.submit-journal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 20px;
 }
 
-.back-button {
+.submit-journal-back-button {
+    font-size: 16px;
+    color: #007bff;
     background: none;
     border: none;
-    color: #007bff;
-    font-size: 18px;
     cursor: pointer;
+    text-align: center;
 }
 
-.journal-title {
-    margin-top: 10px;
+.submit-journal-title {
     font-size: 24px;
     color: #333;
+    margin: 10px 0;
 }
 
-.journal-dates {
-    margin-top: 15px;
-}
-
-.journal-dates p {
-    margin: 5px 0;
-    font-size: 16px;
-    color: #555;
-}
-
-.journal-content {
-    margin-top: 20px;
-}
-
-.journal-textarea {
+.submit-journal-dates {
+    display: flex;
+    justify-content: space-between;
     width: 100%;
-    height: 200px;
+    margin-top: 10px;
+}
+
+.submit-journal-date {
+    margin: 0;
+    font-size: 16px;
+}
+
+/* Journal content styles */
+.submit-journal-content {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.submit-journal-textarea {
+    width: 100%;
+    height: 450px;
     padding: 10px;
     font-size: 16px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    resize: vertical;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    resize: none;
+    margin-bottom: 15px;
 }
 
-.submit-button {
-    margin-top: 20px;
-    padding: 10px 20px;
+.submit-journal-submit-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
     font-size: 18px;
-    border: none;
-    border-radius: 4px;
-    background-color: #007bff;
     color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.submit-button:hover {
+.submit-journal-submit-button:hover {
     background-color: #0056b3;
 }
 
-.error-message {
+/* Error and info message styles */
+.submit-journal-error-message {
     color: red;
-    margin-top: 10px;
     font-size: 14px;
+    margin-top: -10px;
+    margin-bottom: 10px;
 }
+
+.submit-journal-info-message {
+    color: #333;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    .submit-journal-page {
+        padding: 10px;
+        width: 100%;
+        box-shadow: none;
+    }
+
+    .submit-journal-title {
+        font-size: 20px;
+    }
+
+    .submit-journal-textarea {
+        height: 120px;
+    }
+
+    .submit-journal-submit-button {
+        font-size: 16px;
+    }
+
+    .submit-journal-error-message,
+    .submit-journal-info-message {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .submit-journal-textarea {
+      height: 400px;
+    }
+  }
+
