@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Line } from "react-chartjs-2";
 import Api from "../Api.js";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "chart.js/auto";
 import { Modal, Button } from "react-bootstrap";
 import "./UserAnalyticsPage.css";
@@ -10,7 +9,6 @@ import { jwtDecode } from "jwt-decode";
 
 const UserAnalyticsPage = () => {
   const { workspaceId, userId } = useParams();
-  const navigate = useNavigate();
   const [userAnalytics, setUserAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -149,24 +147,23 @@ const UserAnalyticsPage = () => {
   };
 
   return (
-    <div className="container">
-      <h1 className="text-center">
+    <div className="flex flex-col items-center justify-center">
+      <h1 className="text-center text-white">
         User Analytics for {userAnalytics.firstName} {userAnalytics.lastName}
       </h1>
       {userAnalytics.assignments.length > 0 ? (
-        <>
-          <div className="chartContainer">
+        <div className="flex flex-col w-full">
+          <div className="flex items-center justify-center p-4 bg-white">
             <Line data={data} options={options} />
           </div>
-          <div className="table-responsive mt-4">
-            <table className="table table-striped table-bordered mt-3">
+          <div className="">
+            <table className="table">
               <thead className="thead-dark">
-                <tr>
+                <tr className="h-full w-full text-center">
                   <th>Assignment Name</th>
                   <th>Start Date</th>
                   <th>Due Date</th>
                   <th>Average Rating</th>
-                  <th>Details</th>
                 </tr>
               </thead>
               <tbody>
@@ -176,7 +173,7 @@ const UserAnalyticsPage = () => {
                     onClick={() => handleAssignmentClick(assignment)}
                     style={{ cursor: "pointer" }}
                   >
-                    <td>{assignment.name}</td>
+                    <td className="hover:underline">{assignment.name}</td>
                     <td>
                       {new Date(assignment.startDate).toLocaleDateString()}
                     </td>
@@ -186,9 +183,6 @@ const UserAnalyticsPage = () => {
                         ? assignment.averageRating.toFixed(2)
                         : "N/A"}
                     </td>
-                    <td>
-                      <Button className="button-custom">View Details</Button>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -196,69 +190,79 @@ const UserAnalyticsPage = () => {
           </div>
 
           {selectedAssignment && (
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
               <Modal.Header closeButton>
-                <Modal.Title>Assignment Details</Modal.Title>
+                <h5 className="text-3xl">Assignment Details</h5>
               </Modal.Header>
               <Modal.Body>
-                <h5>Assignment Name: {selectedAssignment.name}</h5>
-                <p>
-                  Start Date:{" "}
-                  {new Date(selectedAssignment.startDate).toLocaleDateString()}
-                </p>
-                <p>
-                  Due Date:{" "}
-                  {new Date(selectedAssignment.dueDate).toLocaleDateString()}
-                </p>
-                <p>
-                  Average Rating:{" "}
-                  {selectedAssignment.averageRating !== null
-                    ? selectedAssignment.averageRating.toFixed(2)
-                    : "N/A"}
-                </p>
-                <h6>Questions & Ratings:</h6>
-                {selectedAssignment.questions &&
-                selectedAssignment.questions.length > 0 ? (
-                  selectedAssignment.questions.map((question, index) => (
-                    <div key={index}>
-                      <strong>{question}</strong>
-                    </div>
-                  ))
-                ) : (
-                  <div>No questions found</div>
-                )}
-                <h6>Reviews:</h6>
-                {selectedAssignment.reviews &&
-                selectedAssignment.reviews.length > 0 ? (
-                  selectedAssignment.reviews.map((review, index) => (
-                    <div key={index} className="mb-3">
-                      <strong>
-                        Reviewed by {review.firstName} {review.lastName}
-                      </strong>
-                      <p>Comment: {review.comment}</p>
-                      <ul>
-                        {review.ratings.map((rating, ratingIndex) => (
-                          <li key={ratingIndex}>
-                            Rating for "
-                            {selectedAssignment.questions[ratingIndex]}":{" "}
-                            {rating}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))
-                ) : (
-                  <div>No reviews found</div>
-                )}
+                <div className="flex flex-col items-start justify-center p-3">
+                  <h5 className="text-2xl w-full underline">
+                    {selectedAssignment.name}
+                  </h5>
+                  <div className="flex justify-between w-full">
+                    <p className="text-black">
+                      Start Date:{" "}
+                      {new Date(
+                        selectedAssignment.startDate
+                      ).toLocaleDateString()}
+                    </p>
+                    <p className="text-black">
+                      Due Date:{" "}
+                      {new Date(
+                        selectedAssignment.dueDate
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <p className="text-black">
+                    Average Assignment Rating:{" "}
+                    {selectedAssignment.averageRating !== null
+                      ? selectedAssignment.averageRating.toFixed(2)
+                      : "N/A"}
+                  </p>
+                  <h6 className="text-xl font-bold">Questions:</h6>
+                  {selectedAssignment.questions &&
+                  selectedAssignment.questions.length > 0 ? (
+                    selectedAssignment.questions.map((question, index) => (
+                      <div key={index}>
+                        <h5 className="text-lg font-normal">
+                          {index + 1}: {question}
+                        </h5>
+                      </div>
+                    ))
+                  ) : (
+                    <div>No questions found</div>
+                  )}
+                  <h6 className="text-xl font-bold">Reviews:</h6>
+                  {selectedAssignment.reviews &&
+                  selectedAssignment.reviews.length > 0 ? (
+                    selectedAssignment.reviews.map((review, index) => (
+                      <div key={index} className="flex flex-col">
+                        <h5 className="text-lg">
+                          Review by {review.firstName} {review.lastName}:
+                        </h5>
+                        <ul className="flex flex-col items-start p-1">
+                          {review.ratings.map((rating, ratingIndex) => (
+                            <li key={ratingIndex}>
+                              Average Rating on "
+                              {selectedAssignment.questions[ratingIndex]}":{" "}
+                              {rating.toFixed(2)}
+                            </li>
+                          ))}
+                        </ul>
+                        <h5 className="text-start text-sm font-normal">
+                          Comments: {review.comment}
+                        </h5>
+                      </div>
+                    ))
+                  ) : (
+                    <div>No reviews found</div>
+                  )}
+                </div>
               </Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={() => setShowModal(false)}>
-                  Close
-                </Button>
-              </Modal.Footer>
             </Modal>
           )}
-        </>
+        </div>
       ) : (
         <p className="text-center">No assignments found for this user.</p>
       )}

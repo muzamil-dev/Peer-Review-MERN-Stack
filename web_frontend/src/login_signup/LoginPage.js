@@ -226,7 +226,7 @@ const LoginPage = () => {
   return (
     <div className="flex flex-col h-full gap-4 justify-center">
       <div className="flex items-center flex-col">
-        <h1 className="text-3xl sm:text-4xl">Welcome to</h1>
+        <h1 className="text-3xl sm:text-4xl text-white">Welcome to</h1>
         <Logo className="login-logo -mt-3 sm:-m-0"/>
       </div>
       <div className="w-full sm:flex sm:justify-center">
