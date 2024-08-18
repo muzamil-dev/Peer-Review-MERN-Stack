@@ -11,7 +11,7 @@ import FormsPageAdmin from './FormsPageAdmin';  // Import the FormsPageAdmin com
 import CreateFormPage from './CreateForm/CreateFormPageAdmin'; // Import the CreateFormPage component
 import UserDashboard from './UserDashboard';
 import ReviewPage from './ReviewPage';
-import UserAnalyticsPage from './UserAnalyticsPage.js';
+import UserAnalyticsPage from './AnalyticsPage/UserAnalyticsPage';
 import GradesPage from './Grades'; // Import the GradesPage component
 import UserJournalsPage from './UserJournalsPage'; // Import the UserJournalsPage component
 import SubmitJournal from './SubmitJournal'; // Import the SubmitJournal component

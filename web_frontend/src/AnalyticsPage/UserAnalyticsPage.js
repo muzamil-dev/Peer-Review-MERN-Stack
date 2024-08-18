@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
-import Api from './Api.js';
+import Api from '../Api.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'chart.js/auto';
 import { Modal, Button } from 'react-bootstrap';
