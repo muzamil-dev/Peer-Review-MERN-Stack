@@ -75,6 +75,11 @@ const SubmitJournal = () => {
         return <div>Loading...</div>; // Show a loading message while checking authentication
     }
 
+    const formatContent = (content) => {
+        return { __html: content.replace(/\n/g, '<br/>') };
+    };
+    
+
     return (
         <div className="submit-journal-page">
             <header className="submit-journal-header">
@@ -111,7 +116,7 @@ const SubmitJournal = () => {
                 )}
             </div>
         </div>
-    );
+    );    
 };
 
 export default SubmitJournal;

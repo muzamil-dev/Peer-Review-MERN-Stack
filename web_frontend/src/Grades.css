@@ -1,108 +1,145 @@
 /* General page styling */
-.grades-page {
-    padding: 20px;
-    font-family: Arial, sans-serif;
+.grades-page-container {
+    padding: 4vh;
+    width: 80vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #F0F8FF;
+    color: #2F4F4F;
+    max-width: 1400px;
+    max-height: 1400px;
+    margin: 0 auto;
 }
 
-.grades-page h1 {
+/* Header styling */
+.grades-page-container h1 {
     text-align: center;
-    margin-bottom: 20px;
-    color: white;
+    margin-bottom: 0px;
+    color: #1E90FF;
+    font-size: 2em;
+    font-weight: 600;
 }
 
 /* Assignment Selector styling */
-.assignment-selector {
+.assignment-selector-container {
     margin-bottom: 20px;
     text-align: center;
 }
 
-.assignment-selector label {
+.assignment-selector-label {
     margin-right: 10px;
     font-size: 18px;
-    color: white;
+    color: #4682B4;
+    font-weight: 500;
 }
 
-.assignment-selector select {
-    padding: 8px 12px;
+.assignment-selector-select {
+    padding: 10px 15px;
     font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    transition: border-color 0.3s ease;
+    border: 1px solid #D3D3D3;
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    color: #2F4F4F;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.assignment-selector select:focus {
-    border-color: #007bff;
+.assignment-selector-select:focus {
+    border-color: #5F9EA0;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    outline: none;
 }
 
 /* Table styling */
-.table {
+.grades-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    margin-bottom: 200px;
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
 }
 
-.table th, .table td {
-    padding: 12px 15px;
+.grades-table th, .grades-table td {
+    padding: 3px 20px;
     text-align: left;
-    border: 1px solid #ddd;
+    border: 1px solid #D3D3D3;
 }
 
-.table th {
-    background-color: #f2f2f2;
-    color: #333;
-    font-weight: bold;
+.grades-table th {
+    background-color: #1E90FF;
+    color: #FFFFFF;
+    font-weight: 600;
 }
 
-.table tr:nth-child(even) {
-    background-color: #f9f9f9;
+.grades-table tr:nth-child(even) {
+    background-color: #E6E6FA;
 }
 
-.table tr:hover {
-    background-color: #f1f1f1;
+.grades-table tr:hover {
+    background-color: #F0F8FF;
 }
 
-.table td {
-    color: #555;
+.grades-table td {
+    color: #2F4F4F;
 }
 
 /* Section headers styling */
-.average-ratings h2,
-.completion-data h2 {
+.average-ratings-header,
+.completion-data-header {
     margin-top: 30px;
     margin-bottom: 10px;
-    color: #007bff;
-    text-align: left;
+    color: #1E90FF;
+    font-size: 1.5em;
+    font-weight: 600;
+    border-bottom: 2px solid #E6E6FA;
+    padding-bottom: 10px;
 }
 
 /* Pagination controls styling */
-.pagination-controls {
+.pagination-controls-container {
     text-align: center;
     margin-top: 20px;
 }
 
-.pagination-controls button {
-    padding: 8px 16px;
+.pagination-controls-button {
+    padding: 10px 20px;
     margin: 0 5px;
     font-size: 16px;
-    color: #fff;
-    background-color: #007bff;
+    color: #FFFFFF;
+    background-color: #1E90FF;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.pagination-controls button:disabled {
-    background-color: #ccc;
+.pagination-controls-button:disabled {
+    background-color: #B0C4DE;
     cursor: not-allowed;
 }
 
-.pagination-controls button:hover:not(:disabled) {
-    background-color: #0056b3;
+.pagination-controls-button:hover:not(:disabled) {
+    background-color: #4682B4;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.pagination-controls span {
+.pagination-controls-span {
     font-size: 16px;
+    color: #2F4F4F;
+}
+
+/* Button styling */
+.btn-primary-custom {
+    background-color: #0080ff;
     color: white;
+    text-align: center;
+
+    display: flex;
+    justify-content: center;
+
+    align-items: center;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
