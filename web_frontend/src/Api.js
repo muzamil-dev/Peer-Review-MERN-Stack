@@ -13,11 +13,10 @@ const getUrl = (prefix, route) => {
 };
 
 
-//use this for testing deployed API
 // const getUrl = (prefix, route) => {
 //     const formattedPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
 //     const formattedRoute = route.startsWith('/') ? route : `/${route}`;
-//     return `http://v2.ratemypeer.site/api/${formattedPrefix}${formattedRoute}`;
+//     return `https://peerreview.site/backend/${formattedPrefix}${formattedRoute}`;
 // };
 
 const getConfig = () => ({

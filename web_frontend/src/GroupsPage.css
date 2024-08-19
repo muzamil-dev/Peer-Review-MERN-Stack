@@ -280,5 +280,6 @@
 }
 
 .workspaceUser{
-    width: 65vw;
+    padding: 20px;
+    /* width: 65vw; */
 }

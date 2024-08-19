@@ -1,5 +1,6 @@
 backend/node_modules
 web_frontend/node_modules
+web_frontend/package-lock.json
 backend/.env
 node_modules
 backend-sql/.env

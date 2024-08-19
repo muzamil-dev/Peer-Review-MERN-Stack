@@ -1,23 +1,16 @@
 import pgPromise from 'pg-promise';
 import dotenv from "dotenv";
 
-const pgp = pgPromise();
-
 dotenv.config();
 
-// Fill in pool information from .env
-export const dbConfig = {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-};
+const pgp = pgPromise();
 
-export const supaConfig = {
-    connectionString: process.env.DB_CONNSTRING
-};
-
-const pool = pgp(supaConfig);
+// Use the connection string directly from the environment variables
+const pool = pgp({
+    connectionString: process.env.DB_CONNSTRING,
+    max: 30, // Maximum number of clients in the pool
+    idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+    connectionTimeoutMillis: 2000, // Return an error after 2 seconds if a connection cannot be established
+});
 
 export default pool;

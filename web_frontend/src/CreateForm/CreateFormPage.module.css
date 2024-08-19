@@ -4,20 +4,26 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* background-color: white; */
+    justify-content: center;
+    text-align: center;
     padding: 50px;
     border-radius: 20px;
-    position: relative;
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: auto;
+    margin-top: 10vh;
 }
 
-.bold{
-    color: white;
+.bold {
+    color: #333;
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
 }
 
 .formGroup {
-    /* width: 100%; */
-    margin-bottom: 20px;
-    color: black;
+    width: 100%;
+    margin-bottom: 0px;
 }
 
 .formControl {
@@ -26,82 +32,51 @@
     border-radius: 4px;
     border: 1px solid #ced4da;
     box-sizing: border-box;
-    margin-bottom: 10px;
-    color: black !important;
-}
-
-.options {
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 0px;
+    color: #333;
+    background-color: white;
 }
 
 .fieldGroup {
     display: flex;
-
+    flex-wrap: wrap;
+    justify-content: space-between;
     margin-bottom: 10px;
-}
-
-.field-group input {
-    margin-bottom: 5px;
-}
-
-.field-group .btn-danger {
-    width: fit-content;
-}
-
-.btn {
-    /*padding: 10px 20px;*/
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background-color: #007bff;
-    /* color: white; */
+    gap: 10px;
+    width: 100%;
     margin-top: 10px;
 }
 
-.btn-danger {
-    background-color: #dc3545;
-    /* color: white; */
+
+.removeButton, .addButton {
+    flex-grow: 1;
+    max-width: 48%;
+    margin-top: 0px !important;
 }
 
-.btn-success {
-    background-color: #28a745;
-    /* color: white; */
-    width: fit-content;
-    align-self: flex-end;
-    margin-top: 20px;
+.saveForm{
+    width: 50% !important;
 }
 
-.removeButton{
-    width: 20vh !important;
-    margin-left: 5px;
-    margin-right: 5px;
+@media screen and (max-width: 900px) {
+    .createFormPage {
+        width: 60vw;
+        padding: 30px;
+    }
 }
 
-.addButton{
-    width: 20vh !important;
-    margin-left: 0px;
-}
+@media screen and (max-width: 600px) {
+    .createFormPage {
+        width: 90vw;
+        padding: 30px;
+    }
 
-@media screen and (max-width: 485px) {
     .fieldGroup {
         display: block;
-        justify-content: center;
-        align-items: center;
     }
-    .addButton {
-        width: 50%;
-        margin: 0%;
+
+    .addButton, .removeButton {
+        width: 100%;
         margin-top: 5px;
-    }
-    .removeButton {
-        width: 40%;
-        margin: 0%;
-    }
-    .createFormPage{
-        width: 90vw;
     }
 }
