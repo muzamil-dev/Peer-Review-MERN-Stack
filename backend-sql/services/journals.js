@@ -1,5 +1,4 @@
 import HttpError from './utils/httpError.js';
-import { query } from '../config.js';
 
 export const generateJournalDates = (startDate, endDate, journalDay, weekNumbersToSkip) => {
     const start = new Date(startDate);
@@ -29,13 +28,13 @@ export const generateJournalDates = (startDate, endDate, journalDay, weekNumbers
     return journalDates;
 };
 
-export const createJournalAssignment = async (workspaceId, weekNumber, startDate, endDate) => {
+export const createJournalAssignment = async (db, workspaceId, weekNumber, startDate, endDate) => {
     if (!workspaceId || !weekNumber || !startDate || !endDate) {
         throw new HttpError('Missing required fields for creating a journal assignment', 400);
     }
 
     try {
-        await query(
+        await db.query(
             `INSERT INTO journal_assignments (name, workspace_id, start_date, end_date, week_number)
              VALUES ($1, $2, $3, $4, $5)`,
             [`Journal Week ${weekNumber}`, workspaceId, startDate, endDate, weekNumber]
@@ -45,31 +44,31 @@ export const createJournalAssignment = async (workspaceId, weekNumber, startDate
     }
 };
 
-export const submitJournalEntry = async (journalAssignmentId, userId, content) => {
+export const submitJournalEntry = async (db, journalAssignmentId, userId, content) => {
     if (!journalAssignmentId || !userId || !content) {
         throw new HttpError('Missing required fields for submitting a journal entry', 400);
     }
 
     // Fetch the journal assignment to check its start and end dates
-    const res = await query(
+    const res = await db.query(
         `SELECT start_date, end_date FROM journal_assignments WHERE id = $1`,
         [journalAssignmentId]
     );
 
-    if (res.rows.length === 0) {
+    if (res.length === 0) {
         throw new HttpError('Journal assignment not found', 404);
     }
 
-    const { start_date, end_date } = res.rows[0];
+    const { start_date, end_date } = res[0];
     const now = new Date();
 
     // Check if the current date is within the start and end dates
-    if (now < new Date(start_date) || now > new Date(end_date)) {
+    if (now < start_date || now > end_date) {
         throw new HttpError('Journal entry submission is not allowed outside the assignment period', 403);
     }
 
     // Insert or update the journal entry
-    await query(
+    await db.query(
         `INSERT INTO journal_entries (journal_assignment_id, user_id, content)
          VALUES ($1, $2, $3)
          ON CONFLICT (journal_assignment_id, user_id) DO UPDATE SET content = EXCLUDED.content, submitted_at = CURRENT_TIMESTAMP`,
@@ -77,8 +76,10 @@ export const submitJournalEntry = async (journalAssignmentId, userId, content) =
     );
 };
 
-export const getJournalsByUserAndWorkspace = async (workspaceId, userId) => {
-    const res = await query(
+
+
+export const getJournalsByUserAndWorkspace = async (db, workspaceId, userId) => {
+    const res = await db.query(
         `SELECT ja.id AS "journalAssignmentId", ja.name, ja.week_number, ja.start_date AS "startDate", ja.end_date AS "endDate", 
                 je.content, je.submitted_at AS "submittedAt"
          FROM journal_assignments AS ja
@@ -88,16 +89,16 @@ export const getJournalsByUserAndWorkspace = async (workspaceId, userId) => {
         [workspaceId, userId]
     );
 
-    if (res.rows.length === 0) {
+    if (res.length === 0) {
         throw new HttpError("No journals found for the specified user in this workspace", 404);
     }
 
-    return res.rows;
+    return res;
 };
 
-// Get journal by id
-export const getJournalById = async (journalAssignmentId, userId) => {
-    const res = await query(
+//get journal by id
+export const getJournalById = async (db, journalAssignmentId, userId) => {
+    const res = await db.query(
         `SELECT ja.id AS "journalAssignmentId", ja.name, ja.start_date AS "startDate", ja.end_date AS "endDate", 
                 je.content, je.submitted_at AS "submittedAt"
          FROM journal_assignments AS ja
@@ -106,15 +107,16 @@ export const getJournalById = async (journalAssignmentId, userId) => {
         [journalAssignmentId, userId]
     );
 
-    if (res.rows.length === 0) {
+    if (res.length === 0) {
         throw new HttpError("Journal assignment not found", 404);
     }
 
-    return res.rows[0];
+    return res[0];
 };
 
-export const getWeeks = async (workspaceId) => {
-    const res = await query(
+
+export const getWeeks = async (db, workspaceId) => {
+    const res = await db.query(
         `SELECT DISTINCT week_number, start_date, end_date
          FROM journal_assignments
          WHERE workspace_id = $1
@@ -130,7 +132,7 @@ export const getWeeks = async (workspaceId) => {
         future: []
     };
 
-    res.rows.forEach(row => {
+    res.forEach(row => {
         const startDate = new Date(row.start_date);
         const endDate = new Date(row.end_date);
 

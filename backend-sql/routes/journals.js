@@ -1,5 +1,5 @@
 import express from 'express';
-import { query } from '../config.js';
+import pool from '../config.js';
 import verifyJWT from '../middleware/verifyJWT.js';
 import HttpError from '../services/utils/httpError.js';
 import * as journalService from '../services/journals.js';
@@ -13,16 +13,19 @@ if (process.env.JWT_ENABLED === "true")
 router.post('/:journalAssignmentId/submit', async (req, res) => {
     const { journalAssignmentId } = req.params;
     const { userId, content } = req.body;
+    let db;
 
     try {
-        await query('BEGIN');
+        db = await pool.connect();
+        await db.query('BEGIN');
 
-        await journalService.submitJournalEntry(journalAssignmentId, userId, content);
+        await journalService.submitJournalEntry(db, journalAssignmentId, userId, content);
 
-        await query('COMMIT');
+        await db.query('COMMIT');
         res.status(201).json({ message: 'Journal entry submitted successfully' });
     } catch (err) {
-        await query('ROLLBACK');
+        if (db) 
+            await db.query('ROLLBACK');
 
         if (err instanceof HttpError) {
             res.status(err.status).json({ message: err.message });
@@ -30,15 +33,19 @@ router.post('/:journalAssignmentId/submit', async (req, res) => {
             console.error('Error submitting journal entry:', err);
             res.status(500).json({ message: 'Internal server error' });
         }
+    } finally {
+        if (db) db.done();
     }
 });
 
-// Get journal by id
+//get journal by id
 router.get('/:journalAssignmentId/user/:userId', async (req, res) => {
     const { journalAssignmentId, userId } = req.params;
+    let db;
 
     try {
-        const journal = await journalService.getJournalById(journalAssignmentId, userId);
+        db = await pool.connect();
+        const journal = await journalService.getJournalById(db, journalAssignmentId, userId);
         res.status(200).json(journal);
     } catch (err) {
         if (err instanceof HttpError) {
@@ -47,7 +54,10 @@ router.get('/:journalAssignmentId/user/:userId', async (req, res) => {
             console.error('Error fetching journal:', err);
             res.status(500).json({ message: 'Internal server error' });
         }
+    } finally {
+        if (db) db.done();
     }
 });
+
 
 export default router;

@@ -2,14 +2,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 import HttpError from "./utils/httpError.js";
-import pool from '../config.js';
 import { sendEmail } from "./emailService.js";
 
 // Login to a user's account
-export const login = async (email, password) => {
-    const res = (await pool.query(
+export const login = async (db, email, password) => {
+    const res = (await db.query(
         `SELECT * FROM users WHERE email = $1`, [email]
-    )).rows[0];
+    ))[0];
     if (!res)
         throw new HttpError("The requested user was not found", 404);
     // Check that the user has a password
@@ -40,7 +39,7 @@ export const login = async (email, password) => {
         { expiresIn: "1d" }
     );
     // Insert the refresh token into the database
-    await pool.query(
+    const refreshUpload = await db.query(
         `UPDATE users SET refresh_token = $1 WHERE id = $2`,
         [refreshToken, data.userId]
     );
@@ -51,17 +50,17 @@ export const login = async (email, password) => {
 }
 
 // Function to request a password reset
-export const requestPasswordReset = async (email) => {
+export const requestPasswordReset = async (db, email) => {
     // Find the user
-    const user = await getByEmail(email);
+    const user = await getByEmail(db, email);
     // Generate the password token
     const resetToken = Math.floor(Math.random() * 900000) + 100000; // 6 digit number
     const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
     // Insert the token into the password reset table
-    await pool.query(
-        `INSERT INTO password_reset (email, reset_token, reset_token_expiry)
-        VALUES ($1, $2, $3)
+    const resetQuery = await db.query(
+        `INSERT INTO password_reset VALUES ($1, $2, $3)
         ON CONFLICT(email) DO UPDATE SET
+        email = EXCLUDED.email,
         reset_token = EXCLUDED.reset_token,
         reset_token_expiry = EXCLUDED.reset_token_expiry`,
         [email, resetToken, resetTokenExpires]
@@ -75,28 +74,29 @@ export const requestPasswordReset = async (email) => {
 }
 
 // Reset the user's password based on their password reset token
-export const resetPassword = async (jsonData) => {
+export const resetPassword = async (db, jsonData) => {
     // Extract the components of the data sent
     const { email, password, token } = jsonData;
     // Find the token in the password reset table
-    const res = (await pool.query(
+    const res = await db.query(
         `SELECT * FROM password_reset 
         WHERE email = $1 AND reset_token = $2`,
         [email, token]
-    )).rows[0];
-    if (!res)
+    );
+    const data = res[0];
+    if (!data)
         throw new HttpError(
             "No password reset with this token was found", 404
         );
     // Check that the token hasn't expired
-    if ((new Date(res.reset_token_expiry)) < Date.now())
+    if ((new Date(data.reset_token_expiry)) < Date.now())
         throw new HttpError("The reset token has already expired", 400);
 
     // Delete the token from the password_reset table
-    await pool.query(`DELETE FROM password_reset WHERE reset_token = $1`, [token]);
+    db.query(`DELETE FROM password_reset WHERE reset_token = $1`, [token]);
     // Insert the new password
     const hashedPw = await bcrypt.hash(password, 10);
-    await pool.query(
+    const pwInsert = await db.query(
         `UPDATE users SET password = $1 WHERE email = $2`,
         [hashedPw, email]
     );
@@ -104,44 +104,44 @@ export const resetPassword = async (jsonData) => {
 }
 
 // Get a user by their id
-export const getById = async (userId) => {
-    const res = (await pool.query(
-        `SELECT * FROM users WHERE id = $1`, [userId]
-    )).rows[0];
+export const getById = async (db, userId) => {
+    const res = await db.query
+        (`SELECT * FROM users WHERE id = $1`, [userId]);
     // Throw error if not found
-    if (!res)
+    const data = res[0];
+    if (!data)
         throw new HttpError("No user was found with this id", 404);
 
     return {
-        userId: res.id,
-        firstName: res.first_name,
-        lastName: res.last_name,
-        email: res.email,
-        role: res.role
+        userId: data.id,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        email: data.email,
+        role: data.role
     };
 }
 
 // Get a user by their email
-export const getByEmail = async (email) => {
-    const res = (await pool.query(
-        `SELECT * FROM users WHERE email = $1`, [email]
-    )).rows[0];
-    // Throw error if not found
-    if (!res)
+export const getByEmail = async (db, email) => {
+    const res = await db.query
+        (`SELECT * FROM users WHERE email = $1`, [email]);
+    // Return if not found
+    const data = res[0];
+    if (!data)
         throw new HttpError("No user was found with this email", 404);
 
     return {
-        userId: res.id,
-        firstName: res.first_name,
-        lastName: res.last_name,
-        email: res.email,
-        role: res.role
+        userId: data.id,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        email: data.email,
+        role: data.role
     };
 }
 
 // Get all workspaces that a user is in
-export const getWorkspaces = async (userId) => {
-    const res = (await pool.query(
+export const getWorkspaces = async (db, userId) => {
+    const res = await db.query(
         `SELECT w.id AS "workspaceId", w.name, m.role
         FROM memberships AS m
         JOIN workspaces AS w
@@ -149,27 +149,29 @@ export const getWorkspaces = async (userId) => {
         WHERE m.user_id = $1
         ORDER BY w.id`,
         [userId]
-    )).rows;
+    );
     return res;
 }
 
 // Check that a user is an admin
-export const checkAdmin = async (userId) => {
+export const checkAdmin = async (db, userId) => {
     // Check that the user creating them is an admin
-    const user = await getById(userId);
+    const user = await getById(db, userId);
+    if (user.error) // Return the error if there was one
+        return user;
     if (user.role !== 'Admin')
         throw new HttpError("User is not authorized to make this request", 403);
-    return { message: "User is authorized" };
+    return { message: "User is authorized" }
 }
 
 // Create a new user, returns the newly created user object
-export const createUser = async (user) => {
+export const createUser = async (db, user) => {
     try {
         // Encrypt password
         user.password = await bcrypt.hash(user.password, 10);
         // Insert the user information
         const fields = [user.firstName, user.lastName, user.email, user.password, user.role];
-        const res = (await pool.query(
+        const res = await db.query(
             `INSERT INTO users
             (first_name, last_name, email, password, role)
             VALUES ($1, $2, $3, $4, $5)
@@ -180,8 +182,8 @@ export const createUser = async (user) => {
             role = EXCLUDED.role
             RETURNING id AS "userId", first_name AS "firstName", last_name AS "lastName", email`,
             fields
-        )).rows[0];
-        return res;
+        );
+        return res[0];
     }
     catch (err) {
         return { error: err.message, status: 500 };
@@ -190,7 +192,7 @@ export const createUser = async (user) => {
 
 // Users is an array of user objects, assumed to be students
 // If a given user exists, the row will be updated
-export const createUsers = async (users) => {
+export const createUsers = async (db, users) => {
     // Create the users
     // Separate fields into individual arrays
     let query = `INSERT INTO users 
@@ -211,7 +213,7 @@ export const createUsers = async (users) => {
     query += `RETURNING id AS "userId", first_name AS "firstName", last_name AS "lastName", email`;
 
     // Run the user query
-    const res = (await pool.query(query)).rows;
+    const res = await db.query(query);
     // Return success message
     return {
         message: `Created ${res.length} new users successfully`,

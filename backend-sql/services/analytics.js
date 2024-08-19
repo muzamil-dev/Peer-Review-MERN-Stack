@@ -1,11 +1,11 @@
 import HttpError from "./utils/httpError.js";
-import { query } from '../config.js';
+
 import * as AssignmentService from "../services/assignments.js";
 
-export const getAveragesByAssignment = async(assignmentId, page, perPage) => {
+export const getAveragesByAssignment = async(db, assignmentId, page, perPage) => {
     // Set start point
     const startIndex = perPage * (page - 1);
-    const res = await query(
+    const res = await db.query(
         `WITH all_results AS
         (SELECT a.user_id AS "userId",
         u.first_name AS "firstName",
@@ -27,14 +27,14 @@ export const getAveragesByAssignment = async(assignmentId, page, perPage) => {
             limited_results) AS results`,
         [assignmentId, perPage, startIndex]
     );
-    return res.rows[0];
+    return res[0];
 }
 
 // Function to get users who haven't completed all of their reviews
-export const getCompletionByAssignment = async(assignmentId, page, perPage) => {
+export const getCompletionByAssignment = async(db, assignmentId, page, perPage) => {
     // Set start point
     const startIndex = perPage * (page - 1);
-    const res = await query(
+    const res = await db.query(
         `WITH all_results AS
         (SELECT u.id AS "userId",
         u.first_name AS "firstName",
@@ -66,14 +66,14 @@ export const getCompletionByAssignment = async(assignmentId, page, perPage) => {
             FROM limited_results) AS "results"`,
         [assignmentId, perPage, startIndex]
     );
-    return res.rows[0];
+    return res[0];
 }
 
 // Get all averages on an assignment for a user and workspace
-export const getByUserAndWorkspace = async(userId, workspaceId) => {
+export const getByUserAndWorkspace = async(db, userId, workspaceId) => {
     const curDate = (new Date(Date.now())).toISOString();
     // Get the results
-    const res = await query(
+    const res = await db.query(
         `WITH averages AS
         (SELECT u.id AS user_id,
         jsonb_agg(
@@ -102,12 +102,13 @@ export const getByUserAndWorkspace = async(userId, workspaceId) => {
         WHERE u.id = $1`,
         [userId, workspaceId, curDate]
     );
-    return res.rows[0];
+    const data = res[0];
+    return data;
 }
 
 // Initialize the analytics table with reviews. Use after creating reviews
-export const createAnalytics = async(assignmentId) => {
-    const res = await query(
+export const createAnalytics = async(db, assignmentId) => {
+    const res = await db.query(
         `INSERT INTO analytics (user_id, assignment_id, total_reviews)
         SELECT r.user_id, r.assignment_id,
         count(*)::int AS total_reviews
@@ -117,15 +118,16 @@ export const createAnalytics = async(assignmentId) => {
         RETURNING *`,
         [assignmentId]
     );
-    return res.rows;
+    return res;
 }
 
 // Update analytics for a specific user. Used when submitting reviews
-export const updateAnalytics = async(userId, targetId, assignmentId) => {
+// This does not use prepared 
+export const updateAnalytics = async(db, userId, targetId, assignmentId) => {
     // Check if the review was previously completed. If it wasn't, set
     // Compute analytics and insert
-    await Promise.all([
-        query(
+    const res = await Promise.all([
+        db.query(
         `WITH averages AS
         (SELECT avg(ra.rating) AS average_rating
         FROM reviews AS r
@@ -140,7 +142,7 @@ export const updateAnalytics = async(userId, targetId, assignmentId) => {
         WHERE assignment_id = $1 AND user_id = $2`,
         [assignmentId, targetId]),
 
-        query(
+        db.query(
         `WITH completion AS
         (SELECT count(CASE WHEN completed = true THEN 1 END)::int 
         AS completed_reviews

@@ -1,14 +1,13 @@
 import HttpError from "./utils/httpError.js";
-import { query } from '../config.js';
 
 // Get a group by id (excluding members)
-export const getById = async (groupId) => {
-    const res = await query(
+export const getById = async (db, groupId) => {
+    const res = await db.query(
         `SELECT id AS "groupId", name, workspace_id AS "workspaceId"
         FROM groups WHERE id = $1`,
         [groupId]
     );
-    const group = res.rows[0];
+    const group = res[0];
     // Return
     if (!group)
         throw new HttpError("The requested group was not found", 404);
@@ -17,8 +16,8 @@ export const getById = async (groupId) => {
 }
 
 // Get a group by id (including members)
-export const getByIdWithMembers = async (groupId) => {
-    const res = await query(
+export const getByIdWithMembers = async (db, groupId) => {
+    const res = await db.query(
         `SELECT g.*, jsonb_agg(
             jsonb_build_object(
                 'userId', u.id,
@@ -36,7 +35,7 @@ export const getByIdWithMembers = async (groupId) => {
         [groupId]
     );
     // Format the above query
-    const group = res.rows.map(row => ({
+    const group = res.map(row => ({
         groupId: row.id,
         name: row.name,
         members: row.members,
@@ -50,9 +49,9 @@ export const getByIdWithMembers = async (groupId) => {
 }
 
 // Get basic information about each group in a workspace
-export const getByWorkspace = async (workspaceId) => {
+export const getByWorkspace = async (db, workspaceId) => {
     // Query for groups and members
-    const res = await query(
+    const res = await db.query(
         `SELECT g.id AS "groupId", g.name
         FROM workspaces AS w
         LEFT JOIN groups AS g
@@ -63,19 +62,19 @@ export const getByWorkspace = async (workspaceId) => {
         [workspaceId]
     );
     // Check if the workspace was not found
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The requested workspace was not found", 404);
     // Check if a null group was joined. If so, the workspace exists but has no groups
-    if (!res.rows[0].groupId)
-        return [];
+    if (!res[0].groupId)
+        res = [];
     // Return formatted json
-    return res.rows;
+    return res;
 }
 
 // Get all groups in a workspace with members
-export const getByWorkspaceWithMembers = async (workspaceId) => {
+export const getByWorkspaceWithMembers = async (db, workspaceId) => {
     // Query for groups and members
-    const res = await query(
+    const res = await db.query(
         `SELECT g.id AS "groupId", g.name,
         COALESCE(jsonb_agg(
             jsonb_build_object(
@@ -97,25 +96,25 @@ export const getByWorkspaceWithMembers = async (workspaceId) => {
         [workspaceId]
     );
     // Check if the workspace was not found
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The requested workspace was not found", 404);
     // Check if a null group was joined. If so, the workspace exists but has no groups
-    if (!res.rows[0].groupId)
-        return [];
+    if (!res[0].groupId)
+        res = [];
     // Return formatted json
-    return res.rows;
+    return res;
 }
 
-// Check that a user is an instructor of the workspace associated with a group
-export const checkInstructor = async (userId, groupId) => {
-    const user = (await query(
+// Check that a user is an instructor of the workspace assocaited with a group
+export const checkInstructor = async (db, userId, groupId) => {
+    const user = (await db.query(
         `SELECT m.role
         FROM groups AS g
         LEFT JOIN memberships AS m
         ON g.workspace_id = m.workspace_id AND m.user_id = $1
         WHERE g.id = $2`,
         [userId, groupId]
-    )).rows[0];
+    ))[0];
 
     if (!user)
         throw new HttpError("The requested assignment was not found", 404);
@@ -127,55 +126,55 @@ export const checkInstructor = async (userId, groupId) => {
 
 // Create a group within a given workspace
 // Only workspace instructors should be allowed to run this
-export const createGroup = async (workspaceId, name) => {
-    const res = await query(
+export const createGroup = async (db, workspaceId, name) => {
+    const res = await db.query(
         `INSERT INTO groups (workspace_id, name)
         VALUES ($1, $2) ON CONFLICT DO NOTHING 
         RETURNING *`,
         [workspaceId, name]
     );
     // Check that the group didn't already exist
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The provided group name is already in use", 400);
     return {
-        groupId: res.rows[0].id,
+        groupId: res[0].id,
         workspaceId, name
     }
 }
 
 // Create several groups within a given workspace from a list of names
 // Only workspace instructors should be allowed to run this
-export const createGroups = async (workspaceId, names) => {
+export const createGroups = async (db, workspaceId, names) => {
     // Build the query to insert each group
-    let queryText = `INSERT INTO groups (workspace_id, name) VALUES `;
-    queryText += names.map((name, index) => {
+    let query = `INSERT INTO groups (workspace_id, name) VALUES `;
+    query += names.map((name, index) => {
         return `($1, $${index + 2})`
     }).join(', ');
     // Add the on conflict and returning clauses
-    queryText += `ON CONFLICT (workspace_id, name) DO NOTHING 
+    query += `ON CONFLICT (workspace_id, name) DO NOTHING 
     RETURNING id AS "groupId", name`;
 
     // Execute parameterized query
-    const res = await query(queryText, [workspaceId, ...names]);
+    const res = await db.query(query, [workspaceId, ...names]);
     // Return the new groups
     return {
-        message: `Created ${res.rows.length} groups successfully`,
-        groups: res.rows
+        message: `Created ${res.length} groups successfully`,
+        groups: res
     };
 }
 
 // Moves the provided user to the provided group
 // The provided user must be part of the workspace that the group is in
 // Set groupId to null to remove a user from their group
-export const moveUser = async (userId, groupId) => {
+export const moveUser = async (db, userId, groupId) => {
     // Get the group's workspace
-    const workspaceId = (await getById(groupId)).workspaceId;
-    const res = (await query(`
+    const workspaceId = (await getById(db, groupId)).workspaceId;
+    const res = (await db.query(`
         UPDATE memberships
         SET group_id = $1
         WHERE user_id = $2 AND workspace_id = $3
         RETURNING *`,
-        [groupId, userId, workspaceId])).rows[0];
+        [groupId, userId, workspaceId]))[0];
     if (!res)
         throw new HttpError(
             "The user is not a member of the group's workspace", 400
@@ -185,7 +184,7 @@ export const moveUser = async (userId, groupId) => {
 }
 
 // Edit a group (name only)
-export const edit = async (groupId, updates) => {
+export const edit = async (db, groupId, updates) => {
     // Find edited fields
     const edits = {};
     if (updates.name)
@@ -198,13 +197,13 @@ export const edit = async (groupId, updates) => {
         throw new HttpError("Could not edit because no fields were provided", 400);
 
     // Build the edit query
-    let queryText = `UPDATE groups SET `
-    queryText += keys.map((key, index) => `${key} = $${index + 2}`).join(', ');
-    queryText += ` WHERE id = $1 RETURNING *`;
+    let query = `UPDATE groups SET `
+    query += keys.map((key, index) => `${key} = $${index + 2}`).join(', ');
+    query += ` WHERE id = $1 RETURNING *`;
     // Send the query
-    const res = await query(queryText, [groupId, ...values]);
+    const res = await db.query(query, [groupId, ...values]);
     // Check if any workspace was updated
-    if (res.rows.length === 0)
+    if (res.length === 0)
         throw new HttpError("The requested group was not found", 404);
 
     return { message: "Group updated successfully" };
@@ -212,15 +211,15 @@ export const edit = async (groupId, updates) => {
 
 // Delete a group
 // User must be an instructor of the workspace that contains the group
-export const deleteGroup = async (groupId) => {
+export const deleteGroup = async (db, groupId) => {
     try {
         // Delete the group
-        const res = await query(
+        const res = await db.query(
             `DELETE FROM groups WHERE id = $1 RETURNING *`,
             [groupId]
         );
         // Return an error if the group wasn't found
-        if (!res.rows[0])
+        if (!res[0])
             throw new HttpError("The requested group was not found", 404);
 
         return { message: `Group deleted successfully` };

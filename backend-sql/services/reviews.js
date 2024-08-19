@@ -1,12 +1,11 @@
 import HttpError from "./utils/httpError.js";
-import { query } from '../config.js';
 
 import * as AssignmentService from "../services/assignments.js";
 import * as AnalyticsService from "../services/analytics.js";
 
 // Get a review by id
-export const getById = async(reviewId) => {
-    const res = await query(
+export const getById = async(db, reviewId) => {
+    const res = await db.query(
         `WITH rating_table AS
         (SELECT a.id AS "assignmentId", r.user_id, r.target_id, r.comment, a.start_date, a.due_date,
         array_agg(q.question ORDER BY q.id) FILTER(WHERE q.question IS NOT NULL) AS questions,
@@ -34,7 +33,7 @@ export const getById = async(reviewId) => {
         [reviewId]
     );
     // Check that the review exists
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError("The requested review was not found", 404);
         
@@ -42,9 +41,11 @@ export const getById = async(reviewId) => {
 }
 
 // Get all reviews for a given assignment/user
-export const getByAssignmentAndUser = async(userId, assignmentId) => {
+// Read the blocks of sql and comments above each block to get 
+// a better understanding of the query (it is very long)
+export const getByAssignmentAndUser = async(db, userId, assignmentId) => {
     // Check that the assignment has started
-    const assignment = await AssignmentService.getById(assignmentId);
+    const assignment = await AssignmentService.getById(db, assignmentId);
     if (new Date(assignment.startDate) > Date.now())
         throw new HttpError(
             "Cannot get reviews for this assignment as it has not started",
@@ -52,8 +53,9 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
         );
     
     // Get the reviews with names attached
-    const res = await query(
-        `WITH review_table AS
+    const res = await db.query(
+        `/* Get the review ids and ratings, group them together to create an array of ratings for each review */
+        WITH review_table AS
         (SELECT r.id, r.assignment_id, r.user_id, r.target_id, r.comment, r.completed,
         array_agg(ra.rating ORDER BY q.id) FILTER (WHERE q.id IS NOT NULL) AS ratings
         FROM reviews AS r
@@ -65,6 +67,7 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
         GROUP BY r.id
         ORDER BY r.id),
 
+        /* Group into one row with the specified assignment and user, join target name */
         row_table AS
         (SELECT rt.assignment_id, rt.user_id,
         jsonb_agg(
@@ -83,6 +86,7 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
         ON u.id = rt.target_id
         GROUP BY assignment_id, user_id)
         
+        /* Join the assignment questions and user's name */
         SELECT rt.user_id, u.first_name, u.last_name, rt.reviews,
         array_agg(q.question ORDER BY q.id) AS questions
         FROM row_table AS rt
@@ -93,7 +97,7 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
         GROUP BY rt.user_id, u.first_name, u.last_name, rt.reviews`,
         [userId, assignmentId]
     );
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError(
             "No reviews were assigned for this user", 400
@@ -115,9 +119,10 @@ export const getByAssignmentAndUser = async(userId, assignmentId) => {
 }
 
 // Get reviews on an assignment created toward a specified user
-export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
+// Only completed reviews will be provided
+export const getByAssignmentAndTarget = async(db, targetId, assignmentId) => {
     // Check that the assignment has started
-    const assignment = await AssignmentService.getById(assignmentId);
+    const assignment = await AssignmentService.getById(db, assignmentId);
     if (new Date(assignment.startDate) > Date.now())
         throw new HttpError(
             "Cannot get reviews for this assignment as it has not started",
@@ -125,8 +130,9 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
         );
 
     // Get reviews with names attached
-    const res = await query(
-        `WITH review_table AS
+    const res = await db.query(
+        `/* Get the review ids and ratings, group them together to create an array of ratings for each review */
+        WITH review_table AS
         (SELECT r.id, r.assignment_id, r.user_id, r.target_id, r.comment, 
         array_agg(ra.rating ORDER BY q.id) FILTER (WHERE q.id IS NOT NULL) AS ratings
         FROM reviews AS r
@@ -138,6 +144,7 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
         GROUP BY r.id
         ORDER BY r.id),
 
+        /* Group into one row with the specified assignment and target, join user name */
         row_table AS
         (SELECT rt.assignment_id, rt.target_id,
         jsonb_agg(
@@ -155,6 +162,7 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
         ON u.id = rt.user_id
         GROUP BY assignment_id, target_id)
         
+        /* Join the assignment questions and user's name */
         SELECT rt.target_id, u.first_name, u.last_name, rt.reviews,
         array_agg(q.question ORDER BY q.id) AS questions
         FROM row_table AS rt
@@ -166,7 +174,7 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
         [targetId, assignmentId]
     );
     // Check if the reviews were found
-    const data = res.rows[0];
+    const data = res[0];
     if (!data)
         throw new HttpError(
             "Reviews cannot be accessed as this assignment has not started", 400
@@ -184,9 +192,10 @@ export const getByAssignmentAndTarget = async(targetId, assignmentId) => {
 }
 
 // Helper function to create reviews for an assignment
-export const createReviews = async(assignmentId) => {
+// These will made close to when an assignment opens
+export const createReviews = async(db, assignmentId) => {
     // Get a list of users within each group
-    const res = await query(
+    const res = await db.query(
         `SELECT g.id as group_id, array_agg(m.user_id) AS group_members
         FROM assignments AS a
         JOIN groups AS g
@@ -198,9 +207,9 @@ export const createReviews = async(assignmentId) => {
         [assignmentId]
     );
     // Build the query
-    let queryText = `INSERT INTO reviews (assignment_id, group_id, user_id, target_id) VALUES `
+    let query = `INSERT INTO reviews (assignment_id, group_id, user_id, target_id) VALUES `
     const insertions = [];
-    res.rows.forEach(row => {
+    res.forEach(row => {
         const group = row.group_id;
         const members = row.group_members;
         for (let i = 0; i < members.length; i++){
@@ -211,15 +220,15 @@ export const createReviews = async(assignmentId) => {
             }
         }
     });
-    queryText += insertions.join(', ');
-    await query(queryText);
+    query += insertions.join(', ');
+    await db.query(query);
     return { message: "Created reviews successfully" };
 }
 
 // Submit a review
-export const submit = async(userId, reviewId, ratings, comment) => {
+export const submit = async(db, userId, reviewId, ratings, comment) => {
     // Get required data about the review and assignment
-    const data = (await query(
+    const data = (await db.query(
         `SELECT r.user_id AS "userId", r.target_id AS "targetId",
         r.completed, a.id AS "assignmentId", 
         a.start_date AS "startDate", a.due_date AS "dueDate", 
@@ -232,7 +241,7 @@ export const submit = async(userId, reviewId, ratings, comment) => {
         WHERE r.id = $1
         GROUP BY r.id, a.id`,
         [reviewId]
-    )).rows[0];
+    ))[0];
     if (!data)
         throw new HttpError("The requested review was not found", 404);
 
@@ -256,19 +265,21 @@ export const submit = async(userId, reviewId, ratings, comment) => {
     });
 
     // Build a query to insert all of the ratings
+    // Prepared statement isn't used as all values either come from the database
+    // or have been validated
     let ratingsQuery = `INSERT INTO ratings VALUES `;
     ratingsQuery += ratings.map(
         (_, idx) => `(${reviewId}, ${data.questionIds[idx]}, ${ratings[idx]})`
     ).join(', ');
     ratingsQuery += ';';
 
-    await query(
+    await db.query(
         // Delete old ratings
         `DELETE FROM ratings WHERE review_id = ${reviewId};
         ${ratingsQuery}` // Insert ratings
     );
     // Insert comment and set review to completed
-    await query(
+    await db.query(
         `UPDATE reviews SET 
         completed = true, comment = $1 
         WHERE id = $2`, 
@@ -277,7 +288,7 @@ export const submit = async(userId, reviewId, ratings, comment) => {
 
     // Update the analytics for that user
     await AnalyticsService.updateAnalytics(
-        data.userId, data.targetId, 
+        db, data.userId, data.targetId, 
         data.assignmentId
     );
 

@@ -3,29 +3,29 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
 
-import { query } from '../config.js';
+import pool from '../config.js';
 
 dotenv.config();
 
 const router = express.Router();
 router.use(cookieParser());
 
-router.get("/refresh", async(req, res) => {
+router.get("/refresh", async (req, res) => {
     try {
         // Get the refresh token
         const cookies = req.cookies;
-        if (!(cookies?.jwt)) {
+        if (!cookies?.jwt) {
             return res.status(401).json({ message: "JWT refresh failed - No cookie found" });
         }
         const refresh = cookies.jwt;
 
         // Check db for correct token
-        const userRes = await query(
+        const userResult = await pool.query(
             `SELECT id AS "userId", first_name AS "firstName", last_name AS "lastName"
             FROM users WHERE refresh_token = $1`,
             [refresh]
         );
-        const user = userRes.rows[0];
+        const user = userResult[0];
 
         if (!user) {
             return res.status(403).json({ message: "JWT refresh failed - Could not authenticate user" });
@@ -39,16 +39,14 @@ router.get("/refresh", async(req, res) => {
                 if (err || user.userId !== payload.userId) {
                     return res.status(403).json({ message: "JWT refresh failed - Could not authenticate user" });
                 }
-
                 // Generate access token
                 const accessToken = jwt.sign(
-                    { userId: user.userId, firstName: user.firstName, lastName: user.lastName },
+                    user,
                     process.env.ACCESS_TOKEN_SECRET,
                     { expiresIn: "15m" }
                 );
-
                 // Return access token
-                res.json({
+                return res.json({
                     message: "Refresh successful",
                     accessToken
                 });
@@ -56,7 +54,7 @@ router.get("/refresh", async(req, res) => {
         );
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({ message: err.message });
+        return res.status(500).send({ message: err.message });
     }
 });
 
