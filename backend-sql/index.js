@@ -76,6 +76,7 @@ cron.schedule('*/5 * * * *', async() => {
     // Set date to 15 minutes after now
     const minute = 60*1000; // 60s * 1000ms
     const maxStartDate = (new Date(Date.now() + 15 * minute)).toISOString();
+    let db;
     // Check out a client
     try{
         const db = await pool.connect();

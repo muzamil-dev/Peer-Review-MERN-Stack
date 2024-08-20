@@ -3,18 +3,19 @@
     padding: 4vh;
     width: 80vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #F0F8FF;
-    color: #2F4F4F;
+    background-color: white;
+    color: #27021c; /* Use white text */
     max-width: 1400px;
     max-height: 1400px;
     margin: 0 auto;
+    margin-top: 30px;
 }
 
 /* Header styling */
 .grades-page-container h1 {
     text-align: center;
     margin-bottom: 0px;
-    color: #1E90FF;
+    color: #27021c; /* Silver Lake Blue */
     font-size: 2em;
     font-weight: 600;
 }
@@ -26,9 +27,9 @@
 }
 
 .assignment-selector-label {
-    margin-right: 10px;
+    margin-right: 0px;
     font-size: 18px;
-    color: #4682B4;
+    color: #27021c; /* Ruddy Blue */
     font-weight: 500;
 }
 
@@ -37,13 +38,13 @@
     font-size: 16px;
     border: 1px solid #D3D3D3;
     border-radius: 5px;
-    background-color: #FFFFFF;
-    color: #2F4F4F;
+    background-color: #76A5D0; /* Lapis Lazuli */
+    color: white;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .assignment-selector-select:focus {
-    border-color: #5F9EA0;
+    border-color: #6E8FBA; /* Silver Lake Blue */
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     outline: none;
 }
@@ -52,34 +53,34 @@
 .grades-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 200px;
-    background-color: #FFFFFF;
+    margin-bottom: 80px;
+    background-color: #7A698C; /* Chinese Violet */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    /* border-radius: 8px; */
 }
 
 .grades-table th, .grades-table td {
     padding: 3px 20px;
     text-align: left;
-    border: 1px solid #D3D3D3;
+    border: 1px solid #27021c;
 }
 
 .grades-table th {
-    background-color: #1E90FF;
-    color: #FFFFFF;
+    background-color: #6E8FBA; /* Silver Lake Blue */
+    color: white;
     font-weight: 600;
 }
 
 .grades-table tr:nth-child(even) {
-    background-color: #E6E6FA;
+    background-color: #6578A4; /* Glaucous */
 }
 
 .grades-table tr:hover {
-    background-color: #F0F8FF;
+    background-color: #76A5D0; /* Ruddy Blue */
 }
 
 .grades-table td {
-    color: #2F4F4F;
+    color: white;
 }
 
 /* Section headers styling */
@@ -87,11 +88,11 @@
 .completion-data-header {
     margin-top: 30px;
     margin-bottom: 10px;
-    color: #1E90FF;
+    color: #27021c; /* Silver Lake Blue */
     font-size: 1.5em;
-    font-weight: 600;
+    /* font-weight: 600; */
     border-bottom: 2px solid #E6E6FA;
-    padding-bottom: 10px;
+    /* padding-bottom: 10px; */
 }
 
 /* Pagination controls styling */
@@ -104,8 +105,8 @@
     padding: 10px 20px;
     margin: 0 5px;
     font-size: 16px;
-    color: #FFFFFF;
-    background-color: #1E90FF;
+    color: white;
+    background-color: #6E8FBA; /* Silver Lake Blue */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -118,18 +119,18 @@
 }
 
 .pagination-controls-button:hover:not(:disabled) {
-    background-color: #4682B4;
+    background-color: #6578A4; /* Glaucous */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .pagination-controls-span {
     font-size: 16px;
-    color: #2F4F4F;
+    color: white;
 }
 
 /* Button styling */
 .btn-primary-custom {
-    background-color: #0080ff;
+    background-color: #6E8FBA; /* Silver Lake Blue */
     color: white;
     text-align: center;
 
@@ -142,4 +143,31 @@
     padding: 10px 20px;
     cursor: pointer;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    background-color: #27021c; /* Glaucous */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Media query for responsiveness */
+@media (max-width: 750px) {
+    .grades-page-container {
+        width: 100%;
+        padding: 2vh;
+    }
+
+    .grades-table {
+        font-size: 0.9rem;
+    }
+
+    .pagination-controls-button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .btn-primary-custom {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
 }

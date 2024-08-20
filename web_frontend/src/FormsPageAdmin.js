@@ -49,23 +49,6 @@ const ViewFormsAdminPage = () => {
         fetchForms();
     }, [workspaceId]);
 
-    // const fetchAnalyticsForAssignments = async (assignments) => {
-    //     const userId = getCurrentUserId();
-    //     if (!userId) return;
-
-    //     const assignmentsWithRatings = await Promise.all(assignments.map(async (assignment) => {
-    //         const response = await Api.Analytics.GetAnalyticsForAssignment(assignment.assignmentId, userId, 1, 1);
-    //         if (response.status === 200 && response.data.length > 0) {
-    //             return { ...assignment, averageRating: response.data[0].averageRating };
-    //         } else {
-    //             console.error(`Failed to fetch analytics for assignment ${assignment.assignmentId}:`, response.message);
-    //             return assignment;
-    //         }
-    //     }));
-
-    //     setForms(assignmentsWithRatings);
-    // };
-
     const handleCreateForm = () => {
         navigate(`/createForm/${workspaceId}`);
     };
@@ -184,10 +167,9 @@ const ViewFormsAdminPage = () => {
     return (
         <div className="view-forms-admin-page">
             <nav className="navbar">
-                <a className="navbar-brand" href="/DashboardPage">Rate My Peer</a>
+                <a className="navbar-brand mt-0 mb-10" href="/DashboardPage">Rate My Peer</a>
                 <ul className="navbar-links">
-                    <li><a href="/DashboardPage">Workspaces</a></li>
-                    <li><button onClick={handleLogout} className="btn-danger btn">Logout</button></li>
+                    <li><button onClick={handleLogout} className="btn-danger btn btn-lg">Logout</button></li>
                 </ul>
             </nav>
 
@@ -197,8 +179,8 @@ const ViewFormsAdminPage = () => {
                 </button>
                 <button className="btn btn-outline-primary btn-md" onClick={() => navigate(`/workspaces/${workspaceId}/admin`)}>Back</button>
             </div>
+            <h2>Assignments</h2>
             <div className="forms-containerz">
-                <h2>Assignments</h2>
                 {forms.length > 0 ? (
                     forms.map(form => (
                         <div key={form.assignmentId} className="form-item-container">
