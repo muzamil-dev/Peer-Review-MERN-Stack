@@ -8,6 +8,7 @@ import { useSnackbar } from 'notistack';
 const ViewFormsAdminPage = () => {
     const [forms, setForms] = useState([]);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for delete confirmation modal
     const [currentForm, setCurrentForm] = useState(null);
     const [editFormData, setEditFormData] = useState({
         name: '',
@@ -17,7 +18,6 @@ const ViewFormsAdminPage = () => {
         description: ''
     });
     const { enqueueSnackbar } = useSnackbar();
-
     const navigate = useNavigate();
     const { workspaceId } = useParams(); // Assuming workspaceId is passed as a URL parameter
 
@@ -139,23 +139,35 @@ const ViewFormsAdminPage = () => {
         }
     };
 
-    const handleDeleteForm = async (assignmentId) => {
+    const handleDeleteFormClick = (form) => {
+        setCurrentForm(form);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
         const userId = getCurrentUserId();
         if (!userId) return;
 
-        const response = await Api.Assignments.DeleteAssignment(assignmentId, userId);
+        const response = await Api.Assignments.DeleteAssignment(currentForm.assignmentId, userId);
 
         if (response.success) {
             enqueueSnackbar('Form deleted successfully!', { variant: 'success' });
-            setForms(forms.filter(form => form.assignmentId !== assignmentId));
+            setForms(forms.filter(form => form.assignmentId !== currentForm.assignmentId));
+            setIsDeleteModalOpen(false);
         } else {
             console.error('Failed to delete form:', response.message);
             enqueueSnackbar(`Failed to delete form: ${response.message}`, { variant: 'error' });
+            setIsDeleteModalOpen(false);
         }
     };
 
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false);
+        setCurrentForm(null);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false);
         setCurrentForm(null);
     };
 
@@ -175,9 +187,9 @@ const ViewFormsAdminPage = () => {
 
             <div className="header-container">
                 <button className="create-form-button" onClick={handleCreateForm}>
-                    + Assign Form
+                    Create Form
                 </button>
-                <button className="btn btn-outline-primary btn-md" onClick={() => navigate(`/workspaces/${workspaceId}/admin`)}>Back</button>
+                <button className="btn btn-outline-primary btn-md edit-form-button" onClick={() => navigate(`/workspaces/${workspaceId}/admin`)}>Back</button>
             </div>
             <h2>Assignments</h2>
             <div className="forms-containerz">
@@ -193,14 +205,14 @@ const ViewFormsAdminPage = () => {
                                 )}
                             </div>
                             <button
-                                className="edit-form-button btn btn-success mt-0"
+                                className="btn btn-success mt-0 edit-form-button"
                                 onClick={() => handleEditForm(form)}
                             >
                                 Edit
                             </button>
                             <button
-                                className="delete-form-button btn btn-danger mt-0 ml-2"
-                                onClick={() => handleDeleteForm(form.assignmentId)}
+                                className="btn btn-danger mt-0 ml-2 edit-form-button"
+                                onClick={() => handleDeleteFormClick(form)}
                             >
                                 Delete
                             </button>
@@ -261,7 +273,7 @@ const ViewFormsAdminPage = () => {
                                         {!currentForm.started && ( // Hide the remove button if the assignment has started
                                             <button
                                                 type="button"
-                                                className="btn btn-danger customBtn mt-2 mb-2"
+                                                className="btn btn-danger customBtn mt-2 mb-0"
                                                 onClick={() => handleRemoveQuestion(index)}
                                             >
                                                 <svg
@@ -296,6 +308,19 @@ const ViewFormsAdminPage = () => {
                                 <button type="button" className="btn btn-danger customBtns mx-2" onClick={handleCloseEditModal}>Cancel</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {isDeleteModalOpen && (
+                <div className="delete-modal">
+                    <div className="delete-modal-content">
+                        <h2 className='mt-2'>Confirm Delete</h2>
+                        <p>Are you sure you want to delete this form? This action cannot be undone.</p>
+                        <div className="d-flex justify-content-center mt-3">
+                            <button onClick={handleConfirmDelete} className="btn btn-danger customBtns mx-2">Delete</button>
+                            <button onClick={handleCloseDeleteModal} className="btn btn-secondary customBtns mx-2 edit-form-button">Cancel</button>
+                        </div>
                     </div>
                 </div>
             )}

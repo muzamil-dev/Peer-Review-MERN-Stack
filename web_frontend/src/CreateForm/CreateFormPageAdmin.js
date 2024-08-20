@@ -169,7 +169,7 @@ const CreateFormPage = () => {
                 
                 <button type="submit" className={`btn btn-success mt-3 ${styles.saveForm}`}>Save Form</button>
             </form>
-            <button className="btn btn-light mb-3 mt-4" onClick={() => navigate(`/formsAdmin/${workspaceId}`)}>Back</button>
+            <button className="btn btn-dark mb-3 mt-3" onClick={() => navigate(`/formsAdmin/${workspaceId}`)}>Back</button>
         </div>
     );
 };

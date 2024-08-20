@@ -21,16 +21,12 @@
 }
 
 .forms-containerz {
-    width: 100%;
+    width: 105%;
     max-height: 700px;
-    /* Increased height for the scrollable area */
     overflow-y: auto;
-    padding-right: 10px;
-    /* Space for scrollbar */
-    border: 1px solid #dee2e6;
-    /* Optional: add a border around the scrollable area */
+    /* padding-right: 10px; */
+    /* border: 1px solid #dee2e6; */
     border-radius: 4px;
-    /* Optional: rounded corners */
     box-sizing: border-box;
 }
 
@@ -51,13 +47,9 @@
     border: 1px solid #dee2e6;
     border-radius: 4px;
     padding: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
+    margin-bottom: 0px;
+    /* cursor: pointer; */
     transition: background-color 0.3s;
-}
-
-.form-item:hover {
-    background-color: #e9ecef;
 }
 
 p {
@@ -69,16 +61,26 @@ p {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 2px;
 }
 
 .form-item {
     flex-grow: 1;
-    cursor: pointer;
+    background-color: #76a5d0;
+
 }
 
 .edit-form-button {
-    margin-left: 10px;
+    margin-left: 5px;
+    background-color: #7a698c;
+    transition: all 0.3s ease;
+    border: none;
+    color: white;
+}
+
+.edit-form-button:hover {
+    background-color: #27021c;
+    color: white;
 }
 
 .edit-modal {
@@ -127,12 +129,20 @@ p {
 }
 
 .customBtns {
+    background-color: #7a698c;
     width: 40% !important;
     height: 50px !important;
     display: flex;
     justify-content: center;
     align-items: center;
     margin-left: 6px;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.customBtns:hover {
+    background-color: #27021c;
+    color: white;
 }
 
 .question-group {
@@ -156,12 +166,18 @@ p {
 }
 
 .create-form-button {
-    background-color: #007bff;
-    color: white;
+    background-color: #76a5d0;
+    color: black;
     padding: 10px 20px;
     border: none;
     border-radius: 7px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.create-form-button:hover {
+    background-color: #7a698c;
+    color: white;
 }
 
 /* Navigation Bar Styles */
