@@ -8,7 +8,7 @@ const AdminJournalsPage = () => {
     const { workspaceId } = useParams();
     const [students, setStudents] = useState([]);
     const [selectedStudent, setSelectedStudent] = useState(null);
-    const [journals, setJournals] = useState([]);
+    const [journals, setJournals] = useState([]); // Initialize with an empty array
     const [error, setError] = useState('');
     const [selectedJournal, setSelectedJournal] = useState(null);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -47,13 +47,15 @@ const AdminJournalsPage = () => {
     const fetchJournals = async (studentId) => {
         try {
             const response = await Api.Workspaces.GetUserJournalsByWorkspaceAdmin(workspaceId, studentId);
-            if (response.status === 200) {
-                setJournals(response.data);
+            if (response.status === 200 && response.data) {
+                setJournals(response.data); // Ensure that journals is always an array
             } else {
+                setJournals([]); // Set journals to an empty array if no data is returned
                 setError(`Failed to fetch journals: ${response.message}`);
             }
         } catch (error) {
             console.error('Error fetching journals:', error);
+            setJournals([]); // Ensure journals is an empty array on error
             setError('Error fetching journals.');
         }
     };
@@ -63,6 +65,8 @@ const AdminJournalsPage = () => {
         setSelectedStudent(studentId);
         if (studentId) {
             fetchJournals(studentId);
+        } else {
+            setJournals([]); // Reset journals if no student is selected
         }
     };
 
@@ -77,7 +81,6 @@ const AdminJournalsPage = () => {
         navigate(`/workspaces/${workspaceId}/admin`);
     };
 
-    // Reuse the formatContent function from SubmitJournal
     const formatContent = (content) => {
         return { __html: content.replace(/\n/g, '<br/>') };
     };
@@ -104,10 +107,10 @@ const AdminJournalsPage = () => {
             <div className="journals-list">
                 <h2>Journals for Selected Student</h2>
                 {error && <div className="error-message">{error}</div>}
-                {journals.length === 0 && !error && (
+                {!error && Array.isArray(journals) && journals.length === 0 && (
                     <p>No journals found for this student.</p>
                 )}
-                {journals.length > 0 && (
+                {!error && Array.isArray(journals) && journals.length > 0 && (
                     <ul className='unordered-list'>
                         {journals.map((journal, index) => (
                             <li 
@@ -129,7 +132,6 @@ const AdminJournalsPage = () => {
                     <div className="popup-content" onClick={(e) => e.stopPropagation()}>
                         <h2>{selectedJournal.name}</h2>
                         <p><strong>Submitted on:</strong> {selectedJournal.submittedAt ? new Date(selectedJournal.submittedAt).toLocaleDateString() : 'Not submitted'}</p>
-                        {/* Render the content with the same formatting as the user page */}
                         <div className="formatted-content" dangerouslySetInnerHTML={formatContent(selectedJournal.content)} />
                         <button onClick={() => setIsPopupOpen(false)} className="btn btn-primary">Close</button>
                     </div>

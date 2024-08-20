@@ -8,8 +8,8 @@ import './Grades.css';
 const Grades = () => {
     const [assignments, setAssignments] = useState([]);
     const [selectedAssignment, setSelectedAssignment] = useState('');
-    const [averageData, setAverageData] = useState([]);
-    const [completionData, setCompletionData] = useState([]);
+    const [averageData, setAverageData] = useState([]); // Initialized as an empty array
+    const [completionData, setCompletionData] = useState([]); // Initialized as an empty array
     const [page, setPage] = useState(1);
     const [totalResults, setTotalResults] = useState(0);
     const [view, setView] = useState('average');
@@ -66,7 +66,7 @@ const Grades = () => {
         try {
             const response = await Api.Assignments.GetAveragesByAssignment(selectedAssignment, page, perPage, userId);
             if (response.status === 200) {
-                setAverageData(response.data.results);
+                setAverageData(response.data.results || []); // Ensure it's an array
                 setTotalResults(response.data.totalResults);
             } else {
                 enqueueSnackbar(`Failed to fetch averages: ${response.message}`, { variant: 'error' });
@@ -80,7 +80,7 @@ const Grades = () => {
         try {
             const response = await Api.Assignments.GetCompletionByAssignment(selectedAssignment, page, perPage, userId);
             if (response.status === 200) {
-                setCompletionData(response.data.results);
+                setCompletionData(response.data.results || []); // Ensure it's an array
                 setTotalResults(response.data.totalResults);
             } else {
                 enqueueSnackbar(`Failed to fetch completion data: ${response.message}`, { variant: 'error' });
@@ -142,7 +142,7 @@ const Grades = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {averageData.map((item, index) => (
+                            {Array.isArray(averageData) && averageData.map((item, index) => (
                                 <tr key={index}>
                                     <td>{`${item.firstName} ${item.lastName}`}</td>
                                     <td>{item.averageRating}</td>
@@ -163,7 +163,7 @@ const Grades = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {completionData.map((item, index) => (
+                            {Array.isArray(completionData) && completionData.map((item, index) => (
                                 <tr key={index}>
                                     <td>{`${item.firstName} ${item.lastName}`}</td>
                                     <td>{item.completedReviews}</td>
