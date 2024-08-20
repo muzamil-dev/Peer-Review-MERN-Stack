@@ -113,8 +113,8 @@ const AdminJournalsPage = () => {
                 {!error && Array.isArray(journals) && journals.length > 0 && (
                     <ul className='unordered-list'>
                         {journals.map((journal, index) => (
-                            <li 
-                                key={index} 
+                            <li
+                                key={index}
                                 className={`journal-entry ${journal.submittedAt ? '' : 'not-submitted'}`}
                                 onClick={() => handleJournalClick(journal)}
                                 style={{ cursor: journal.content ? 'pointer' : 'default' }}
@@ -133,7 +133,7 @@ const AdminJournalsPage = () => {
                         <h2>{selectedJournal.name}</h2>
                         <p><strong>Submitted on:</strong> {selectedJournal.submittedAt ? new Date(selectedJournal.submittedAt).toLocaleDateString() : 'Not submitted'}</p>
                         <div className="formatted-content" dangerouslySetInnerHTML={formatContent(selectedJournal.content)} />
-                        <button onClick={() => setIsPopupOpen(false)} className="btn btn-primary">Close</button>
+                        <div className="close-button" onClick={() => setIsPopupOpen(false)}>Close</div>
                     </div>
                 </div>
             )}
