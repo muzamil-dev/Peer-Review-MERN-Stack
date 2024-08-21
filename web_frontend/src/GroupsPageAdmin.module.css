@@ -1,35 +1,10 @@
 .workspaceAdmin {
-    padding: 20px;
-    /* background-color: white; */
-}
-
-.headerLarge {
-    font-size: 3.5em;
-    margin-bottom: 20px;
-    text-align: center;
-    color: white;
-    font-weight: bold;
-}
-
-.headerContainer {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    height: 100vh;
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    gap: 20px;
-}
-
-.headerContainer {
-    display: flex;
-    justify-content: center; /* Center content horizontally */
-    align-items: center;
-    position: relative; /* Allows absolute positioning of the button */
-    margin-bottom: 20px; /* Adjust as needed */
+    padding: 20px;
 }
 
 .centeredTitle {
@@ -37,35 +12,6 @@
     flex-grow: 1;
 }
 
-/* .dashboardButton {
-    position: absolute;
-    right: 200px;
-    top: 50%;
-    transform: translateY(-50%);
-} */
-
-.ungroupedCard {
-    width: 100%;
-    background-color: rgba(255, 255, 255, 0);
-}
-
-.ungrouped{
-    background-color: rgba(0, 0, 0, 0);
-    border: none !important;
-}
-
-.ungrouped_body{
-    background-color: rgba(170, 79, 79, 0) !important;
-    border: none !important;
-}
-
-.ungrouped h2 {
-    color: white;
-}
-
-.groupCardWrapper {
-    width: 100%;
-}
 
 .groupCard {
     border: 1px solid #ddd;
@@ -79,10 +25,6 @@
     box-sizing: border-box; /* Ensure padding is included in the height */
     overflow: hidden; /* Prevent content overflow */
     border-radius: 10px;
-}
-
-.ungrouped{
-    height: max-content;
 }
 
 .groupCard h2 {
@@ -268,56 +210,194 @@
     }
 }
 
-/* GroupsPageAdmin.module.css */
-
-.navbarContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* padding: 1rem; */
-    background-color: #0000;
-    padding: 0; /* Remove padding to ensure full width */
-
-}
-
-.navbarBrand {
-    margin: 0;
-    font-size: 1.5rem;
-    color: #faf8f8; /* Example color */
-    text-decoration: none;
-}
-
-.navbarToggler {
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
-}
-
-.navbarCollapse {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.navLink {
-    margin-right: 1rem;
-    text-decoration: none;
-    color: #000; /* Example color */
-}
-
-.logoutButton {
-    background-color: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
 .hoverEffect {
     transition: color 0.3s ease;
 }
 
 .hoverEffect:hover {
     color: #007bff; /* Change to your desired hover color */
+}
+
+/* Sidebar Styles */
+.sidebarContainer {
+    display: flex;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    padding: 20px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    position: fixed;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+.custBtn{
+    background-color: #7a698c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custBtn:hover{
+    background-color: #7b5570;
+    color: white;
+}
+
+.custBtnDark{
+    background-color: #27021c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custBtnDark:hover{
+    background-color: #434344;
+    color: white;
+}
+
+.modalJournal{
+    margin-right: 250px;
+}
+
+.navbarBrand {
+    font-size: 1.5rem;
+    color: white;
+    text-decoration: none;
+    margin-bottom: 30px;
+}
+
+.navLinks {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.navLinks li {
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.navLinks button {
+    width: 100%;
+    text-align: left;
+    padding: 10px 20px;
+    background-color: #7a698c;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.navLinks button:hover {
+    background-color: #6578a4; /* Highlight on hover */
+}
+
+.logoutButton {
+    margin-top: auto; /* Push logout button to the bottom */
+    width: 100%;
+    text-align: left;
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logoutButton:hover {
+    background-color: #c0392b;
+}
+
+/* Content Container Styles */
+.contentContainer {
+    margin-left: 260px !important;
+    padding: 20px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.headerLarge {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.inputCSV{
+    width: 220px;
+    
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+        padding: 10px;
+    }
+
+    .headerLarge {
+        font-size: 2rem;
+    }
+
+    .contentContainer {
+        margin-left: 200px !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .container{
+        display: flex;
+        flex-direction: column;
+    }
+
+    .groupedCard {
+        width: 100% !important;
+    }
+
+    .inputCSV{
+        width: 195px;
+        
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        width: 150px;
+    }
+
+    .navbarBrand {
+        margin-bottom: 10px;
+    }
+
+    .contentContainer {
+        margin-left: 150px !important;
+        width: 100%;
+        padding: 0px;
+    }
+
+    .headerLarge {
+        font-size: 1.5rem;
+    }
+
+    .inputCSV{
+        width: 140px;
+        
+    }
 }
