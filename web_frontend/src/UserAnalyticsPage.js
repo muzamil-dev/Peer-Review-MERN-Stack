@@ -121,7 +121,7 @@ const UserAnalyticsPage = () => {
 
     return (
         <div className={` ${styles.container} mt-5`}>
-            <Button className="btn btn-light" variant="secondary" onClick={() => navigate(-1)}>Back</Button>
+            <Button className={`btn btn-light ${styles.custBtn}`} variant="secondary" onClick={() => navigate(-1)}>Back</Button>
             <h1 className="text-center">User Analytics for {userAnalytics.firstName} {userAnalytics.lastName}</h1>
             {userAnalytics.assignments.length > 0 ? (
                 <>
@@ -146,7 +146,7 @@ const UserAnalyticsPage = () => {
                                         <td>{new Date(assignment.startDate).toLocaleDateString()}</td>
                                         <td>{new Date(assignment.dueDate).toLocaleDateString()}</td>
                                         <td>{assignment.averageRating !== null ? assignment.averageRating.toFixed(2) : 'N/A'}</td>
-                                        <td><Button className="button-custom">View Details</Button></td>
+                                        <td><Button className={` ${styles.custBtn}`}>View Details</Button></td>
                                     </tr>
                                 ))}
                             </tbody>
