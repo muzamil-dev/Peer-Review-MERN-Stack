@@ -62,7 +62,7 @@
 
 .review-question {
     margin-bottom: 20px;
-    background-color: #76A5D0;
+    background-color: #bce2f6;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -90,7 +90,7 @@
 }
 
 .star.selected {
-    color: #27021C;
+    color: #2F669D;
 }
 
 .submit-button {
@@ -122,23 +122,12 @@
     font-weight: bold;
 }
 
-.temp{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    width: 80%;
-    margin: auto;
-    font-family: Arial, sans-serif;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
 
 .comment-textarea {
-    background-color: #76A5D0;
+    /* use lighter shade of #76A5D0 */
+    background-color: #bce2f6;
     width: 300px;
-    color: black;
+    color: #27021C;
     height: 200px;
     border: 2px solid transparent; 
     padding: 10px;

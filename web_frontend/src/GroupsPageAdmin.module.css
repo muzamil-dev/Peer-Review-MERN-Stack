@@ -147,6 +147,7 @@
 }
 
 .formContainer input {
+    background-color: white;
     margin-bottom: 15px;
     padding: 10px;
     border: 1px solid #ddd;
@@ -307,6 +308,17 @@
 
 .navLinks button:hover {
     background-color: #6578a4; /* Highlight on hover */
+}
+
+.textEntry{
+    background-color: white;
+    padding: 10px;
+}
+/* focused */
+.textEntry:focus {
+    border: 1px solid #7a698c;
+    box-shadow: 0 0 5px #7a698c;
+    background-color: white;
 }
 
 .logoutButton {

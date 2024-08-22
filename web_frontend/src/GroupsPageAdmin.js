@@ -694,7 +694,7 @@ const GroupsPageAdmin = () => {
                             <h1></h1>
 
                             <label htmlFor="name"><b>Workspace Name</b></label>
-                            <input type="text" placeholder="Enter Workspace Name" name="name" required value={formData.name} onChange={handleChange} />
+                            <input type="text" className={` ${styles.textEntry}`} placeholder="Enter Workspace Name" name="name" required value={formData.name} onChange={handleChange} />
 
                             <button type="submit" className = {`btn mb-2 ${styles.custBtn}`}>Save</button>
                             <button type="button" className = {`btn ${styles.custBtnDark}`} onClick={closeForm}>Close</button>
@@ -714,7 +714,7 @@ const GroupsPageAdmin = () => {
                             placeholder="Enter group name"
                             value={newGroupName}
                             onChange={handleNewGroupNameChange}
-                            className="mb-4 mt-3"
+                            className={`mb-4 mt-3 ${styles.textEntry}`}
                         />
                         <div className={styles.modalActions}>
                             <button className = {`btn mr-2 ${styles.custBtn}`} onClick={handleCreateGroup}>Create</button>

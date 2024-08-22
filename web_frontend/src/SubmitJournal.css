@@ -49,7 +49,7 @@
 
 /* Journal content styles */
 .submit-journal-content {
-    background-color: #76A5D0; /* Lapis Lazuli */
+    background-color: #bce2f6; /* Lapis Lazuli */
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -65,17 +65,13 @@
     resize: none;
     border: #27021c !important;
     margin-bottom: 15px;
-    color: #27021c;
-    background-color: #76A5D0;
-}
-
-.submit-journal-textarea:disabled {
-    background-color: #555555; /* Grey background when disabled */
-    color: #999999; /* Light grey text when disabled */
+    color: #27021c !important;
+    background-color: #bce2f6;
+    /* change placeholder color */
 }
 
 .submit-journal-textarea::placeholder {
-    color: #E6E6FA; /* Light color for placeholder */
+    color: #27021c; /* Light color for placeholder */
     opacity: 1; /* Fully opaque placeholder */
 }
 
@@ -110,7 +106,7 @@
 }
 
 .submit-journal-info-message {
-    color: #E6E6FA; /* Lighter text color for info messages */
+    color: #27021c; /* Lighter text color for info messages */
     font-size: 14px;
     margin-top: 10px;
 }
