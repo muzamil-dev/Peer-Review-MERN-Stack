@@ -4,104 +4,105 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* background-color: white; */
+    justify-content: center;
+    text-align: center;
     padding: 50px;
     border-radius: 20px;
-    position: relative;
+    background-color: white; /* Dark purple */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: auto;
+    margin-top: 10vh;
+    color: white; /* White text for better contrast */
 }
 
-.bold{
-    color: white;
+.bold {
+    color: #27021c; /* Silver Lake Blue */
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
 }
 
 .formGroup {
-    /* width: 100%; */
-    margin-bottom: 20px;
-    color: black;
+    width: 100%;
+    margin-bottom: 0px;
 }
 
 .formControl {
     width: 100%;
     padding: 10px;
     border-radius: 4px;
-    border: 1px solid #ced4da;
+    border: 1px solid #6578A4; /* Glaucous */
     box-sizing: border-box;
-    margin-bottom: 10px;
-    color: black !important;
-}
-
-.options {
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 0px;
+    color: white; /* White text inside inputs */
+    background-color: #6E8FBA; /* Lapis Lazuli */
 }
 
 .fieldGroup {
     display: flex;
-
+    flex-wrap: wrap;
+    justify-content: space-between;
     margin-bottom: 10px;
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+    border: #27021c;
 }
 
-.field-group input {
-    margin-bottom: 5px;
-}
-
-.field-group .btn-danger {
-    width: fit-content;
-}
-
-.btn {
-    /*padding: 10px 20px;*/
+.removeButton {
+    background-color: #FF0000; /* Red */
+    color: white;
     border: none;
     border-radius: 4px;
-    cursor: pointer;
+    padding: 8px 12px;
 }
 
-.btn-primary {
-    background-color: #007bff;
-    /* color: white; */
-    margin-top: 10px;
+.addButton {
+    background-color: #6E8FBA; /* Silver Lake Blue */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
 }
 
-.btn-danger {
-    background-color: #dc3545;
-    /* color: white; */
+.addButton:hover {
+    background-color: #27021c; /* Silver Lake Blue on hover */
 }
 
-.btn-success {
-    background-color: #28a745;
-    /* color: white; */
-    width: fit-content;
-    align-self: flex-end;
-    margin-top: 20px;
+.saveForm {
+    background-color: #7a698c; /* Ruddy Blue */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    width: 50% !important;
+    transition: background-color 0.3s ease;
 }
 
-.removeButton{
-    width: 20vh !important;
-    margin-left: 5px;
-    margin-right: 5px;
+.saveForm:hover {
+    background-color: #27021c; /* Silver Lake Blue on hover */
 }
 
-.addButton{
-    width: 20vh !important;
-    margin-left: 0px;
+@media screen and (max-width: 900px) {
+    .createFormPage {
+        width: 60vw;
+        padding: 30px;
+    }
 }
 
-@media screen and (max-width: 485px) {
+@media screen and (max-width: 600px) {
+    .createFormPage {
+        width: 90vw;
+        padding: 30px;
+    }
+
     .fieldGroup {
         display: block;
-        justify-content: center;
-        align-items: center;
     }
-    .addButton {
-        width: 50%;
-        margin: 0%;
+
+    .addButton, .removeButton {
+        width: 100%;
         margin-top: 5px;
-    }
-    .removeButton {
-        width: 40%;
-        margin: 0%;
-    }
-    .createFormPage{
-        width: 90vw;
     }
 }

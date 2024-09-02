@@ -4,6 +4,9 @@ import Api from '../Api.js';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
+// Ensure Font Awesome is imported
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 const CreateFormPage = () => {
     const [formName, setFormName] = useState('');
@@ -11,13 +14,13 @@ const CreateFormPage = () => {
     const [availableFrom, setAvailableFrom] = useState('');
     const [availableUntil, setAvailableUntil] = useState('');
     const navigate = useNavigate();
-    const { workspaceId } = useParams(); // Assuming workspaceId is passed as a URL parameter
+    const { workspaceId } = useParams(); 
     const { enqueueSnackbar } = useSnackbar();
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            navigate('/'); // Redirect to login if token is not available
+            navigate('/'); 
             return null;
         }
         const decodedToken = jwtDecode(token);
@@ -65,8 +68,8 @@ const CreateFormPage = () => {
             return;
         }
 
-        const startDate = new Date(availableFrom).getTime(); // Convert to epoch time
-        const dueDate = new Date(availableUntil).getTime(); // Convert to epoch time
+        const startDate = new Date(availableFrom).getTime();
+        const dueDate = new Date(availableUntil).getTime();
 
         if (dueDate < startDate) {
             enqueueSnackbar('Due date cannot be before the start date.', { variant: 'error' });
@@ -87,12 +90,12 @@ const CreateFormPage = () => {
             startDate,
             dueDate,
             questions,
-            'Description' // Replace with actual description if needed
+            'Description' 
         );
 
         if (response.success) {
             enqueueSnackbar('Form created successfully!', { variant: 'success' });
-            navigate(`/formsAdmin/${workspaceId}`); // Adjust the redirect URL as needed
+            navigate(`/formsAdmin/${workspaceId}`);
         } else {
             console.error('Failed to create form:', response.message);
             enqueueSnackbar('Failed to create form.', { variant: 'error' });
@@ -101,12 +104,10 @@ const CreateFormPage = () => {
 
     return (
         <div className={styles.createFormPage}>
-            
             <form onSubmit={handleSubmit}>
                 <div className={styles.formGroup}>
                     <label className={styles.bold}>Assignment</label>
                     <input
-                        // Assignment name must be filled out
                         required
                         type="text"
                         value={formName}
@@ -133,42 +134,42 @@ const CreateFormPage = () => {
                                 className={`btn btn-danger ${styles.removeButton}`}
                                 disabled={fields.length === 1}
                             >
-                                Delete
+                                <FontAwesomeIcon icon={faTrash} />
                             </button>
-                            <button type="button" onClick={handleAddField} className={`btn btn-primary ${styles.addButton}`}>
-                                + Add Field
+                            <button 
+                                type="button" 
+                                onClick={handleAddField} 
+                                className={`btn btn-primary ${styles.addButton}`}>
+                                <FontAwesomeIcon icon={faPlus} />
                             </button>
                         </div>
                     ))}
                 </div>
+    
+                <div className={styles.formGroup}>
+                    <label className={styles.bold}>Available from</label>
+                    <input
+                        type="date"
+                        name="availableFrom"
+                        value={availableFrom}
+                        onChange={handleDateChange}
+                        className={styles.formControl}
+                    />
+                </div>
+                <div className={styles.formGroup}>
+                    <label className={styles.bold}>Until</label>
+                    <input
+                        type="date"
+                        name="availableUntil"
+                        value={availableUntil}
+                        onChange={handleDateChange}
+                        className={styles.formControl}
+                    />
+                </div>
                 
-                <div className='row'> 
-                    <label className={`col-6 ${styles.bold}`}>Available from</label>
-                    <label className={`col-6 ${styles.bold}`}>Until</label>
-                </div>
-                <div className='row'>
-                    <div className={`col-6 ${styles.formGroup}`}>
-                        <input
-                            type="date"
-                            name="availableFrom"
-                            value={availableFrom}
-                            onChange={handleDateChange}
-                            className={`.text-dark ${styles.formControl}`}
-                        />
-                    </div>
-                    <div className={`col-6 ${styles.formGroup}`}>
-                        <input
-                            type="date"
-                            name="availableUntil"
-                            value={availableUntil}
-                            onChange={handleDateChange}
-                            className={styles.formControl}
-                        />
-                    </div>
-                </div>
-                <button type="submit" className="btn btn-success">Save Form</button>
+                <button type="submit" className={`btn btn-success mt-3 ${styles.saveForm}`}>Save Form</button>
             </form>
-            <button className="btn btn-light mb-3 mt-4" onClick={() => navigate(`/formsAdmin/${workspaceId}`)}>Back</button>
+            <button className="btn btn-dark mb-3 mt-3" onClick={() => navigate(`/formsAdmin/${workspaceId}`)}>Back</button>
         </div>
     );
 };

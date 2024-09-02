@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Api from './Api';
-import {jwtDecode} from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode'; // Corrected import
 import './SubmitJournal.css';
 
 const SubmitJournal = () => {
@@ -82,39 +82,35 @@ const SubmitJournal = () => {
 
     return (
         <div className="submit-journal-page">
-            <header className="journal-header">
-                <button onClick={() => navigate(`/workspaces/${workspaceId}/journals`)} className="btn btn-danger">
+            <header className="submit-journal-header">
+                <button onClick={() => navigate(`/workspaces/${workspaceId}/journals`)} className="submit-journal-back-button">
                     &#8592; Back
                 </button>
-                <h1 className="journal-title">{journal.name}</h1>
-                <div className="journal-dates">
-                    <p><strong>Start Date:</strong> {new Date(journal.startDate).toLocaleDateString()}</p>
-                    <p><strong>End Date:</strong> {new Date(journal.endDate).toLocaleDateString()}</p>
+                <h1 className="submit-journal-title">{journal.name}</h1>
+                <div className="submit-journal-dates">
+                    <p className="submit-journal-date"><strong>Start Date:</strong> {new Date(journal.startDate).toLocaleDateString()}</p>
+                    <p className="submit-journal-date"><strong>End Date:</strong> {new Date(journal.endDate).toLocaleDateString()}</p>
                 </div>
             </header>
-    
-            <div className="journal-content">
-                {isEditable ? (
-                    <textarea
-                        placeholder="Write or edit your journal entry here..."
-                        value={content}
-                        onChange={handleContentChange}
-                        className="journal-textarea"
-                    />
-                ) : (
-                    <div className="formatted-content" dangerouslySetInnerHTML={formatContent(content)} />
-                )}
-                {error && <div className="error-message">{error}</div>}
-                {isEditable && (
-                    <button 
-                        onClick={handleSubmit} 
-                        className="btn btn-primary submit-button"
-                    >
-                        Submit
-                    </button>
-                )}
+
+            <div className="submit-journal-content">
+                <textarea
+                    placeholder="Write or edit your journal entry here..."
+                    value={content}
+                    onChange={handleContentChange}
+                    className="submit-journal-textarea"
+                    disabled={!isEditable} // Disable textarea if not editable
+                />
+                {error && <div className="submit-journal-error-message">{error}</div>}
+                <button 
+                    onClick={handleSubmit} 
+                    className="submit-journal-submit-button"
+                    disabled={!isEditable} // Disable button if not editable
+                >
+                    Submit
+                </button>
                 {!isEditable && (
-                    <div className="info-message">
+                    <div className="submit-journal-info-message">
                         You cannot edit this journal because it is past or before the submission period.
                     </div>
                 )}

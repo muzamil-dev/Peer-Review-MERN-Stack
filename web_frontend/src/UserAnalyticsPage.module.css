@@ -1,6 +1,9 @@
+/* General container styles */
 .analyticsContainer {
     padding: 20px;
     font-family: Arial, sans-serif;
+    max-width: 90%;
+    margin: 0 auto;
 }
 
 .chartContainer {
@@ -8,49 +11,107 @@
     height: 400px;
     margin: 0 auto;
     padding: 10px;
-    background-color: #ffffff; /* Light blue background color for the chart container */
+    background-color: #f0f0f0; /* Light grey background color for the chart container */
     display: flex;
     justify-content: center;
     align-items: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .table-responsive {
     margin-top: 20px;
+    width: 100%;
 }
 
 h1 {
-    color: white;
+    color: #27021C; /* Dark grey for the heading */
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.table {
+    background-color: #ffffff; /* White background color */
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .table th, .table td {
     text-align: center; /* Center align the text */
+    padding: 10px;
+    vertical-align: middle;
 }
 
-/* New styles for table background */
-.table {
-    background-color: #e0f7fa; /* Light blue background color */
-}
-
+/* Header styles */
 .table th {
-    background-color: #00838f; /* Darker blue for header */
+    /* background-color: #3e8e41;  */
     color: white; /* White text color for header */
 }
 
+/* Row styles */
 .table tbody tr:hover {
-    background-color: #b2ebf2; /* Light blue hover color for rows */
+    background-color: #eafaf1; /* Light green hover color for rows */
 }
 
-.button-custom {
-    background-color: #00acc1; /* Custom button color */
-    border-color: #00acc1;
+/* Button styles */
+.custBtn {
+    background-color: #6578A4 !important; /* Green button color */
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.custBtn:hover {
+    background-color: #27021C !important; /* Darker hover color */
     color: white;
 }
 
-.button-custom:hover {
-    background-color: #007c91; /* Darker hover color */
-    border-color: #007c91;
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.container{
-    width: 60vw !important;
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+    .chartContainer {
+        height: 300px;
+    }
+
+    .table-responsive {
+        margin-top: 10px;
+    }
+
+    .button-custom {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .analyticsContainer {
+        padding: 10px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .chartContainer {
+        height: 250px;
+    }
+
+    h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    .button-custom {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
 }

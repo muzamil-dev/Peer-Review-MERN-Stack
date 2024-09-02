@@ -62,18 +62,25 @@ const UserDashboard = () => {
                 const fetchedAssignments = response.data;
                 const now = new Date();
 
-                // Filter assignments based on their due date
                 const currentAssignments = fetchedAssignments.filter(assignment => new Date(assignment.dueDate) >= now);
                 const pastDueAssignments = fetchedAssignments.filter(assignment => new Date(assignment.dueDate) < now);
 
-                // Fetch and filter reviews for assignments
                 const filteredAssignmentsWithReviews = await fetchAndFilterReviews(currentAssignments);
                 const filteredPastDueAssignmentsWithReviews = await fetchAndFilterReviews(pastDueAssignments);
 
-                // Update state with filtered assignments and reviews
                 setAssignments(fetchedAssignments);
                 setFilteredAssignments(filteredAssignmentsWithReviews);
                 setPastDueAssignments(filteredPastDueAssignmentsWithReviews);
+
+                // Determine if all reviews are completed for this workspace
+                const allReviewsCompleted = filteredAssignmentsWithReviews.every(
+                    assignment => assignment.reviewData && assignment.reviewData.incompleteReviews.length === 0
+                );
+
+                setWorkspaceCompletionStatus(prevStatus => ({
+                    ...prevStatus,
+                    [workspaceId]: allReviewsCompleted
+                }));
             } else {
                 setErrorMessage(`Failed to fetch assignments: ${response.message}`);
                 enqueueSnackbar(`Failed to fetch assignments: ${response.message}`, { variant: 'error' });
@@ -84,6 +91,7 @@ const UserDashboard = () => {
             enqueueSnackbar(`Failed to fetch assignments: ${error.response ? error.response.data.message : error.message}`, { variant: 'error' });
         }
     };
+
 
     const checkForJournals = async (workspaceId) => {
         const userId = getCurrentUserId();
@@ -196,7 +204,7 @@ const UserDashboard = () => {
                     ))}
                 </select>
                 <button
-                    className='btn btn-primary ml-2'
+                    className='btn btn-primary ml-2 editBtn'
                     onClick={() => handleReviewAction(assignmentId, dueDate)}
                     disabled={!selectedReview[assignmentId]}
                 >
@@ -208,11 +216,11 @@ const UserDashboard = () => {
 
     return (
         <div className="dashboardz">
-            <button className="btn btn-light mt-2 back-button" onClick={() => navigate(`/groups/${selectedWorkspace}`)}>Back</button>
+            <button className="btn btn-light mt-2 back-button btn-lg" onClick={() => navigate(`/groups/${selectedWorkspace}`)}>Back</button>
             <h1 className="header-large">Assignments</h1>
             <div className="workspace-selector">
                 <label htmlFor="workspace">Workspace: </label>
-                <select id="workspace" value={selectedWorkspace} onChange={handleWorkspaceChange}>
+                <select id="workspace" value={selectedWorkspace} onChange={handleWorkspaceChange} className='workspaceDropDown'>
                     {workspaces.map((workspace) => (
                         <option key={workspace.workspaceId} value={workspace.workspaceId}>
                             {workspace.name} {workspaceCompletionStatus[workspace.workspaceId] ? '✔️' : '❌'}
@@ -222,8 +230,8 @@ const UserDashboard = () => {
             </div>
 
             {hasJournals && (
-                <button 
-                    className="btn btn-info mt-0 mb-3" 
+                <button
+                    className="btn btn-info mt-0 mb-3 journalBtn"
                     onClick={() => navigate(`/workspaces/${selectedWorkspace}/journals`)}
                 >
                     View My Journals
@@ -234,7 +242,7 @@ const UserDashboard = () => {
             <div className="assignments-table">
                 <table className="table table-white">
                     <thead>
-                        <tr>
+                        <tr >
                             <th>Name</th>
                             <th>Due Date</th>
                             <th>Start Date</th>

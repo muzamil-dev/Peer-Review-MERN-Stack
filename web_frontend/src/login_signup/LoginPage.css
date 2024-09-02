@@ -1,292 +1,934 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap');
+
 *{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
-.buttoon{
-  margin-top: 10px;
-}
-html,body{
 
-  height: 100%;
-  height: 100%;
-  background-color: #2F669D;
-}
-::selection{
-  background: #1a75ff;
-  color: #fff;
+
+
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--black);
+  background-color: var(--lapis-lazuli);
 }
 
-.page-container {
+:root {
+  --dark-purple: #27021C;
+  --chinese-violet: #7A698C;
+  --glaucous: #6578A4;
+  --silver-lake-blue: #6E8FBA;
+  --ruddy-blue: #76A5D0;
+  --lapis-lazuli: #2F669D;
+  --white: #FFFFFF;
+  --black: #000000;
+  --primary-color: #0066cc;
+  --hover-color: #0052a3;
+  --text-color: #333;
+  --background-color: #f5f5f5;
+  --color-primary: #0291ff;
+  --color-text: rgb(255 255 255 / 96%);
+  --color-muted: rgb(255 255 255 / 40%);
+  --dark-purple: #27021C; /* Dark purple color */
+  --color-input-bg: transparent; /* Transparent background */
+  --color-border: var(--color-muted); /* Border color when not focused */
+}
+
+.landing-page {
   display: flex;
-  height: 100vh;
+}
+
+#main-content, .landing-page {
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-}
-
-.logo-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.wrapper{
-  overflow: hidden;
-  max-width: 500px;
-  width: 50vh;
-  height: 45vh;
-  background-color: #fff;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0px 15px 20px rgba(0,0,0,0.1);
-}
-
-.login{
-  margin-top: 14px;
-}
-
-.wrapper .title-text{
-  display: flex;
-  width: 200%;
-}
-.wrapper .title{
-  width: 50%;
-  font-size: 35px;
-  font-weight: 600;
-  color: #2F669D;
-  text-align: center;
-  transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
-}
-.wrapper .slide-controls{
-  position: relative;
-  display: flex;
-  height: 50px;
-  width: 100%;
-  overflow: hidden;
-  margin: 30px 0 10px 0;
-  justify-content: space-between;
-  border: 1px solid lightgrey;
-  border-radius: 15px;
-}
-.slide-controls .slide{
-  height: 100%;
-  width: 100%;
-  color: #fff;
-  font-size: 18px;
-  font-weight: 500;
-  text-align: center;
-  line-height: 48px;
-  cursor: pointer;
-  z-index: 1;
-  transition: all 0.6s ease;
-}
-.slide-controls label.signup{
-  color: #000;
-}
-.slide-controls .slider-tab{
-  position: absolute;
-  height: 100%;
-  width: 50%;
-  left: 0;
-  z-index: 0;
-  border-radius: 15px;
-  background: -webkit-linear-gradient(left,#003366,#004080,#0059b3
-, #0073e6);
-  transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
-}
-input[type="radio"]{
-  display: none;
-}
-#signup:checked ~ .slider-tab{
-  left: 50%;
-}
-#signup:checked ~ label.signup{
-  color: #fff;
-  cursor: default;
-  /*user-select: none;*/
-}
-#signup:checked ~ label.login{
-  color: #000;
-}
-#login:checked ~ label.signup{
-  color: #000;
-}
-#login:checked ~ label.login{
-  cursor: default;
-  /*user-select: none;*/
-}
-.wrapper .form-container{
-  width: 100%;
-  overflow: hidden;
-}
-/* src/LoginPage.css */
-
-.wrapper .slider-tab {
-    position: absolute;
-    height: 100%;
-    width: 50%;
-    left: 0;
-    z-index: 0;
-    border-radius: 15px;
-    background: -webkit-linear-gradient(left, #003366, #004080, #0059b3, #0073e6);
-    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.form-container .form-inner {
-    display: flex;
-    width: 200%;
-    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.form-container .form-inner{
-  display: flex;
-  width: 200%;
-}
-.form-container .form-inner form{
-  width: 50%;
-  transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
-}
-.form-inner form .field{
-  height: 50px;
-  width: 100%; /**/
-  margin-top: 20px;
-}
-.form-inner form .field input{
-  height: 100%;
-  width: 100%; /**/
-  outline: none;
-  padding-left: 15px;
-  border-radius: 15px;
-  border: 1px solid lightgrey;
-  border-bottom-width: 2px;
-  font-size: 17px;
-  transition: all 0.3s ease;
-}
-.form-inner form .field input:focus{
-  border-color: #1a75ff;
-  /* box-shadow: inset 0 0 3px #fb6aae; */
-}
-.form-inner form .field input::placeholder{
-  color: #999;
-  transition: all 0.3s ease;
-}
-form .field input:focus::placeholder{
-  color: #1a75ff;
-}
-.form-inner form .pass-link{
-  margin-top: 5px;
-}
-.form-inner form .signup-link{
-  text-align: center;
-  margin-top: 30px;
-}
-.form-inner form .pass-link a,
-.form-inner form .signup-link a{
-  color: #2F669D;
-  text-decoration: none;
-}
-.form-inner form .pass-link a:hover,
-.form-inner form .signup-link a:hover{
-  text-decoration: underline;
-}
-.signup-link{
-  color: #004080;
-}
-
-form .btn{
-  --bs-btn-padding-x: 0. !important;
-}
-
-form .btn{
-  height: 50px;
-  width: 100%;
-  border-radius: 15px;
-  position: relative;
-  overflow: hidden;
-}
-form .btn .btn-layer{
-  height: 100%;
-  width: 300%;
-  position: absolute;
-  left: -100%;
-  height: 100%;
-  background-color: #2F669D;
-  border-radius: 15px;
-}
-form .btn:hover .btn-layer{
-  left: 0;
-}
-form .btn input[type="submit"]{
-  height: 100%;
-  width: 100%;
-  z-index: 1;
-  position: relative;
-  background: none;
-  border: none;
-  color: #fff;
-  padding-left: 0;
-  border-radius: 15px;
-  font-size: 20px;
-  font-weight: 500;
-  cursor: pointer;
 }
 
 
-/**/
-.wrapper .form-inner {
-  display: flex;
-  width: 200%; /**/
-  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+/* To target autofilled inputs */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--chinese-violet) inset; /* Transparent background */
+  -webkit-text-fill-color: var(--dark-purple); /* Set your desired text color */
+  transition: background-color 5000s ease-in-out 0s;
 }
 
-.wrapper .form-inner form {
-  width: 50%;
+/* For Firefox */
+input:-moz-autofill {
+  box-shadow: 0 0 0 1000px var(--chinese-violet) inset;
+  -moz-text-fill-color: #000;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
-#signup:checked ~ .form-container .form-inner {
-  margin-left: -50%;
+/* To remove the background color on focus */
+input:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--chinese-violet) inset;
+  box-shadow: 0 0 0 1000px var(--chinese-violet) inset;
 }
 
-#login:checked ~ .form-container .form-inner {
-  margin-left: 0;
-}
 
-#login:checked ~ .slider-tab {
-  left: 0;
-}
 
-.field-row {
-  display: flex;
-  justify-content: space-between;
-}
 
-.field-row .field {
-  width: 48%;
-}
+/******************************* NAVIGATION MENU Styling ********************************/
 
-.field-row .field:first-child {
-  margin-right: 2%;
-}
-
-.field-row .field:last-child {
-  margin-left: 2%;
-}
-
-.loading {
+.header {
+  color: var(--white);
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  bottom: 0;
+  width: 7rem; /* Collapsed width for the icons */
+  padding: 0;
+  transition: all 0.3s ease-in-out;
+  overflow-y: auto;
+  z-index: 1000;
+  background-color: transparent; /* Transparent background */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.header .header-toggle {
+  color: var(--white);
+  background-color: var(--dark-purple);
+  font-size: 1.5rem; /* Adjusted for rem units */
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.7);
-  font-size: 1.5em;
-  color: #0073e6;
-  z-index: 1000;
+  width: 2.5rem; /* Adjusted for rem units */
+  height: 2.5rem; /* Adjusted for rem units */
+  border-radius: 50%;
+  cursor: pointer;
+  position: absolute;
+  top: 1rem; /* Adjusted for rem units */
+  right: 1rem; /* Adjusted for rem units */
+  z-index: 9999;
+  transition: background-color 0.3s;
+}
+
+.header .header-toggle:hover {
+  background-color: var(--ruddy-blue);
+}
+
+/* Navigation Menu */
+.navmenu {
+  padding: 0;
+  z-index: 9997;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  display: flex;
+}
+
+.navmenu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.navmenu a,
+.navmenu a:focus {
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem; /* Adjusted for rem units */
+  font-size: 1rem; /* Adjusted for rem units */
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+  width: 5rem; /* Adjusted for rem units */
+  height: 5rem; /* Adjusted for rem units */
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  left: 0; /* Reset left position */
+}
+
+.navmenu a i,
+.navmenu a:focus i {
+  font-size: 2.2rem; /* Adjusted for rem units */
+}
+
+.navmenu a span {
+  display: none;
+  white-space: nowrap;
+  font-family: Arial, Helvetica, sans-serif; /* Update the font style */
+  font-size: 1.4rem; /* Adjust the font size */
+  transition: all 0.3s ease;
+}
+
+/* Hover State: Expands and changes color */
+.navmenu a:hover,
+.navmenu li:hover > a {
+  width: 10rem; /* Expanded width when hovered */
+  border-radius: 50px;
+  background: var(--dark-purple);  /* Color when hovered */
+  justify-content: flex-start;
+  padding-left: 1.25rem; /* Adjusted for rem units */
+  left: 2.5rem;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+/* Make the span visible as soon as hover occurs */
+.navmenu a:hover span,
+.navmenu li:hover > a span {
+  display: inline-block;
+  font-size: 1.4rem; /* Adjusted for rem units */
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border-bottom: none;
+  box-shadow: none;
+}
+
+.navmenu a {
+  text-decoration: none !important; /* Remove underline */
+}
+
+/* Ensure the icon and text transition smoothly together */
+.navmenu a:hover i,
+.navmenu li:hover > a i {
+  margin-right: 1rem; /* Adjusted for rem units */
+  transition: margin-right 0.3s ease;
+}
+
+/* Active State: Only changes circle color, no expansion */
+.navmenu .active {
+  width: 5rem; /* Collapsed width for the icons */
+  background: var(--dark-purple);
+  border-radius: 50%;
+  justify-content: center;
+}
+
+/* Active State: Make sure the span is not displayed when active */
+.navmenu .active span {
+  display: none;
+}
+
+/* Optional: Keep the icon positioning consistent */
+.navmenu .active i {
+  margin-right: 0;
+}
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+
+
+/******************************* WELCOME Section Styling ********************************/
+#welcome {
+  background-color: var(--lapis-lazuli);
+  color: var(--white);
+  padding: 0;
+}
+
+#welcome .logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10vh;
+}
+
+#welcome .logo {
+  max-width: 100%;
+  height: auto;
+  width: 50rem; /* Adjusted for rem units */
+}
+
+#welcome .btn-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem; /* Adds space between the buttons */
+  margin-top: 15vh;
+}
+
+#welcome .btn {
+  flex: 1 1 45%; /* Each button takes up almost half the container width */
+  max-width: 200px; /* Ensures the buttons don't get too wide on larger screens */
+  width: 6rem;
+  color: var(--white);
+  font-size: 1.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  transition: border-bottom 0.3s;
+  outline: none; /* Remove any outline on focus */
+  box-shadow: none; /* Remove any box shadow on focus */
+
+}
+
+#welcome .btn:hover,
+#welcome .btn:focus {
+  border-bottom: 2px solid var(--white); /* Straight underline on hover and focus */
+  outline: none; /* Ensure no outline is shown */
+  box-shadow: none; /* Ensure no box shadow is shown */
+}
+
+#welcome .btn:active {
+  outline: none; /* Remove any default focus outline */
+  box-shadow: none; /* Remove any default box shadow */
+  border-bottom: 2px solid var(--white); /* Ensure the underline remains straight on click */
+}
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+
+
+/******************************* LOGIN Section Styling ********************************/
+#login {
+  background-color: var(--chinese-violet);
+  color: var(--white);
+  padding: 4rem 1rem; /* Using rem for padding */
+}
+
+#login .container {
+  max-width: 31.25rem; /* 500px converted to rem */
+  margin: 0 auto;
+}
+
+#login h2 {
+  font-size: 2rem; /* Keep as rem for responsive scaling */
+  margin-bottom: 2rem; /* Use rem for margin */
+  text-align: center;
+}
+
+#login form {
+  display: flex;
+  flex-direction: column;
+}
+
+#login form input {
+  padding: 1rem; /* Using rem for padding */
+  margin-bottom: 1rem; /* Use rem for margin */
+  border: none;
+  border-radius: 0.3125rem; /* Using rem for border-radius */
+  font-size: 1.3rem; /* Use rem for font size */
+}
+
+#login form button {
+  padding: 1rem; /* Use rem for padding */
+  background-color: var(--dark-purple);
+  color: var(--white);
+  border: none;
+  border-radius: 0.3125rem; /* Using rem for border-radius */
+  font-size: 1.2rem; /* Use rem for font size */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#login form button:hover {
+  background-color: var(--ruddy-blue);
+}
+
+/* Remove focus outline from input fields */
+#login .textbox input:focus {
+  outline: none;
+}
+
+#login .textbox {
+  position: relative;
+  margin-bottom: 1rem; /* Adjusted to rem */
+  width: 100%;
+}
+
+#login .textbox > span {
+  position: absolute;
+  top: 50%;
+  left: 0.625rem; /* 10px converted to rem */
+  transform: translateY(-50%);
+  font-size: 1.375rem; /* 22px converted to rem */
+  pointer-events: none;
+  color: var(--color-muted);
+  transition: color 0.4s ease;
+}
+
+#login .textbox input {
+  width: 100%;
+  padding: 1.5rem 2.25rem 0rem 3.125rem; /* Adjusted padding using rem */
+  background-color: var(--color-input-bg);
+  border: none;
+  border-bottom: 0.125rem solid var(--color-border); /* 2px converted to rem */
+  color: var(--dark-purple);
+  height: 4.5rem; /* 72px converted to rem */
+  transition: border-color 0.3s ease;
+}
+
+#login .textbox label {
+  position: absolute;
+  top: 50%;
+  left: 3.125rem; /* 50px converted to rem */
+  transform: translateY(-50%);
+  color: var(--color-muted);
+  pointer-events: none;
+  transition: all 0.4s ease;
+}
+
+/* Ensure labels stay up if fields are not empty */
+#login .textbox input:not(:placeholder-shown) ~ label,
+#login .textbox input:focus ~ label {
+  transform: translate(-2.5rem, -2.5rem) scale(0.875); /* Adjusted using rem */
+  color: var(--dark-purple);
+}
+
+/* Ensure the border and icon color change when field is not empty or focused */
+#login .textbox input:not(:placeholder-shown),
+#login .textbox input:focus {
+  border-color: var(--dark-purple);
+}
+
+#login .textbox input:not(:placeholder-shown) ~ span,
+#login .textbox input:focus ~ span {
+  color: var(--dark-purple);
+  z-index: 1;
+}
+
+/* Password Field Button */
+#login .password {
+  position: relative;
+}
+
+#login .password input {
+  padding-right: 3.75rem; /* 60px converted to rem */
+}
+
+#login .password button {
+  position: absolute;
+  top: 50%;
+  right: 0.625rem; /* 10px converted to rem */
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  height: 2.25rem; /* 36px converted to rem */
+  width: 2.25rem; /* 36px converted to rem */
+  background:  none !important;
+  border: none;
+  cursor: pointer;
+}
+
+#login .password button span {
+  color: var(--color-muted);
+  transition: color 0.3s ease;
+}
+
+#login input:is(:focus,:valid) ~ button span {
+  color: var(--dark-purple);
+}
+
+/* Ensuring labels stay up if fields are filled */
+#login .textbox input:valid ~ label {
+  transform: translate(-2.5rem, -2.5rem) scale(0.875);
+  color: var(--dark-purple);
+}
+
+.pass-link {
+  text-align: center;
+  margin-bottom: 1rem; /* Adjusted for rem units */
+}
+
+.pass-link button {
+  color: var(--white) !important;
+  text-decoration: none;
+  background-color: transparent !important;
+  border: none;
+  font-size: 1.1rem !important;
+}
+
+.pass-link button:hover {
+  text-decoration: underline;
+}
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+
+
+
+/******************************* About Section Styling ********************************/
+
+#about {
+  background-color: var(--glaucous);
+  color: var(--white);
+  padding: 4rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+#about .container {
+  max-width: 50rem; /* Use rem for consistent scaling */
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+#about .about-content {
+  width: 100%;
+}
+
+#about .section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0rem;
+  color: var(--white);
+}
+
+#about p {
+  font-size: 1.25rem; /* Font size consistent with the login section */
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: var(--white);
+}
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+
+
+/******************************* General Sections Styling ********************************/
+
+.main {
+  flex-grow: 1;
+}
+
+.section {
+  height: 100vh;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.section-title {
+  text-align: center;
+  padding-bottom: 1.875rem; /* Adjusted for rem units */
+}
+
+.section-title h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem; /* Adjusted for rem units */
+  padding-bottom: 1.25rem; /* Adjusted for rem units */
+  position: relative;
+}
+
+/* .btn {
+  display: inline-block;
+  padding: 0.625rem 1.25rem; 
+  background-color: var(--dark-purple);
+  color: var(--white);
+  text-decoration: none;
+  border-radius: 0.3125rem; 
+  transition: background-color 0.3s;
+} */
+
+/* .btn:hover {
+  background-color: var(--ruddy-blue);
+} */
+
+.container {
+  width: 80%;
+  margin: 0 auto;
+}
+
+/*********************** Scroll-to-top button styling  *******************/
+.scroll-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  background-color: var(--dark-purple);
+  color: var(--white);
+  border: none;
+  border-radius: 50%;
+  padding: 1rem;
+  cursor: pointer;
+  font-size: 1.5rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  width: 4.5rem; /* Adjusted for wider circle */
+}
+
+.scroll-to-top i {
+  display: inline-block;
+  font-size: 2rem;
+  color: var(--white);
+}
+
+.scroll-to-top:hover {
+  background-color: var(--ruddy-blue);
+}
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+
+
+
+
+/* Adjustments for small screen sizes using media quries */
+
+@media (max-width: 75rem) {
+  /* For screens smaller than 75rem (1200px) */
+  .main {
+    margin-left: 0;
+  }
+
+  .header {
+    width: 5rem; /* Collapsed width for the icons */
+    background-color: transparent;
+  }
+
+  .header-show {
+    width: 30%; /* Expanded width for the side panel */
+    background-color: var(--ruddy-blue);
+  }
+
+  .navmenu {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header-show .navmenu {
+    display: flex; /* Show the menu when header is expanded */
+  }
+
+  .navmenu a,
+  .navmenu a:focus {
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.25rem; /* Adjusted for rem units */
+    font-size: 1rem; /* Adjusted for rem units */
+    background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+    width: 10rem;
+    height: 5rem; /* Adjusted for rem units */
+    overflow: hidden;
+    transition: all 0.3s ease;
+    padding-left: 1.25rem;
+    overflow: hidden;
+    border-radius: 50px;
+    justify-content: flex-start;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+  }
+
+  .navmenu a i,
+  .navmenu a:focus i {
+    font-size: 1.5rem; /* Adjusted for rem units */
+  }
+
+  .navmenu a span {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 1rem; /* Adjusted for rem units */
+  }
+
+  /* Hover State: Expands and changes color */
+  .navmenu a:hover,
+  .navmenu li:hover > a {
+    background: var(--dark-purple); /* Color when hovered */
+    padding-left: 1.25rem; /* Adjusted for rem units */
+    left: 0rem;
+    transition: all 0.3s ease;
+  }
+
+  /* Make the span visible as soon as hover occurs */
+  .navmenu a span,
+  .navmenu li > a span {
+    display: inline-block;
+    padding-left: 1rem; /* Adjusted for rem units */
+    font-size: 1.4rem; /* Adjusted for rem units */
+    transition: all 0.3s ease;
+  }
+
+  .navmenu a:hover span,
+  .navmenu li:hover > a span {
+    display: inline-block;
+    padding-left: 0rem;
+    font-size: 1.4rem;
+  }
+
+  /* Active State: Only changes circle color, no expansion */
+  .navmenu .active {
+    background: var(--dark-purple);
+    padding-left: 1.25rem; /* Adjusted for rem units */
+    width: 10rem; /* Expanded width when hovered */
+    border-radius: 50px;
+    color: var(--white);
+    justify-content: flex-start;
+  }
+
+  /* Active State: Make sure the span is not displayed when active */
+  .navmenu .active span {
+    display: inline-block;
+    color: var(--white);
+  }
+
+  /* Optional: Keep the icon positioning consistent */
+  .navmenu .active i {
+    margin-right: 0;
+  }
+
+  .scroll-to-top i {
+    display: inline-block;
+    font-size: 1.5rem;
+    color: var(--white);
+  }
+
+  #welcome .logo {
+    max-width: 70%;
+  }
+
+   /* Adjustments for screens smaller than 1200px */
+   #welcome .btn-container {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  #welcome .btn {
+    font-size: 1.5rem;
+    flex: 1 1 45%; /* Same as before, but more relevant here */
+  }
+
+
+  #login {
+    padding: 3rem 1rem; /* Adjust padding */
+  }
+
+  #login .container {
+    max-width: 90%; /* Adjust max-width */
+  }
+
+  #login h2 {
+    font-size: 1.75rem; /* Slightly smaller heading */
+    margin-bottom: 1.5rem;
+  }
+
+  #login form input {
+    font-size: 1.1rem; /* Slightly smaller font size */
+  }
+
+  #login .textbox input {
+    height: 4rem; /* Slightly smaller height */
+  }
+
+  #about {
+    padding: 3rem 1rem; /* Slightly reduced padding */
+  }
+
+  #about .container {
+    max-width: 80%; /* Increased max-width to utilize more screen space */
+  }
+
+  #about .section-title {
+    font-size: 1.75rem; /* Slightly smaller heading */
+  }
+
+  #about p {
+    font-size: 1.15rem; /* Slightly smaller paragraph text */
+    margin-bottom: 1.5rem; /* Reduced margin to fit content better */
+  }
+
+}
+
+@media (max-width: 48rem) {
+  /* For screens smaller than 48rem (768px) */
+  .main {
+    margin-left: 0;
+  }
+
+  .header {
+    width: 5rem; /* Collapsed width for the icons */
+    background-color: transparent;
+  }
+
+  .header-show {
+    width: 45%; /* Expanded width for the side panel */
+    background-color: var(--ruddy-blue);
+  }
+
+  .navmenu {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header-show .navmenu {
+    display: flex; /* Show the menu when header is expanded */
+  }
+
+  .navmenu a,
+  .navmenu a:focus {
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.25rem; /* Adjusted for rem units */
+    font-size: 1rem; /* Adjusted for rem units */
+    background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+    width: 10rem;
+    height: 5rem; /* Adjusted for rem units */
+    overflow: hidden;
+    transition: all 0.3s ease;
+    padding-left: 1.25rem;
+    overflow: hidden;
+    border-radius: 50px;
+    justify-content: flex-start;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+  }
+
+  .navmenu a i,
+  .navmenu a:focus i {
+    font-size: 1.5rem; /* Adjusted for rem units */
+  }
+
+  .navmenu a span {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 1rem; /* Adjusted for rem units */
+  }
+
+  /* Hover State: Expands and changes color */
+  .navmenu a:hover,
+  .navmenu li:hover > a {
+    background: var(--dark-purple); /* Color when hovered */
+    padding-left: 1.25rem; /* Adjusted for rem units */
+    left: 0rem;
+    transition: all 0.3s ease;
+  }
+
+  /* Make the span visible as soon as hover occurs */
+  .navmenu a span,
+  .navmenu li > a span {
+    display: inline-block;
+    padding-left: 1rem; /* Adjusted for rem units */
+    font-size: 1.4rem; /* Adjusted for rem units */
+    transition: all 0.3s ease;
+  }
+
+  .navmenu a:hover span,
+  .navmenu li:hover > a span {
+    display: inline-block;
+    padding-left: 0rem;
+    font-size: 1.4rem;
+  }
+
+  /* Active State: Only changes circle color, no expansion */
+  .navmenu .active {
+    background: var(--dark-purple);
+    padding-left: 1.25rem; /* Adjusted for rem units */
+    width: 10rem; /* Expanded width when hovered */
+    border-radius: 50px;
+    color: var(--white);
+    justify-content: flex-start;
+  }
+
+  /* Active State: Make sure the span is not displayed when active */
+  .navmenu .active span {
+    display: inline-block;
+    color: var(--white);
+  }
+
+  /* Optional: Keep the icon positioning consistent */
+  .navmenu .active i {
+    margin-right: 0;
+  }
+
+  .scroll-to-top i {
+    display: inline-block;
+    font-size: 1.5rem;
+    color: var(--white);
+  }
+
+  #welcome .logo {
+    max-width: 85%;
+  }
+
+  #welcome .logo-container {
+    margin-bottom: 4rem;
+  }
+
+  /* Adjustments for screens smaller than 768px */
+  #welcome .btn-container {
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 4rem;
+  }
+
+  #welcome .btn {
+    font-size: 1.5rem;
+    flex: 1 1 100%; /* Each button takes the full width */
+  }
+
+  #login {
+    padding: 2rem 1rem; /* Adjust padding */
+  }
+
+  #login h2 {
+    font-size: 1.5rem; /* Smaller heading */
+    margin-bottom: 1rem;
+  }
+
+  #login form input {
+    font-size: 1.1rem; /* Smaller font size */
+    padding: 1rem; /* Adjust padding */
+  }
+
+  #login form button {
+    font-size: 0.875rem; /* Smaller font size */
+  }
+
+  #login .textbox > span {
+    font-size: 1.125rem; /* Smaller icon size */
+  }
+
+  #login .textbox input {
+    padding: 1.25rem 2rem 0rem 2.75rem; /* Adjusted padding */
+    height: 3.5rem; /* Smaller height */
+  }
+
+  #login .textbox label {
+    left: 2.75rem; /* Adjusted label position */
+  }
+
+  #login .password button {
+    height: 2rem; /* Smaller button */
+    width: 2rem; /* Smaller button */
+    right: 0.5rem; /* Adjusted position */
+  }
+
+  #about {
+    padding: 2rem 0.5rem; /* Reduced padding */
+  }
+
+  #about .container {
+    max-width: 100%; /* Full width usage for small screens */
+    padding: 0 1rem; /* Horizontal padding */
+  }
+
+  #about .section-title {
+    font-size: 1.25rem; /* Smaller heading */
+    margin-bottom: 0rem; /* Further reduced margin-bottom */
+  }
+
+  #about p {
+    font-size: 0.95rem; /* Smaller paragraph text */
+    line-height: 1.3; /* Tighter line-height */
+    margin-bottom: 0.75rem; /* Reduced margin-bottom */
+  }
+
 }

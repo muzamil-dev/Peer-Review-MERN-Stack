@@ -4,10 +4,12 @@
     padding: 20px;
     width: 80vw; /* Adjusted width to 80% */
     margin: auto;
+    margin-top: 20px;
     font-family: Arial, sans-serif;
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #27021C;
 }
 .review-header {
     display: flex;
@@ -24,18 +26,25 @@
     border: none;
     font-size: 20px;
     cursor: pointer;
+    color: #27021C;
+    transition: all 0.5s ease;
+}
+
+.back-button:hover {
+    text-decoration: underline;
+    background-color: #76A5D0 !important;
 }
 
 .review-title {
     font-size: 28px;
     margin-bottom: 5px;
-    color: #333;
+    color: #27021C;
 }
 
 .review-target {
     font-size: 18px;
     margin-bottom: 15px;
-    color: #666;
+    color: #27021C;
 }
 
 .review-details {
@@ -53,10 +62,14 @@
 
 .review-question {
     margin-bottom: 20px;
-    background-color: #f9f9f9;
+    background-color: #bce2f6;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.white-text{
+    color: black !important;
 }
 
 .review-question h2 {
@@ -73,18 +86,18 @@
 
 .star {
     font-size: 24px;
-    color: grey;
+    color: white;
 }
 
 .star.selected {
-    color: gold;
+    color: #2F669D;
 }
 
 .submit-button {
     display: block;
     width: 100%;
     padding: 12px;
-    background-color: #007bff;
+    background-color: #2F669D;
     color: white;
     border: none;
     font-size: 18px;
@@ -94,8 +107,9 @@
     border-radius: 8px;
 }
 
+
 .submit-button:hover {
-    background-color: #0056b3;
+    background-color: #27021C;
 }
 
 .status-completed {
@@ -108,15 +122,29 @@
     font-weight: bold;
 }
 
-.temp{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    width: 80%;
-    margin: auto;
-    font-family: Arial, sans-serif;
-    background-color: white;
+
+.comment-textarea {
+    /* use lighter shade of #76A5D0 */
+    background-color: #bce2f6;
+    width: 300px;
+    color: #27021C;
+    height: 200px;
+    border: 2px solid transparent; 
+    padding: 10px;
+    outline: none; 
+    transition: border-color 0.3s ease;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* comment-textarea on click styling */
+/* change border color */
+.comment-textarea:focus {
+    border-color: #27021C; /* Border color when textarea is clicked (focused) */
+}
+
+@media screen and (max-width: 430px) {
+    .comment-textarea {
+        width: 100%;
+    }
+    
 }

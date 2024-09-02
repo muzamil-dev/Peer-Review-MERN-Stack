@@ -84,19 +84,19 @@ const ReviewPage = () => {
             <div className="review-questions">
                 {review.questions.map((question, index) => (
                     <div key={index} className="review-question">
-                        <h2>{question}</h2>
+                        <h2 className='white-text'>{question}</h2>
                         <div className="rating">
                             {[...Array(5)].map((_, starIndex) => (
                                 <span
                                     key={starIndex}
-                                    className={`star ${ratings[index] > starIndex ? "selected" : ""}`}
+                                    className={` star ${ratings[index] > starIndex ? "selected" : ""}`}
                                     onClick={() => handleRatingChange(index, starIndex + 1)}
                                 >
                                     ★
                                 </span>
                             ))}
                         </div>
-                        <p>Rating {ratings[index] || 0} / 5</p>
+                        <p className='white-text'>Rating {ratings[index] || 0} / 5</p>
                     </div>
                 ))}
             </div>

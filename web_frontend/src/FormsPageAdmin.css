@@ -1,14 +1,16 @@
 .view-forms-admin-page {
     width: 75vw;
-    padding: 20px;
+    max-width: 1200px;
+    padding: 50px;
+    margin: 60px auto 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow-y: auto;
+    justify-content: center;
     background-color: white;
-    padding: 50px;
     border-radius: 20px;
-    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-height: calc(100vh - 120px);
 }
 
 .header-container {
@@ -18,24 +20,26 @@
     margin-bottom: 20px;
 }
 
-.search-input {
-    width: 70%;
-    padding: 10px;
+.forms-containerz {
+    width: 105%;
+    max-height: 700px;
+    overflow-y: auto;
+    /* padding-right: 10px; */
+    /* border: 1px solid #dee2e6; */
     border-radius: 4px;
-    border: 1px solid black;
     box-sizing: border-box;
 }
 
-.create-form-button:hover {
-    background-color: #0056b3;
-}
+@media screen and (max-width: 480px) {
+    .forms-containerz {
+        width: 140%;
+    }
 
-.forms-containerz {
-    width: 100%;
 }
 
 .forms-containerz h2 {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 .form-item {
@@ -43,34 +47,40 @@
     border: 1px solid #dee2e6;
     border-radius: 4px;
     padding: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
+    margin-bottom: 0px;
+    /* cursor: pointer; */
     transition: background-color 0.3s;
-}
-
-.form-item:hover {
-    background-color: #e9ecef;
 }
 
 p {
     text-align: center;
-    color: #6c757d;
+    color: #27021c;
 }
 
 .form-item-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 2px;
 }
 
 .form-item {
     flex-grow: 1;
-    cursor: pointer;
+    background-color: #76a5d0;
+
 }
 
 .edit-form-button {
-    margin-left: 10px;
+    margin-left: 5px;
+    background-color: #7a698c;
+    transition: all 0.3s ease;
+    border: none;
+    color: white;
+}
+
+.edit-form-button:hover {
+    background-color: #27021c;
+    color: white;
 }
 
 .edit-modal {
@@ -109,7 +119,7 @@ p {
     box-sizing: border-box;
 }
 
-.customBtn{
+.customBtn {
     width: 25% !important;
     height: 40px !important;
     display: flex;
@@ -118,16 +128,24 @@ p {
     margin-left: 6px;
 }
 
-.customBtns{
+.customBtns {
+    background-color: #7a698c;
     width: 40% !important;
     height: 50px !important;
     display: flex;
     justify-content: center;
     align-items: center;
     margin-left: 6px;
+    transition: all 0.3s ease;
+    border: none;
 }
 
-.question-group{
+.customBtns:hover {
+    background-color: #27021c;
+    color: white;
+}
+
+.question-group {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center;
@@ -146,13 +164,20 @@ p {
 .logout-button:hover {
     background-color: #ff1a1a;
 }
+
 .create-form-button {
-    background-color: #007bff;
-    color: white;
+    background-color: #76a5d0;
+    color: black;
     padding: 10px 20px;
     border: none;
     border-radius: 7px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.create-form-button:hover {
+    background-color: #7a698c;
+    color: white;
 }
 
 /* Navigation Bar Styles */
@@ -160,7 +185,6 @@ p {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* background-color: #007df9; */
     padding: 10px 20px;
     color: #fff;
     position: fixed;
@@ -196,109 +220,11 @@ p {
 }
 
 .view-forms-admin-page {
-    margin-top: 60px; /* Adjust this based on the height of your navbar */
-}
-
-/* Existing styles */
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
+    margin-top: 60px;
 }
 
 .search-input {
     width: 300px;
     padding: 10px;
     font-size: 16px;
-}
-
-.create-form-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-}
-
-.create-form-button:hover {
-    background-color: #218838;
-}
-
-.forms-containerz {
-    padding: 20px;
-}
-
-.form-item-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.form-item {
-    cursor: pointer;
-    flex-grow: 1;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    margin-right: 10px;
-}
-
-.edit-form-button,
-.delete-form-button {
-    padding: 5px 10px;
-    font-size: 14px;
-    border: none;
-    cursor: pointer;
-}
-
-.edit-form-button:hover {
-    background-color: #218838;
-}
-
-.delete-form-button:hover {
-    background-color: #c82333;
-}
-
-.edit-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.edit-modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 4px;
-    width: 400px;
-    max-width: 90%;
-}
-
-.form-groupz {
-    margin-bottom: 15px;
-}
-
-.question-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.customBtns {
-    width: 30%;
-}
-
-button.btn.btn-secondary {
-    color: rgb(255, 255, 255);
-    background: red;
 }

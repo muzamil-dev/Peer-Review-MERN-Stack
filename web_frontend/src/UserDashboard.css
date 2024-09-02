@@ -5,65 +5,125 @@ label {
 }
 
 select {
-    width: 17vw;
+    width: 100%;
+    max-width: 300px;
     padding: 0.5rem;
     color: black !important;
+    min-width: 220px;
 }
 
 .dashboardz {
     text-align: center;
     color: white;
-    width: 100vw;
+    width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
 }
 
 .header-large {
-    font-size: 3rem;
-    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .workspace-selector {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .assignments-table {
     margin: 0 auto;
-    width: 80%;
+    width: 100%;
+    max-width: 1200px;
+    overflow-x: auto;
+    /* Allows horizontal scrolling */
 }
 
 .table-white {
-    background-color: white;
+    background-color: #27021C;
     color: black;
     border-collapse: collapse;
     width: 100%;
+
 }
 
 .table-white th,
 .table-white td {
-    border: 1px solid #ddd;
+    border: 1px solid #27021C;
     padding: 8px;
+    text-align: left;
 }
 
 .table-white th {
-    background-color: #f2f2f2;
+    background-color: #7a698c !important;
+    color: white !important;
     text-align: left;
     padding-top: 12px;
     padding-bottom: 12px;
+    border-bottom: 2px solid #27021C !important;
 }
 
 .back-button {
-    display: block;
-    justify-content: center;
-    background-color: white !important;
-    padding: 10px 20px;
+    align-self: flex-start;
+    margin-bottom: 10px;
+    background: none;
     border: none;
-    border-radius: 4px;
+    font-size: 20px;
+    padding: 10px;
     cursor: pointer;
-    margin-bottom: 30px !important;
-    margin-left: 5vw !important;
-    font-size: large !important;
+    color: #27021C;
+    transition: all 0.5s ease;
 }
 
 .back-button:hover {
-    background-color: #d3c9c9 !important;
+    text-decoration: underline;
+    background-color: #76A5D0 !important;
+}
+.review-dropdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-start;
 }
 
+.editBtn {
+    background-color: #6578a4 !important;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.editBtn:hover {
+    background-color: #27021C !important;
+}
+
+.journalBtn{
+    background-color: #7a698c;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.journalBtn:hover {
+    background-color: #27021C;
+    color: white;
+}
+
+/* Media query to make the table scrollable on smaller screens */
+@media (max-width: 750px) {
+    .assignments-table {
+        overflow-x: auto;
+        /* Enables horizontal scrolling */
+    }
+
+    .table-white {
+        min-width: 600px;
+        /* Ensures table does not shrink too much */
+    }
+}
+
+.workspaceDropDown {
+    width: 200px !important;
+}

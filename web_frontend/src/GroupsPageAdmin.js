@@ -56,6 +56,11 @@ const GroupsPageAdmin = () => {
 
     const { workspaceId } = useParams();
     const navigate = useNavigate();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setSidebarOpen(!sidebarOpen);
+    };
 
     const getCurrentUserId = () => {
         const token = localStorage.getItem('accessToken');
@@ -518,13 +523,13 @@ const GroupsPageAdmin = () => {
                 navigate('/');
                 return;
             }
-    
+
             // Convert dates to ISO format (UTC)
             const startDate = new Date(journalFormData.startDate).toISOString();
             console.log(startDate);
             const endDate = new Date(journalFormData.endDate).toISOString();
             console.log(endDate);
-    
+
             // Prepare the payload with formatted dates
             const payload = {
                 startDate: startDate,
@@ -535,11 +540,11 @@ const GroupsPageAdmin = () => {
                     .map(Number) // Convert to an array of numbers
                     .filter(week => week > 0), // Ensure valid week numbers, remove 0 if it's not intended
             };
-    
+
             console.log(payload);
-    
+
             const response = await Api.Workspaces.createJournals(workspaceId, payload);
-    
+
             if (response.status === 201) {
                 enqueueSnackbar('Journals created successfully!', { variant: 'success' });
                 checkForJournals(); // Refresh the journals status
@@ -552,51 +557,53 @@ const GroupsPageAdmin = () => {
             enqueueSnackbar('Error creating journals', { variant: 'error' });
         }
     };
-    
+
 
     return (
         <div className={styles.workspaceAdmin}>
-            <nav className={styles.navbarContainer}>
-                <a className={styles.navbarBrand} href="/DashboardPage">Rate My Peer</a>
-                <button className={styles.navbarToggler} type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className={styles.navbarCollapse} id="navbarNav">
-                    <ul className="navbar-nav ml-auto">
-                        <li className="nav-item">
-                            <button className="btn btn-info" onClick={goToGradesPage}>
-                                View Grades
-                            </button>
+            <div className={styles.sidebarContainer}>
+                <div className={styles.hamburger} onClick={toggleSidebar}>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <nav className={`${styles.sidebar} ${sidebarOpen ? 'open' : ''}`}>
+                    <a className={styles.navbarBrand} href="/DashboardPage">Rate My Peer</a>
+                    <ul className={styles.navLinks}>
+                        {/* import csv */}
+                        <li>
+                            <input className={`mb-3 ${styles.inputCSV}`} type="file" accept=".csv" onChange={handleFileChange} />
+                            <button className="btn btn-primary" onClick={handleImportCSV}>Import CSV</button>
                         </li>
-                        <li className="nav-item">
+                        <li>
+                            <button className="btn btn-info" onClick={goToGradesPage}>View Grades</button>
+                        </li>
+                        <li>
+                            <button className="btn btn-light" onClick={createForm}>Create Forms</button>
+                        </li>
+                        <li>
+                            <button className="btn btn-light" onClick={openForm}>Edit Workspace</button>
+                        </li>
+                        <li>
+                            <button className="btn btn-success" onClick={handleOpenCreateGroupModal}>Add Group</button>
+                        </li>
+                        <li>
+                            <button className="btn btn-primary" onClick={handleOpenInsertUserModal}>Insert User</button>
+                        </li>
+                        <li>
+                            {hasJournals ? (
+                                <button className="btn btn-primary" onClick={() => navigate(`/workspaces/${workspaceId}/admin/journals`)}>
+                                    View Journals
+                                </button>
+                            ) : (
+                                <button className="btn btn-success" onClick={handleOpenJournalModal}>Create Journals</button>
+                            )}
+                        </li>
+                        <li>
                             <button className={styles.logoutButton} onClick={handleLogout}>Logout</button>
                         </li>
                     </ul>
-                </div>
-            </nav>
-
-            <div className={`row ${styles.headerContainer}`}>
-                <button className={`open-button ol-xl-3 col-lg-3 col-md-3 col-sm-3 btn btn-light mb-2 mb-md-0 ${styles.fixedWidthSm} ${styles.custom}`} onClick={createForm}>Create Forms</button>
-                <h1 className={`col-xl-6 col-lg-6 col-md-6 col-sm-6 ${styles.headerLarge} text-center`}>{workspaceName}</h1>
-                <button className={`open-button col-xl-3 col-lg-3 col-md-3 col-sm-3 btn btn-light mb-2 mb-md-0 ${styles.fixedWidthSm}`} onClick={openForm}>Edit Workspace</button>
-                <button className={`col-xl-2 col-lg-2 col-md-3 btn btn-success col-sm-4 mb-2 mb-md-0 ${styles.fixedWidthSm}`} onClick={handleOpenCreateGroupModal}>Add Group</button>
-            </div>
-            <div className="row">
-                <input type="file" onChange={handleFileChange} />
-                <button className="btn btn-primary" onClick={handleImportCSV}>Import CSV</button>
-            </div>
-
-            <div className="row mt-4">
-                <button className="btn btn-primary" onClick={handleOpenInsertUserModal}>Insert User</button>
-                {hasJournals ? (
-                    <button className="btn btn-primary mt-2" onClick={() => navigate(`/workspaces/${workspaceId}/admin/journals`)}>
-                        View Journals
-                    </button>
-                ) : (
-                    <button className="btn btn-success mt-2" onClick={handleOpenJournalModal}>
-                        Create Journals
-                    </button>
-                )}
+                </nav>
             </div>
 
             {showInsertUserModal && (
@@ -671,8 +678,8 @@ const GroupsPageAdmin = () => {
                                 </div>
                             )}
                             <div className={styles.modalActions}>
-                                <button type="submit" className="btn btn-primary">Insert User</button>
-                                <button type="button" className="btn btn-secondary" onClick={handleCloseInsertUserModal}>Cancel</button>
+                                <button type="submit" className = {`btn mr-2 ${styles.custBtn}`}>Insert User</button>
+                                <button type="button" className = {`btn ${styles.custBtnDark}`} onClick={handleCloseInsertUserModal}>Cancel</button>
                             </div>
                         </form>
                     </div>
@@ -687,10 +694,10 @@ const GroupsPageAdmin = () => {
                             <h1></h1>
 
                             <label htmlFor="name"><b>Workspace Name</b></label>
-                            <input type="text" placeholder="Enter Workspace Name" name="name" required value={formData.name} onChange={handleChange} />
+                            <input type="text" className={` ${styles.textEntry}`} placeholder="Enter Workspace Name" name="name" required value={formData.name} onChange={handleChange} />
 
-                            <button type="submit" className="btn btn-outline-success mb-3">Save</button>
-                            <button type="button" className="btn cancel btn-outline-danger" onClick={closeForm}>Close</button>
+                            <button type="submit" className = {`btn mb-2 ${styles.custBtn}`}>Save</button>
+                            <button type="button" className = {`btn ${styles.custBtnDark}`} onClick={closeForm}>Close</button>
                         </form>
                     </div>
                 </div>
@@ -707,10 +714,11 @@ const GroupsPageAdmin = () => {
                             placeholder="Enter group name"
                             value={newGroupName}
                             onChange={handleNewGroupNameChange}
+                            className={`mb-4 mt-3 ${styles.textEntry}`}
                         />
                         <div className={styles.modalActions}>
-                            <button className="btn btn-primary" onClick={handleCreateGroup}>Create</button>
-                            <button className="btn btn-secondary" onClick={handleCloseCreateGroupModal}>Cancel</button>
+                            <button className = {`btn mr-2 ${styles.custBtn}`} onClick={handleCreateGroup}>Create</button>
+                            <button className = {`btn ${styles.custBtnDark}`} onClick={handleCloseCreateGroupModal}>Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -748,136 +756,85 @@ const GroupsPageAdmin = () => {
                 </div>
             )}
 
-            <div className={styles.container}>
-                {ungroupedMembers.length > 0 && (
-                    <div className={`${styles.ungroupedCard} ${styles.groupCardWrapper} ${styles.ungrouped}`}>
-                        <div className={`card ${styles.groupCard} ${styles.ungrouped}`}>
-                            <div className="card-body d-flex flex-column ungrouped_body">
-                                <h2 className="card-title ungrouped-title">Ungrouped Members</h2>
-                                <div className={styles.tableContainer}>
-                                    <table className={`table ${styles.membersTable}`}>
-                                        <thead>
-                                            <tr>
-                                                <th>First Name</th>
-                                                <th>Last Name</th>
-                                                <th>Email</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {ungroupedMembers.map(member => (
-                                                member && (
-                                                    <tr key={member.userId}>
-                                                        <td onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }}>{member.firstName}</td>
-                                                        <td onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }}>{member.lastName}</td>
-                                                        <td>{member.email}</td>
-                                                        <td className={styles.temp}>
-                                                            <select
-                                                                value={selectedMemberGroup[member.userId] || ''}
-                                                                onChange={(e) => handleAddUserToGroup(member.userId, e.target.value)}
-                                                                className={`${styles.dropdown} form-select`}
-                                                            >
-                                                                <option value="">Assign to group</option>
-                                                                {groups.map(group => (
-                                                                    <option key={group.groupId} value={group.groupId}>
-                                                                        {group.name}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                            <button
-                                                                className="btn btn-danger ml-2 mt-0"
-                                                                onClick={() => handleKickConfirmation(member.userId, 'workspace')}
-                                                            >
-                                                                Kick
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div className="container">
-                    <div className="row">
-                        {Array.isArray(groups) && groups.map((group) => (
-                            <div key={group.groupId} className="col-12 col-sm-6 col-lg-4  mb-4">
-                                <div className={`card ${styles.groupCard}`}>
-                                    <div className="card-body d-flex flex-column">
-                                        <h2 className="card-title">{group.name}</h2>
-                                        <ul className="list-unstyled flex-grow-1">
-                                            {Array.isArray(group.members) && group.members.map(member => (
-                                                member && (
-                                                    <li
-                                                        key={member.userId} onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }} className={`${styles.hoverEffect}`}> {member.firstName} {member.lastName}
-                                                    </li>
-                                                )
-                                            ))}
-                                        </ul>
-                                        <div className="mt-auto">
-                                            <button
-                                                className="btn btn-primary"
-                                                onClick={() => handleOpenEditForm(group.groupId, group.members)}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                className="btn btn-danger ml-2"
-                                                onClick={() => handleDeleteGroup(group.groupId)}
-                                            >
-                                                Delete
-                                            </button>
+            <div className={styles.contentContainer}>
+                <div className={styles.container}>
+                    <div className="container">
+                        <div className="row">
+                            {Array.isArray(groups) && groups.map((group) => (
+                                <div key={group.groupId} className="col-12 col-md-6 col-lg-4 mb-4">
+                                    <div className={`card ${styles.groupCard}`}>
+                                        <div className="card-body d-flex flex-column">
+                                            <h2 className="card-title">{group.name}</h2>
+                                            <ul className="list-unstyled flex-grow-1">
+                                                {Array.isArray(group.members) && group.members.map(member => (
+                                                    member && (
+                                                        <li
+                                                            key={member.userId} onClick={() => goToUserAnalytics(member.userId)} style={{ cursor: 'pointer' }} className={`${styles.hoverEffect}`}> {member.firstName} {member.lastName}
+                                                        </li>
+                                                    )
+                                                ))}
+                                            </ul>
+                                            <div className="mt-auto">
+                                                <button
+                                                    className = {`btn mr-2 ${styles.custBtn}`}
+                                                    onClick={() => handleOpenEditForm(group.groupId, group.members)}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className = {`btn ${styles.custBtnDark}`}
+                                                    onClick={() => handleDeleteGroup(group.groupId)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+
+                {/* Confirmation Modal for Deleting Group */}
+                <div className={`modal fade ${showDeleteConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Delete</h5>
+                                <button type="button" className="close" onClick={() => setShowDeleteConfirmModal(false)} aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-
-            {/* Confirmation Modal for Deleting Group */}
-            <div className={`modal fade ${showDeleteConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <div className="modal-dialog modal-dialog-centered" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Delete</h5>
-                            <button type="button" className="close" onClick={() => setShowDeleteConfirmModal(false)} aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <p>Are you sure you want to delete this group?</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirmModal(false)}>Cancel</button>
-                            <button type="button" className="btn btn-primary" onClick={confirmDeleteGroup}>Delete</button>
+                            <div className="modal-body">
+                                <p>Are you sure you want to delete this group?</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirmModal(false)}>Cancel</button>
+                                <button type="button" className="btn btn-primary" onClick={confirmDeleteGroup}>Delete</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Confirmation Modal for Kicking Member */}
-            <div className={`modal fade ${showKickConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <div className="modal-dialog modal-dialog-centered" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Confirm Kick</h5>
-                            <button type="button" className="close" onClick={() => setShowKickConfirmModal(false)} aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <p>Are you sure you want to kick this member {kickFrom === 'group' ? 'from the group' : 'from the workspace'}?</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={() => setShowKickConfirmModal(false)}>Cancel</button>
-                            <button type="button" className="btn btn-primary" onClick={confirmKickMember}>Kick</button>
+                {/* Confirmation Modal for Kicking Member */}
+                <div className={`modal fade ${showKickConfirmModal ? 'show d-block' : ''}`} tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Kick</h5>
+                                <button type="button" className="close" onClick={() => setShowKickConfirmModal(false)} aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Are you sure you want to kick this member {kickFrom === 'group' ? 'from the group' : 'from the workspace'}?</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowKickConfirmModal(false)}>Cancel</button>
+                                <button type="button" className="btn btn-primary" onClick={confirmKickMember}>Kick</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -888,6 +845,12 @@ const GroupsPageAdmin = () => {
                 isOpen={isJournalModalOpen}
                 onRequestClose={handleCloseJournalModal}
                 contentLabel="Create Journals"
+                
+                style={{
+                    content: {
+                        marginLeft: window.innerWidth <= 768 ? '180px' : '250px',
+                    }
+                }}
             >
                 <h2>Create Journals</h2>
                 <form>
@@ -916,7 +879,7 @@ const GroupsPageAdmin = () => {
                     <div className="form-group">
                         <label>Journal Day (0 for Sunday, 6 for Saturday)</label>
                         <input
-                        //journalDay is an integer
+                            //journalDay is an integer
 
                             type="number"
                             name="journalDay"
@@ -938,10 +901,10 @@ const GroupsPageAdmin = () => {
                     </div>
                 </form>
                 <div className="modal-actions">
-                    <button className="btn btn-primary" onClick={handleCreateJournals}>
+                    <button className = {`btn mr-2 ${styles.custBtn}`} onClick={handleCreateJournals}>
                         Create Journals
                     </button>
-                    <button className="btn btn-secondary" onClick={handleCloseJournalModal}>
+                    <button className = {`btn ${styles.custBtnDark}`} onClick={handleCloseJournalModal}>
                         Cancel
                     </button>
                 </div>
