@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_application/src/login-signup/loginsignup.dart';
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_application/core.services/api.dart';
 
 class PasswordResetPage extends StatelessWidget {
   static const routeName =
@@ -10,35 +12,36 @@ class PasswordResetPage extends StatelessWidget {
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
-
-  PasswordResetPage({super.key});
+  final storage = const FlutterSecureStorage();
+  final apiInstance = Api();
 
   Future<void> resetPassword(
       BuildContext context, String token, String newPassword) async {
-    final url = Uri.parse('http://10.0.2.2:5001/users/resetPassword');
+    const url = '/users/resetPassword';
 
     try {
-      final response = await http.post(
+      final response = await apiInstance.api.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'token': token,
           'newPassword': newPassword,
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         print('Password reset successful');
-        Navigator.pushNamed(context, '/loginsignup');
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginSignup(),
+            ));
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text(
                   'Password reset successful. Please login with your new password.')),
         );
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         print(
             'Password reset failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -67,7 +70,7 @@ class PasswordResetPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: Container(
-        color: const Color(0xFF004080),
+        color: Color(0xFF004080),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

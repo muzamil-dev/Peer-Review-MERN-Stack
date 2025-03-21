@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:convert';
 
 class CreateWorkspace extends StatefulWidget {
   static const routeName = "/createWorkspace";
-  final String userId;
+  final int userId;
 
   const CreateWorkspace({super.key, required this.userId});
 
@@ -17,9 +19,12 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   final TextEditingController domainController = TextEditingController();
   final TextEditingController numGroupsController = TextEditingController();
   final TextEditingController maxGroupSizeController = TextEditingController();
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   Future<void> createWorkspace(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5001/workspaces/create');
+    const url = '/workspaces/create';
+
     try {
       final allowedDomains = domainController.text.isEmpty
           ? <String>[]
@@ -37,13 +42,10 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
         );
         return;
       }
-
-      final response = await http.post(
+      print("User Id: ${widget.userId}");
+      final response = await apiInstance.api.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'name': nameController.text,
           'allowedDomains': domainController.text.isEmpty
               ? []
@@ -67,7 +69,8 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
           const SnackBar(content: Text('Workspace created successfully')),
         );
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
+        print("Status Code: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
@@ -94,41 +97,130 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'Create',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ), // Change text color here
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SvgPicture.asset(
+                'assets/images/RMP_Icon.svg',
+                width: 35,
+                height: 35,
+              ),
+              const Text(
+                'Create Workspace',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
           backgroundColor: const Color(0xFF004080),
-          centerTitle: true, // Center the title
+          centerTitle: true,
+          iconTheme:
+              const IconThemeData(color: Colors.white), // Center the title
         ),
-        body: SingleChildScrollView(
+        body: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF004080),
+          ),
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Workspace Name'),
+              const SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
+                    child: const Text(
+                      "Enter Workspace Details:",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
               ),
-              TextField(
-                //color
-                controller: domainController,
-                decoration: const InputDecoration(
-                    labelText: 'Allowed Domains (comma separated)'),
+              const SizedBox(height: 10),
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                      hintText: 'Workspace Name',
+                      hintStyle: const TextStyle(fontSize: 17),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none),
+                      fillColor: Colors.white,
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 3),
+                      )),
+                ),
               ),
-              TextField(
-                controller: numGroupsController,
-                decoration:
-                    const InputDecoration(labelText: 'Number of Groups'),
-                keyboardType: TextInputType.number,
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextField(
+                  controller: domainController,
+                  decoration: InputDecoration(
+                      hintText: 'Allowed Domains',
+                      hintStyle: const TextStyle(fontSize: 17),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none),
+                      fillColor: Colors.white,
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 3),
+                      )),
+                ),
               ),
-              TextField(
-                controller: maxGroupSizeController,
-                decoration: const InputDecoration(labelText: 'Max Group Size'),
-                keyboardType: TextInputType.number,
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextField(
+                  controller: numGroupsController,
+                  decoration: InputDecoration(
+                      hintText: 'Number of Groups',
+                      hintStyle: const TextStyle(fontSize: 17),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none),
+                      fillColor: Colors.white,
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 3),
+                      )),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.only(bottom: 10.0),
+                child: TextField(
+                  controller: maxGroupSizeController,
+                  decoration: InputDecoration(
+                      hintText: 'Max Group Size',
+                      hintStyle: const TextStyle(fontSize: 17),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none),
+                      fillColor: Colors.white,
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 3),
+                      )),
+                ),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -142,7 +234,11 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
                     );
                   }
                 },
-                child: const Text('Create Workspace'),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                child: const Text(
+                  'Create Workspace',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
               ),
             ],
           ),

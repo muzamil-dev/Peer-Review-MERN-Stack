@@ -1,15 +1,21 @@
+// ignore_for_file: unnecessary_const
+
+import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_application/core.services/api.dart';
+import 'package:flutter_application/src/dashboard/user_dashboard.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
 import 'CreateWorkspace.dart';
 import 'package:flutter_application/src/groups/adminGroups.dart';
-import 'package:flutter_application/src/groups/userGroups.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AdminDashboard extends StatefulWidget {
+  final String token;
   static const routeName = "/adminDashboard";
-  final token;
-  const AdminDashboard({@required this.token, super.key});
+  const AdminDashboard({required this.token, super.key});
 
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
@@ -18,8 +24,10 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   List<Workspace> workspaces = [];
   bool isLoading = true;
-  late String userId;
+  late int userId;
   final TextEditingController inviteCodeController = TextEditingController();
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -30,12 +38,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Future<void> fetchWorkspaces() async {
-    final url = Uri.parse('http://10.0.2.2:5001/users/$userId/workspaces');
     try {
-      final response = await http.get(url);
+      final response = await apiInstance.api.get(
+        '/users/$userId/workspaces',
+      );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final List<dynamic> data = response.data;
 
         setState(() {
           workspaces =
@@ -48,7 +57,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         throw Exception('Failed to load workspaces');
       }
     } catch (error) {
-      print('Error fetching workspaces: $error');
       setState(() {
         isLoading = false;
       });
@@ -59,7 +67,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CreateWorkspace(userId: userId),
+        builder: (context) => CreateWorkspace(
+          userId: userId,
+        ),
       ),
     );
     if (result == true) {
@@ -72,24 +82,57 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Join Workspace'),
-          content: TextField(
-            controller: inviteCodeController,
-            decoration: const InputDecoration(labelText: 'Invite Code'),
+          title: const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: const Text(
+              'Join Workspace',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+            ),
+          ),
+          content: Container(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              controller: inviteCodeController,
+              decoration: const InputDecoration(
+                  labelText: 'Invite Code',
+                  labelStyle: TextStyle(
+                    fontSize: 20,
+                    color: Colors.black,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 2))),
+            ),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                joinWorkspace(inviteCodeController.text);
-                Navigator.pop(context);
-              },
-              child: const Text('Join'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    joinWorkspace(inviteCodeController.text);
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  child: const Text(
+                    'Join',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -98,14 +141,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Future<void> joinWorkspace(String inviteCode) async {
-    final url = Uri.parse('http://10.0.2.2:5001/workspaces/join');
+    const url = '/workspaces/join';
+
     try {
-      final response = await http.put(
+      final response = await apiInstance.api.put(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+        data: jsonEncode({
           'userId': userId,
           'inviteCode': inviteCode,
         }),
@@ -116,20 +157,19 @@ class _AdminDashboardState extends State<AdminDashboard> {
         );
         fetchWorkspaces(); // Refresh workspaces after joining
       } else {
-        final errorData = json.decode(response.body);
+        final errorData = response.data;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${errorData['message']}')),
         );
       }
     } catch (err) {
-      print('Error joining workspace: $err');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error joining workspace')),
       );
     }
   }
 
-  void navigateToGroupPage(String workspaceId, String role) {
+  void navigateToGroupPage(int workspaceId, String role) {
     if (role == 'Instructor') {
       Navigator.push(
         context,
@@ -144,8 +184,65 @@ class _AdminDashboardState extends State<AdminDashboard> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              UserGroup(workspaceId: workspaceId, userId: userId),
+          builder: (context) => UserDashboard(
+            workspaceId: workspaceId,
+            token: widget.token,
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget displayAdminBody() {
+    if (workspaces.isEmpty) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "No Workspaces to Show",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline),
+                    ),
+                    Text(
+                      "Add or Join a Workspace to Get Started",
+                      style: TextStyle(
+                          fontSize: 18.0, fontWeight: FontWeight.w500),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          )
+        ],
+      );
+    } else {
+      return Container(
+        color: const Color(0xFF004080), // Set background color
+        child: RawScrollbar(
+          child: ListView.builder(
+            itemCount: workspaces.length,
+            itemBuilder: (context, index) {
+              return WorkspaceCard(
+                workspace: workspaces[index],
+                onTap: navigateToGroupPage,
+                userId: userId,
+              );
+            },
+          ),
         ),
       );
     }
@@ -155,55 +252,91 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Home',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ), // Change text color here
+        iconTheme: const IconThemeData(
+          color: Colors.white,
         ),
-        backgroundColor: const Color(0xFF004080),
-        centerTitle: true, // Center the title
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SvgPicture.asset(
+              'assets/images/RMP_Icon.svg',
+              width: 35,
+              height: 35,
+            ),
+            const SizedBox(width: 5),
+            const Text(
+              'Workspaces',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ), // Change text color here
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF004080), // Center the title
       ),
-      body: Container(
-        color: const Color(0xFF004080), // Set background color
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                itemCount: workspaces.length,
-                itemBuilder: (context, index) {
-                  return WorkspaceCard(
-                    workspace: workspaces[index],
-                    onTap: navigateToGroupPage,
-                  );
-                },
-              ),
-      ),
-      bottomNavigationBar: SizedBox(
-        height: 60,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : displayAdminBody(),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+            color: Colors.white, // Set background color
+            // Set background color
+            border: Border.all(
+              color: const Color(0xFF004080), // Set background color
+              // Set background color
+            ),
+            borderRadius: BorderRadius.circular(12.0)), // Set background color
+        height: 80,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             IconButton(
-              icon: const Icon(Icons.add),
+              icon: const Column(
+                children: [
+                  Icon(
+                    Icons.add_circle,
+                    size: 42,
+                    color: Colors.green,
+                  ),
+                  Text(
+                    "Add Workspace",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
               onPressed: navigateToCreateWorkspacePage,
               tooltip: 'Add Workspace',
             ),
             IconButton(
-              icon: const Icon(Icons.input),
+              icon: const Column(
+                children: [
+                  Icon(
+                    CupertinoIcons.square_arrow_right,
+                    size: 42,
+                    color: Colors.green,
+                  ),
+                  Text(
+                    "Join Workspace",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
               onPressed: showJoinWorkspaceDialog,
               tooltip: 'Join Workspace',
             ),
           ],
         ),
       ),
+      backgroundColor: const Color(0xFF004080), // Set background color
     );
   }
 }
 
 class Workspace {
-  final String workspaceId;
+  final int workspaceId;
   final String name;
   final String role;
 
@@ -219,17 +352,118 @@ class Workspace {
   }
 }
 
-class WorkspaceCard extends StatelessWidget {
+class WorkspaceCard extends StatefulWidget {
   final Workspace workspace;
-  final Function(String, String) onTap;
+  final Function(int, String) onTap;
+  final int userId;
 
   const WorkspaceCard(
-      {required this.workspace, required this.onTap, super.key});
+      {required this.workspace,
+      required this.onTap,
+      required this.userId,
+      super.key});
+
+  @override
+  State<WorkspaceCard> createState() => _WorkspaceCardState();
+}
+
+class _WorkspaceCardState extends State<WorkspaceCard> {
+  final apiInstance = Api();
+  final storage = const FlutterSecureStorage();
+  String accessToken = '';
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> createInviteCode(BuildContext context) async {
+    const url = '/workspaces/setInvite';
+
+    try {
+      final response = await apiInstance.api.put(
+        url,
+        data: jsonEncode({
+          'userId': widget.userId,
+          'workspaceId': widget.workspace.workspaceId,
+        }),
+      );
+      if (response.statusCode == 200) {
+      } else {}
+    } catch (error) {
+      print("Error Creating Invite Code: $error");
+    }
+  }
+
+  Future<Object> getWorkspaceInfo(BuildContext context) async {
+    final url = "/workspaces/${widget.workspace.workspaceId}";
+
+    try {
+      final response = await apiInstance.api.get(url);
+
+      if (response.statusCode == 200) {
+        return response.data;
+      }
+    } catch (error) {
+      print("Error Getting Workspace Info: $error");
+    }
+    return {};
+  }
+
+  Future<void> inviteDialog(BuildContext context) async {
+    await createInviteCode(context);
+    Map workspaceDetails = await getWorkspaceInfo(context) as Map;
+    String inviteCode = workspaceDetails["inviteCode"];
+
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Center(
+                    child: Text(
+                  "Invite Code",
+                  style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
+                )),
+              ],
+            ),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  inviteCode,
+                  style: const TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  Widget addMemberButton(BuildContext context) {
+    if (widget.workspace.role == 'Instructor') {
+      return IconButton(
+          onPressed: () {
+            inviteDialog(context);
+          },
+          icon: const Icon(
+            Icons.person_add_alt_1,
+            color: Colors.black,
+            size: 28,
+          ));
+    }
+    return const SizedBox();
+  }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onTap(workspace.workspaceId, workspace.role),
+      onTap: () =>
+          widget.onTap(widget.workspace.workspaceId, widget.workspace.role),
       child: Card(
         margin: const EdgeInsets.all(10),
         child: Padding(
@@ -237,15 +471,24 @@ class WorkspaceCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                workspace.name,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      widget.workspace.name,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  addMemberButton(context),
+                ],
               ),
               const SizedBox(height: 10),
               Text(
-                'Role: ${workspace.role}',
-                style: const TextStyle(fontSize: 16),
+                'Role: ${widget.workspace.role}',
+                style: const TextStyle(fontSize: 18),
               ),
             ],
           ),
