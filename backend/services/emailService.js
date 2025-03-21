@@ -1,25 +1,33 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-    service: 'Outlook365',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 export const sendEmail = async (to, subject, message) => {
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to,
-        subject,
-        html: message,
-    };
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    html: message,
+  };
 
-    const emailSent = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully');
-    return emailSent;
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    // console.log("Email sent successfully:", info.response);
+    return info;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return {
+      error: error.message,
+      status: 500,
+    };
+  }
 };

@@ -1,139 +1,130 @@
 import express from 'express';
-import pool from '../config.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Import JWT
 import verifyJWT from '../middleware/verifyJWT.js';
 
-import HttpError from '../services/utils/httpError.js';
+// Import services
+import * as UserService from '../services/users.js';
 
-import * as UserService from "../services/users.js";
-import * as GroupService from "../services/groups.js";
-import * as WorkspaceService from "../services/workspaces.js";
+// Add reset password functionality
 
 const router = express.Router();
 
-// Log into an account
+// Create user (for testing, no error handling here)
+// Requires firstName, lastName, email, password
+router.post("/", async(req, res) => {
+    // Call the service
+    const data = await UserService.createUser(req.body);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(201).json(data);
+});
+
+// Sign up for an account
+router.post("/signup", async(req, res) => {
+    // Check for required fields
+    const { firstName, lastName, email, password } = req.body;
+    if (!firstName || !lastName || !email || !password){
+        return res.status(400).json({ message: "One or more required fields is not present" });
+    }
+    // Call the service
+    const data = await UserService.signup(firstName, lastName, email, password);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(201).json(data);
+});
+
+// Login to a user's account
 router.post("/login", async(req, res) => {
-    let db;
+    // Check for required fields
     const { email, password } = req.body;
-    try{
-        db = await pool.connect();
-        await db.query('BEGIN');
-        // Run the login function
-        const tokenData = await UserService.login(db, email, password);
-        await db.query('COMMIT');
-        res.cookie("jwt", tokenData.refreshToken, { 
-            httpOnly: true, 
-            maxAge: tokenData.refreshTokenAge
-        });
-        res.json({
-            message: "Logged in successfully",
-            accessToken: tokenData.accessToken
-        });
+    if (!email || !password){
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
-    catch(err){
-        if (db) await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Call the service
+    const data = await UserService.login(email, password);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    // Return tokens
+    res.cookie("jwt", data.refreshToken, { httpOnly: true, maxAge: data.refreshTokenAge});
+    res.json({ 
+        message: "Login successful",
+        accessToken: data.accessToken 
+    });
 });
 
-// Have an email sent to get a password reset code
+// Verify the user's email
+router.post("/verifyEmail", async(req, res) => {
+    const { token } = req.body;
+    if (!token) {
+        return res.status(400).json({ message: "One or more required fields is not present" });
+    }
+    // Call the service
+    const data = await UserService.verifyEmail(token);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(201).json(data);
+});
+
+// Request a password reset
 router.post("/requestPasswordReset", async(req, res) => {
-    let db;
     const { email } = req.body;
-    try{
-        // Check for an email
-        if (!email)
-            throw new HttpError("One or more required fields is missing", 400);
-        // Connect to the pool
-        db = await pool.connect();
-        await db.query('BEGIN');
-        const msg = await UserService.requestPasswordReset(db, email);
-        await db.query('COMMIT');
-        return res.json(msg);
+    if (!email) {
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
-    catch(err){
-        if (db) await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Call the service
+    const data = await UserService.requestPasswordReset(email);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(201).json(data);
 });
 
-// Set a new password by providing an email, reset code, and new password
+// Set the user's new password after requesting a reset
 router.post("/resetPassword", async(req, res) => {
-    let db;
-    const { email, token, newPassword } = req.body;
-    try{
-        // Check for an email
-        if (!email || !token || !newPassword)
-            throw new HttpError("One or more required fields is missing", 400);
-        // Connect to the pool
-        db = await pool.connect();
-        await db.query('BEGIN');
-        // Place data in a new json object and pass it to the service
-        const jsonData = {
-            email, token, password: newPassword
-        };
-        const msg = await UserService.resetPassword(db, jsonData);
-        await db.query('COMMIT');
-        return res.json(msg);
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
-    catch(err){
-        if (db) await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Call the service
+    const data = await UserService.resetPassword(token, newPassword);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(201).json(data);
 });
 
-// Use jwt for routes below
-if (process.env.JWT_ENABLED === 'true')
+// Require JWT
+if (process.env.JWT_ENABLED === "true")
     router.use(verifyJWT);
 
-router.get("/", async(req, res) => {
-    let db;
-    const { userId } = req.body;
-    try{
-        db = await pool.connect();
-        const user = await UserService.getById(db, userId);
-        return res.json(user);
-    }
-    catch(err){
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+// Get all workspaces that a user is in
+router.get(["/:userId/workspaces", "/workspaces"], async(req, res) => {
+    const userId = req.params.userId || req.body.userId;
+    // Call the service
+    const data = await UserService.getWorkspaces(userId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
-router.get("/workspaces", async(req, res) => {
-    let db;
-    const { userId } = req.body;
-    try{
-        db = await pool.connect();
-        const workspaces = await UserService.getWorkspaces(db, userId);
-        return res.json(workspaces);
-    }
-    catch(err){
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+// Get user by id
+router.get(["/", "/:userId"], async(req, res) => {
+    const userId = req.params.userId || req.body.userId;
+    // Call the service
+    const data = await UserService.getById(userId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
 export default router;

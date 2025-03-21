@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
 
-import pool from '../config.js';
+import db from '../config.js';
 
 dotenv.config();
 
@@ -17,8 +17,8 @@ router.get("/refresh", async(req, res) => {
         if (!(cookies?.jwt))
             res.status(401).json({ message: "JWT refresh failed - No cookie found"});
         const refresh = cookies.jwt;
-        // Chech db for correct token
-        const user = (await pool.query(
+        // Chech db for correct token (will encrypt later)
+        const user = (await db.query(
             `SELECT id AS "userId", first_name AS "firstName", last_name AS "lastName"
             FROM users WHERE refresh_token = $1`,
             [refresh]
@@ -47,7 +47,7 @@ router.get("/refresh", async(req, res) => {
         );
     }
     catch (err) {
-        console.log(err.message);
+        //console.log(err.message);
         res.status(500).send({ message: err.message });
     }
 });

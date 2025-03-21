@@ -3,23 +3,17 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// // Fill in pool information from .env
-// export const dbConfig = {
+// Fill in client information from .env
+// const db = new pg.Client({
 //     host: process.env.DB_HOST,
 //     port: process.env.DB_PORT,
 //     user: process.env.DB_USER,
 //     password: process.env.DB_PASSWORD,
 //     database: process.env.DB_NAME
-// };
+// });
 
-// const pool = new pg.Pool(dbConfig);
-
-// Log database connection attempts
-const pool = new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false, // This might be necessary for some cloud services
-    },
+const db = new pg.Client({
+  connectionString: process.env.DB_CONN_STRING,
 });
 
-export default pool; 
+export default db;

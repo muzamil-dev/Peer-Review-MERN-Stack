@@ -17,10 +17,10 @@ const verifyJWT = (req, res, next) => {
                 return res.status(403).json({ message: "JWT Verification failed - Incorrect token" });
             if (!req.body)
                 req.body = {};
+
             // Set user vars
             req.body.userId = payload.userId;
-            req.userId = payload.userId;
-            // Auth successful, use the next function
+            // Go to next
             next();
         }
     );

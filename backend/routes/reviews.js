@@ -1,45 +1,56 @@
 import express from 'express';
-import pool from '../config.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Import JWT
 import verifyJWT from '../middleware/verifyJWT.js';
 
-import HttpError from '../services/utils/httpError.js';
-
-import * as AssignmentService from "../services/assignments.js";
-import * as ReviewService from "../services/reviews.js";
-import * as AnalyticsService from "../services/analytics.js";
+// Import services
+import * as AssignmentService from '../services/assignments.js';
+import * as ReviewService from '../services/reviews.js';
 
 const router = express.Router();
 
-// Use jwt for routes below
-if (process.env.JWT_ENABLED === 'true')
+// Require JWT
+if (process.env.JWT_ENABLED === "true")
     router.use(verifyJWT);
 
-// Submit a review
-router.post("/submit", async(req, res) => {
-    let db;
-    const { userId, reviewId, ratings, comment } = req.body;
-    try{
-        // Check that required fields are provided
-        if (!reviewId || !ratings)
-            throw new HttpError("One or more required fields is not present", 400);
-        // Connect to db
-        db = await pool.connect();
-        await db.query('BEGIN');
-
-        // Submit the review
-        const data = await ReviewService.submit(db, userId, reviewId, ratings, comment);
-        await db.query('COMMIT');
-        res.json(data);
-    }
-    catch(err){
-        if (db) await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+// Get a specific review by its id
+router.get("/:reviewId", async(req, res) => {
+    const { reviewId } = req.params;
+    // Call the service
+    const data = await ReviewService.getById(reviewId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
+
+// Submit a review
+router.post("/submit", async (req, res) => {
+    const { userId, reviewId, ratings, comment } = req.body;
+
+    // Check for missing fields
+    if (!userId || !reviewId || !ratings) {
+        return res.status(400).json({ message: "One or more required fields is not present" });
+    }
+
+    // Check that ratings is a proper array
+    if (!Array.isArray(ratings) || ratings.length < 1) {
+        return res.status(400).json({ message: "There must be at least one rating provided" });
+    }
+
+    // Call the service
+    const data = await ReviewService.submit(userId, reviewId, ratings, comment);
+
+    // Send the error if the service returned one
+    if (data.error) {
+        return res.status(data.status).json({ message: data.error });
+    }
+
+    return res.status(200).json(data);
+});
+
 
 export default router;

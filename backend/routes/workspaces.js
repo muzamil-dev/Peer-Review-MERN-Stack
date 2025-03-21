@@ -1,303 +1,216 @@
 import express from 'express';
-import multer from 'multer';
-import csv from 'csvtojson';
+import dotenv from 'dotenv';
 
-import pool from '../config.js';
+dotenv.config();
+
+// Import JWT
 import verifyJWT from '../middleware/verifyJWT.js';
 
-import HttpError from '../services/utils/httpError.js';
+// Import services
+import * as WorkspaceService from '../services/workspaces.js';
+import * as AssignmentService from '../services/assignments.js';
 
-import * as UserService from "../services/users.js";
-import * as WorkspaceService from "../services/workspaces.js";
-import * as GroupService from "../services/groups.js"
-import * as AssignmentService from "../services/assignments.js";
-import { convertEmailAndGroupNames } from '../services/utils/conversions.js';
+// Function to generate invite codes
+import generateCode from '../services/generateCode.js';
 
 const router = express.Router();
-const upload = multer(); // Store incoming csv in memory
 
 // Require JWT
-if (process.env.JWT_ENABLED === "true")
-    router.use(verifyJWT);
+ if (process.env.JWT_ENABLED === "true")
+     router.use(verifyJWT);
 
-// Get basic information about a workspace
+// Get details about a specific workspace
 router.get("/:workspaceId", async(req, res) => {
-    let db;
     const { workspaceId } = req.params;
-    try{
-        db = await pool.connect();
-        const workspace = await WorkspaceService.getById(db, workspaceId);
-        return res.json(workspace);
-    }
-    catch(err){
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Call getById
+    const data = await WorkspaceService.getById(workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
 // Get all assignments for a provided workspace
 router.get("/:workspaceId/assignments", async(req, res) => {
     const { workspaceId } = req.params;
-    let db;
-    try{
-        db = await pool.connect();
-        // Make the call to the service
-        const data = await AssignmentService.getByWorkspace(db, workspaceId);
-        res.json(data);
-    }
-    catch(err){
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Make the call to the service
+    const data = await AssignmentService.getByWorkspace(workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
-// Get all groups in a workspace with members
+// Gets a list of groups (with members) from the workspace
 router.get("/:workspaceId/groups", async(req, res) => {
-    let db, groups;
-    const { members } = req.query;
     const { workspaceId } = req.params;
-    try{
-        db = await pool.connect();
-        if (members === 'true')
-            groups = await GroupService.getByWorkspaceWithMembers(db, workspaceId);
-        else
-            groups = await GroupService.getByWorkspace(db, workspaceId);
-        return res.json(groups);
-    }
-    catch(err){
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Make the call to the service
+    const data = await WorkspaceService.getGroups(workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
-// Create a new workspace
+// Gets a list of students from the workspace
+router.get("/:workspaceId/students", async(req, res) => {
+    const { workspaceId } = req.params;
+    // Make the call to the service
+    const data = await WorkspaceService.getStudents(workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+});
+
+// Gets students in a workspace with no group
+router.get("/:workspaceId/ungrouped", async (req, res) => {
+    const { workspaceId } = req.params;
+    // Make the call to the service
+    const data = await WorkspaceService.getUngrouped(workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+});
+
+// Creates a new workspace
 router.post("/create", async(req, res) => {
-    let db; // Save the client for use in all blocks
-    try{
-        db = await pool.connect();
-        await db.query('BEGIN');
-        const { userId, name } = req.body;
-        // Only site admins can create new workspaces
-        await UserService.checkAdmin(db, userId);
-        // Create the workspace
-        const workspace = await WorkspaceService.create(db, userId, name);
-        // Commit and release connection
-        await db.query('COMMIT');
-        // Send data and release
-        return res.status(201).json(workspace);
+    // Check for required fields
+    const {name, userId, allowedDomains, groupMemberLimit, numGroups} = req.body;
+    if (!name || !userId){
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
-    catch(err){
-        if (db) 
-            await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Create a settings object with all fields
+    const settings = {
+        name, allowedDomains, groupMemberLimit, numGroups
+    };
+    // Call the service
+    const data = await WorkspaceService.create(userId, settings);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(201).json(data);
 });
 
-// Import a csv to create users, groups, and join them in a workspace
-router.post("/import", upload.single('csvFile'), async(req, res) => {
-    let db;
-    try{
-        db = await pool.connect();
-        await db.query('BEGIN');
-        const userId = req.userId || req.body.userId;
-        const { workspaceId } = req.body;
-
-        // Check that the user is an instructor
-        await WorkspaceService.checkInstructor(db, userId, workspaceId);
-
-        // User is an instructor, get csv data
-        const csvFile = req.file;
-        if (!csvFile) 
-            throw new HttpError('No csv file was provided', 400);
-        // Convert csv data to a string
-        const csvData = csvFile.buffer.toString('utf-8');
-        // Convert csv string to json
-        const jsonData = await csv().fromString(csvData);
-        
-        // Create accounts for anyone without one
-        await UserService.createUsers(db, jsonData);
-        // Create all groups mentioned in the csv
-        const groups = jsonData.map(user => user.groupName);
-        await GroupService.createGroups(db, workspaceId, groups);
-        // Insert all users into their groups
-        const usersAndGroups = await convertEmailAndGroupNames(db, workspaceId, jsonData);
-        await WorkspaceService.insertUsers(db, workspaceId, usersAndGroups);
-        await db.query('COMMIT');
-        return res.status(201).json({ message: "CSV imported successfully"});
-    }
-    catch(err){
-        if (db) 
-            await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
-});
-
-// Edit a provided workspace
+// Edit a workspace
 router.put("/edit", async(req, res) => {
-    let db; // Save the client for use in all blocks
-    try{
-        db = await pool.connect();
-        await db.query('BEGIN');
-        const { userId, workspaceId, name } = req.body;
-        const updates = { name };
-        // Check that the workspaceId was provided
-        if (!workspaceId)
-            throw new HttpError("One or more required fields is not present", 400);
-        // Check that the provided user is an instructor of the workspace
-        await WorkspaceService.checkInstructor(db, userId, workspaceId);
-        // Edit the workspace
-        const msg = await WorkspaceService.edit(db, workspaceId, updates);
-        // Commit and release connection
-        await db.query('COMMIT');
-        // Send data and release
-        return res.json(msg);
+    // Check for required fields
+    const {userId, workspaceId, name, allowedDomains, groupMemberLimit, groupLock} = req.body;
+    if (!userId || !workspaceId){
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
-    catch(err){
-        if (db) 
-            await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Create a settings object with all fields
+    const settings = {
+        name, allowedDomains, groupMemberLimit, groupLock
+    };
+    // Call the service
+    const data = await WorkspaceService.edit(userId, workspaceId, settings);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
-// Promote a user to instructor (from student)
-router.put("/promoteUser", async(req, res) => {
-    let db;
-    try{
-        db = await pool.connect();
-        await db.query('BEGIN');
-        const { userId, workspaceId, targetId } = req.body;
-        console.log(userId);
-        // Check that the provided user is an instructor of the workspace
-        await WorkspaceService.checkInstructor(db, userId, workspaceId);
-        // Delete the workspace
-        const msg = await WorkspaceService.setRole(db, targetId, workspaceId, 'Instructor');
-        // Commit and release connection
-        await db.query('COMMIT');
-        // Send data and release
-        return res.json(msg);
+// Join a workspace
+router.put("/join", async(req, res) => {
+    // Check for required fields
+    const { userId, inviteCode } = req.body;
+    if (!userId || !inviteCode){
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
-    catch(err){
-        if (db) 
-            await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Call the service
+    const data = await WorkspaceService.join(userId, inviteCode);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
-// Promote a user to instructor (from student)
-router.put("/demoteUser", async(req, res) => {
-    let db;
-    try{
-        db = await pool.connect();
-        await db.query('BEGIN');
-        const { userId, workspaceId, targetId } = req.body;
-        // Check that the provided user is an instructor of the workspace
-        await WorkspaceService.checkInstructor(db, userId, workspaceId);
-        // Delete the workspace
-        const msg = await WorkspaceService.setRole(db, targetId, workspaceId, 'Student');
-        // Commit and release connection
-        await db.query('COMMIT');
-        // Send data and release
-        return res.json(msg);
+// Leave a workspace
+router.put("/leave", async(req, res) => {
+    // Check for required fields
+    const { userId, workspaceId } = req.body;
+    if (!userId || !workspaceId){
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
-    catch(err){
-        if (db) 
-            await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+    // Call the service
+    const data = await WorkspaceService.leave(userId, workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
-// Remove a user from the workspace
+// Remove a user from a workspace
 router.put("/removeUser", async(req, res) => {
-    let db; // Save the client for use in all blocks
-    try{
-        db = await pool.connect();
-        await db.query('BEGIN');
-        const { userId, workspaceId, targetId } = req.body;
-        // Check that the provided user is an instructor of the workspace
-        await WorkspaceService.checkInstructor(db, userId, workspaceId);
-        // Delete the workspace
-        const msg = await WorkspaceService.removeUser(db, targetId, workspaceId);
-        // Commit and release connection
-        await db.query('COMMIT');
-        // Send data and release
-        return res.json(msg);
+    // Check for required fields
+    const { userId, targetId, workspaceId } = req.body;
+    if (!userId || !targetId || !workspaceId){
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
-    catch(err){
-        if (db) 
-            await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
+    // Call the service
+    const data = await WorkspaceService.removeUser(userId, targetId, workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+})
+
+// Remove a user from a workspace
+router.put("/removeUser", async(req, res) => {
+    // Check for required fields
+    const { userId, targetId, workspaceId } = req.body;
+    if (!userId || !targetId || !workspaceId){
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
-    finally{
-        if (db) db.release();
+    // Call the service
+    const data = await WorkspaceService.removeUser(userId, targetId, workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+})
+
+// Sets the active invite code
+router.put("/setInvite", async(req, res) => {
+    // Check for required fields
+    const { userId, workspaceId } = req.body;
+    if (!userId || !workspaceId){
+        return res.status(400).json({ message: "One or more required fields is not present" });
     }
+    // Call the service
+    const data = await WorkspaceService.setInvite(userId, workspaceId, generateCode());
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
-// Delete a workspace, used by instructors
-router.delete("/:workspaceId/delete", async(req, res) => {
-    let db; // Save the client for use in all blocks
-    try{
-        db = await pool.connect();
-        await db.query('BEGIN');
-        const { userId } = req.body;
-        const { workspaceId } = req.params;
-        // Check that the provided user is an instructor of the workspace
-        await WorkspaceService.checkInstructor(db, userId, workspaceId);
-        // Delete the workspace
-        const msg = await WorkspaceService.deleteWorkspace(db, workspaceId);
-        // Commit and release connection
-        await db.query('COMMIT');
-        // Send data and release
-        return res.json(msg);
-    }
-    catch(err){
-        if (db) 
-            await db.query('ROLLBACK');
-        return res.status(err.status || 500).json(
-            { message: err.message }
-        );
-    }
-    finally{
-        if (db) db.release();
-    }
+// Remove the active code, effectively locking the workspace
+router.delete("/:workspaceId/removeInvite", async(req, res) => {
+    // Get fields
+    const { workspaceId } = req.params;
+    const { userId } = req.body;
+    // Call the service
+    const data = await WorkspaceService.setInvite(userId, workspaceId, null);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+})
+
+// Delete a workspace entirely
+router.delete("/:workspaceId", async(req, res) => {
+    // Get fields
+    const { workspaceId } = req.params;
+    const { userId } = req.body;
+    // Call the service
+    const data = await WorkspaceService.deleteWorkspace(userId, workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
 });
 
 export default router;
