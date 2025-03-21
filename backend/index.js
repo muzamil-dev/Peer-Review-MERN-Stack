@@ -40,7 +40,7 @@ const corsOptions = {
   ],
   credentials: true,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization"], // Add 'skip-interceptor' here
+  allowedHeaders: ["Content-Type", "Authorization", "skip-interceptor"], // Add 'skip-interceptor' here
 };
 
 app.use(cors(corsOptions)); //comment out to test on hoppscotch
