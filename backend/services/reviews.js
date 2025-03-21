@@ -7,7 +7,8 @@ export const getById = async(reviewId) => {
             `WITH rating_table AS
             (SELECT r.user_id, r.target_id, a.start_date, a.due_date,
             array_agg(q.question ORDER BY q.id) FILTER(WHERE q.question IS NOT NULL) AS questions,
-            array_agg(ra.rating ORDER BY ra.question_id) FILTER(WHERE ra.rating IS NOT NULL) AS ratings
+            array_agg(ra.rating ORDER BY ra.question_id) FILTER(WHERE ra.rating IS NOT NULL) AS ratings,
+            r.comment AS comment -- Fetch the comment from the reviews table
             FROM reviews AS r
             LEFT JOIN assignments AS a
             ON r.assignment_id = a.id
@@ -16,13 +17,13 @@ export const getById = async(reviewId) => {
             LEFT JOIN ratings AS ra
             ON ra.question_id = q.id AND ra.review_id = r.id
             WHERE r.id = $1
-            GROUP BY r.user_id, r.target_id, a.start_date, a.due_date)
-            
+            GROUP BY r.user_id, r.target_id, a.start_date, a.due_date, r.comment
+            )
             SELECT user_id AS "userId", target_id AS "targetId",
             u1.first_name AS "firstName", u1.last_name AS "lastName",
             u2.first_name AS "targetFirstName", u2.last_name AS "targetLastName",
             start_date AS "startDate", due_date AS "dueDate",
-            questions, ratings
+            questions, ratings, comment
             FROM rating_table
             JOIN users AS u1
             ON u1.id = user_id
@@ -44,6 +45,7 @@ export const getById = async(reviewId) => {
         return { error: err.message, status: 500 };
     }
 }
+
 
 // Get all reviews for a given assignment/user
 // Read the blocks of sql and comments above each block to get 
@@ -239,7 +241,7 @@ export const getByAssignmentAndTargetWithQAverages = async(targetId, assignmentI
         }
 
         // Log the data for debugging
-        console.log("Database response:", JSON.stringify(data, null, 2));
+        //console.log("Database response:", JSON.stringify(data, null, 2));
 
         // Ensure reviews and questions are arrays
         data.reviews = data.reviews || [];
@@ -310,7 +312,7 @@ export const createReviews = async(assignmentId) => {
 }
 
 // Submit a review
-export const submit = async(userId, reviewId, ratings) => {
+export const submit = async(userId, reviewId, ratings, comment) => {
     try{
         const res = await db.query(
             `SELECT r.*, a.start_date, a.due_date,
@@ -363,12 +365,19 @@ export const submit = async(userId, reviewId, ratings) => {
             [reviewId]
         );
 
+        // Update the comment in the reviews table
+        await db.query(
+            `UPDATE reviews SET comment = $2 WHERE id = $1`,
+            [reviewId, comment]
+        );
+
         // Insert new ratings
-        let ratingsQuery = `INSERT INTO ratings VALUES `;
-        ratingsQuery += ratings.map(
-            (_, idx) => `($1, $${idx+2}, $${idx+2+ratings.length})`
-        ).join(', ');
-        const insertRatings = await db.query(ratingsQuery, [data.id, ...questionIds, ...ratings]);
+        let ratingsQuery = `INSERT INTO ratings (review_id, question_id, rating) VALUES `;
+        ratingsQuery += ratings.map((_, idx) => `($1, $${idx + 2}, $${idx + 2 + ratings.length})`).join(', ');
+
+        const values = [reviewId, ...questionIds, ...ratings];
+        await db.query(ratingsQuery, values);
+
         return { message: "Review submitted successfully" };
     }
     catch(err){

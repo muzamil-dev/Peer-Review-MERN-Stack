@@ -16,8 +16,8 @@ import generateCode from '../services/generateCode.js';
 const router = express.Router();
 
 // Require JWT
-if (process.env.JWT_ENABLED === "true")
-    router.use(verifyJWT);
+ if (process.env.JWT_ENABLED === "true")
+     router.use(verifyJWT);
 
 // Get details about a specific workspace
 router.get("/:workspaceId", async(req, res) => {
@@ -141,6 +141,21 @@ router.put("/leave", async(req, res) => {
         return res.status(data.status).json({ message: data.error });
     return res.status(200).json(data);
 });
+
+// Remove a user from a workspace
+router.put("/removeUser", async(req, res) => {
+    // Check for required fields
+    const { userId, targetId, workspaceId } = req.body;
+    if (!userId || !targetId || !workspaceId){
+        return res.status(400).json({ message: "One or more required fields is not present" });
+    }
+    // Call the service
+    const data = await WorkspaceService.removeUser(userId, targetId, workspaceId);
+    // Send the error if the service returned one
+    if (data.error)
+        return res.status(data.status).json({ message: data.error });
+    return res.status(200).json(data);
+})
 
 // Remove a user from a workspace
 router.put("/removeUser", async(req, res) => {

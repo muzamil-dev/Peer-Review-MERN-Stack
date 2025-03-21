@@ -18,13 +18,11 @@ router.get("/refresh", async(req, res) => {
             res.status(401).json({ message: "JWT refresh failed - No cookie found"});
         const refresh = cookies.jwt;
         // Chech db for correct token (will encrypt later)
-        console.log(`Refresh: ${refresh}`);
         const user = (await db.query(
             `SELECT id AS "userId", first_name AS "firstName", last_name AS "lastName"
             FROM users WHERE refresh_token = $1`,
             [refresh]
         )).rows[0];
-        console.log(user);
         if (!user)
             res.status(403).json({ message: "JWT refresh failed - Could not authenticate user"});
         // Verify the refresh token if found in db
@@ -49,7 +47,7 @@ router.get("/refresh", async(req, res) => {
         );
     }
     catch (err) {
-        console.log(err.message);
+        //console.log(err.message);
         res.status(500).send({ message: err.message });
     }
 });

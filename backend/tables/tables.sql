@@ -63,6 +63,7 @@ CREATE TABLE reviews(
     group_id INT REFERENCES groups (id) ON DELETE CASCADE,
     user_id INT REFERENCES users (id) ON DELETE CASCADE,
     target_id INT REFERENCES users (id) ON DELETE CASCADE,
+    comment TEXT,
     UNIQUE(assignment_id, user_id, target_id)
 );
 
@@ -84,4 +85,18 @@ CREATE TABLE analytics(
     assignment_id INT REFERENCES assignments (id) ON DELETE CASCADE,
     average_rating NUMERIC,
     PRIMARY KEY (user_id, assignment_id)
+);
+
+CREATE TABLE journal_assignment (
+    id SERIAL PRIMARY KEY,
+    workspace_id INT NOT NULL REFERENCES workspaces (id) ON DELETE CASCADE,
+    start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_date TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+CREATE TABLE journal_submission (
+    id SERIAL PRIMARY KEY,
+    journal_assignment_id INT NOT NULL REFERENCES journal_assignment (id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    submission_text TEXT NOT NULL
 );
