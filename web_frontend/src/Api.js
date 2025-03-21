@@ -1097,13 +1097,10 @@ export default {
      */
     deleteWorkspace: async (workspaceId, userId) => {
       const config = getConfig();
-      const response = await axios.delete(
-        getUrl(WORKSPACES, `${workspaceId}/delete`),
-        {
-          data: { userId }, // Pass the userId in the request body
-          ...config,
-        }
-      );
+      const response = await axios.delete(getUrl(WORKSPACES, workspaceId), {
+        data: { userId }, // Pass the userId in the request body
+        ...config,
+      });
       return {
         status: response.status,
         message: response.data.message,

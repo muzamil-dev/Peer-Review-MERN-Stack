@@ -344,7 +344,6 @@ const DashboardPage = () => {
         id="createWorkspaceModal"
         tabIndex="-1"
         aria-labelledby="createWorkspaceModalLabel"
-        aria-hidden="true"
       >
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
@@ -361,7 +360,7 @@ const DashboardPage = () => {
                 data-dismiss="modal"
                 aria-label="Close"
               >
-                <span aria-hidden="true">&times;</span>
+                <span>&times;</span>
               </button>
             </div>
             <div className="modal-body">
