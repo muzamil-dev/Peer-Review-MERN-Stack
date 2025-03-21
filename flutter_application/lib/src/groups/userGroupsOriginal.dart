@@ -6,7 +6,7 @@ class UserGroup extends StatefulWidget {
   final String workspaceId;
   static const routeName = '/userGroups';
 
-  const UserGroup({required this.workspaceId});
+  const UserGroup({super.key, required this.workspaceId});
 
   @override
   State<UserGroup> createState() => _UserGroupState();

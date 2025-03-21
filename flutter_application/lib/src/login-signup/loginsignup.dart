@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class LoginSignup extends StatefulWidget {
   const LoginSignup({super.key});
 
@@ -38,16 +37,16 @@ class _LoginSignupState extends State<LoginSignup> {
         title: const Text(
           'Welcome!',
           style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white, // Title color
-            ), // Change text color here
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // Title color
+          ), // Change text color here
         ),
-        backgroundColor: Color(0xFF004080),
+        backgroundColor: const Color(0xFF004080),
         centerTitle: true,
       ),
       body: Container(
-        color: Color(0xFF004080), // Background color
+        color: const Color(0xFF004080), // Background color
         child: Column(
           children: [
             Row(
@@ -56,13 +55,14 @@ class _LoginSignupState extends State<LoginSignup> {
                 GestureDetector(
                   onTap: () => _togglePage(0),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
                           color: _selectedPage == 0
-                            ? Colors.white
-                            : Colors.transparent,
+                              ? Colors.white
+                              : Colors.transparent,
                           width: 2,
                         ),
                       ),
@@ -79,7 +79,8 @@ class _LoginSignupState extends State<LoginSignup> {
                 GestureDetector(
                   onTap: () => _togglePage(1),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
@@ -101,7 +102,7 @@ class _LoginSignupState extends State<LoginSignup> {
                 ),
               ],
             ),
-            SizedBox(height: 10),  // Add space between tabs and title
+            const SizedBox(height: 10), // Add space between tabs and title
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -136,6 +137,7 @@ class _LoginSignupState extends State<LoginSignup> {
 }
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -158,10 +160,11 @@ class _LoginScreenState extends State<LoginScreen> {
     prefs = await SharedPreferences.getInstance();
   }
 
-  Future<void> loginUser(BuildContext context, String email, String password) async{
-    final url = Uri.parse('http://10.0.2.2:5000/users/login');
+  Future<void> loginUser(
+      BuildContext context, String email, String password) async {
+    final url = Uri.parse('http://10.0.2.2:5001/users/login');
 
-    try{
+    try {
       final response = await http.post(
         url,
         headers: {
@@ -172,15 +175,20 @@ class _LoginScreenState extends State<LoginScreen> {
           'password': password,
         }),
       );
+
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        var userToken = responseData['accessToken'];
+        print(responseData);
+        var userToken = responseData['accessToken'].toString();
         prefs.setString('token', userToken);
 
         // Navigate to dashboard
-        Navigator.push(context, MaterialPageRoute(builder: (context) => AdminDashboard(token: userToken))); // Adjust the route name as needed
-      } 
-      else {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => AdminDashboard(
+                    token: userToken))); // Adjust the route name as needed
+      } else {
         // Login failed
         final errorData = json.decode(response.body);
         print('Login failed: ${response.statusCode}, ${errorData['message']}');
@@ -188,15 +196,15 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(content: Text('Login failed: ${errorData['message']}')),
         );
       }
-    }catch(err){
+    } catch (err) {
       print('Error: $err');
     }
   }
 
   Future<void> requestPasswordReset(BuildContext context, String email) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/requestPasswordReset');
+    final url = Uri.parse('http://10.0.2.2:5001/users/requestPasswordReset');
 
-    try{
+    try {
       final response = await http.post(
         url,
         headers: {
@@ -207,20 +215,21 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
 
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         print('Password reset email sent');
-        Navigator.pushNamed(context, '/passwordReset'); 
+        Navigator.pushNamed(context, '/passwordReset');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset email sent')),
+          const SnackBar(content: Text('Password reset email sent')),
         );
-      }else{
+      } else {
         final errorData = json.decode(response.body);
-        print('Request failed: ${response.statusCode}, ${errorData['message']}');
+        print(
+            'Request failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Request failed: \n${errorData['message']}')),
         );
       }
-    }catch(err){
+    } catch (err) {
       print('Error: $err');
     }
   }
@@ -232,10 +241,13 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(margin: const EdgeInsets.only(bottom: 10.0), child: TextField(
-            controller: emailController,
-            decoration: InputDecoration(labelText: 'Email',
-            border: OutlineInputBorder(
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
@@ -244,10 +256,13 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          Container(margin: const EdgeInsets.only(bottom: 10.0), child: TextField(
-            controller: passwordController,
-            decoration: InputDecoration(labelText: 'Password',
-            border: OutlineInputBorder(
+          Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              controller: passwordController,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none),
                 fillColor: Colors.white,
@@ -269,84 +284,85 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 10),
           TextButton(
-  onPressed: () {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-          child: Stack(
-            children: [
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    //color: Colors.black.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-              SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 160),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Reset Password',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller : resetEmailController,
-                        decoration: InputDecoration(
-                          labelText: 'Enter your email',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none,
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Stack(
+                        children: [
+                          BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                //color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
                           ),
-                          fillColor: Colors.grey[200],
-                          filled: true,
-                        ),
+                          SingleChildScrollView(
+                            child: Container(
+                              padding: const EdgeInsets.all(20),
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 160),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    'Reset Password',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  TextField(
+                                    controller: resetEmailController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Enter your email',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      fillColor: Colors.grey[200],
+                                      filled: true,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      // Handle password reset logic
+                                      // Send password reset email
+                                      final email = resetEmailController.text;
+                                      requestPasswordReset(context, email);
+                                    },
+                                    child: const Text('Submit'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
                       ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Handle password reset logic
-                          // Send password reset email
-                          final email = resetEmailController.text;
-                          requestPasswordReset(context, email);
-                        },
-                        child: const Text('Submit'),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ],
+                    ),
+                  );
+                },
+              );
+            },
+            child: const Text(
+              'Forgot Password?',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
-          ),
-        );
-      },
-    );
-  },
-  child: const Text(
-    'Forgot Password?',
-    style: TextStyle(color: Colors.white),
-  ),
-),
         ],
       ),
     );
@@ -359,17 +375,28 @@ class SignUpScreen extends StatelessWidget {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final TextEditingController tokenController = TextEditingController();
 
-  Future<void> userSignUp(BuildContext context, String firstName, String lastName, String email, String password, String confirmPassword) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/signup');
+  SignUpScreen({super.key});
+
+  Future<void> userSignUp(
+      BuildContext context,
+      String firstName,
+      String lastName,
+      String email,
+      String password,
+      String confirmPassword) async {
+    final url = Uri.parse('http://10.0.2.2:5001/users/signup');
 
     try {
       // Validation Check for Password and Confirm Password
       if (password != confirmPassword) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('SignUp Failed: \nPassword and Confirm Password Do Not Match.')),
+          const SnackBar(
+              content: Text(
+                  'SignUp Failed: \nPassword and Confirm Password Do Not Match.')),
         );
         return;
       }
@@ -407,23 +434,24 @@ class SignUpScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Email Verification'),
+          title: const Text('Email Verification'),
           content: TextField(
             controller: tokenController,
-            decoration: InputDecoration(labelText: 'Enter verification token'),
+            decoration:
+                const InputDecoration(labelText: 'Enter verification token'),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 verifyEmail(context, tokenController.text);
               },
-              child: Text('Verify'),
+              child: const Text('Verify'),
             ),
           ],
         );
@@ -432,7 +460,7 @@ class SignUpScreen extends StatelessWidget {
   }
 
   Future<void> verifyEmail(BuildContext context, String token) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/verifyEmail');
+    final url = Uri.parse('http://10.0.2.2:5001/users/verifyEmail');
 
     try {
       final response = await http.post(
@@ -447,21 +475,24 @@ class SignUpScreen extends StatelessWidget {
 
       if (response.statusCode == 200) {
         Navigator.pop(context); // Close the dialog
-        Navigator.pushNamed(context, '/adminDashboard'); // Navigate to dashboard
+        Navigator.pushNamed(
+            context, '/adminDashboard'); // Navigate to dashboard
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Email verified successfully.')),
+          const SnackBar(content: Text('Email verified successfully.')),
         );
       } else {
         final errorData = json.decode(response.body);
-        print("Verification Failed: ${response.statusCode}, ${errorData['message']}");
+        print(
+            "Verification Failed: ${response.statusCode}, ${errorData['message']}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Verification Failed: \n${errorData['message']}')),
+          SnackBar(
+              content: Text('Verification Failed: \n${errorData['message']}')),
         );
       }
     } catch (err) {
       print("Error: $err");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error verifying email.')),
+        const SnackBar(content: Text('Error verifying email.')),
       );
     }
   }
@@ -558,7 +589,8 @@ class SignUpScreen extends StatelessWidget {
               final email = emailController.text;
               final password = passwordController.text;
               final confirmPassword = confirmPasswordController.text;
-              userSignUp(context, firstName, lastName, email, password, confirmPassword);
+              userSignUp(context, firstName, lastName, email, password,
+                  confirmPassword);
             },
             child: const Text('Sign Up'),
           ),

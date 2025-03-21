@@ -86,13 +86,13 @@ class _IndividualAdminGroupState extends State<IndividualAdminGroup> {
           centerTitle: true,
           actions: [
             IconButton(
-              icon: Icon(Icons.edit, color: Colors.white),
+              icon: const Icon(Icons.edit, color: Colors.white),
               onPressed: () {},
             ),
           ],
         ),
         body: Column(children: [
-          Text("Members"),
+          const Text("Members"),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -101,7 +101,7 @@ class _IndividualAdminGroupState extends State<IndividualAdminGroup> {
                   return ListTile(
                     title: Text('${member.firstName} ${member.lastName}'),
                     trailing: IconButton(
-                      icon: Icon(Icons.edit),
+                      icon: const Icon(Icons.edit),
                       onPressed: () {},
                     ),
                   );

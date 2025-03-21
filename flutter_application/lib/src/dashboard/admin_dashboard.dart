@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
@@ -26,20 +25,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
   void initState() {
     super.initState();
     Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
-    userId = jwtDecodedToken['userId'];
+    userId = jwtDecodedToken['userId'].toString();
     fetchWorkspaces();
-
   }
 
   Future<void> fetchWorkspaces() async {
-    final url = Uri.parse(
-        'http://10.0.2.2:5000/users/$userId/workspaces');
+    final url = Uri.parse('http://10.0.2.2:5001/users/$userId/workspaces');
     try {
       final response = await http.get(url);
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        
+
         setState(() {
           workspaces =
               data.map((workspace) => Workspace.fromJson(workspace)).toList();
@@ -75,24 +72,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Join Workspace'),
+          title: const Text('Join Workspace'),
           content: TextField(
             controller: inviteCodeController,
-            decoration: InputDecoration(labelText: 'Invite Code'),
+            decoration: const InputDecoration(labelText: 'Invite Code'),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 joinWorkspace(inviteCodeController.text);
                 Navigator.pop(context);
               },
-              child: Text('Join'),
+              child: const Text('Join'),
             ),
           ],
         );
@@ -101,7 +98,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Future<void> joinWorkspace(String inviteCode) async {
-    final url = Uri.parse('http://10.0.2.2:5000/workspaces/join');
+    final url = Uri.parse('http://10.0.2.2:5001/workspaces/join');
     try {
       final response = await http.put(
         url,
@@ -115,7 +112,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Workspace joined successfully')),
+          const SnackBar(content: Text('Workspace joined successfully')),
         );
         fetchWorkspaces(); // Refresh workspaces after joining
       } else {
@@ -127,7 +124,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     } catch (err) {
       print('Error joining workspace: $err');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error joining workspace')),
+        const SnackBar(content: Text('Error joining workspace')),
       );
     }
   }
@@ -137,14 +134,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => AdminGroup(workspaceId: workspaceId, userId: userId,),
+          builder: (context) => AdminGroup(
+            workspaceId: workspaceId,
+            userId: userId,
+          ),
         ),
       );
     } else {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UserGroup(workspaceId: workspaceId, userId: userId),
+          builder: (context) =>
+              UserGroup(workspaceId: workspaceId, userId: userId),
         ),
       );
     }
@@ -168,7 +169,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       body: Container(
         color: const Color(0xFF004080), // Set background color
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : ListView.builder(
                 itemCount: workspaces.length,
                 itemBuilder: (context, index) {
@@ -222,8 +223,8 @@ class WorkspaceCard extends StatelessWidget {
   final Workspace workspace;
   final Function(String, String) onTap;
 
-  const WorkspaceCard({required this.workspace, required this.onTap, Key? key})
-      : super(key: key);
+  const WorkspaceCard(
+      {required this.workspace, required this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {

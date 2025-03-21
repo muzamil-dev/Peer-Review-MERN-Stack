@@ -231,7 +231,7 @@ class _AdminGroupState extends State<AdminGroup> {
                           Navigator.of(context).pop();
                         },
                       ))
-                  .toList(),
+                  ,
               ListTile(
                 title: const Text('Kick from Workspace',
                     style: TextStyle(color: Colors.red)),
@@ -579,7 +579,7 @@ class _AdminGroupState extends State<AdminGroup> {
                             ),
                           ),
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),

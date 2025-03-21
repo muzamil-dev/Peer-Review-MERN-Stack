@@ -2,22 +2,22 @@ name: flutter_application
 description: "A new Flutter project."
 
 # Prevent accidental publishing to pub.dev.
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.4.3 <4.0.0'
+  sdk: ">=3.4.3 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  uni_links: ^0.5.1
   http: ^0.13.3
   shared_preferences:
   jwt_decoder:
   flutter_localizations:
     sdk: flutter
+  app_links: ^6.4.0
 
 dev_dependencies:
   flutter_test:

@@ -6,7 +6,7 @@ class CreateWorkspace extends StatefulWidget {
   static const routeName = "/createWorkspace";
   final String userId;
 
-  CreateWorkspace({required this.userId});
+  const CreateWorkspace({super.key, required this.userId});
 
   @override
   _CreateWorkspaceState createState() => _CreateWorkspaceState();
@@ -28,7 +28,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
 
       if (!validateDomains(allowedDomains)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid domain format. Only letters and periods are allowed.')),
+          const SnackBar(content: Text('Invalid domain format. Only letters and periods are allowed.')),
         );
         return;
       }
@@ -51,7 +51,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
       if (response.statusCode == 201) {
         Navigator.pop(context, true); // Return true to indicate success
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Workspace created successfully')),
+          const SnackBar(content: Text('Workspace created successfully')),
         );
       } else {
         final errorData = json.decode(response.body);
@@ -62,7 +62,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
     } catch (err) {
       print('Error creating workspace: $err');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating workspace')),
+        const SnackBar(content: Text('Error creating workspace')),
       );
     }
   }
@@ -100,35 +100,35 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
           children: [
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: 'Workspace Name'),
+              decoration: const InputDecoration(labelText: 'Workspace Name'),
             ),
             TextField(
               //color
               controller: domainController,
-              decoration: InputDecoration(labelText: 'Allowed Domains (comma separated)'),
+              decoration: const InputDecoration(labelText: 'Allowed Domains (comma separated)'),
             ),
             TextField(
               controller: numGroupsController,
-              decoration: InputDecoration(labelText: 'Number of Groups'),
+              decoration: const InputDecoration(labelText: 'Number of Groups'),
               keyboardType: TextInputType.number,
             ),
             TextField(
               controller: maxGroupSizeController,
-              decoration: InputDecoration(labelText: 'Max Group Size'),
+              decoration: const InputDecoration(labelText: 'Max Group Size'),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 if (nameController.text.isNotEmpty) {
                   createWorkspace(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Please fill in the workspace name')),
+                    const SnackBar(content: Text('Please fill in the workspace name')),
                   );
                 }
               },
-              child: Text('Create Workspace'),
+              child: const Text('Create Workspace'),
             ),
           ],
         ),

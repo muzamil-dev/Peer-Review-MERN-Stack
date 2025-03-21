@@ -7,8 +7,8 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MainAppBar({
     required this.title,
     this.backgroundColor = const Color(0xFF004080), // Default color if not provided
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

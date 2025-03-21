@@ -9,6 +9,8 @@ class PasswordResetPage extends StatelessWidget {
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
+  PasswordResetPage({super.key});
+
   Future<void> resetPassword(BuildContext context, String token, String newPassword) async {
     final url = Uri.parse('http://10.0.2.2:5000/users/resetPassword');
 
@@ -28,7 +30,7 @@ class PasswordResetPage extends StatelessWidget {
         print('Password reset successful');
         Navigator.pushNamed(context, '/loginsignup');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset successful. Please login with your new password.')),
+          const SnackBar(content: Text('Password reset successful. Please login with your new password.')),
         );
       } else {
         final errorData = json.decode(response.body);
@@ -54,12 +56,12 @@ class PasswordResetPage extends StatelessWidget {
               color: Colors.white, // Title color
             ), // Change text color here
         ),
-        backgroundColor: Color(0xFF004080),
+        backgroundColor: const Color(0xFF004080),
         centerTitle: true,
       ),
       body: 
         Container(
-          color: Color(0xFF004080),
+          color: const Color(0xFF004080),
           child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
