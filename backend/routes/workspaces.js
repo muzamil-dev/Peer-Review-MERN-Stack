@@ -71,8 +71,9 @@ router.get("/:workspaceId/ungrouped", async (req, res) => {
 // Creates a new workspace
 router.post("/create", async (req, res) => {
   // Check for required fields
-  const { name, userId, allowedDomains, groupMemberLimit, numGroups } =
-    req.body;
+  const { name, allowedDomains, groupMemberLimit, numGroups } = req.body;
+  const userId = req.user;
+
   if (!name || !userId) {
     return res
       .status(400)
@@ -95,14 +96,10 @@ router.post("/create", async (req, res) => {
 // Edit a workspace
 router.put("/edit", async (req, res) => {
   // Check for required fields
-  const {
-    userId,
-    workspaceId,
-    name,
-    allowedDomains,
-    groupMemberLimit,
-    groupLock,
-  } = req.body;
+  const { workspaceId, name, allowedDomains, groupMemberLimit, groupLock } =
+    req.body;
+  const userId = req.user;
+
   if (!userId || !workspaceId) {
     return res
       .status(400)
@@ -125,7 +122,9 @@ router.put("/edit", async (req, res) => {
 // Join a workspace
 router.put("/join", async (req, res) => {
   // Check for required fields
-  const { userId, inviteCode } = req.body;
+  const { inviteCode } = req.body;
+  const userId = req.user;
+
   if (!userId || !inviteCode) {
     return res
       .status(400)
@@ -141,7 +140,9 @@ router.put("/join", async (req, res) => {
 // Leave a workspace
 router.put("/leave", async (req, res) => {
   // Check for required fields
-  const { userId, workspaceId } = req.body;
+  const { workspaceId } = req.body;
+  const userId = req.user;
+
   if (!userId || !workspaceId) {
     return res
       .status(400)
@@ -157,7 +158,9 @@ router.put("/leave", async (req, res) => {
 // Remove a user from a workspace
 router.put("/removeUser", async (req, res) => {
   // Check for required fields
-  const { userId, targetId, workspaceId } = req.body;
+  const { targetId, workspaceId } = req.body;
+  const userId = req.user;
+
   if (!userId || !targetId || !workspaceId) {
     return res
       .status(400)
@@ -173,7 +176,9 @@ router.put("/removeUser", async (req, res) => {
 // Remove a user from a workspace
 router.put("/removeUser", async (req, res) => {
   // Check for required fields
-  const { userId, targetId, workspaceId } = req.body;
+  const { targetId, workspaceId } = req.body;
+  const userId = req.user;
+
   if (!userId || !targetId || !workspaceId) {
     return res
       .status(400)
@@ -189,7 +194,9 @@ router.put("/removeUser", async (req, res) => {
 // Sets the active invite code
 router.put("/setInvite", async (req, res) => {
   // Check for required fields
-  const { userId, workspaceId } = req.body;
+  const { workspaceId } = req.body;
+  const userId = req.user;
+
   if (!userId || !workspaceId) {
     return res
       .status(400)
@@ -210,7 +217,8 @@ router.put("/setInvite", async (req, res) => {
 router.delete("/:workspaceId/removeInvite", async (req, res) => {
   // Get fields
   const { workspaceId } = req.params;
-  const { userId } = req.body;
+  const userId = req.user;
+
   // Call the service
   const data = await WorkspaceService.setInvite(userId, workspaceId, null);
   // Send the error if the service returned one
@@ -224,7 +232,6 @@ router.delete("/:workspaceId", async (req, res) => {
   const { workspaceId } = req.params;
   const userId = req.user;
 
-  console.log(userId);
   // Call the service
   const data = await WorkspaceService.deleteWorkspace(userId, workspaceId);
   // Send the error if the service returned one
