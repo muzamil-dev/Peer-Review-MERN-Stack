@@ -1,122 +1,145 @@
-import express from 'express';
-import dotenv from 'dotenv';
+import express from "express";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 // Import JWT
-import verifyJWT from '../middleware/verifyJWT.js';
+import verifyJWT from "../middleware/verifyJWT.js";
 
 // Import services
-import * as AssignmentService from '../services/assignments.js';
-import * as ReviewService from '../services/reviews.js';
+import * as AssignmentService from "../services/assignments.js";
+import * as ReviewService from "../services/reviews.js";
 
 const router = express.Router();
 
 // Require JWT
-if (process.env.JWT_ENABLED === "true")
-    router.use(verifyJWT);
+if (process.env.JWT_ENABLED === "true") router.use(verifyJWT);
 
 // Get the details of an assignment
-router.get("/:assignmentId", async(req, res) => {
-    const { assignmentId } = req.params;
-    // Call the service
-    const data = await AssignmentService.getById(assignmentId);
-    // Send the error if the service returned one
-    if (data.error)
-        return res.status(data.status).json({ message: data.error });
-    return res.status(200).json(data);
+router.get("/:assignmentId", async (req, res) => {
+  const { assignmentId } = req.params;
+  // Call the service
+  const data = await AssignmentService.getById(assignmentId);
+  // Send the error if the service returned one
+  if (data.error) return res.status(data.status).json({ message: data.error });
+  return res.status(200).json(data);
 });
 
 // Get all reviews created by a user for an assignment
-router.get(["/:assignmentId/user", "/:assignmentId/user/:userId"], async(req, res) => {
+router.get(
+  ["/:assignmentId/user", "/:assignmentId/user/:userId"],
+  async (req, res) => {
     const { assignmentId } = req.params;
-    const userId = req.params.userId || req.body.userId;
+    const userId = req.params.userId || req.user;
+
     // Call the service
-    const data = await ReviewService.getByAssignmentAndUser(userId, assignmentId);
+    const data = await ReviewService.getByAssignmentAndUser(
+      userId,
+      assignmentId
+    );
     // Send the error if the service returned one
     if (data.error)
-        return res.status(data.status).json({ message: data.error });
+      return res.status(data.status).json({ message: data.error });
     return res.status(200).json(data);
-});
+  }
+);
 
 // Get all reviews written about a user (target) for an assignment
-router.get("/:assignmentId/target/:targetId", async(req, res) => {
-    const { assignmentId, targetId } = req.params;
-    // Call the service
-    const data = await ReviewService.getByAssignmentAndTarget(targetId, assignmentId);
-    // Send the error if the service returned one
-    if (data.error)
-        return res.status(data.status).json({ message: data.error });
-    return res.status(200).json(data);
+router.get("/:assignmentId/target/:targetId", async (req, res) => {
+  const { assignmentId, targetId } = req.params;
+  // Call the service
+  const data = await ReviewService.getByAssignmentAndTarget(
+    targetId,
+    assignmentId
+  );
+  // Send the error if the service returned one
+  if (data.error) return res.status(data.status).json({ message: data.error });
+  return res.status(200).json(data);
 });
 
 // Get all reviews written about a user (target) for an assignment With Questions Averages
-router.get("/averages/:assignmentId/target/:targetId", async(req, res) => {
-    const { assignmentId, targetId } = req.params;
-    // Call the service
-    const data = await ReviewService.getByAssignmentAndTargetWithQAverages(targetId, assignmentId);
-    // Send the error if the service returned one
-    if (data.error)
-        return res.status(data.status).json({ message: data.error });
-    return res.status(200).json(data);
+router.get("/averages/:assignmentId/target/:targetId", async (req, res) => {
+  const { assignmentId, targetId } = req.params;
+  // Call the service
+  const data = await ReviewService.getByAssignmentAndTargetWithQAverages(
+    targetId,
+    assignmentId
+  );
+  // Send the error if the service returned one
+  if (data.error) return res.status(data.status).json({ message: data.error });
+  return res.status(200).json(data);
 });
 
 // Create a new assignment
-router.post("/create", async(req, res) => {
-    const { userId, workspaceId, name, startDate, dueDate, questions, description } = req.body;
-    // Check for required fields
-    if (!userId || !workspaceId || !name || !dueDate || !questions){
-        return res.status(400).json({ message: "One or more required fields is not present" });
-    };
-    // Check that questions exists and there is at least one question
-    if (!Array.isArray(questions) || questions.length < 1)
-        return res.status(400).json({ message: "Assignments must have at least one question" });
+router.post("/create", async (req, res) => {
+  const { workspaceId, name, startDate, dueDate, questions, description } =
+    req.body;
+  const userId = req.user;
 
-    // Build the settings object, these will be used to create the new assignment
-    const settings = { name, startDate, dueDate, questions, description };
-    // Call the service
-    const data = await AssignmentService.create(userId, workspaceId, settings);
-    // Send the error if the service returned one
-    if (data.error)
-        return res.status(data.status).json({ message: data.error });
-    return res.status(200).json(data);
+  // Check for required fields
+  if (!userId || !workspaceId || !name || !dueDate || !questions) {
+    return res
+      .status(400)
+      .json({ message: "One or more required fields is not present" });
+  }
+  // Check that questions exists and there is at least one question
+  if (!Array.isArray(questions) || questions.length < 1)
+    return res
+      .status(400)
+      .json({ message: "Assignments must have at least one question" });
+
+  // Build the settings object, these will be used to create the new assignment
+  const settings = { name, startDate, dueDate, questions, description };
+  // Call the service
+  const data = await AssignmentService.create(userId, workspaceId, settings);
+  // Send the error if the service returned one
+  if (data.error) return res.status(data.status).json({ message: data.error });
+  return res.status(200).json(data);
 });
 
 // Edit an assignment
-router.put("/edit", async(req, res) => {
-    const { userId, assignmentId, name, startDate, dueDate, questions, description } = req.body;
-    // Check for required fields
-    if (!userId || !assignmentId){
-        return res.status(400).json({ message: "One or more required fields is not present" });
-    };
-    // Check that questions is a proper array if it exists
-    if (questions && (!Array.isArray(questions) || questions.length < 1))
-        return res.status(400).json({ message: "Assignments must have at least one question" });
+router.put("/edit", async (req, res) => {
+  const { assignmentId, name, startDate, dueDate, questions, description } =
+    req.body;
+  const userId = req.user;
 
-    // Build the settings object used to update the assignment
-    const settings = { name, startDate, dueDate, questions, description };
-    // Call the service
-    const data = await AssignmentService.edit(userId, assignmentId, settings);
-    // Send the error if the service returned one
-    if (data.error)
-        return res.status(data.status).json({ message: data.error });
-    return res.status(200).json(data);
+  // Check for required fields
+  if (!userId || !assignmentId) {
+    return res
+      .status(400)
+      .json({ message: "One or more required fields is not present" });
+  }
+  // Check that questions is a proper array if it exists
+  if (questions && (!Array.isArray(questions) || questions.length < 1))
+    return res
+      .status(400)
+      .json({ message: "Assignments must have at least one question" });
+
+  // Build the settings object used to update the assignment
+  const settings = { name, startDate, dueDate, questions, description };
+  // Call the service
+  const data = await AssignmentService.edit(userId, assignmentId, settings);
+  // Send the error if the service returned one
+  if (data.error) return res.status(data.status).json({ message: data.error });
+  return res.status(200).json(data);
 });
 
 // Delete an assignment
-router.delete("/:assignmentId", async(req, res) => {
-    const { assignmentId } = req.params;
-    const { userId } = req.body;
-    // Check for required fields
-    if (!userId || !assignmentId){
-        return res.status(400).json({ message: "One or more required fields is not present" });
-    };
-    // Call the service
-    const data = await AssignmentService.deleteAssignment(userId, assignmentId)
-    // Send the error if the service returned one
-    if (data.error)
-        return res.status(data.status).json({ message: data.error });
-    return res.status(200).json(data);
+router.delete("/:assignmentId", async (req, res) => {
+  const { assignmentId } = req.params;
+  const userId = req.user;
+
+  // Check for required fields
+  if (!userId || !assignmentId) {
+    return res
+      .status(400)
+      .json({ message: "One or more required fields is not present" });
+  }
+  // Call the service
+  const data = await AssignmentService.deleteAssignment(userId, assignmentId);
+  // Send the error if the service returned one
+  if (data.error) return res.status(data.status).json({ message: data.error });
+  return res.status(200).json(data);
 });
 
 export default router;
