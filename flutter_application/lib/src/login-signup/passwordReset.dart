@@ -3,16 +3,19 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class PasswordResetPage extends StatelessWidget {
-  static const routeName = '/passwordReset'; // Ensure you have this route defined
+  static const routeName =
+      '/passwordReset'; // Ensure you have this route defined
 
   final TextEditingController tokenController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   PasswordResetPage({super.key});
 
-  Future<void> resetPassword(BuildContext context, String token, String newPassword) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/resetPassword');
+  Future<void> resetPassword(
+      BuildContext context, String token, String newPassword) async {
+    final url = Uri.parse('http://10.0.2.2:5001/users/resetPassword');
 
     try {
       final response = await http.post(
@@ -30,13 +33,17 @@ class PasswordResetPage extends StatelessWidget {
         print('Password reset successful');
         Navigator.pushNamed(context, '/loginsignup');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset successful. Please login with your new password.')),
+          const SnackBar(
+              content: Text(
+                  'Password reset successful. Please login with your new password.')),
         );
       } else {
         final errorData = json.decode(response.body);
-        print('Password reset failed: ${response.statusCode}, ${errorData['message']}');
+        print(
+            'Password reset failed: ${response.statusCode}, ${errorData['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset failed: ${errorData['message']}')),
+          SnackBar(
+              content: Text('Password reset failed: ${errorData['message']}')),
         );
       }
     } catch (err) {
@@ -51,18 +58,17 @@ class PasswordResetPage extends StatelessWidget {
         title: const Text(
           'Reset Password',
           style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white, // Title color
-            ), // Change text color here
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // Title color
+          ), // Change text color here
         ),
         backgroundColor: const Color(0xFF004080),
         centerTitle: true,
       ),
-      body: 
-        Container(
-          color: const Color(0xFF004080),
-          child: Padding(
+      body: Container(
+        color: const Color(0xFF004080),
+        child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -116,7 +122,8 @@ class PasswordResetPage extends StatelessWidget {
 
                   if (newPassword.isEmpty || confirmPassword.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please fill in all fields')),
+                      const SnackBar(
+                          content: Text('Please fill in all fields')),
                     );
                     return;
                   }
@@ -134,7 +141,7 @@ class PasswordResetPage extends StatelessWidget {
             ],
           ),
         ),
-      ), 
+      ),
     );
   }
 }

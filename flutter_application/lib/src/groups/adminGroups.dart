@@ -38,7 +38,7 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> fetchWorkspaceDetails() async {
     final workspaceDetailsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+        'http://10.0.2.2:5001/workspaces/${widget.workspaceId}/details');
     try {
       final response = await http.get(workspaceDetailsUrl);
       if (response.statusCode == 200) {
@@ -64,7 +64,7 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> fetchGroups() async {
     final groupsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
+        'http://10.0.2.2:5001/workspaces/${widget.workspaceId}/groups');
     try {
       final groupsResponse = await http.get(groupsUrl);
       if (groupsResponse.statusCode == 200) {
@@ -84,7 +84,7 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> fetchUngroupedStudents() async {
     final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/ungrouped');
+        'http://10.0.2.2:5001/workspaces/${widget.workspaceId}/ungrouped');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -102,7 +102,7 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> deleteGroup(String groupId) async {
-    final deleteUrl = Uri.parse('http://10.0.2.2:5000/groups/$groupId');
+    final deleteUrl = Uri.parse('http://10.0.2.2:5001/groups/$groupId');
     try {
       final response = await http.delete(
         deleteUrl,
@@ -128,7 +128,7 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> addStudentToGroup(String userId, String groupId) async {
-    final addUserUrl = Uri.parse('http://10.0.2.2:5000/groups/addUser');
+    final addUserUrl = Uri.parse('http://10.0.2.2:5001/groups/addUser');
     try {
       final response = await http.put(
         addUserUrl,
@@ -161,7 +161,7 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> removeStudentFromGroup(String userId, String groupId) async {
-    final removeUserUrl = Uri.parse('http://10.0.2.2:5000/groups/removeUser');
+    final removeUserUrl = Uri.parse('http://10.0.2.2:5001/groups/removeUser');
     try {
       final response = await http.put(
         removeUserUrl,
@@ -248,7 +248,7 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> kickStudent(String userId) async {
-    final kickUrl = Uri.parse('http://10.0.2.2:5000/workspaces/leave');
+    final kickUrl = Uri.parse('http://10.0.2.2:5001/workspaces/leave');
     try {
       final response = await http.put(
         kickUrl,
@@ -285,7 +285,7 @@ class _AdminGroupState extends State<AdminGroup> {
   }
 
   Future<void> addGroup() async {
-    final Uri url = Uri.parse('http://10.0.2.2:5000/groups/create');
+    final Uri url = Uri.parse('http://10.0.2.2:5001/groups/create');
     try {
       final response = await http.post(
         url,
@@ -317,7 +317,7 @@ class _AdminGroupState extends State<AdminGroup> {
 
     // Load the current workspace details
     final workspaceDetailsUrl = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+        'http://10.0.2.2:5001/workspaces/${widget.workspaceId}/details');
     print('Fetching workspace details from: $workspaceDetailsUrl');
     http.get(workspaceDetailsUrl).then((response) {
       print('Workspace details response status: ${response.statusCode}');
@@ -419,7 +419,7 @@ class _AdminGroupState extends State<AdminGroup> {
 
   Future<void> editWorkspace(String name, List<String> allowedDomains,
       int groupMemberLimit, bool groupLock) async {
-    final editUrl = Uri.parse('http://10.0.2.2:5000/workspaces/edit');
+    final editUrl = Uri.parse('http://10.0.2.2:5001/workspaces/edit');
     try {
       final response = await http.put(
         editUrl,

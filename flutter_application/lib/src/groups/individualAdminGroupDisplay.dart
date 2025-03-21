@@ -27,7 +27,7 @@ class _IndividualAdminGroupState extends State<IndividualAdminGroup> {
 
   Future<void> fetchComments() async {
     final groupDetailsUrl = Uri.parse(
-        'http://10.0.2.2:5000/reviews/group/${widget.groupId}/reviews');
+        'http://10.0.2.2:5001/reviews/group/${widget.groupId}/reviews');
     try {
       final response = await http.get(groupDetailsUrl);
       if (response.statusCode == 200) {
@@ -48,7 +48,7 @@ class _IndividualAdminGroupState extends State<IndividualAdminGroup> {
 
   Future<void> fetchGroup() async {
     final groupDetailsUrl =
-        Uri.parse('http://10.0.2.2:5000/groups/${widget.groupId}');
+        Uri.parse('http://10.0.2.2:5001/groups/${widget.groupId}');
     try {
       final response = await http.get(groupDetailsUrl);
       if (response.statusCode == 200) {

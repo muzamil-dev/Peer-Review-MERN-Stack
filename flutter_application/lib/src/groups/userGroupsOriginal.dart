@@ -28,7 +28,7 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> getGroupsData(BuildContext context, String workspaceId) async {
     final url =
-        Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
+        Uri.parse('http://10.0.2.2:5001/workspaces/$workspaceId/groups');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -146,7 +146,7 @@ class _GroupCardState extends State<GroupCard> {
 
   Future<void> getGroupsData(BuildContext context, String workspaceId) async {
     final url =
-        Uri.parse('http://10.0.2.2:5000/workspaces/$workspaceId/groups');
+        Uri.parse('http://10.0.2.2:5001/workspaces/$workspaceId/groups');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -183,7 +183,7 @@ class _GroupCardState extends State<GroupCard> {
   }
 
   Future<dynamic> getUser(String userID) async {
-    final url = Uri.parse('http://10.0.2.2:5000/users/$userID');
+    final url = Uri.parse('http://10.0.2.2:5001/users/$userID');
     try {
       final response = await http.get(url);
 
@@ -200,7 +200,7 @@ class _GroupCardState extends State<GroupCard> {
   }
 
   Future<void> joinGroup(BuildContext context, String groupID) async {
-    final url = Uri.parse('http://10.0.2.2:5000/groups/join');
+    final url = Uri.parse('http://10.0.2.2:5001/groups/join');
     print('Join Group : $groupID');
     try {
       final response = await http.put(
@@ -246,7 +246,7 @@ class _GroupCardState extends State<GroupCard> {
   }
 
   Future<void> leaveGroup(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
+    final url = Uri.parse('http://10.0.2.2:5001/groups/leave');
     String groupID = getGroupID(userID);
     print('GroupID : $groupID');
     if (groupID == '') {

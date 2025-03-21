@@ -19,16 +19,21 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   final TextEditingController maxGroupSizeController = TextEditingController();
 
   Future<void> createWorkspace(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/workspaces/create');
+    final url = Uri.parse('http://10.0.2.2:5001/workspaces/create');
     try {
-
       final allowedDomains = domainController.text.isEmpty
-        ? <String>[]
-        : domainController.text.split(',').map((domain) => domain.trim()).toList().cast<String>();
+          ? <String>[]
+          : domainController.text
+              .split(',')
+              .map((domain) => domain.trim())
+              .toList()
+              .cast<String>();
 
       if (!validateDomains(allowedDomains)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid domain format. Only letters and periods are allowed.')),
+          const SnackBar(
+              content: Text(
+                  'Invalid domain format. Only letters and periods are allowed.')),
         );
         return;
       }
@@ -40,11 +45,19 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
         },
         body: jsonEncode({
           'name': nameController.text,
-          'allowedDomains': domainController.text.isEmpty ? [] 
-          : domainController.text.split(',').map((domain) => domain.trim()).toList(),
+          'allowedDomains': domainController.text.isEmpty
+              ? []
+              : domainController.text
+                  .split(',')
+                  .map((domain) => domain.trim())
+                  .toList(),
           'userId': widget.userId,
-          'numGroups': numGroupsController.text.isNotEmpty ? int.parse(numGroupsController.text) : null,
-          'groupMemberLimit': maxGroupSizeController.text.isNotEmpty ? int.parse(maxGroupSizeController.text) : null,
+          'numGroups': numGroupsController.text.isNotEmpty
+              ? int.parse(numGroupsController.text)
+              : null,
+          'groupMemberLimit': maxGroupSizeController.text.isNotEmpty
+              ? int.parse(maxGroupSizeController.text)
+              : null,
         }),
       );
 
@@ -80,60 +93,59 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Create',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ), // Change text color here
+        appBar: AppBar(
+          title: const Text(
+            'Create',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ), // Change text color here
+          ),
+          backgroundColor: const Color(0xFF004080),
+          centerTitle: true, // Center the title
         ),
-        backgroundColor: const Color(0xFF004080),
-        centerTitle: true, // Center the title
-      ),
-      body: Container(
-        //color: Colors.white,
-        child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Workspace Name'),
-            ),
-            TextField(
-              //color
-              controller: domainController,
-              decoration: const InputDecoration(labelText: 'Allowed Domains (comma separated)'),
-            ),
-            TextField(
-              controller: numGroupsController,
-              decoration: const InputDecoration(labelText: 'Number of Groups'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: maxGroupSizeController,
-              decoration: const InputDecoration(labelText: 'Max Group Size'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty) {
-                  createWorkspace(context);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill in the workspace name')),
-                  );
-                }
-              },
-              child: const Text('Create Workspace'),
-            ),
-          ],
-        ),
-      ),)
-        
-      );
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Workspace Name'),
+              ),
+              TextField(
+                //color
+                controller: domainController,
+                decoration: const InputDecoration(
+                    labelText: 'Allowed Domains (comma separated)'),
+              ),
+              TextField(
+                controller: numGroupsController,
+                decoration:
+                    const InputDecoration(labelText: 'Number of Groups'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: maxGroupSizeController,
+                decoration: const InputDecoration(labelText: 'Max Group Size'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.isNotEmpty) {
+                    createWorkspace(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Please fill in the workspace name')),
+                    );
+                  }
+                },
+                child: const Text('Create Workspace'),
+              ),
+            ],
+          ),
+        ));
   }
 }

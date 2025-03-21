@@ -28,7 +28,7 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> getLockedStatus(BuildContext context) async {
     final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/details');
+        'http://10.0.2.2:5001/workspaces/${widget.workspaceId}/details');
 
     try {
       final response = await http.get(url);
@@ -45,7 +45,7 @@ class _UserGroupState extends State<UserGroup> {
 
   Future<void> getGroupsData(BuildContext context) async {
     final url = Uri.parse(
-        'http://10.0.2.2:5000/workspaces/${widget.workspaceId}/groups');
+        'http://10.0.2.2:5001/workspaces/${widget.workspaceId}/groups');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -62,7 +62,7 @@ class _UserGroupState extends State<UserGroup> {
   }
 
   Future<void> joinGroup(BuildContext context, String groupID, index) async {
-    final url = Uri.parse('http://10.0.2.2:5000/groups/join');
+    final url = Uri.parse('http://10.0.2.2:5001/groups/join');
     try {
       
       final response = await http.put(
@@ -94,7 +94,7 @@ class _UserGroupState extends State<UserGroup> {
   }
 
   Future<void> leaveGroup(BuildContext context) async {
-    final url = Uri.parse('http://10.0.2.2:5000/groups/leave');
+    final url = Uri.parse('http://10.0.2.2:5001/groups/leave');
     String groupID = getGroupID();
 
     if (groupID == '') {
