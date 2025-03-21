@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (response.statusCode == 200) {
         final responseData = response.data;
-        var userToken = responseData['accessToken'];
+        var userToken = responseData['accessToken'].toString();
         await storage.write(key: 'accessToken', value: userToken);
 
         // Retrieves refresh token
