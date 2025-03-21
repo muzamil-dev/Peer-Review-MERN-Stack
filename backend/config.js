@@ -1,4 +1,4 @@
-import pg from "pg"
+import pg from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -13,7 +13,7 @@ dotenv.config();
 // });
 
 const db = new pg.Client({
-    connectionString: process.env.DB_CONN_STRING
+  connectionString: process.env.DB_CONN_STRING,
 });
 
 export default db;

@@ -5,6 +5,8 @@
 #Ignore Node Modules backend
 backend/node_modules/
 
+backend/.env
+
 #Ignore Node Modules
 node_modules/
 
