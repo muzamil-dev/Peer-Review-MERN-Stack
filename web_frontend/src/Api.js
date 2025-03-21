@@ -155,6 +155,7 @@ export default {
      * @returns {Promise<{ status: number, data: {}, message: string }>} Returns the newly created group's info
      */
     CreateGroup: async (userId, workspaceId, name) => {
+      console.log("Api name: ", name);
       const payload = {
         userId,
         workspaceId,

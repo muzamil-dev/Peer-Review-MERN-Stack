@@ -9,6 +9,7 @@ import verifyJWT from "../middleware/verifyJWT.js";
 // Import services
 import * as WorkspaceService from "../services/workspaces.js";
 import * as AssignmentService from "../services/assignments.js";
+import * as journalService from "../services/journals.js";
 
 // Function to generate invite codes
 import generateCode from "../services/generateCode.js";
@@ -237,6 +238,77 @@ router.delete("/:workspaceId", async (req, res) => {
   // Send the error if the service returned one
   if (data.error) return res.status(data.status).json({ message: data.error });
   return res.status(200).json(data);
+});
+
+// Route to create multiple journal assignments
+router.post("/:workspaceId/createJournals", async (req, res) => {
+  const { workspaceId } = req.params;
+  const { startDate, endDate, journalDay, weekNumbersToSkip } = req.body;
+
+  try {
+    const journalDates = journalService.generateJournalDates(
+      startDate,
+      endDate,
+      journalDay,
+      weekNumbersToSkip
+    );
+
+    for (const [weekNumber, journal] of journalDates.entries()) {
+      await journalService.createJournalAssignment(
+        workspaceId,
+        weekNumber + 1,
+        journal.start,
+        journal.end
+      );
+    }
+    res.status(201).json({ message: "Journals created successfully" });
+  } catch (err) {
+    if (err instanceof HttpError) {
+      res.status(err.status).json({ message: err.message });
+    } else {
+      console.error("Error creating journals:", err);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+});
+
+// Get all journals submitted by a user in a specific workspace
+router.get(
+  ["/:workspaceId/user", "/:workspaceId/user/:userId"],
+  async (req, res) => {
+    const { workspaceId } = req.params;
+    const userId = req.user || req.body.userId;
+
+    try {
+      // If a userId is provided in the route parameter, check if the requester is an instructor
+      await WorkspaceService.checkInstructor(db, userId, workspaceId);
+
+      const journals = await journalService.getJournalsByUserAndWorkspace(
+        workspaceId,
+        userId
+      );
+
+      res.status(200).json(journals);
+    } catch (err) {
+      if (err instanceof HttpError) {
+        res.status(err.status).json({ message: err.message });
+      } else {
+        console.error("Error fetching journals:", err);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    }
+  }
+);
+
+//get number of weeks in journal_assignment
+router.get("/:workspaceId/weeks", async (req, res) => {
+  const { workspaceId } = req.params;
+  try {
+    const weeks = await journalService.getWeeks(workspaceId);
+    return res.json(weeks);
+  } catch (err) {
+    return res.status(err.status || 500).json({ message: err.message });
+  }
 });
 
 export default router;

@@ -100,3 +100,12 @@ CREATE TABLE journal_submission (
     user_id INT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     submission_text TEXT NOT NULL
 );
+
+CREATE TABLE journal_entries (
+    id SERIAL PRIMARY KEY,
+    journal_assignment_id INT REFERENCES journal_assignment(id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT,
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (journal_assignment_id, user_id)
+);

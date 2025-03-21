@@ -26,7 +26,7 @@ router.get("/:groupId", async (req, res) => {
 
 // Create a new group within a workspace
 router.post("/create", async (req, res) => {
-  const { workspaceId } = req.body;
+  const { workspaceId, name } = req.body;
   const userId = req.user;
 
   // Check for required fields
@@ -35,8 +35,9 @@ router.post("/create", async (req, res) => {
       .status(400)
       .json({ message: "One or more required fields is not present" });
   }
+  console.log("New group name: ", name);
   // Call the service
-  const data = await GroupService.create(userId, workspaceId);
+  const data = await GroupService.create(userId, workspaceId, name);
   // Send the error if the service returned one
   if (data.error) return res.status(data.status).json({ message: data.error });
   return res.status(201).json(data);
