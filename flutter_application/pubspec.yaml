@@ -12,7 +12,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  uni_links: ^0.5.1
   http: ^0.13.3
   jwt_decoder:
   cupertino_icons:
@@ -25,6 +24,7 @@ dependencies:
   dio: ^5.5.0+1
   http_interceptor: ^1.0.2
   flutter_svg: ^2.0.9
+  app_links: ^6.4.0
 
 dev_dependencies:
   flutter_test:
