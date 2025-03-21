@@ -33,7 +33,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   void initState() {
     super.initState();
     Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
-    userId = jwtDecodedToken['userId'].toString();
+    userId = jwtDecodedToken['userId'];
     fetchWorkspaces();
   }
 
