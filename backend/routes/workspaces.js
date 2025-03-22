@@ -10,9 +10,11 @@ import verifyJWT from "../middleware/verifyJWT.js";
 import * as WorkspaceService from "../services/workspaces.js";
 import * as AssignmentService from "../services/assignments.js";
 import * as journalService from "../services/journals.js";
+import * as UserService from "../services/users.js";
 
 // Function to generate invite codes
 import generateCode from "../services/generateCode.js";
+import { sendEmail } from "../services/emailService.js";
 
 const router = express.Router();
 
@@ -306,6 +308,64 @@ router.get("/:workspaceId/weeks", async (req, res) => {
   try {
     const weeks = await journalService.getWeeks(workspaceId);
     return res.json(weeks);
+  } catch (err) {
+    return res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
+// Insert a single user into the workspace, creates their account if
+// it does not exist
+router.post("/insertUser", async (req, res) => {
+  const { userId, workspaceId, groupId, firstName, lastName, email, role } =
+    req.body;
+  try {
+    // Check for required fields
+    if (!workspaceId || !email || !role) {
+      const err = new Error("One or more required fields is not present");
+      err.status = 400;
+      throw err;
+    }
+    if (role !== "Student" && role !== "Instructor") {
+      const err = new Error("Role must be either student or instructor", 400);
+      err.status = 400;
+      throw err;
+    }
+    // Check that either the student is given a group, or the instructor is given no group
+    if (role === "Student" && !groupId) {
+      const err = new Error("Student must be placed into a group", 400);
+      err.status = 400;
+      throw err;
+    }
+    if (role === "Instructor" && groupId) {
+      const err = new Error("Instructors cannot be placed in groups", 400);
+      err.status = 400;
+      throw err;
+    }
+    // Check out a client
+    // Authenticate instructor
+    let password = generateCode();
+    await WorkspaceService.checkInstructor(userId, workspaceId);
+    console.log(password);
+    // Create the account if it doesn't exist
+    let user = await UserService.createUser({
+      firstName,
+      lastName,
+      email,
+      password,
+    });
+
+    console.log(user);
+    // Insert the user into the workspace
+    await WorkspaceService.insertUser(workspaceId, {
+      userId: user.id,
+      groupId,
+      role,
+    });
+
+    console.log(3);
+    let message = `<div><h1>Login Information</h1><h3>Username: ${user.email}></h3> <h3>Password ${user.password}</h3></div>`;
+    await sendEmail(user.email, "Rate My Peer Invitation", message);
+    return res.status(201).json({ message: "User inserted successfully" });
   } catch (err) {
     return res.status(err.status || 500).json({ message: err.message });
   }

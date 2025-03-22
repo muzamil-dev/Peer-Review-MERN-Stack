@@ -96,8 +96,8 @@ const GroupsPageAdmin = () => {
   const fetchGroups = async () => {
     try {
       const response = await Api.Workspaces.GetGroups(workspaceId);
-      console.log(response);
-      if (response.status === 200 && response.data.groups.length != 0) {
+      // console.log(response);
+      if (response.status === 200 && response.data.groups.length !== 0) {
         setGroups(
           response.data.groups.map((group) => ({
             ...group,
@@ -952,21 +952,20 @@ const GroupsPageAdmin = () => {
                         <h2 className="card-title">{group.name}</h2>
                         <ul className="list-unstyled flex-grow-1">
                           {Array.isArray(group.members) &&
-                            group.members.map(
-                              (member) =>
-                                member && (
-                                  <li
-                                    key={member.userId}
-                                    onClick={() =>
-                                      goToUserAnalytics(member.userId)
-                                    }
-                                    style={{ cursor: "pointer" }}
-                                    className={`${styles.hoverEffect}`}
-                                  >
-                                    {" "}
-                                    {member.firstName} {member.lastName}
-                                  </li>
-                                )
+                            group.members.map((member, index) =>
+                              member(
+                                <li
+                                  key={member.userId}
+                                  onClick={() =>
+                                    goToUserAnalytics(member.userId)
+                                  }
+                                  style={{ cursor: "pointer" }}
+                                  className={`${styles.hoverEffect}`}
+                                >
+                                  {" "}
+                                  {member.firstName} {member.lastName}
+                                </li>
+                              )
                             )}
                         </ul>
                         <div className="mt-auto">

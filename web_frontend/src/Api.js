@@ -1,7 +1,7 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
-const app_name = "cop4331-mern-cards-d3d1d335310b"; // TODO - get real URL
+// const app_name = "cop4331-mern-cards-d3d1d335310b"; // TODO - get real URL
 // const getUrl = (prefix, route) => {
 
 //     return 'http://localhost:5000' + prefix + route;
@@ -155,7 +155,6 @@ export default {
      * @returns {Promise<{ status: number, data: {}, message: string }>} Returns the newly created group's info
      */
     CreateGroup: async (userId, workspaceId, name) => {
-      console.log("Api name: ", name);
       const payload = {
         userId,
         workspaceId,
@@ -664,8 +663,8 @@ export default {
       const payload = { email: email.toLowerCase(), password };
       try {
         const url = getUrl(USERS, "login");
-        console.log("Login URL:", url); // Debug log
-        console.log("Login Payload:", payload); // Debug log
+        // console.log("Login URL:", url); // Debug log
+        // console.log("Login Payload:", payload); // Debug log
         const response = await axios.post(url, payload, {
           withCredentials: true,
           headers: { "Skip-Interceptor": "true" }, // Skip the interceptor
