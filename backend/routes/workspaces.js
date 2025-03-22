@@ -345,7 +345,7 @@ router.post("/insertUser", async (req, res) => {
     // Authenticate instructor
     let password = generateCode();
     await WorkspaceService.checkInstructor(userId, workspaceId);
-    console.log(password);
+
     // Create the account if it doesn't exist
     let user = await UserService.createUser({
       firstName,
@@ -354,7 +354,6 @@ router.post("/insertUser", async (req, res) => {
       password,
     });
 
-    console.log(user);
     // Insert the user into the workspace
     await WorkspaceService.insertUser(workspaceId, {
       userId: user.id,
@@ -362,7 +361,6 @@ router.post("/insertUser", async (req, res) => {
       role,
     });
 
-    console.log(3);
     let message = `<div><h1>Login Information</h1><h3>Username: ${user.email}></h3> <h3>Password ${user.password}</h3></div>`;
     await sendEmail(user.email, "Rate My Peer Invitation", message);
     return res.status(201).json({ message: "User inserted successfully" });
