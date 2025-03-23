@@ -126,7 +126,7 @@ export const getJournalsByUserAndWorkspace = async (workspaceId, userId) => {
     );
   }
 
-  return res;
+  return res.rows;
 };
 
 //get journal by id

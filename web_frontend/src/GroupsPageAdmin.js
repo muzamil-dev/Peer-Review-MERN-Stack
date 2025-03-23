@@ -7,6 +7,8 @@ import Modal from "react-modal";
 //snackbar
 import { enqueueSnackbar } from "notistack";
 
+Modal.setAppElement("#root");
+
 const GroupsPageAdmin = () => {
   const [ungroupedMembers, setUngroupedMembers] = useState([]);
   const [groups, setGroups] = useState([]);

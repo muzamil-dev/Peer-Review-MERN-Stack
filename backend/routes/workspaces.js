@@ -265,7 +265,7 @@ router.post("/:workspaceId/createJournals", async (req, res) => {
     }
     res.status(201).json({ message: "Journals created successfully" });
   } catch (err) {
-    if (err instanceof HttpError) {
+    if (err instanceof Error) {
       res.status(err.status).json({ message: err.message });
     } else {
       console.error("Error creating journals:", err);
@@ -283,7 +283,7 @@ router.get(
 
     try {
       // If a userId is provided in the route parameter, check if the requester is an instructor
-      await WorkspaceService.checkInstructor(db, userId, workspaceId);
+      await WorkspaceService.checkInstructor(userId, workspaceId);
 
       const journals = await journalService.getJournalsByUserAndWorkspace(
         workspaceId,
@@ -292,7 +292,7 @@ router.get(
 
       res.status(200).json(journals);
     } catch (err) {
-      if (err instanceof HttpError) {
+      if (err instanceof Error) {
         res.status(err.status).json({ message: err.message });
       } else {
         console.error("Error fetching journals:", err);
