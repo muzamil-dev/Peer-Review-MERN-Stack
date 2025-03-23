@@ -67,7 +67,6 @@ export const create = async (userId, workspaceId, groupName) => {
         status: 403,
       };
 
-    console.log("group name: ", groupName);
     // Create the group
     const finalGroupName = groupName || `Group ${found.groups_created + 1}`;
 

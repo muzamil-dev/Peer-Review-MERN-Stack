@@ -70,6 +70,19 @@ router.get("/averages/:assignmentId/target/:targetId", async (req, res) => {
   return res.status(200).json(data);
 });
 
+// Get average ratings of each student within an assignment
+router.get("/:assignmentId/averages", async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+    const { page, perPage } = req.query;
+
+    // Call Assignment Average Service
+    return res.status(200).json({ message: "Route Needs Implementation" });
+  } catch (err) {
+    return res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
 // Create a new assignment
 router.post("/create", async (req, res) => {
   const { workspaceId, name, startDate, dueDate, questions, description } =

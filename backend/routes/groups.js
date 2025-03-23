@@ -35,7 +35,6 @@ router.post("/create", async (req, res) => {
       .status(400)
       .json({ message: "One or more required fields is not present" });
   }
-  console.log("New group name: ", name);
   // Call the service
   const data = await GroupService.create(userId, workspaceId, name);
   // Send the error if the service returned one

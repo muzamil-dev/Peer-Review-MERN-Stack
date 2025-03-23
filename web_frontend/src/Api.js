@@ -1290,13 +1290,13 @@ export default {
     createJournals: async (workspaceId, payload) => {
       try {
         const config = getConfig();
-        console.log("Sending request with payload:", payload);
+        // console.log("Sending request with payload:", payload);
         const response = await axios.post(
           getUrl(WORKSPACES, `${workspaceId}/createJournals`),
           payload,
           config
         );
-        console.log("Response received:", response);
+        // console.log("Response received:", response);
         return {
           status: response.status,
           data: response.data,
