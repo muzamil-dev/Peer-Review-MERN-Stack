@@ -863,8 +863,13 @@ export default {
      * @returns {Promise<{status: number, data: object, message: string}>} The analytics data
      */
     GetAnalyticsByUserAndWorkspace: async (workspaceId, targetId, userId) => {
-      const url = getUrl(WORKSPACES, `${workspaceId}/analytics/${targetId}`);
-      const response = await apiRequest(GET, url, { userId });
+      console.log(userId);
+      const url = getUrl(
+        WORKSPACES,
+        `${workspaceId}/analytics/${targetId}?userId=${userId}`
+      );
+      console.log(url);
+      const response = await apiRequest(GET, url);
       return {
         status: response.status,
         data: response.data,

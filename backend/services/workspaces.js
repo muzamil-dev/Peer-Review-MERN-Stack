@@ -400,6 +400,9 @@ export const setInvite = async (userId, workspaceId, code) => {
 // Check that a user is an instructor for a given workspace
 export const checkInstructor = async (userId, workspaceId) => {
   // Check that the user creating them is an admin
+  // console.log("User id: ", userId);
+  // console.log("Workspace id: ", workspaceId);
+
   const res = await db.query(
     `
         SELECT m.role
@@ -410,6 +413,7 @@ export const checkInstructor = async (userId, workspaceId) => {
     [workspaceId, userId]
   );
 
+  // console.log(res);
   const user = res.rows[0];
   if (!user)
     // Return the error if there was one

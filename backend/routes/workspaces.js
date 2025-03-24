@@ -13,6 +13,7 @@ import * as WorkspaceService from "../services/workspaces.js";
 import * as AssignmentService from "../services/assignments.js";
 import * as journalService from "../services/journals.js";
 import * as UserService from "../services/users.js";
+import * as AnalyticsService from "../services/analytics.js";
 
 // Function to generate invite codes
 import generateCode from "../services/generateCode.js";
@@ -305,6 +306,24 @@ router.get(
   }
 );
 
+// Get analytics for a particular user across all of the workspace's assignments
+router.get("/:workspaceId/analytics/:targetId", async (req, res) => {
+  const { userId } = req.query;
+  const { targetId, workspaceId } = req.params;
+  try {
+    // Check that the user is an instructor
+    await WorkspaceService.checkInstructor(userId, workspaceId);
+    // Call the function
+    const data = await AnalyticsService.getByUserAndWorkspace(
+      targetId,
+      workspaceId
+    );
+    return res.json(data);
+  } catch (err) {
+    return res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
 //get number of weeks in journal_assignment
 router.get("/:workspaceId/weeks", async (req, res) => {
   const { workspaceId } = req.params;
@@ -379,7 +398,7 @@ router.post("/import", upload.single("csvFile"), async (req, res) => {
     const { workspaceId } = req.body;
 
     // Check that the user is an instructor
-    await WorkspaceService.checkInstructor(db, userId, workspaceId);
+    await WorkspaceService.checkInstructor(userId, workspaceId);
 
     // User is an instructor, get csv data
     const csvFile = req.file;
@@ -390,17 +409,16 @@ router.post("/import", upload.single("csvFile"), async (req, res) => {
     const jsonData = await csv().fromString(csvData);
 
     // Create accounts for anyone without one
-    await UserService.createUsers(db, jsonData);
+    await UserService.createUsers(jsonData);
     // Create all groups mentioned in the csv
     const groups = jsonData.map((user) => user.groupName);
-    await GroupService.createGroups(db, workspaceId, groups);
+    await GroupService.createGroups(workspaceId, groups);
     // Insert all users into their groups
     const usersAndGroups = await convertEmailAndGroupNames(
-      db,
       workspaceId,
       jsonData
     );
-    await WorkspaceService.insertUsers(db, workspaceId, usersAndGroups);
+    await WorkspaceService.insertUsers(workspaceId, usersAndGroups);
     return res.status(201).json({ message: "CSV imported successfully" });
   } catch (err) {
     return res.status(err.status || 500).json({ message: err.message });
@@ -409,7 +427,6 @@ router.post("/import", upload.single("csvFile"), async (req, res) => {
 
 // Edit a provided workspace
 router.put("/edit", async (req, res) => {
-  let db; // Save the client for use in all blocks
   try {
     const { userId, workspaceId, name } = req.body;
     const updates = { name };
@@ -417,9 +434,9 @@ router.put("/edit", async (req, res) => {
     if (!workspaceId)
       throw new Error("One or more required fields is not present", 400);
     // Check that the provided user is an instructor of the workspace
-    await WorkspaceService.checkInstructor(db, userId, workspaceId);
+    await WorkspaceService.checkInstructor(userId, workspaceId);
     // Edit the workspace
-    const msg = await WorkspaceService.edit(db, workspaceId, updates);
+    const msg = await WorkspaceService.edit(workspaceId, updates);
     // Commit and release connection
     // Send data and release
     return res.json(msg);
@@ -434,10 +451,9 @@ router.put("/promoteUser", async (req, res) => {
     const { userId, workspaceId, targetId } = req.body;
     console.log(userId);
     // Check that the provided user is an instructor of the workspace
-    await WorkspaceService.checkInstructor(db, userId, workspaceId);
+    await WorkspaceService.checkInstructor(userId, workspaceId);
     // Delete the workspace
     const msg = await WorkspaceService.setRole(
-      db,
       targetId,
       workspaceId,
       "Instructor"
@@ -450,14 +466,12 @@ router.put("/promoteUser", async (req, res) => {
 
 // Promote a user to instructor (from student)
 router.put("/demoteUser", async (req, res) => {
-  let db;
   try {
     const { userId, workspaceId, targetId } = req.body;
     // Check that the provided user is an instructor of the workspace
-    await WorkspaceService.checkInstructor(db, userId, workspaceId);
+    await WorkspaceService.checkInstructor(userId, workspaceId);
     // Delete the workspace
     const msg = await WorkspaceService.setRole(
-      db,
       targetId,
       workspaceId,
       "Student"
@@ -473,9 +487,9 @@ router.put("/removeUser", async (req, res) => {
   try {
     const { userId, workspaceId, targetId } = req.body;
     // Check that the provided user is an instructor of the workspace
-    await WorkspaceService.checkInstructor(db, userId, workspaceId);
+    await WorkspaceService.checkInstructor(userId, workspaceId);
     // Delete the workspace
-    const msg = await WorkspaceService.removeUser(db, targetId, workspaceId);
+    const msg = await WorkspaceService.removeUser(targetId, workspaceId);
     // Send data and release
     return res.json(msg);
   } catch (err) {
@@ -490,13 +504,13 @@ router.delete("/:workspaceId/delete", async (req, res) => {
     const { workspaceId } = req.params;
 
     //check that the user is an admin
-    await UserService.checkAdmin(db, userId);
+    await UserService.checkAdmin(userId);
 
     // Check that the provided user is an instructor of the workspace
-    await WorkspaceService.checkInstructor(db, userId, workspaceId);
+    await WorkspaceService.checkInstructor(userId, workspaceId);
 
     // Delete the workspace and all associated journals
-    const msg = await WorkspaceService.deleteWorkspace(db, workspaceId);
+    const msg = await WorkspaceService.deleteWorkspace(workspaceId);
 
     // Send data and release
     return res.json(msg);
