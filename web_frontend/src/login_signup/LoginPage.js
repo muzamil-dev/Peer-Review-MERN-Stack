@@ -3,7 +3,7 @@ import Api from "../Api.js";
 import React, { useState } from "react";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
-import "./LoginPage.css"; // Assuming you save the CSS styles in LoginPage.css
+import "./LoginPage.css"; 
 
 const LoginPage = () => {
   const [isLoginActive, setIsLoginActive] = useState(true);
